@@ -109,6 +109,16 @@ public class ContextUtilManager {
 
 	}
 
+	public List<Role> roles_data(String idIS, 
+			String category,
+			Long idUserAuth, String IPAddress)
+			throws GeneralFailure {
+
+		logger.info("roles_data");
+
+		return aml.roles_data(idIS, category, idUserAuth, IPAddress);
+	}
+	
 	private void is_exist(String idIS) throws GeneralFailure {
 		logger.info(":is_exist:01");
 		aml.is_exist(idIS);

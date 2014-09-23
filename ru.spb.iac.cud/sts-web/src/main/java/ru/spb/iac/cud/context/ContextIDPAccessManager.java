@@ -69,5 +69,10 @@ public class ContextIDPAccessManager {
 			throws Exception {
 		return iml.rolesCodes(login, domain);
 	}
+  
+	public void saveTokenID(String tokenID, String userID)
+			throws Exception {
+		 iml.saveTokenID(tokenID, userID);
+	}
 
 }

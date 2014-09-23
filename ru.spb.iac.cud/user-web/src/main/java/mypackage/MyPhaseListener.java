@@ -6,6 +6,9 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 //import org.jboss.seam.annotations.Logger;
 //import org.apache.log4j.Logger;
 
@@ -21,6 +24,8 @@ public class MyPhaseListener implements PhaseListener {
 	//@Logger private Log log;
 	
 	//private Logger log = Logger.getLogger(MyPhaseListener.class);
+	
+	final static Logger logger = LoggerFactory.getLogger(MyPhaseListener.class);
 	
     private Long phaseTime;
     private Long requestTime;
@@ -38,7 +43,8 @@ public class MyPhaseListener implements PhaseListener {
     		requestTime=System.currentTimeMillis();
     	}
     	phaseTime=System.currentTimeMillis();
-      System.out.println("Phase Start: " + event.getPhaseId());
+    	
+        logger.debug("Phase Start: " + event.getPhaseId());
       //  log.info("Phase Start: " + event.getPhaseId());
      }
 
@@ -47,10 +53,10 @@ public class MyPhaseListener implements PhaseListener {
      * @param event The Phase Event.
      */
     public void afterPhase(PhaseEvent event) {
-    	System.out.println("Phase Finish: " + event.getPhaseId());
-    	System.out.println("Phase Time: " + (System.currentTimeMillis()-phaseTime));
+    	logger.debug("Phase Finish: " + event.getPhaseId());
+    	logger.debug("Phase Time: " + (System.currentTimeMillis()-phaseTime));
       if(event.getPhaseId().equals(PhaseId.RENDER_RESPONSE)){
-    	  System.out.println("Request Time: " + (System.currentTimeMillis()-requestTime));
+    	  logger.debug("Request Time: " + (System.currentTimeMillis()-requestTime));
   	 }
    }
 }

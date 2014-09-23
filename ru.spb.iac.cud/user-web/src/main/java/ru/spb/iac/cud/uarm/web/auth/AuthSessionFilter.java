@@ -14,6 +14,9 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.util.CUDUserConsoleConstants;
 
 /**
@@ -22,6 +25,8 @@ import ru.spb.iac.cud.uarm.util.CUDUserConsoleConstants;
 @WebFilter("*")
 public class AuthSessionFilter implements Filter {
 
+	final static Logger logger = LoggerFactory.getLogger(AuthSessionFilter.class);
+	
     /**
      * Default constructor. 
      */
@@ -52,7 +57,7 @@ public class AuthSessionFilter implements Filter {
 		String contextPath = hsr.getContextPath();
 		
 		
-		System.out.println("AuthSessionFilter:doFilter:01:"+requestURI);
+		logger.info("AuthSessionFilter:doFilter:01:"+requestURI);
 		
 		if(
 			!requestURI.endsWith(".js")&&
@@ -67,6 +72,7 @@ public class AuthSessionFilter implements Filter {
 			
 			if(!requestURI.endsWith("/welcome.xhtml")&&
 			   !requestURI.endsWith("/public.xhtml")&&
+			   !requestURI.endsWith("/login_obo.xhtml")&&
 			   !requestURI.endsWith(contextPath)&&
 			   !requestURI.endsWith(contextPath+"/")&&
 			   !requestURI.endsWith("/userRegServlet")&&
@@ -89,7 +95,7 @@ public class AuthSessionFilter implements Filter {
 		}
 		
 		if(flag_redirect==0){
-		  System.out.print("AuthSessionFilter:doFilter:03");
+		  logger.info("AuthSessionFilter:doFilter:03");
 		  chain.doFilter(request, response);
 		}
 	}

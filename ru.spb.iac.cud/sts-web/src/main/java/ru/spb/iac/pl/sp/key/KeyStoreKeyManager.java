@@ -60,6 +60,8 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	public static final String SIGNING_KEY_PASS = "SigningKeyPass";
 	public static final String SIGNING_KEY_ALIAS = "SigningKeyAlias";
 
+	private PrivateKey privateKey = null;
+	
 	public PrivateKey getSigningKey() throws TrustKeyConfigurationException,
 			TrustKeyProcessingException {
 		try {
@@ -69,8 +71,12 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 
 			// loggerslf4j.info("getSigningKey:02");
 
-			return (PrivateKey) this.ks.getKey(this.signingAlias,
-					this.signingKeyPass);
+			if(this.privateKey==null){
+				this.privateKey=(PrivateKey) this.ks.getKey(this.signingAlias,
+						this.signingKeyPass);
+			}
+			return this.privateKey/*(PrivateKey) this.ks.getKey(this.signingAlias,
+					this.signingKeyPass)*/;
 
 		} catch (KeyStoreException e) {
 			throw logger.keyStoreConfigurationError(e);
@@ -90,14 +96,16 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	public KeyPair getSigningKeyPair() throws TrustKeyConfigurationException,
 			TrustKeyProcessingException {
 		try {
-			PrivateKey privateKey = null;
+			//PrivateKey privateKey = null;
 			loggerslf4j.info("getSigningKeyPair:01");
 
 			initKeyStore();
 
 			// loggerslf4j.info("getSigningKeyPair:02");
 
-			privateKey = getSigningKey();
+			if(this.privateKey==null) {
+				this.privateKey = getSigningKey();
+			}
 
 			if (this.publicKey == null) {
 				// loggerslf4j.info("getSigningKeyPair:02+");
@@ -109,7 +117,7 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 
 			// loggerslf4j.info("getSigningKeyPair:03");
 
-			return new KeyPair(publicKey, privateKey);
+			return new KeyPair(publicKey, this.privateKey);
 		} catch (KeyStoreException e) {
 			throw logger.keyStoreConfigurationError(e);
 		} catch (GeneralSecurityException e) {

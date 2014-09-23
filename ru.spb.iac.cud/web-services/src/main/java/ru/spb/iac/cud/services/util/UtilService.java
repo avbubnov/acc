@@ -80,4 +80,9 @@ public interface UtilService {
 			@WebParam(name = "category", targetNamespace = NS) String category)
 			throws GeneralFailure;
 
+	@WebResult(targetNamespace = NS)
+	public List<Role> roles_data(
+			@WebParam(name = "category", targetNamespace = NS) String category) throws GeneralFailure;
+
+	
 }

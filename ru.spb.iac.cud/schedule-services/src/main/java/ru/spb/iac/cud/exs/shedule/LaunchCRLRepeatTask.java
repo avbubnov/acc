@@ -37,13 +37,16 @@ import javax.naming.InitialContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.spb.iac.cud.exs.init.Configuration;
+
 public class LaunchCRLRepeatTask {
 
 	private static final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
 
-	private static String directory = "/home/jboss/jboss/data/crl/";
-
+	//private static String directory = "/home/jboss/jboss/data/crl/";
+	private static String directory = Configuration.getCrlReestr();
+	
 	private static String reestr_path = System
 			.getProperty("jboss.server.config.dir")
 			+ "/"

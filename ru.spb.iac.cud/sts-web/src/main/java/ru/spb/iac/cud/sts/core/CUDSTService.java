@@ -112,16 +112,19 @@ public class CUDSTService implements Provider<SOAPMessage> {
 				.getAttribute("user_principal");
 		String system_principal_name = (String) http_session
 				.getAttribute("system_principal");
-
+    	String auth_type = (String)  http_session
+				.getAttribute("cud_auth_type");
+			
 		loggerslf4j.info("invoke:01:" + user_principal_name);
 		loggerslf4j.info("invoke:02:" + system_principal_name);
 
 		cud_principal = new CudPrincipal();
 		cud_principal.setSystemName(system_principal_name);
-		;
+		
 
 		if (user_principal_name != null) {
 			cud_principal.setUserName(user_principal_name);
+			cud_principal.setAuthType(auth_type);
 		}
 
 		// Check headers

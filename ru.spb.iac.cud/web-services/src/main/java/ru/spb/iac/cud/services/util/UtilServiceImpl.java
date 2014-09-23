@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+
 //import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebMethod;
@@ -133,14 +134,20 @@ public class UtilServiceImpl implements UtilService {
 	@WebParam(name = "category", targetNamespace = NS) String category)
 			throws GeneralFailure {
 
-		return (new ContextUtilManager()).resources_data_subsys(getIDSystem(), /*
-																				 * resourcesCodes
-																				 * ,
-																				 */
+		return (new ContextUtilManager()).resources_data_subsys(getIDSystem(), 
+				/*resourcesCodes*/
 				category, getIDUser(), getIPAddress());
 
 	}
 
+	@WebResult(targetNamespace = NS)
+	public List<Role> roles_data(
+			@WebParam(name = "category", targetNamespace = NS) String category) throws GeneralFailure{
+		return (new ContextUtilManager()).roles_data(getIDSystem(), 
+				category, getIDUser(), getIPAddress());
+	}
+
+	
 	private String getIPAddress() {
 		MessageContext context = wsContext.getMessageContext();
 		HttpServletRequest request = (HttpServletRequest) context

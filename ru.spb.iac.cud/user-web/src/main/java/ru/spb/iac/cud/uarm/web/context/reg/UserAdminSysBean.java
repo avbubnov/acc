@@ -12,6 +12,9 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserAccessEJB;
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserAdminSysEJB;
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserRegEJB;
@@ -28,6 +31,8 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserAdminSysBean implements Serializable {
 
+	final static Logger logger = LoggerFactory.getLogger(UserAdminSysBean.class);
+	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserAdminSysEJB")
 	private UserAdminSysEJB userAdminSysEJB;
 
@@ -44,7 +49,7 @@ public class UserAdminSysBean implements Serializable {
 
 		try {
 
-			System.out.println("userAdminSysBean:action:01");
+			logger.info("userAdminSysBean:action:01");
 
 			//String version = FacesContext.class.getPackage()
 			//		.getImplementationVersion();
@@ -52,7 +57,7 @@ public class UserAdminSysBean implements Serializable {
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("idArm");
 	
-			System.out.println("userAdminSysBean:action:03:" + pidArm);
+			logger.info("userAdminSysBean:action:03:" + pidArm);
 	
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
@@ -82,7 +87,7 @@ public class UserAdminSysBean implements Serializable {
 									+ "/context/app/admin/list.xhtml");
 
 		} catch (Exception e) {
-			System.out.println("userAdminSysBean:action:error:" + e);
+			logger.error("userAdminSysBean:action:error:" + e);
 		}
 	}
 

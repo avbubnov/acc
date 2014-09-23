@@ -10,6 +10,9 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserRegEJB;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
@@ -21,6 +24,8 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserRegBean implements Serializable {
  
+	final static Logger logger = LoggerFactory.getLogger(UserRegBean.class);
+	
 	private static final long serialVersionUID = 1L;
 	   
     @EJB(beanName = "CUDUserConsole-ejb.jar#UserRegEJB")
@@ -48,11 +53,11 @@ public class UserRegBean implements Serializable {
         
     	try{
         
-    	System.out.println("UserRegBean:action:01");
+    	logger.info("UserRegBean:action:01");
         
         String version = FacesContext.class.getPackage().getImplementationVersion();
         
-        System.out.println("UserRegBean:action:02:"+version);
+        logger.info("UserRegBean:action:02:"+version);
         
         HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 		String email = (String) hs.getAttribute(CUDUserConsoleConstants.userEmailReg);
@@ -77,7 +82,7 @@ public class UserRegBean implements Serializable {
         		.getContextPath()+"/context/registr/reg_user_step2_message.xhtml");
    
     	}catch(Exception e){
-    		System.out.println("UserRegBean:action:error:"+e);
+    		logger.error("UserRegBean:action:error:"+e);
     	}
    }
 
@@ -85,11 +90,11 @@ public class UserRegBean implements Serializable {
         
      try{
         
-    	System.out.println("UserRegBean:step1:01");
+    	logger.info("UserRegBean:step1:01");
         
         String version = FacesContext.class.getPackage().getImplementationVersion();
         
-        System.out.println("UserRegBean:step1:02:"+version);
+        logger.info("UserRegBean:step1:02:"+version);
         
         HttpServletRequest request = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
     	String context_url=request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();
@@ -104,7 +109,7 @@ public class UserRegBean implements Serializable {
         		.getContextPath()+"/context/registr/reg_user_step1_message.xhtml");
    
     	}catch(Exception e){
-    		System.out.println("UserRegBean:step1:error:"+e);
+    		logger.error("UserRegBean:step1:error:"+e);
     	}
     	}
 

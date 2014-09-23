@@ -73,6 +73,9 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 
+
+
+
 //import org.apache.ws.security.WSDocInfo;
 //import org.apache.ws.security.message.WSSecHeader;
 import org.apache.xml.security.transforms.Transforms;
@@ -104,14 +107,21 @@ import ru.spb.iac.cud.context.ContextAccessSTSManager;
 import ru.spb.iac.cud.context.ContextIDPAccessManager;
 import ru.spb.iac.cud.context.ContextIDPUtilManager;
 import ru.spb.iac.cud.exceptions.GeneralFailure;
+import ru.spb.iac.cud.exceptions.TokenExpired;
 import ru.spb.iac.cud.idp.web.sig.GOSTSAML2Signature;
 import ru.spb.iac.cud.idp.web.util.GOSTSignatureUtil;
 import ru.spb.iac.cud.items.AuthMode;
 import ru.spb.iac.cud.items.Token;
+import ru.spb.iac.cud.services.web.init.Configuration;
 import ru.spb.iac.pl.sp.key.KeyStoreKeyManager;
 
 public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
+	private static final String auth_type_password = "urn:oasis:names:tc:SAML:2.0:ac:classes:password";
+	private static final String auth_type_x509 = "urn:oasis:names:tc:SAML:2.0:ac:classes:X509";
+	
+	private static PublicKey publicKey = null;
+	
 	final static Logger logger = LoggerFactory
 			.getLogger(ServerSOAPHandler.class);
 
@@ -149,6 +159,8 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 			String user_obo_principal = null;
 
+			String user_obo_auth_type = null;
+			
 			String user_password = null;
 
 			X509Certificate userCert = null;
@@ -180,8 +192,12 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				if (signatureList == null || signatureList.getLength() == 0) {
 					logger.info("handleMessage:02_1");
-					throw new GeneralFailure(
+					
+					
+					if(Configuration.isSignRequired()){
+					   throw new GeneralFailure(
 							"This service requires <dsig:Signature>, which is missing!!!");
+					}
 				}
 
 				// исправление некорректной работы apache cxf
@@ -263,26 +279,30 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 						String[] arrTokenID = tokenID.split("_");
 
-						if (arrTokenID == null || arrTokenID.length != 3) {
+						if (arrTokenID == null || arrTokenID.length != 4) {
 							throw new Exception("UserAuthToken is not valid!!!");
 						}
 
 						StringBuilder sb = new StringBuilder();
 
-						sb.append(arrTokenID[0] + "_" + arrTokenID[1]);
+						sb.append(arrTokenID[0] + "_" + arrTokenID[1] + "_" + arrTokenID[2]);
 
-						byte[] sigValue = Base64.decode(arrTokenID[2]);
+						byte[] sigValue = Base64.decode(arrTokenID[3]);
 
+					if(this.publicKey ==null){
+						
 						KeyStore ks = KeyStore.getInstance("HDImageStore",
 								"JCP");
 						ks.load(null, null);
 
-						PublicKey publicKey = ks.getCertificate("cudvm_export")
+						this.publicKey = ks.getCertificate("cudvm_export")
 								.getPublicKey();
 
+					}
+					
 						boolean tokenIDValidateResult = GOSTSignatureUtil
 								.validate(sb.toString().getBytes("UTF-8"),
-										sigValue, publicKey);
+										sigValue, this.publicKey);
 
 						logger.info("handleMessage:" + tokenIDValidateResult);
 
@@ -298,11 +318,22 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 									"TokenId of OnBehalfOf is not valid!!!");
 						}
 
+						//на самом деле спорный момент
+						//если токен просрочен, то можно ли на его основе получить 
+						//другой токен?
+						//ведь принимающая сторона ничего не знает о токене
+						// и если она получает исключение, что токен просрочен -
+						//то что её делать?
+						//так что видимо надо убирать проверку на дату или 
+						//расширять период до 1 суток
 						if (new Date(System.currentTimeMillis()).after(expired)) {
-							throw new Exception(
-									"TokenId of OnBehalfOf is expired!!!");
+							//throw new TokenExpired("TokenId of OnBehalfOf is expired!!!");
+							//throw new Exception(
+							//		"TokenId of OnBehalfOf is expired!!!");
 						}
 
+						 user_obo_auth_type = arrTokenID[2].toString();
+						 
 					} else {
 						throw new Exception("TokenId of OnBehalfOf is empty!!!");
 					}
@@ -632,8 +663,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				logger.info("handleMessage:02_5_1:" + system_principal);
 				logger.info("handleMessage:02_5_2:" + user_principal);
 				logger.info("handleMessage:02_5_3:" + user_password);
-				logger.info("handleMessage:02_5_4:" + userCert);
-
+				
 				logger.info("handleMessage:obo:01:" + user_obo_principal);
 
 				if (user_obo_principal != null) {
@@ -660,6 +690,8 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 					http_session.setAttribute("user_principal", login_user);
 
+					http_session.setAttribute("cud_auth_type", user_obo_auth_type);
+					 
 				} else if (user_principal != null) {
 					// аутентификация пользователя по логин/паролю
 
@@ -671,6 +703,8 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					// user_principal и так логин
 					http_session.setAttribute("user_principal", user_principal);
 
+					http_session.setAttribute("cud_auth_type", auth_type_password);
+					 
 				} else if (userCert != null) {
 					// аутентификация пользователя по сертификату
 
@@ -688,6 +722,8 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 					http_session.setAttribute("user_principal", user_principal);
 
+					http_session.setAttribute("cud_auth_type", auth_type_x509);
+					 
 				} else {
 					// просто аутентификация системы
 
@@ -702,6 +738,8 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				http_session.setAttribute("system_principal", system_principal);
 
+			 if(Configuration.isSignRequired()){
+				
 				X509Certificate cert_user = (new ContextIDPUtilManager())
 						.system_cert(system_principal);
 
@@ -769,21 +807,13 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					throw new GeneralFailure("Signature is not valid!!!");
 				}
 
+				
+			}
+				
 				// ответ
 			} else {
 
-				KeyStoreKeyManager kskm = new KeyStoreKeyManager();
-				// в KeyStoreKeyManager KeyStore ks - static
-				// поэтому ks уже инициализирован нужными параметрами
-				// а также важно, что static:
-				// private static char[] signingKeyPass;
-				// private static String signingAlias;
-
-				KeyPair keyPair = kskm.getSigningKeyPair();
-
-				PublicKey publicKey = keyPair.getPublic();
-
-				PrivateKey privateKey = keyPair.getPrivate();
+			
 
 				MessageFactory mf = MessageFactory.newInstance();
 
@@ -866,6 +896,24 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// logger.info("dispatch:05:"+DocumentUtil.asString(soapDoc));
 
+				
+				if(Configuration.isSignRequired()){
+					
+					
+					KeyStoreKeyManager kskm = new KeyStoreKeyManager();
+					// в KeyStoreKeyManager KeyStore ks - static
+					// поэтому ks уже инициализирован нужными параметрами
+					// а также важно, что static:
+					// private static char[] signingKeyPass;
+					// private static String signingAlias;
+
+					KeyPair keyPair = kskm.getSigningKeyPair();
+
+					PublicKey publicKey = keyPair.getPublic();
+
+					PrivateKey privateKey = keyPair.getPrivate();	
+					
+				
 				org.apache.xml.security.Init.init();
 
 				Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
@@ -945,6 +993,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				sig.sign(signContext);
 
+				}
 			}
 			logger.info("handleMessage:0100");
 

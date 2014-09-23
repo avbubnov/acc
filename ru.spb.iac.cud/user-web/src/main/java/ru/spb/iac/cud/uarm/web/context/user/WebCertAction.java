@@ -46,6 +46,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.xml.security.utils.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.objsys.asn1j.runtime.Asn1BerDecodeBuffer;
 
@@ -67,6 +69,7 @@ import ru.spb.iac.cud.uarm.util.CUDUserConsoleConstants;
 @RequestScoped
 public class WebCertAction extends HttpServlet {
 	
+	final static Logger logger = LoggerFactory.getLogger(WebCertAction.class);
 	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserManagerEJB")
 	private UserManagerEJB userManagerEJB;
@@ -98,6 +101,8 @@ public class WebCertAction extends HttpServlet {
 	
 	private String root_sn = null;
     
+	private static KeyStore keyStore = null;
+	
 	private static String cert_store_url;
 	
     public WebCertAction() {
@@ -116,10 +121,10 @@ public class WebCertAction extends HttpServlet {
 				throw new Exception("cert_store_url is not set!!!");
 			}
 			
-			//System.out.println("WebCertAction:init:cert_store_url:"+cert_store_url);
+			//logger.info("WebCertAction:init:cert_store_url:"+cert_store_url);
 			
 		}catch(Exception e){
-			 System.out.println("WebCertAction:init:error:"+e);
+			 logger.error("WebCertAction:init:error:"+e);
 		} 
 	}
     
@@ -147,8 +152,8 @@ public class WebCertAction extends HttpServlet {
 			
 			forceBack = request.getParameter("forceBack");
 			
-		//	System.out.println("WebCertAction:service:backUrl:"+backUrl);
-			//System.out.println("WebLoginAction:service:signatureValue:"+signatureValue);
+		//	logger.info("WebCertAction:service:backUrl:"+backUrl);
+			//logger.info("WebLoginAction:service:signatureValue:"+signatureValue);
 			
 			if(signatureValue!=null){
 			
@@ -156,11 +161,11 @@ public class WebCertAction extends HttpServlet {
 		      X509Certificate user_cert =validate(signatureValue);
 		      
 		      
-		      System.out.println("WebCertAction:service:user_cert:"+(user_cert!=null));
+		      logger.info("WebCertAction:service:user_cert:"+(user_cert!=null));
 		      
 		      if(user_cert!=null){
 		    	 
-		    	  System.out.println("WebCertAction:service:userManagerEJB:"+(userManagerEJB==null));
+		    	  logger.info("WebCertAction:service:userManagerEJB:"+(userManagerEJB==null));
 		    	  
 			    // login_user = (new ContextAccessWebManager())
 			   // 		.authenticate_cert_sn(certSN, getIPAddress(request), getCodeSystem(request));
@@ -173,7 +178,7 @@ public class WebCertAction extends HttpServlet {
 			  }
 			}
 		}catch(Exception e4){
-		    System.out.println("WebCertAction:error4:"+e4.getMessage());
+		    logger.error("WebCertAction:error4:"+e4.getMessage());
 		}
 		
 		
@@ -197,7 +202,7 @@ public class WebCertAction extends HttpServlet {
    /* public static void sendPost(String destination, HttpServletResponse response,
             String success, String tokenID)throws IOException{
 
-System.out.println("WebCertAction:sendPost:01");
+logger.info("WebCertAction:sendPost:01");
 
 
 if(destination==null){
@@ -221,7 +226,7 @@ try{
       pw.print("</html>");
       pw.close();
 	}catch(Exception e){
-		   System.out.println("main:error:"+e);
+		   logger.error("main:error:"+e);
 	}
 return;
 }
@@ -248,7 +253,7 @@ builder.append("</FORM></BODY></HTML>");
 
 String str = builder.toString();
 
-System.out.println("AccessServicesWeb:sendPost:"+str);
+logger.info("AccessServicesWeb:sendPost:"+str);
 
 out.println(str);
 out.close();
@@ -283,13 +288,13 @@ out.close();
 
 			String str = builder.toString();
 
-			System.out.println("WebCertAction:location_href:" + str);
+			logger.info("WebCertAction:location_href:" + str);
 
 			out.println(str);
 			out.close();
 
 		} catch (Exception e) {
-			System.out.println("WebCertAction:location_href:error:" + e);
+			logger.error("WebCertAction:location_href:error:" + e);
 		}
 	}
     
@@ -321,14 +326,14 @@ private X509Certificate validate(String message){
     final byte[] enc =
             decoder.decodeBuffer(new ByteArrayInputStream(message.getBytes()));
   
-  System.out.println("main:04");
+  logger.info("main:04");
   if(enc!=null){
-   //System.out.println("main:02:enc:"+new String(enc, "utf-8")); 
+   //logger.info("main:02:enc:"+new String(enc, "utf-8")); 
    }
   
     return CMSVerify(enc,null, "12345".getBytes());
 	}catch(Exception e){
-		System.out.println("decode:error:"+e);
+		logger.error("decode:error:"+e);
 	}
 	return null;
 		
@@ -338,19 +343,19 @@ public X509Certificate CMSVerify(byte[] buffer, Certificate[] certs, byte[] data
         throws Exception {
     //clear buffers fo logs
 	
-	//System.out.println("CMSVerify:001");
+	//logger.info("CMSVerify:001");
 	
     out = new StringBuffer("");
     out1 = new StringBuffer("");
     final Asn1BerDecodeBuffer asnBuf = new Asn1BerDecodeBuffer(buffer);
     
-   // System.out.println("CMSVerify:002");
+   // logger.info("CMSVerify:002");
     final ContentInfo all = new ContentInfo();
     
-  //  System.out.println("CMSVerify:003");
+  //  logger.info("CMSVerify:003");
     all.decode(asnBuf);
     
-  //  System.out.println("CMSVerify:004");
+  //  logger.info("CMSVerify:004");
     
     if (!new OID(STR_CMS_OID_SIGNED).eq(all.contentType.value))
         throw new Exception("Not supported");
@@ -375,11 +380,11 @@ public X509Certificate CMSVerify(byte[] buffer, Certificate[] certs, byte[] data
         throw new Exception("Unknown digest");
     final OID eContTypeOID = new OID(cms.encapContentInfo.eContentType.value);
     
-  //  System.out.println("CMSVerify:01");
+  //  logger.info("CMSVerify:01");
     
     if (cms.certificates != null) {
     	
-    //	System.out.println("CMSVerify:02");
+    //	logger.info("CMSVerify:02");
     	
         //Проверка на вложенных сертификатах
         for (int i = 0; i < cms.certificates.elements.length; i++) {
@@ -393,11 +398,11 @@ public X509Certificate CMSVerify(byte[] buffer, Certificate[] certs, byte[] data
                             .generateCertificate(encBuf.getInputStream());
 
             
-            // System.out.println("CMSVerify:03:"+cert.toString());
-         //   System.out.println("CMSVerify:03:SubjectDN:"+cert.getSubjectDN());
-          //  System.out.println("CMSVerify:03:"+cert.getSerialNumber());
-         //   System.out.println("CMSVerify:03:cert_sn:"+dec_to_hex(cert.getSerialNumber()));
-       //     System.out.println("CMSVerify:03:root_sn:"+root_sn());
+            // logger.info("CMSVerify:03:"+cert.toString());
+         //   logger.info("CMSVerify:03:SubjectDN:"+cert.getSubjectDN());
+          //  logger.info("CMSVerify:03:"+cert.getSerialNumber());
+         //   logger.info("CMSVerify:03:cert_sn:"+dec_to_hex(cert.getSerialNumber()));
+       //     logger.info("CMSVerify:03:root_sn:"+root_sn());
             
          if(root_sn()!=null&&!root_sn().equals(dec_to_hex(cert.getSerialNumber()))){
         	
@@ -405,18 +410,18 @@ public X509Certificate CMSVerify(byte[] buffer, Certificate[] certs, byte[] data
         	/* 
         	// String cert_base64_1 = DatatypeConverter.printBase64Binary(cert.getEncoded());
         	 
-        	// System.out.println("cert_base64_1:"+cert_base64_1);
+        	// logger.info("cert_base64_1:"+cert_base64_1);
         	 
         	 String cert_base64_2 = new BASE64Encoder().encode(cert.getEncoded());
         	 
-        	 System.out.println("cert_base64_2:"+cert_base64_2);
+        	 logger.info("cert_base64_2:"+cert_base64_2);
         	 
         	// byte[] encoded = org.apache.commons.codec.binary.Base64.encodeBase64(cert.getEncoded());
         	// String cert_base64_3 = Arrays.toString(encoded);
         		
         	 String cert_base64_3 = Base64.encodeBytes(cert.getEncoded());
         	 
-        	 System.out.println("cert_base64_3:"+cert_base64_3);
+        	 logger.info("cert_base64_3:"+cert_base64_3);
         	 
         	 getX509CertificateFromKeyInfoString(cert_base64_3);
         	 */
@@ -426,9 +431,9 @@ public X509Certificate CMSVerify(byte[] buffer, Certificate[] certs, byte[] data
  			InputStream in = new ByteArrayInputStream(certData);
  			X509Certificate cert_obj = (X509Certificate)certFactory.generateCertificate(in);
  		    if(cert_obj==null){
- 		    	 System.out.println("Certificate not found!");
+ 		    	 logger.info("Certificate not found!");
  		    }else{
- 		  		 System.out.println("AccessServicesImpl:authenticate_cert_base64:SerialNumber:"+cert_obj.getSerialNumber().toString(16)); 
+ 		  		 logger.info("AccessServicesImpl:authenticate_cert_base64:SerialNumber:"+cert_obj.getSerialNumber().toString(16)); 
  		    }
         	 in.close();*/
  		   
@@ -452,28 +457,29 @@ public static boolean chain_check(Certificate pcert) {
 	
 	try{
 		
-		KeyStore keyStore = KeyStore.getInstance("CertStore", "JCP");
+		if(keyStore==null) {
+		keyStore = KeyStore.getInstance("CertStore", "JCP");
 	//	keyStore.load(new FileInputStream("/Development/cert/gost/cudvm/cudvm.store"), "Access_Control".toCharArray());
 		//keyStore.load(new FileInputStream("/distr/jboss/jboss-5.1.0.GA/cert/cudvm.store"), "Access_Control".toCharArray());
 		
 		keyStore.load(new FileInputStream(cert_store_url), "Access_Control".toCharArray());
 		
-		
+		}
 		
 	 // final KeyStore keyStore  = KeyStore.getInstance("HDImageStore", "JCP");
 	//  keyStore.load(null, null);
 	 
 //	  PrivateKey key = (PrivateKey)keyStore.getKey(alias, password);
-//	  System.out.println("key:"+key.toString());
+//	  logger.info("key:"+key.toString());
 	  
-	//  System.out.println("Current alias_01 ");
+	//  logger.info("Current alias_01 ");
 	  
 	  Enumeration aliases = keyStore.aliases();
 	 while (aliases.hasMoreElements()) {
 	  String alias = (String) aliases.nextElement();
-	//  System.out.println("Current alias: " + alias);
+	//  logger.info("Current alias: " + alias);
 	  if (keyStore.isCertificateEntry(alias)) {
-	//  System.out.println( ((X509Certificate)keyStore.getCertificate(alias)).getSubjectDN() );
+	//  logger.info( ((X509Certificate)keyStore.getCertificate(alias)).getSubjectDN() );
 	  }
 	  }
 	  
@@ -481,7 +487,7 @@ public static boolean chain_check(Certificate pcert) {
 	  Certificate crt=pcert;
 	//  Certificate crt = keyStore.getCertificate(alias);
 	  
-	//   System.out.println("cert:"+tr.toString());
+	//   logger.info("cert:"+tr.toString());
 	  
 	   
 	   final Certificate[] certs = new Certificate[2];
@@ -537,7 +543,7 @@ public static boolean chain_check(Certificate pcert) {
 //	  keyStore.store(new FileOutputStream(file), STORE_PASS);
 	  
 	}catch(Exception e){
-		System.out.println("error:"+e);
+		logger.error("error:"+e);
 	}
 	
 	return result;
@@ -550,11 +556,11 @@ private static String dec_to_hex(BigInteger bi) {
 	try
 	{
 	 result = bi.toString(16);
-    // System.out.println("num_convert:num:"+result);
+    // logger.info("num_convert:num:"+result);
 	}
 	catch (NumberFormatException e)
 	{
-	     System.out.println("Error! tried to parse an invalid number format");
+	     logger.error("Error! tried to parse an invalid number format");
 	}
 	 return result;
 }
@@ -564,22 +570,23 @@ public String root_sn() {
 	
 	if(root_sn==null){
 	
-		//  System.out.println("WebCertAction:root_sn:01");
+		//  logger.info("WebCertAction:root_sn:01");
 		  
 	try{
 		
-		KeyStore keyStore = KeyStore.getInstance("CertStore", "JCP");
+		if(keyStore==null) {
+		  keyStore = KeyStore.getInstance("CertStore", "JCP");
 		//keyStore.load(new FileInputStream("/Development/cert/gost/cudvm/cudvm.store"), "Access_Control".toCharArray());
 		//keyStore.load(new FileInputStream("/distr/jboss/jboss-5.1.0.GA/cert/cudvm.store"), "Access_Control".toCharArray());
 		
 		keyStore.load(new FileInputStream(cert_store_url), "Access_Control".toCharArray());
-		
+		}
 		
 	 // final KeyStore keyStore  = KeyStore.getInstance("HDImageStore", "JCP");
 	//  keyStore.load(null, null);
 	 
 //	  PrivateKey key = (PrivateKey)keyStore.getKey(alias, password);
-//	  System.out.println("key:"+key.toString());
+//	  logger.info("key:"+key.toString());
 	  
 	
 	  
@@ -593,14 +600,14 @@ public String root_sn() {
 	  
  	  while(enumeration.hasMoreElements()) {
           String alias = (String)enumeration.nextElement();
-          System.out.println("alias name: " + alias);
+          logger.info("alias name: " + alias);
           Certificate certificate = keyStore.getCertificate(alias);
-          System.out.println(certificate.toString());
+          logger.info(certificate.toString());
 
       }*/
 	  
 	  }catch(Exception e){
-		  System.out.println("WebCertAction:root_sn:error:"+e);
+		  logger.error("WebCertAction:root_sn:error:"+e);
 		 // e.printStackTrace(System.out);
 	  }
 	}
@@ -617,7 +624,7 @@ public String root_sn() {
 	int result = 0;
 	try{
 	
-	   System.out.println("WebCertAction:addUserCert:01");
+	   logger.info("WebCertAction:addUserCert:01");
 	
 	   HttpSession hs = request.getSession();
 	   Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
@@ -638,7 +645,7 @@ public String root_sn() {
        String serial = dec_to_hex(user_cert.getSerialNumber());
        
        if(userManagerEJB.certNumExistCrt(serial)){
-    	   System.out.println("WebCertAction:addUserCert:01_1:return;");
+    	   logger.info("WebCertAction:addUserCert:01_1:return;");
     	 //  FacesContext.getCurrentInstance().addMessage(null, 
        	//		new FacesMessage("Сертификат уже используется!"));
     	 //  FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
@@ -657,12 +664,12 @@ public String root_sn() {
 	   
 	   String subject = user_cert.getSubjectDN().getName();
 	   
-	   System.out.println("WebCertAction:addUserCert:02:"+subject);
+	   logger.info("WebCertAction:addUserCert:02:"+subject);
 	   
 	   LdapName ldapDN = new LdapName(subject);
 	   
 	   for(Rdn rdn: ldapDN.getRdns()) {
-		    System.out.println(rdn.getType() + " -> " + rdn.getValue());
+		    logger.info(rdn.getType() + " -> " + rdn.getValue());
 		    
 		    if("CN".equals(rdn.getType())){
 		    	userCert.setUserFio((String)rdn.getValue());
@@ -689,7 +696,7 @@ public String root_sn() {
 
        
 	} catch(Exception e){
-		 System.out.println("WebCertAction:addUserCert:error:"+e);
+		 logger.error("WebCertAction:addUserCert:error:"+e);
 		 
 		 result=-1;
 		//FacesContext.getCurrentInstance().addMessage(null, 

@@ -3,6 +3,7 @@ package ru.spb.iac.cud.exs.init;
 import java.io.IOException;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +45,11 @@ public class StartupServlet extends HttpServlet {
 			LaunchBindingNoActTask.initTask(50);
 			LaunchUCCertTask.initTask(55);
 
+			ServletContext context = config.getServletContext();
+			String crlReestr = context.getInitParameter("CRL_REESTR"); 
+			
+			Configuration.setCrlReestr(crlReestr);
+			
 			logger.info("StartupServlet:init:02");
 
 		} catch (Exception e) {

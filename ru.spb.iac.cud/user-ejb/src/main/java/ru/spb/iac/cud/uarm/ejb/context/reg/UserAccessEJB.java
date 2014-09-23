@@ -8,6 +8,9 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppAccessBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppAccessGroupsBssT;
@@ -20,6 +23,8 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserAccessEJB {
 
+	final static Logger logger = LoggerFactory.getLogger(UserAccessEJB.class);
+	
    
 	@PersistenceContext(unitName = "CUDUserConsolePU")
     private EntityManager entityManager;
@@ -30,14 +35,14 @@ public class UserAccessEJB {
 
     public void save(JournAppAccessBssT user) {
 
-       System.out.println("userAccessEJB:save:01");
-       System.out.println("userAccessEJB:save:02:"+user.getCodeSystem());
+       logger.info("userAccessEJB:save:01");
+       logger.info("userAccessEJB:save:02:"+user.getCodeSystem());
        try{
     	  /*List<JournAppUserBssT>  app_user_list = entityManager
     			  .createQuery("select t1 from JournAppUserBssT t1 ")
     			  .getResultList();
     	  
-    	  System.out.println("UserRegEJB:save:03:"+app_user_list.size());
+    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
     	  */
     	   
     	   user.setCreated(new Date());
@@ -45,20 +50,20 @@ public class UserAccessEJB {
     	   
     	   
        }catch(Exception e){
-    	   System.out.println("userAccessEJB:save:error:"+e);
+    	   logger.error("userAccessEJB:save:error:"+e);
        }
      }
     
     public void saveGroup(JournAppAccessGroupsBssT user) {
 
-        System.out.println("userAccessEJB:saveGroup:01");
+        logger.info("userAccessEJB:saveGroup:01");
       
         try{
      	  /*List<JournAppUserBssT>  app_user_list = entityManager
      			  .createQuery("select t1 from JournAppUserBssT t1 ")
      			  .getResultList();
      	  
-     	  System.out.println("UserRegEJB:save:03:"+app_user_list.size());
+     	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
      	  */
      	   
      	   user.setCreated(new Date());
@@ -66,7 +71,7 @@ public class UserAccessEJB {
      	   
      	   
         }catch(Exception e){
-     	   System.out.println("userAccessEJB:saveGroup:error:"+e);
+     	   logger.error("userAccessEJB:saveGroup:error:"+e);
         }
       }
 }

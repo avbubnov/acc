@@ -19,7 +19,6 @@ public class HomeBean {
 
     public String test() {
 
-       System.out.println("HomeBean:hbean");
        
        return "bubnov";
     }

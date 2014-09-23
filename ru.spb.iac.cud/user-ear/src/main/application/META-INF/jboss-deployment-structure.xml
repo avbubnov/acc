@@ -5,9 +5,13 @@
   
         <exclusions>
            <module name="org.apache.log4j"/>
+           <!--module name="org.slf4j"/-->
         </exclusions>
-  
-       <dependencies>
+
+      <dependencies>
+       
+       <!--module name="ch.qos.logback" export="true"/>
+       <module name="org.slf4j" slot = "1.6.1" export="true" /-->
        
         <module name="com.sun.jsf-impl" slot="main" export="true"/>
         <module name="javax.servlet.jstl.api" slot="main" export="true"/>
@@ -54,6 +58,7 @@
   <sub-deployment name="CUDUserConsole-war.war">
        <exclusions>
            <module name="org.apache.log4j"/>
+           <module name="org.slf4j"/>
         </exclusions>
         <dependencies>
         
@@ -62,14 +67,24 @@
          
           <module name="javax.faces.api" slot="main"/>
         
+         <module name="ch.qos.logback" export="true"/>
+         <module name="org.slf4j" slot = "1.6.1" export="true" />
       
         </dependencies>
   </sub-deployment>
  <sub-deployment name="CUDUserConsole-ejb.jar">
+ 
+      <exclusions>
+           <module name="org.slf4j"/>
+        </exclusions>
+        
          <dependencies>
           <module name="org.apache.log4j" export="true"/>
          <module name="ru.spb.iac.cud" export="true"/>
          
+         <module name="ch.qos.logback" export="true"/>
+         <module name="org.slf4j" slot = "1.6.1" export="true" />
+       
         </dependencies>
   </sub-deployment>
 

@@ -3,6 +3,7 @@ package ru.spb.iac.sts.core.plugins.saml;
 import org.picketlink.common.PicketLinkLogger;
 import org.picketlink.common.PicketLinkLoggerFactory;
 import org.picketlink.common.constants.JBossSAMLConstants;
+import org.picketlink.common.constants.JBossSAMLURIConstants;
 import org.picketlink.common.constants.WSTrustConstants;
 import org.picketlink.common.exceptions.ProcessingException;
 import org.picketlink.common.util.DocumentUtil;
@@ -12,6 +13,7 @@ import org.picketlink.identity.federation.core.saml.v2.common.IDGenerator;
 import org.picketlink.identity.federation.core.saml.v2.factories.SAMLAssertionFactory;
 import org.picketlink.identity.federation.core.saml.v2.util.AssertionUtil;
 import org.picketlink.identity.federation.core.saml.v2.util.StatementUtil;
+import org.picketlink.identity.federation.core.saml.v2.util.XMLTimeUtil;
 import org.picketlink.identity.federation.core.sts.AbstractSecurityTokenProvider;
 import org.picketlink.identity.federation.core.wstrust.SecurityToken;
 import org.picketlink.identity.federation.core.wstrust.StandardSecurityToken;
@@ -24,6 +26,10 @@ import org.picketlink.identity.federation.saml.v2.assertion.AssertionType;
 import org.picketlink.identity.federation.saml.v2.assertion.AttributeStatementType;
 import org.picketlink.identity.federation.saml.v2.assertion.AttributeType;
 import org.picketlink.identity.federation.saml.v2.assertion.AudienceRestrictionType;
+import org.picketlink.identity.federation.saml.v2.assertion.AuthnContextClassRefType;
+import org.picketlink.identity.federation.saml.v2.assertion.AuthnContextType;
+import org.picketlink.identity.federation.saml.v2.assertion.AuthnContextType.AuthnContextTypeSequence;
+import org.picketlink.identity.federation.saml.v2.assertion.AuthnStatementType;
 import org.picketlink.identity.federation.saml.v2.assertion.ConditionsType;
 import org.picketlink.identity.federation.saml.v2.assertion.KeyInfoConfirmationDataType;
 import org.picketlink.identity.federation.saml.v2.assertion.NameIDType;
@@ -31,6 +37,7 @@ import org.picketlink.identity.federation.saml.v2.assertion.StatementAbstractTyp
 import org.picketlink.identity.federation.saml.v2.assertion.SubjectConfirmationDataType;
 import org.picketlink.identity.federation.saml.v2.assertion.SubjectConfirmationType;
 import org.picketlink.identity.federation.saml.v2.assertion.SubjectType;
+import org.picketlink.identity.federation.saml.v2.protocol.RequestedAuthnContextType;
 import org.picketlink.identity.federation.ws.policy.AppliesTo;
 import org.picketlink.identity.federation.ws.trust.RequestedReferenceType;
 import org.picketlink.identity.federation.ws.trust.StatusType;
@@ -45,6 +52,7 @@ import org.w3c.dom.Element;
 import ru.spb.iac.cud.sts.core.attrib.CUDSAML20CommonTokenRoleAttributeProvider;
 import ru.spb.iac.cud.util.CudPrincipal;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -52,11 +60,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		implements SecurityTokenProvider {
@@ -223,9 +233,19 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		}
 
 		// create an AuthnStatement
+		if(((CudPrincipal) principal).getUserName()!=null){
+			
+			 //для пользователей и onBehalfOf
+			
+			confirmationMethod=(((CudPrincipal) principal).getAuthType()!=null?
+					((CudPrincipal) principal).getAuthType():
+						JBossSAMLURIConstants.AC_PASSWORD.get());
+		}
+		
 		statements.add(StatementUtil.createAuthnStatement(
 				lifetime.getCreated(), confirmationMethod));
-
+		
+		
 		// create the SAML assertion.
 		NameIDType issuerID = SAMLAssertionFactory.createNameID(null, null,
 				context.getTokenIssuer());
@@ -287,6 +307,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 					.getAttributeStatement(
 							((CudPrincipal) principal).getSystemName(),
 							((CudPrincipal) principal).getUserName(),
+							((CudPrincipal) principal).getAuthType(),
 							lifetimeMs);
 
 			if (attributeStatement != null) {
@@ -295,6 +316,35 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 
 				assertion.addStatement(attributeStatement);
 			}
+			
+			//уже есть выше реализация
+			/*
+			try{
+			XMLGregorianCalendar currentTime = XMLTimeUtil.getIssueInstant();
+			
+			org.picketlink.identity.federation.saml.v2.assertion.AuthnStatementType ant =
+					new org.picketlink.identity.federation.saml.v2.assertion.AuthnStatementType(currentTime);
+			
+			AuthnContextType act = new AuthnContextType();
+			
+			String authContextDeclRef = 
+					(((CudPrincipal) principal).getAuthType()!=null?
+						((CudPrincipal) principal).getAuthType():
+							JBossSAMLURIConstants.AC_PASSWORD.get());
+			
+			AuthnContextType.AuthnContextTypeSequence sequence = act.new AuthnContextTypeSequence();
+			
+			AuthnContextClassRefType classRef = new AuthnContextClassRefType(URI.create(authContextDeclRef));
+			sequence.setClassRef(classRef);
+			act.setSequence(sequence); 
+			 
+			ant.setAuthnContext(act);
+			
+			assertion.addStatement(ant);
+			
+			}catch(Exception e){
+				 loggerslf4j.error("issueToken:currentTime:error:"+e);
+			}*/
 		}
 
 		// loggerslf4j.info("issueToken:04");
@@ -415,7 +465,8 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		String assertionID = IDGenerator.create("ID_");
 
 		// !!!
-
+		Principal principal = context.getCallerPrincipal();
+		 
 		java.util.Set<StatementAbstractType> oldStatements = oldAssertion
 				.getStatements();
 
@@ -444,7 +495,43 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 								.getAttributeValue().get(0);
 					}
 				}
+			}/*else if(oldSt instanceof AuthnStatementType){
+				
+			//впринципе, сам sts не продляет AuthnInstant у saml:AuthnStatement при renew
+			//так что и мы не будем	
+			//то есть, saml:AuthnStatement переносится какой есть.	
+			try{	
+				
+				URI authContextDeclRef = null;
+				Set<URI> list = ((AuthnStatementType) oldSt).getAuthnContext().getAuthenticatingAuthority();
+						
+				if(list!=null &&!list.isEmpty()){
+					authContextDeclRef = list.iterator().next()	;	
+				}
+				
+				XMLGregorianCalendar currentTime = XMLTimeUtil.getIssueInstant();
+				oldSt = new AuthnStatementType(currentTime);
+			
+				AuthnContextType act = new AuthnContextType();
+				
+				AuthnContextType.AuthnContextTypeSequence sequence = act.new AuthnContextTypeSequence();
+				
+				AuthnContextClassRefType classRef = new AuthnContextClassRefType(
+						authContextDeclRef!=null?
+								authContextDeclRef:
+								URI.create(JBossSAMLURIConstants.AC_PASSWORD.get()));
+				sequence.setClassRef(classRef);
+				act.setSequence(sequence); 
+			
+					 
+				((AuthnStatementType)oldSt).setAuthnContext(act);
+			
+				
+			} catch (Exception e) {
+				 loggerslf4j.error("renewToken:currentTime:error:"+e);
 			}
+
+			}*/
 		}
 
 		loggerslf4j.info("renewToken:04");
@@ -461,7 +548,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 
 			tokenIDAttribute
 					.addAttributeValue(new CUDSAML20CommonTokenRoleAttributeProvider()
-							.tokenIDCreate(uidAttribute, lifetimeMs));
+							.tokenIDCreate(uidAttribute, ((CudPrincipal)principal).getAuthType(), lifetimeMs));
 		}
 
 		List<StatementAbstractType> statements = new ArrayList<StatementAbstractType>();

@@ -23,6 +23,19 @@
     <servlet-name>Faces Servlet</servlet-name>
     <url-pattern>/faces/*</url-pattern>
   </servlet-mapping>
+  
+   <servlet>
+    <description></description>
+    <display-name>StartupServlet</display-name>
+    <servlet-name>StartupServlet</servlet-name>
+    <servlet-class>ru.spb.iac.cud.uarm.web.init.StartupServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>StartupServlet</servlet-name>
+    <url-pattern>/StartupServlet</url-pattern>
+  </servlet-mapping>
+  
   <context-param>
     <param-name>facelets.SKIP_COMMENTS</param-name>
     <param-value>true</param-value>
@@ -31,4 +44,38 @@
     <param-name>cert_store_url</param-name>
     <param-value>/home/jboss/jboss/certstore/cudvm.store</param-value>
   </context-param>
+  
+  <context-param>
+    <param-name>SIGN_REQUIRED</param-name>
+    <param-value>true</param-value>
+  </context-param>
+  <context-param>
+    <param-name>SAML_REQUEST_LOGIN_UARM</param-name>
+    <param-value>/home/jboss/jboss/data/saml/uarm_saml_request_post.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>SAML_REQUEST_LOGOUT</param-name>
+    <param-value>/home/jboss/jboss/data/saml/saml_request_logout_post.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>SAML_ASSERTION</param-name>
+    <param-value>/home/jboss/jboss/data/saml/saml_asserion.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>STORE_PATH</param-name>
+    <param-value>/home/jboss/jboss/certstore/cudvm.store</param-value>
+  </context-param>
+  <context-param>
+    <param-name>AUDIT_SERVICE</param-name>
+    <param-value>https://acc.lan.iac.spb.ru:18443/CudServicesPro/AuditService?wsdl</param-value>
+  </context-param>
+  <context-param>
+    <param-name>STS_OBO_SERVICE</param-name>
+    <param-value>https://acc.lan.iac.spb.ru:18443/CudServicesSTS/CUDSTS?wsdl</param-value>
+  </context-param>
+ <context-param>
+    <param-name>STS_SERVICE</param-name>
+    <param-value>https://acc.lan.iac.spb.ru:18443/CudServicesSTS/CUDSTS?wsdl</param-value>
+  </context-param>
+  
 </web-app>

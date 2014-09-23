@@ -18,6 +18,9 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.entity.AcIsBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.AcRolesBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersCertBssT;
@@ -36,7 +39,8 @@ import ru.spb.iac.cud.uarm.util.CUDUserConsoleConstants;
 @LocalBean
 public class UserManagerEJB {
 
-   
+	final static Logger logger = LoggerFactory.getLogger(UserManagerEJB.class);
+	
 	@PersistenceContext(unitName = "CUDUserConsolePU")
     private EntityManager entityManager;
 	
@@ -47,7 +51,7 @@ public class UserManagerEJB {
     
     public AcUsersKnlT getUserItem(Long idUser){
  	   
-    	System.out.println("UserManagerEJB:getUserItem:idUser:"+idUser);
+    	logger.info("UserManagerEJB:getUserItem:idUser:"+idUser);
  	   
  	   if(idUser==null){
  		  return null;
@@ -124,7 +128,7 @@ public class UserManagerEJB {
             
             for(Object[] objectArray :lo){
          	   try{
-         		  System.out.println("UserManagerEJB:getUserItem:login:"+objectArray[1].toString());
+         		  logger.info("UserManagerEJB:getUserItem:login:"+objectArray[1].toString());
          		 
          		 AcUsersKnlT userDataItem = new AcUsersKnlT();
          		 
@@ -165,11 +169,11 @@ public class UserManagerEJB {
          	     
          	     return userDataItem;
          	   }catch(Exception e1){
-         		  System.out.println("UserManagerEJB:getUserItem:for:error:"+e1);
+         		  logger.error("UserManagerEJB:getUserItem:for:error:"+e1);
          	   }
             }  
  	   }catch(Exception e){
- 		  System.out.println("UserManagerEJB:getUserItem:error:"+e);
+ 		  logger.error("UserManagerEJB:getUserItem:error:"+e);
  	   }
  	   return null;
     }
@@ -180,7 +184,7 @@ public class UserManagerEJB {
     
     public List<AcIsBssT> getUserRoles(Long idUser){
   	   
-    	System.out.println("UserManagerEJB:getUserRoles:idUser:"+idUser);
+    	logger.info("UserManagerEJB:getUserRoles:idUser:"+idUser);
  	   
  	   if(idUser==null){
  		  return null;
@@ -257,7 +261,7 @@ public class UserManagerEJB {
             return arm_list;
             
  	   }catch(Exception e){
- 		  System.out.println("UserManagerEJB:getUserRoles:error:"+e);
+ 		  logger.error("UserManagerEJB:getUserRoles:error:"+e);
  		  e.printStackTrace(System.out);
  	   }
  	   return null;
@@ -265,7 +269,7 @@ public class UserManagerEJB {
     
     public List<AcIsBssT> getArmList(){
     	   
-    	System.out.println("UserManagerEJB:getArmList:01");
+    	logger.info("UserManagerEJB:getArmList:01");
  	   
  	   
     	 try{
@@ -277,7 +281,7 @@ public class UserManagerEJB {
             return arm_list;
              
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getArmList:error:"+e);
+  		  logger.error("UserManagerEJB:getArmList:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -285,7 +289,7 @@ public class UserManagerEJB {
     
     public List<JournAppAccessBssT> getAppAccessList(Long idUser){
  	   
-    	System.out.println("UserManagerEJB:getAppAccessList:01:"+idUser);
+    	logger.info("UserManagerEJB:getAppAccessList:01:"+idUser);
  	   
  	   
     	 try{
@@ -299,7 +303,7 @@ public class UserManagerEJB {
             return arm_list;
              
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getAppAccessList:error:"+e);
+  		  logger.error("UserManagerEJB:getAppAccessList:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -307,7 +311,7 @@ public class UserManagerEJB {
     
     public List<JournAppAccessBssT> getAppAccessGroupsList(Long idUser){
   	   
-    	System.out.println("UserManagerEJB:getAppAccessGroupsList:01:"+idUser);
+    	logger.info("UserManagerEJB:getAppAccessGroupsList:01:"+idUser);
  	   
  	   
     	 try{
@@ -321,7 +325,7 @@ public class UserManagerEJB {
             return arm_list;
              
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getAppAccessGroupsList:error:"+e);
+  		  logger.error("UserManagerEJB:getAppAccessGroupsList:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -329,7 +333,7 @@ public class UserManagerEJB {
     
     public List<JournAppAdminUserSysBssT> getAppAdminUserSysList(Long idUser){
   	   
-    	System.out.println("UserManagerEJB:getAppAdminUserSysList:01:"+idUser);
+    	logger.info("UserManagerEJB:getAppAdminUserSysList:01:"+idUser);
  	   
  	   
     	 try{
@@ -343,7 +347,7 @@ public class UserManagerEJB {
             return arm_list;
              
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getAppAdminUserSysList:error:"+e);
+  		  logger.error("UserManagerEJB:getAppAdminUserSysList:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -351,7 +355,7 @@ public class UserManagerEJB {
     
     public List<JournAppOrgManagerBssT> getAppOrgManList(Long idUser){
    	   
-    	System.out.println("UserManagerEJB:getAppOrgManList:01:"+idUser);
+    	logger.info("UserManagerEJB:getAppOrgManList:01:"+idUser);
  	   
  	   
     	 try{
@@ -365,7 +369,7 @@ public class UserManagerEJB {
             return arm_list;
              
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getAppOrgManList:error:"+e);
+  		  logger.error("UserManagerEJB:getAppOrgManList:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -373,7 +377,7 @@ public class UserManagerEJB {
     
     public List<AcRolesBssT> getListRolesFromArm(Long pidArm){
     	   
-    	System.out.println("UserManagerEJB:getListRolesFromArm:01:"+pidArm);
+    	logger.info("UserManagerEJB:getListRolesFromArm:01:"+pidArm);
  	   
  	   if(pidArm==null){
  		   return null;
@@ -444,7 +448,7 @@ public class UserManagerEJB {
             	return null;
              }
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getListRolesFromArm:error:"+e);
+  		  logger.error("UserManagerEJB:getListRolesFromArm:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -452,7 +456,7 @@ public class UserManagerEJB {
     
     public List<GroupUsersKnlT> getListGroupsFromArm(Long pidArm){
  	   
-    	System.out.println("UserManagerEJB:getListGroupsFromArm:01:"+pidArm);
+    	logger.info("UserManagerEJB:getListGroupsFromArm:01:"+pidArm);
  	   
  	   if(pidArm==null){
  		   return null;
@@ -523,7 +527,7 @@ public class UserManagerEJB {
             	return null;
              }
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getListGroupsFromArm:error:"+e);
+  		  logger.error("UserManagerEJB:getListGroupsFromArm:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;
@@ -531,7 +535,7 @@ public class UserManagerEJB {
     
     public void changePassword(Long idUser, String userOldPassword, String newPassword) throws Exception{
     	
-    	 System.out.println("UserManagerEJB:changePassword:01");
+    	 logger.info("UserManagerEJB:changePassword:01");
     	 
     	 try{
     		 
@@ -552,7 +556,7 @@ public class UserManagerEJB {
                   .executeUpdate();
             
          }catch(Exception e){
-  		  System.out.println("UserManagerEJB:changePassword:error:"+e);
+  		  logger.error("UserManagerEJB:changePassword:error:"+e);
   		 // e.printStackTrace(System.out);
   		  throw e;
   	   }
@@ -560,14 +564,14 @@ public class UserManagerEJB {
      }
     
     public void uploadCertFile(AcUsersCertBssT userCert) throws Exception {
-      System.out.println("UserManagerEJB:uploadCertFile:01");
+      logger.info("UserManagerEJB:uploadCertFile:01");
     	 
     	 try{
     		 
     		 entityManager.persist(userCert);
             
          }catch(Exception e){
-  		  System.out.println("UserManagerEJB:uploadCertFile:error:"+e);
+  		  logger.error("UserManagerEJB:uploadCertFile:error:"+e);
   		 // e.printStackTrace(System.out);
   		  throw e;
   	   }
@@ -575,7 +579,7 @@ public class UserManagerEJB {
     
     public boolean certNumExistCrt(String certNum) throws Exception {
  	   
-    	System.out.println("UserManagerEJB:certNumExistCrt:certNum="+certNum);
+    	logger.info("UserManagerEJB:certNumExistCrt:certNum="+certNum);
 		
     	boolean result = false;
     	
@@ -592,11 +596,11 @@ public class UserManagerEJB {
 			  
 			  result=true;
 			  
-				  System.out.println("UserManagerEJB:certNumExistCrt:addCertNumExist!");		     
+				  logger.info("UserManagerEJB:certNumExistCrt:addCertNumExist!");		     
 		    }catch (NoResultException ex){
-		    	System.out.println("UserManagerEJB:certNumExistCrt:NoResultException");
+		    	logger.error("UserManagerEJB:certNumExistCrt:NoResultException");
           }catch(Exception e){
-        	  System.out.println("UserManagerEJB:certNumExistCrt:Error:"+e);
+        	  logger.error("UserManagerEJB:certNumExistCrt:Error:"+e);
 	           throw e;
         }
 		}
@@ -607,7 +611,7 @@ public class UserManagerEJB {
     
     private Long getIdUser(String loginUser){
   	   
-       System.out.println("UserManagerEJB:getIdUser:01:"+loginUser);
+       logger.info("UserManagerEJB:getIdUser:01:"+loginUser);
  	   
        Long result = null;
        
@@ -628,9 +632,9 @@ public class UserManagerEJB {
              .getSingleResult()).longValue();
               
  	   }catch(NullPointerException e){
- 		  System.out.println("UserManagerEJB:getIdUser:error_NPE:"+e);
+ 		  logger.error("UserManagerEJB:getIdUser:error_NPE:"+e);
  	   }catch(Exception e){
- 		  System.out.println("UserManagerEJB:getIdUser:error:"+e);
+ 		  logger.error("UserManagerEJB:getIdUser:error:"+e);
  	   }
  	   return result;
     }
@@ -638,7 +642,7 @@ public class UserManagerEJB {
     
     public List<GroupUsersKnlT> getUserGroups(Long idUser) throws Exception{
   	   
-    	System.out.println("UserManagerEJB:getUserGroups:01:"+idUser);
+    	logger.info("UserManagerEJB:getUserGroups:01:"+idUser);
  	   
  	   if(idUser==null){
  		   return null;
@@ -702,7 +706,7 @@ public class UserManagerEJB {
     		    return listUsrGroupForView;
     		    
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getUserGroups:error:"+e);
+  		  logger.error("UserManagerEJB:getUserGroups:error:"+e);
   		 // e.printStackTrace(System.out);
   		  throw e;
   	   }
@@ -729,7 +733,7 @@ public class UserManagerEJB {
 			    		.setMaxResults(100)
 			    		.getResultList();
 			     
-			   System.out.println("UserManagerEJB:getUserCertList:size:"+user_cert_list.size());
+			   logger.info("UserManagerEJB:getUserCertList:size:"+user_cert_list.size());
 			     
 			     userCertList= new ArrayList<BaseItem>();
 			     
@@ -747,13 +751,13 @@ public class UserManagerEJB {
 		        			   "");
 		        	     userCertList.add(ui);
 		        	   }catch(Exception e1){
-		        		   System.out.println("UserManagerEJB:getUserCertList:for:error:"+e1);
+		        		   logger.error("UserManagerEJB:getUserCertList:for:error:"+e1);
 		        	   } 
 			    	 
 			     }
      		
       }catch(Exception e){
-		  System.out.println("UserManagerEJB:getUserCertList:error:"+e);
+		  logger.error("UserManagerEJB:getUserCertList:error:"+e);
 		 // e.printStackTrace(System.out);
 		  throw e;
 	   }
@@ -764,7 +768,7 @@ public class UserManagerEJB {
  /*  
    public List<AcIsBssT> getFullArmRoles(Long pidArm){
    	   
-    	System.out.println("UserManagerEJB:getFullArmRoles:01:"+pidArm);
+    	logger.info("UserManagerEJB:getFullArmRoles:01:"+pidArm);
  	   
  	   
     	 try{
@@ -829,7 +833,7 @@ public class UserManagerEJB {
              return arm_list;
              
   	   }catch(Exception e){
-  		  System.out.println("UserManagerEJB:getFullArmRoles:error:"+e);
+  		  logger.error("UserManagerEJB:getFullArmRoles:error:"+e);
   		  e.printStackTrace(System.out);
   	   }
  	   return null;

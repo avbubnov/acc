@@ -30,7 +30,6 @@ import org.picketlink.identity.federation.saml.v2.assertion.AttributeStatementTy
 import org.picketlink.identity.federation.saml.v2.assertion.AttributeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ru.spb.iac.cud.context.ContextIDPAccessManager;
 import ru.spb.iac.cud.idp.web.util.GOSTSignatureUtil;
 import ru.spb.iac.pl.sp.key.KeyStoreKeyManager;
@@ -60,6 +59,10 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 	 */
 	private String tokenRoleAttributeName;
 
+	private static final String auth_type_password = "urn:oasis:names:tc:SAML:2.0:ac:classes:password";
+
+	private static PrivateKey privateKey = null;
+	
 	public void setProperties(Map<String, String> properties) {
 
 		String roleAttrKey = this.getClass().getName()
@@ -76,7 +79,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 	}
 
 	public AttributeStatementType getAttributeStatement(String systemCode,
-			String userCode, String lifetimeMs) {
+			String userCode, String authType, String lifetimeMs) {
 
 		loggerslf4j.info("getAttributeStatement:01:" + systemCode);
 		loggerslf4j.info("getAttributeStatement:02:" + userCode);
@@ -131,7 +134,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 						userAttributes.put(
 								"TOKEN_ID",
 								tokenIDCreate(userAttributes.get("USER_UID"),
-										lifetimeMs));
+									authType, lifetimeMs));
 
 						/*
 						 * //формирование tokenID
@@ -237,7 +240,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 		}
 	}
 
-	public String tokenIDCreate(String userUID, String lifetime) {
+	public String tokenIDCreate(String userUID, String authType, String lifetime) {
 
 		String base64tokenID = null;
 
@@ -261,23 +264,27 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 
 			// надо переделать!!!
 
+			if(this.privateKey == null) {
+				
+			
 			char[] signingKeyPass = "Access_Control".toCharArray();
 			String signingAlias = "cudvm_export";
 
 			KeyStore ks = KeyStore.getInstance("HDImageStore", "JCP");
 			ks.load(null, null);
 
-			PrivateKey privateKey = (PrivateKey) ks.getKey(signingAlias,
+			this.privateKey = (PrivateKey) ks.getKey(signingAlias,
 					signingKeyPass);
-
+			}
+			
 			loggerslf4j.info("tokenIDCreate:01+:"
 					+ new Date(new Long(lifetime)));
 
 			StringBuilder sb = new StringBuilder();
 
-			sb.append(userUID).append("_").append(lifetime);
+			sb.append(userUID).append("_").append(lifetime).append("_").append(authType!=null?authType:auth_type_password);
 
-			byte[] sigValue = GOSTSignatureUtil.sign(sb.toString(), privateKey);
+			byte[] sigValue = GOSTSignatureUtil.sign(sb.toString(), this.privateKey);
 
 			String base64SigValue = Base64.encodeBytes(sigValue,
 					Base64.DONT_BREAK_LINES);
@@ -288,8 +295,14 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 					Base64.DONT_BREAK_LINES);
 
 			loggerslf4j.info("tokenIDCreate:01:" + tokenID);
-			loggerslf4j.info("tokenIDCreate:02:" + base64tokenID);
+			loggerslf4j.info("tokenIDCreate:02+:" + base64tokenID);
 
+			
+			(new ContextIDPAccessManager())
+			   .saveTokenID(base64tokenID, userUID);
+			
+			loggerslf4j.info("tokenIDCreate:03");
+			
 		} catch (Exception e) {
 			loggerslf4j.error("tokenIDCreate:tokenID:error:" + e);
 		}

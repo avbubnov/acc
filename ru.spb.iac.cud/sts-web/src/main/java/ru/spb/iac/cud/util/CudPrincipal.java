@@ -12,6 +12,8 @@ public class CudPrincipal implements Principal {
 
 	private String userName;
 
+	private String authType;
+	
 	public CudPrincipal() {
 	}
 
@@ -19,9 +21,10 @@ public class CudPrincipal implements Principal {
 		this.systemName = systemName;
 	}
 
-	public CudPrincipal(String systemName, String userName) {
-		this.systemName = systemName;
-		this.userName = userName;
+	public CudPrincipal(String systemName, String userName, String authType){
+		this.systemName=systemName;
+		this.userName=userName;
+		this.authType = authType;
 	}
 
 	public String getUserName() {
@@ -48,4 +51,11 @@ public class CudPrincipal implements Principal {
 		this.systemName = systemName;
 	}
 
+	public String getAuthType() {
+		return authType;
+	}
+
+	public void setAuthType(String authType) {
+		this.authType = authType;
+	}
 }

@@ -59,6 +59,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ru.spb.iac.cud.exceptions.GeneralFailure;
+import ru.spb.iac.cud.exceptions.TokenExpired;
 import ru.spb.iac.cud.items.AuthMode;
 import ru.spb.iac.cud.sign.GOSTSignatureUtil;
 
@@ -66,6 +67,8 @@ public class AppSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	Logger logger = LoggerFactory.getLogger(AppSOAPHandler.class);
 
+	private static PublicKey publicKey = null;
+	
 	public Set<QName> getHeaders() {
 		return null;
 	}
@@ -170,24 +173,25 @@ public class AppSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								String[] arrTokenID = tokenID.split("_");
 
 								if (arrTokenID == null
-										|| arrTokenID.length != 3) {
+										|| arrTokenID.length != 4) {
 									throw new Exception(
 											"UserAuthToken is not valid!!!");
 								}
 
 								StringBuilder sb = new StringBuilder();
 
-								sb.append(arrTokenID[0] + "_" + arrTokenID[1]);
+								sb.append(arrTokenID[0] + "_" + arrTokenID[1] +"_" + arrTokenID[2]);
 
-								byte[] sigValue = Base64.decode(arrTokenID[2]);
+								byte[] sigValue = Base64.decode(arrTokenID[3]);
 
+							if(publicKey==null){	
 								KeyStore ks = KeyStore.getInstance(
 										"HDImageStore", "JCP");
 								ks.load(null, null);
 
-								PublicKey publicKey = ks.getCertificate(
+								publicKey = ks.getCertificate(
 										"cudvm_export").getPublicKey();
-
+							}
 								boolean tokenIDValidateResult = GOSTSignatureUtil
 										.validate(
 												sb.toString().getBytes("UTF-8"),
@@ -211,8 +215,12 @@ public class AppSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 								if (new Date(System.currentTimeMillis())
 										.after(expired)) {
-									throw new Exception(
+									
+									throw new TokenExpired(
 											"UserAuthToken is expired!!!");
+									
+									//throw new Exception(
+									//		"UserAuthToken is expired!!!");
 								}
 
 							} else {

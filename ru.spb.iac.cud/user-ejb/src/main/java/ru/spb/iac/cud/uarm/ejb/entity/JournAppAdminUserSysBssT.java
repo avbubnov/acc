@@ -1,0 +1,230 @@
+package ru.spb.iac.cud.uarm.ejb.entity;
+
+import java.io.Serializable;
+import javax.persistence.*;
+
+import java.util.Date;
+import java.util.List;
+
+
+/**
+ * The persistent class for the JOURN_APP_ADMIN_USER_SYS_BSS_T database table.
+ * 
+ */
+@Entity
+@Table(name="JOURN_APP_ADMIN_USER_SYS_BSS_T")
+public class JournAppAdminUserSysBssT implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@SequenceGenerator(name="JOURN_APP_ADMIN_USER_SYS_BSS_T_IDSRV_GENERATOR", sequenceName="JOURN_APP_ADMIN_USER_SYS_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="JOURN_APP_ADMIN_USER_SYS_BSS_T_IDSRV_GENERATOR")
+	@Column(name="ID_SRV")
+	private Long idSrv;
+
+	@Column(name="COMMENT_")
+	private String comment;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date created;
+
+	@Column(name="MODE_EXEC")
+	private Long modeExec;
+
+	@Column(name="REJECT_REASON")
+	private String rejectReason;
+
+	private String secret;
+
+	private Long status;
+
+	//кому назначается привилегия
+	@ManyToOne
+	@JoinColumn(name="UP_USER_APP", insertable=false, updatable=false)
+	private AcUsersKnlT acUsersKnlT1;
+
+	@Column(name="UP_USER_APP")
+	private Long acUsersKnlT1Long;
+	
+	//заявитель
+	@ManyToOne
+	@JoinColumn(name="UP_USER", insertable=false, updatable=false)
+	private AcUsersKnlT acUsersKnlT2;
+
+	@Column(name="UP_USER")
+	private Long acUsersKnlT2Long;
+	
+	@ManyToOne
+	@JoinColumn(name="UP_USER_EXEC")
+	private AcUsersKnlT acUsersKnlT3;
+
+	//@OneToMany(mappedBy="journAppAdminUserSysBssT")
+	//private List<SysAppAdminUserSysBssT> sysAppAdminUserSysBssTs;
+
+	@ManyToOne
+	@JoinColumn(name="UP_SYS", insertable=false, updatable=false)
+	private AcIsBssT acIsBssT;
+	
+	@Column(name="UP_SYS")
+	private Long acIsBssTLong;
+	
+	@Transient
+	private String statusValue;
+	
+	public JournAppAdminUserSysBssT() {
+	}
+
+	public Long getIdSrv() {
+		return this.idSrv;
+	}
+
+	public void setIdSrv(Long idSrv) {
+		this.idSrv = idSrv;
+	}
+
+	public String getComment() {
+		return this.comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public Date getCreated() {
+		return this.created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Long getModeExec() {
+		return this.modeExec;
+	}
+
+	public void setModeExec(Long modeExec) {
+		this.modeExec = modeExec;
+	}
+
+	public String getRejectReason() {
+		return this.rejectReason;
+	}
+
+	public void setRejectReason(String rejectReason) {
+		this.rejectReason = rejectReason;
+	}
+
+	public String getSecret() {
+		return this.secret;
+	}
+
+	public void setSecret(String secret) {
+		this.secret = secret;
+	}
+
+	public Long getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(Long status) {
+		this.status = status;
+	}
+
+	public AcUsersKnlT getAcUsersKnlT1() {
+		return this.acUsersKnlT1;
+	}
+
+	public void setAcUsersKnlT1(AcUsersKnlT acUsersKnlT1) {
+		this.acUsersKnlT1 = acUsersKnlT1;
+	}
+
+	public AcUsersKnlT getAcUsersKnlT2() {
+		return this.acUsersKnlT2;
+	}
+
+	public void setAcUsersKnlT2(AcUsersKnlT acUsersKnlT2) {
+		this.acUsersKnlT2 = acUsersKnlT2;
+	}
+
+	public AcUsersKnlT getAcUsersKnlT3() {
+		return this.acUsersKnlT3;
+	}
+
+	public void setAcUsersKnlT3(AcUsersKnlT acUsersKnlT3) {
+		this.acUsersKnlT3 = acUsersKnlT3;
+	}
+/*
+	public List<SysAppAdminUserSysBssT> getSysAppAdminUserSysBssTs() {
+		return this.sysAppAdminUserSysBssTs;
+	}
+
+	public void setSysAppAdminUserSysBssTs(List<SysAppAdminUserSysBssT> sysAppAdminUserSysBssTs) {
+		this.sysAppAdminUserSysBssTs = sysAppAdminUserSysBssTs;
+	}
+
+	public SysAppAdminUserSysBssT addSysAppAdminUserSysBssT(SysAppAdminUserSysBssT sysAppAdminUserSysBssT) {
+		getSysAppAdminUserSysBssTs().add(sysAppAdminUserSysBssT);
+		sysAppAdminUserSysBssT.setJournAppAdminUserSysBssT(this);
+
+		return sysAppAdminUserSysBssT;
+	}
+
+	public SysAppAdminUserSysBssT removeSysAppAdminUserSysBssT(SysAppAdminUserSysBssT sysAppAdminUserSysBssT) {
+		getSysAppAdminUserSysBssTs().remove(sysAppAdminUserSysBssT);
+		sysAppAdminUserSysBssT.setJournAppAdminUserSysBssT(null);
+
+		return sysAppAdminUserSysBssT;
+	}*/
+	
+	public AcIsBssT getAcIsBssT() {
+		return this.acIsBssT;
+	}
+
+	public void setAcIsBssT(AcIsBssT acIsBssT) {
+		this.acIsBssT = acIsBssT;
+	}
+
+	public Long getAcIsBssTLong() {
+		return acIsBssTLong;
+	}
+
+	public void setAcIsBssTLong(Long acIsBssTLong) {
+		this.acIsBssTLong = acIsBssTLong;
+	}
+
+	public Long getAcUsersKnlT1Long() {
+		return acUsersKnlT1Long;
+	}
+
+	public void setAcUsersKnlT1Long(Long acUsersKnlT1Long) {
+		this.acUsersKnlT1Long = acUsersKnlT1Long;
+	}
+
+	public Long getAcUsersKnlT2Long() {
+		return acUsersKnlT2Long;
+	}
+
+	public void setAcUsersKnlT2Long(Long acUsersKnlT2Long) {
+		this.acUsersKnlT2Long = acUsersKnlT2Long;
+	}
+
+    public String getStatusValue() {
+		
+		if(statusValue==null&&status!=null){
+			
+			if(status.equals(0L)){
+				statusValue="В обработке";
+			}else if(status.equals(1L)){
+				statusValue="Выполнено";
+			}else if(status.equals(2L)){
+				statusValue="Отклонено";
+			}
+		}
+		
+		return statusValue;
+	}
+
+	public void setStatusValue(String statusValue) {
+		this.statusValue = statusValue;
+	}
+}

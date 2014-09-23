@@ -17,6 +17,9 @@ import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 
@@ -27,7 +30,9 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserRegEJB {
 
-   
+	final static Logger logger = LoggerFactory.getLogger(UserRegEJB.class);
+
+	
 	@Resource(mappedName="java:jboss/mail/Default")
 	private Session mailSession;
 	
@@ -40,14 +45,14 @@ public class UserRegEJB {
 
     public void save(JournAppUserBssT user) {
 
-       System.out.println("UserRegEJB:save:01");
-       System.out.println("UserRegEJB:save:02:"+user.getNameUser());
+       logger.info("UserRegEJB:save:01");
+       logger.info("UserRegEJB:save:02:"+user.getNameUser());
        try{
     	  /*List<JournAppUserBssT>  app_user_list = entityManager
     			  .createQuery("select t1 from JournAppUserBssT t1 ")
     			  .getResultList();
     	  
-    	  System.out.println("UserRegEJB:save:03:"+app_user_list.size());
+    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
     	  */
     	   
     	   user.setStatus(0L);
@@ -56,14 +61,14 @@ public class UserRegEJB {
     	   
     	   
        }catch(Exception e){
-    	   System.out.println("UserRegEJB:save:error:"+e);
+    	   logger.error("UserRegEJB:save:error:"+e);
        }
      }
     
     public void step1(String email, String context_url) {
 
-        System.out.println("UserRegEJB:step1:01:"+email);
-        System.out.println("UserRegEJB:step1:01_2:"+context_url);
+        logger.info("UserRegEJB:step1:01:"+email);
+        logger.info("UserRegEJB:step1:01_2:"+context_url);
         
         try{
         	MimeMessage m = new MimeMessage(mailSession);
@@ -86,7 +91,7 @@ public class UserRegEJB {
            	 URLEncoder.encode(email, "UTF-8")+"&validationKey=" +
            	 URLEncoder.encode(validationKey, "UTF-8");
         	
-        	System.out.println("UserRegEJB:step1:02:"+link);
+        	logger.info("UserRegEJB:step1:02:"+link);
         	 
         	String content = "Добрый день!<br/>"+
         	 "Вы интересовались запросом на регистрацию пользователя в ИАЦ ПААА.<br/>" +
@@ -102,10 +107,10 @@ public class UserRegEJB {
         	
         	Transport.send(m);
         	
-        	System.out.println("UserRegEJB:step1:03");
+        	logger.info("UserRegEJB:step1:03");
         	
         }catch(Exception e){
-     	   System.out.println("UserRegEJB:step1:error:"+e);
+     	   logger.error("UserRegEJB:step1:error:"+e);
         }
      }
 }

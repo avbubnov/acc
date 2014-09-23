@@ -13,6 +13,9 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserAccessEJB;
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserOrgManEJB;
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserRegEJB;
@@ -30,6 +33,8 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserOrgManBean implements Serializable {
 
+	final static Logger logger = LoggerFactory.getLogger(UserOrgManBean.class);
+	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserOrgManEJB")
 	private UserOrgManEJB userOrgManEJB;
 
@@ -46,7 +51,7 @@ public class UserOrgManBean implements Serializable {
 
 		try {
 
-			System.out.println("userOrgManBean:action:01");
+			logger.info("userOrgManBean:action:01");
 
 			//String version = FacesContext.class.getPackage()
 			//		.getImplementationVersion();
@@ -78,7 +83,7 @@ public class UserOrgManBean implements Serializable {
 									+ "/context/app/org_man/list.xhtml");
 
 		} catch (Exception e) {
-			System.out.println("userOrgManBean:action:error:" + e);
+			logger.error("userOrgManBean:action:error:" + e);
 		}
 	}
 

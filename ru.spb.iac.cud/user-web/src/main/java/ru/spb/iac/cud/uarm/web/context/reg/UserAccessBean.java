@@ -12,6 +12,9 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserAccessEJB;
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserRegEJB;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
@@ -28,6 +31,8 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserAccessBean implements Serializable {
 
+	final static Logger logger = LoggerFactory.getLogger(UserAccessBean.class);
+	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserAccessEJB")
 	private UserAccessEJB userAccessEJB;
 
@@ -42,7 +47,7 @@ public class UserAccessBean implements Serializable {
 
 		try {
 
-			System.out.println("userAccessRegBean:action:01");
+			logger.info("userAccessRegBean:action:01");
 
 			//String version = FacesContext.class.getPackage()
 			//		.getImplementationVersion();
@@ -50,8 +55,8 @@ public class UserAccessBean implements Serializable {
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("idArm");
 	
-			System.out.println("userAccessRegBean:action:03:" + pidArm);
-			//System.out.println("userAccessRegBean:action:04:" + userSessionBean.getSumRoles().size());
+			logger.info("userAccessRegBean:action:03:" + pidArm);
+			//logger.info("userAccessRegBean:action:04:" + userSessionBean.getSumRoles().size());
 
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
@@ -99,7 +104,7 @@ public class UserAccessBean implements Serializable {
 									+ "/context/app/roles/list.xhtml");
 
 		} catch (Exception e) {
-			System.out.println("userAccessRegBean:action:error:" + e);
+			logger.error("userAccessRegBean:action:error:" + e);
 		}
 	}
 
@@ -107,7 +112,7 @@ public class UserAccessBean implements Serializable {
 
 		try {
 
-			System.out.println("userAccessRegBean:actionGroup:01");
+			logger.info("userAccessRegBean:actionGroup:01");
 
 			//String version = FacesContext.class.getPackage()
 			//		.getImplementationVersion();
@@ -115,8 +120,8 @@ public class UserAccessBean implements Serializable {
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("idArm");
 	
-			System.out.println("userAccessRegBean:actionGroup:03:" + pidArm);
-			//System.out.println("userAccessRegBean:action:04:" + userSessionBean.getSumRoles().size());
+			logger.info("userAccessRegBean:actionGroup:03:" + pidArm);
+			//logger.info("userAccessRegBean:action:04:" + userSessionBean.getSumRoles().size());
 
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
@@ -159,7 +164,7 @@ public class UserAccessBean implements Serializable {
 									+ "/context/app/groups/list.xhtml");
 
 		} catch (Exception e) {
-			System.out.println("userAccessRegBean:actionGroup:error:" + e);
+			logger.error("userAccessRegBean:actionGroup:error:" + e);
 			e.printStackTrace(System.out);
 		}
 	}

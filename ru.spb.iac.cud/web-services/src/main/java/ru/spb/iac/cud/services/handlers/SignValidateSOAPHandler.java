@@ -52,11 +52,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ru.spb.iac.cud.exceptions.GeneralFailure;
+import ru.spb.iac.cud.services.web.init.Configuration;
 
 public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	Logger logger = LoggerFactory.getLogger(SignValidateSOAPHandler.class);
 
+	private static PublicKey publicKey = null;
+	
+	private static PrivateKey privateKey = null;
+	
 	public Set<QName> getHeaders() {
 		return null;
 	}
@@ -138,6 +143,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 				http_session.setAttribute("cud_sts_principal",
 						cud_sts_principal);
 
+			 if(Configuration.isSignRequired()){
 				/*
 				 * //1-й вариант: взять код системы из Assertion/subject/NameID
 				 * //по этому коду найти в базе сертификат
@@ -260,21 +266,30 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 					throw new GeneralFailure("Signature is not valid!!!");
 				}
 
+			  }
 			} else {
 				// ответ
 
+				if(Configuration.isSignRequired()){
+					
+				
 				char[] signingKeyPass = "Access_Control".toCharArray();
 				String signingAlias = "cudvm_export";
 
+				
+				if(publicKey==null){
+				
 				KeyStore ks = KeyStore.getInstance("HDImageStore", "JCP");
 				ks.load(null, null);
 
-				PrivateKey privateKey = (PrivateKey) ks.getKey(signingAlias,
+				privateKey = (PrivateKey) ks.getKey(signingAlias,
 						signingKeyPass);
 
 				Certificate cert = ks.getCertificate(signingAlias);
-				PublicKey publicKey = cert.getPublicKey();
+				publicKey = cert.getPublicKey();
 
+				}
+				
 				org.apache.xml.security.Init.init();
 
 				Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
@@ -434,6 +449,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 				 * 
 				 * logger.info("010+:"+result1);
 				 */
+				}
 			}
 
 		} catch (Exception e) {

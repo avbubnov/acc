@@ -91,11 +91,7 @@ public class LaunchUCCertTask {
 
 					logger.info("initTask:run:03+!+");
 
-					logger.info("initTask:run:03++:" + ServiceReestrPro.class);
-
-					logger.info("initTask:run:04+:"
-							+ ServiceReestrPro.UCCert.name());
-
+				
 					BaseParamItem bpi = new BaseParamItem(
 							ServiceReestrPro.UCCert.name());
 

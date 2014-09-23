@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserRegEJB;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
@@ -29,6 +32,9 @@ import test.ejb.HomeBean;
 @WebServlet(value="/authServlet")
 public class AuthServlet extends HttpServlet {
  
+
+   final static Logger logger = LoggerFactory.getLogger(AuthServlet.class);
+	
    private static final long serialVersionUID = 1L;
  
    public AuthServlet() {
@@ -40,21 +46,16 @@ public class AuthServlet extends HttpServlet {
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
-		System.out.println("AuthServlet:service:01");
+		logger.info("AuthServlet:service:01");
 		boolean success = false;
 		String email = null;
 				
-		try{
 		
-					
-	    }catch(Exception e){
-	    	System.out.println("AuthServlet:service:error:"+e);
-	    }
 		
 		if(success){
 			//!!!
 			HttpSession hs = (HttpSession) request.getSession(true); 
-			System.out.println("AuthServlet:service:03:"+hs.getId());
+			logger.info("AuthServlet:service:03:"+hs.getId());
 			hs.setAttribute(CUDUserConsoleConstants.userEmailReg, email);
 		
 			response.sendRedirect(request.getContextPath()+"/context/registr/reg_user_step2.xhtml");

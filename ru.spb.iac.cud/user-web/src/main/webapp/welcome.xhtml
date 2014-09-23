@@ -71,12 +71,10 @@
              <h:outputText value="Войти через" style="font-size: 11px;" />
             </td>
             <td>
-            <!--h:button value="Логин" outcome="/context/auth/login_user.xhtml"/-->
               <h:commandButton action="#{authBean.cudAuth('AUTH_LOGIN')}"
                      value="Логин" />
             </td>
             <td> 
-            <!--h:button value="Сертификат" outcome="/context/auth/login_user.xhtml"/-->
               <h:commandButton action="#{authBean.cudAuth('AUTH_CERT')}"
                      value="Сертификат" />
            
@@ -84,37 +82,18 @@
            </tr>
          </table>
         </h:form>
-           <!--h:panelGrid styleClass="vertical-menu-cell" columnClasses="optionList" columns="1" cellspacing="0" cellpadding="0"-->
-            <!--table border="0" >
-            <tr>
-            <td>
-             <r:dropDownMenu mode="client" 
-                             style="padding:0px;margin:0px; color: rgb(0, 144, 255);" 
-                             horizontalOffset="5">
-                <f:facet name="label">
-                    <h:panelGroup>
-                          <h:outputText value="Войти" />
-                    </h:panelGroup>
-                </f:facet>
-                <r:menuItem label="По логину" 
-                icon="/images/icons/create_doc.gif">
-                  <h:link value="по логину" outcome="/context/auth/login_user.xhtml"/>
-                </r:menuItem>
-                <r:menuItem label="По сертификату" 
-                icon="/images/icons/open.gif" />
-                  <h:link value="по сертификату" outcome="/context/auth/login_user.xhtml"/>
-               </r:dropDownMenu>
-               </td>
-               </tr>
-               </table-->
-          <!--/h:panelGrid-->
+                   
            <br/>
            <br/>
+           
+         <!-- 
              <h:link style="border-top:0px solid silver; padding:5px;"
              value="Запрос на регистрацию" outcome="/context/registr/reg_user_step1.xhtml"/>
            <br/>
              <h:link style="border-top:0px solid silver; padding:5px;"
              value="Забыли пароль?" outcome="/context/forgot/pass_step1.xhtml"/>
+      
+         -->
       
             </div>
             </div>

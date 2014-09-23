@@ -3,6 +3,13 @@
  xmlns="http://java.sun.com/xml/ns/javaee"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
  <display-name>CudServicesPro</display-name>
+ 
+ 
+ <context-param>
+    <param-name>SIGN_REQUIRED</param-name>
+    <param-value>true</param-value>
+  </context-param>
+ 
  <servlet>
   <servlet-name>AuditService</servlet-name>
   <servlet-class>ru.spb.iac.cud.services.audit.AuditServiceImpl</servlet-class>

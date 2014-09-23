@@ -8,6 +8,9 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppAccessBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppAdminUserSysBssT;
@@ -21,7 +24,8 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserOrgManEJB {
 
-   
+	final static Logger logger = LoggerFactory.getLogger(UserOrgManEJB.class);
+	
 	@PersistenceContext(unitName = "CUDUserConsolePU")
     private EntityManager entityManager;
 	
@@ -31,14 +35,14 @@ public class UserOrgManEJB {
 
     public void save(JournAppOrgManagerBssT user) {
 
-       System.out.println("userOrgManEJB:save:01");
+       logger.info("userOrgManEJB:save:01");
       
        try{
     	  /*List<JournAppUserBssT>  app_user_list = entityManager
     			  .createQuery("select t1 from JournAppUserBssT t1 ")
     			  .getResultList();
     	  
-    	  System.out.println("UserRegEJB:save:03:"+app_user_list.size());
+    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
     	  */
     	   
     	   user.setCreated(new Date());
@@ -46,7 +50,7 @@ public class UserOrgManEJB {
     	   
     	   
        }catch(Exception e){
-    	   System.out.println("userOrgManEJB:save:error:"+e);
+    	   logger.error("userOrgManEJB:save:error:"+e);
        }
        
        

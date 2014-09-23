@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.uarm.ejb.context.reg.UserRegEJB;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
@@ -29,6 +32,8 @@ import test.ejb.HomeBean;
 @WebServlet(value="/userForgotServlet")
 public class UserForgotServlet extends HttpServlet {
  
+  final static Logger logger = LoggerFactory.getLogger(UserForgotServlet.class);
+	
    private static final long serialVersionUID = 1L;
  
    public UserForgotServlet() {
@@ -40,7 +45,7 @@ public class UserForgotServlet extends HttpServlet {
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
-		System.out.println("UserForgotServlet:service:01");
+		logger.info("UserForgotServlet:service:01");
 		boolean success = false;
 		String email = null;
 		String login = null;
@@ -61,7 +66,7 @@ public class UserForgotServlet extends HttpServlet {
 				
 				String validationKeyTrue = (new BigInteger((email+login).getBytes("utf-8"))).toString(16);
 			
-				System.out.println("UserForgotServlet:service:02:"+validationKeyTrue);
+				logger.info("UserForgotServlet:service:02:"+validationKeyTrue);
 				
 				if(validationKey.equals(validationKeyTrue)){
 					success = true;
@@ -69,13 +74,13 @@ public class UserForgotServlet extends HttpServlet {
 			}
 			
 	    }catch(Exception e){
-	    	System.out.println("UserForgotServlet:service:error:"+e);
+	    	logger.error("UserForgotServlet:service:error:"+e);
 	    }
 		
 		if(success){
 			//!!!
 			HttpSession hs = (HttpSession) request.getSession(true); 
-			System.out.println("UserForgotServlet:service:03:"+hs.getId());
+			logger.info("UserForgotServlet:service:03:"+hs.getId());
 			hs.setAttribute(CUDUserConsoleConstants.userLoginForgot, login);
 		
 			response.sendRedirect(request.getContextPath()+"/context/forgot/pass_step2.xhtml");

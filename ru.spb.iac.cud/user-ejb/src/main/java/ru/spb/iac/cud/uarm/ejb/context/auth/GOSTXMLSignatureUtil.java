@@ -17,6 +17,8 @@ import org.picketlink.identity.xmlsec.w3.xmldsig.DSAKeyValueType;
 import org.picketlink.identity.xmlsec.w3.xmldsig.KeyValueType;
 import org.picketlink.identity.xmlsec.w3.xmldsig.RSAKeyValueType;
 import org.picketlink.identity.xmlsec.w3.xmldsig.SignatureType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,6 +26,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.security.*;
@@ -60,6 +63,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
+
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
@@ -88,7 +92,9 @@ import java.util.List;
 
 public class GOSTXMLSignatureUtil {
 private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
-    
+  
+final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.class);
+
     // Set some system properties and Santuario providers. Run this block before any other class initialization.
     static {
         ProvidersUtil.ensure();
@@ -120,7 +126,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
             
              
         } catch (/*NoSuchProvider*/Exception ex) {
-        	System.out.println("getXMLSignatureFactory:error:"+ex);
+        	loggerslf4j.error("getXMLSignatureFactory:error:"+ex);
             try {
                 xsf = XMLSignatureFactory.getInstance("DOM");
             } catch (Exception err) {
@@ -453,7 +459,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
 
         logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
         
-       // System.out.println("GOSTXMLSignatureUtil:sign:01:" + DocumentUtil.asString(doc));
+       // loggerslf4j.info("GOSTXMLSignatureUtil:sign:01:" + DocumentUtil.asString(doc));
         
         PrivateKey signingKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
@@ -479,7 +485,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         if (signedDoc == null)
             throw logger.nullArgumentError("Signed Document");
 
-       // System.out.println("GOSTXMLSignatureUtil:validate:01");
+       // loggerslf4j.info("GOSTXMLSignatureUtil:validate:01");
         
         propagateIDAttributeSetup(signedDoc.getDocumentElement(), signedDoc.getDocumentElement());
 
@@ -498,7 +504,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
 
         boolean coreValidity = signature.validate(valContext);
 
-      //  System.out.println("GOSTXMLSignatureUtil:validate:02:"+coreValidity);
+      //  loggerslf4j.info("GOSTXMLSignatureUtil:validate:02:"+coreValidity);
         
         if (logger.isTraceEnabled() && !coreValidity) {
             boolean sv = signature.getSignatureValue().validate(valContext);
@@ -675,7 +681,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
                                  X509Certificate x509Certificate)
             throws GeneralSecurityException, MarshalException, XMLSignatureException {
     	
-  	System.out.println("GOSTXMLSignatureUtil:signImpl:01+");
+  	loggerslf4j.info("GOSTXMLSignatureUtil:signImpl:01+");
     	
    	
         dsc.setDefaultNamespacePrefix("dsig");
@@ -697,7 +703,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         SignatureMethod signatureMethodObj = fac.newSignatureMethod(signatureMethod, null);
         SignedInfo si = fac.newSignedInfo(canonicalizationMethod, signatureMethodObj, referenceList);
 
-    	//System.out.println("GOSTXMLSignatureUtil:signImpl:02:"+si.getSignatureMethod());
+    	//loggerslf4j.info("GOSTXMLSignatureUtil:signImpl:02:"+si.getSignatureMethod());
         
         
         KeyInfo ki = null;

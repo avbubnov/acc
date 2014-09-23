@@ -2,15 +2,10 @@
 
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
 
-
-   <!--servlet>
-     <servlet-name>PicketLinkSTS</servlet-name>
-      <servlet-class>ru.spb.iac.cud.sts.core.CUDSTService</servlet-class>
-   </servlet>
-   <servlet-mapping>
-      <servlet-name>PicketLinkSTS</servlet-name>
-      <url-pattern>/PicketLinkSTS</url-pattern>
-   </servlet-mapping-->
+<context-param>
+    <param-name>SIGN_REQUIRED</param-name>
+    <param-value>TRUE</param-value>
+  </context-param>
  
   <servlet>
      <servlet-name>CUDSTS</servlet-name>

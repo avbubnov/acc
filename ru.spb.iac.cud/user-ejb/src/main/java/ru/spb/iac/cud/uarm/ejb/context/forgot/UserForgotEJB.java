@@ -19,6 +19,9 @@ import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.spb.iac.cud.exceptions.web.BaseError;
 import ru.spb.iac.cud.items.CodesErrors;
 import ru.spb.iac.cud.uarm.ejb.context.user.UserManagerEJB;
@@ -32,7 +35,8 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserForgotEJB {
 
-   
+	final static Logger logger = LoggerFactory.getLogger(UserForgotEJB.class);
+	
 	@Resource(mappedName="java:jboss/mail/Default")
 	private Session mailSession;
 	
@@ -49,14 +53,14 @@ public class UserForgotEJB {
 
     public void save(JournAppUserBssT user) {
 
-       System.out.println("UserForgotEJB:save:01");
-       System.out.println("UserForgotEJB:save:02:"+user.getNameUser());
+       logger.info("UserForgotEJB:save:01");
+       logger.info("UserForgotEJB:save:02:"+user.getNameUser());
        try{
     	  /*List<JournAppUserBssT>  app_user_list = entityManager
     			  .createQuery("select t1 from JournAppUserBssT t1 ")
     			  .getResultList();
     	  
-    	  System.out.println("UserForgotEJB:save:03:"+app_user_list.size());
+    	  logger.info("UserForgotEJB:save:03:"+app_user_list.size());
     	  */
     	   
     	   user.setStatus(0L);
@@ -65,7 +69,7 @@ public class UserForgotEJB {
     	   
     	   
        }catch(Exception e){
-    	   System.out.println("UserForgotEJB:save:error:"+e);
+    	   logger.error("UserForgotEJB:save:error:"+e);
        }
      }
     
@@ -74,8 +78,8 @@ public class UserForgotEJB {
     	//email_up_to_date - уточнённый email
     	//когда у пользователя несколько email, и он выбирает один из них
     	
-        System.out.println("UserForgotEJB:step1:01:"+login);
-        System.out.println("UserForgotEJB:step1:01_2:"+context_url);
+        logger.info("UserForgotEJB:step1:01:"+login);
+        logger.info("UserForgotEJB:step1:01_2:"+context_url);
         
         List<String> result = null;
         		
@@ -152,7 +156,7 @@ public class UserForgotEJB {
            	 URLEncoder.encode(validationKey, "UTF-8")+"&login="+
            	 URLEncoder.encode(login, "UTF-8");
         	
-        	System.out.println("UserForgotEJB:step1:02:"+link);
+        	logger.info("UserForgotEJB:step1:02:"+link);
         	 
         	String content = "Добрый день!<br/>"+
         	 "Мы получили запрос на сброс Вашего пароля в ИАЦ ПААА.<br/>" +
@@ -169,14 +173,14 @@ public class UserForgotEJB {
         	
         	Transport.send(m);
         	
-        	System.out.println("UserForgotEJB:step1:03");
+        	logger.info("UserForgotEJB:step1:03");
         
         }catch(BaseError be){
-        	System.out.println("UserForgotEJB:step1:berror:"+be);
+        	logger.error("UserForgotEJB:step1:berror:"+be);
         	throw be;
         	
         }catch(Exception e){
-     	   System.out.println("UserForgotEJB:step1:error:"+e);
+     	   logger.error("UserForgotEJB:step1:error:"+e);
         }
         
         return result;
@@ -184,7 +188,7 @@ public class UserForgotEJB {
     
     public void changePassword(String loginUser, String newPassword) throws Exception{
     	
-   	 System.out.println("UserForgotEJB:changePassword:01");
+   	 logger.info("UserForgotEJB:changePassword:01");
    	 
    	 try{
    		 
@@ -197,7 +201,7 @@ public class UserForgotEJB {
                  .executeUpdate();
            
         }catch(Exception e){
- 		  System.out.println("UserForgotEJB:changePassword:error:"+e);
+ 		  logger.error("UserForgotEJB:changePassword:error:"+e);
  		 // e.printStackTrace(System.out);
  		  throw e;
  	   }

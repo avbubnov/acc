@@ -43,7 +43,11 @@ public class StartupServlet extends HttpServlet {
 					.getInitParameter("JBOSS_JNDI_PORT");
 			// ContextIDPUtilManager.initContext(jboss_jndi_port);
 
-			logger.info("init:jboss_jndi_port:" + jboss_jndi_port);
+            String signRequired = context.getInitParameter("SIGN_REQUIRED"); 
+			
+			Configuration.setSignRequired(
+					!"FALSE".equals(signRequired)&&!"false".equals(signRequired));
+	
 
 		} catch (Exception e) {
 			logger.error("init:error:" + e);

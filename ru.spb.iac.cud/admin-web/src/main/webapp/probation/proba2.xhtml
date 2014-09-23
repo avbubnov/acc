@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+  <head>
+  <title>АИС ГРН СПб</title> 
+  </head>
+ <body>
+  
+ <!--a4j:outputPanel id="out1"-->
+  <h:form>
+  <!--h:inputText value="#{proba.name1}"
+                 id="name1" maxlength="30" size="55"/-->
+      <!--h:graphicImage value="#{proba.name1}"/--> 
+                 
+    <a4j:commandButton action="#{navigManager.testMenu()}"
+         value="testMenu" />
+   </h:form>
+   <!--img id="i777" src="/infos/img/msg!info.png"/-->
+    <h:graphicImage id="i777" value="/img/msg!info.png"/>
+ <!--/a4j:outputPanel-->
+ 
+ <!--a4j:outputPanel id="out2">
+  <h:form>
+       <table style="width:100%; font-size:12px;" border="0">
+          <a4j:repeat var="field" rowKeyVar="rkv"
+                      value="#{usrManager.auditItemsListContext}">
+           <tr>
+            <td height="25px">
+              <h:outputText value="#{field.itemLabel}"/>
+            </td>
+            </tr>
+         </a4j:repeat>   
+       </table> 
+   </h:form>
+  </a4j:outputPanel-->
+  <!--a4j:log popup="false" level="ALL" style="width: 800px; height: 300px;"></a4j:log-->
+  
+ </body>
+</html>

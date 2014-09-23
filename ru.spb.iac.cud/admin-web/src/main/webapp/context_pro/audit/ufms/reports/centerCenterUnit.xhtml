@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+ <h3 class="ui-widget-header">Аудит Данных УФМС - Отчёты</h3>
+ <div class="ui-layout-content" >
+
+  <a4j:outputPanel id="outCenterCenter">
+  
+   <s:div rendered="#{param['remoteAudit']!=null and auditManager.connectError==0 and auditReportsManager.connectError==0}">
+  
+    <h:form>
+  
+     <rich:dataTable id="reps_dt" style="width:100%" var="it"
+        value="#{auditReportsManager.reports}" rowKeyVar="rkv">
+             <rich:column style="width:40px;">
+              <f:facet name="header">
+                  <h:outputText value="№" />
+             </f:facet>
+                <h:outputText value="#{rkv+1}"/>
+             </rich:column>
+             <rich:column>
+              <f:facet name="header">
+                  <h:outputText value="Название" />
+              </f:facet>
+                <a4j:commandLink 
+                     reRender="outCenterBottom">
+                <h:outputText value="#{it.value}" />
+                <f:param name="remoteAudit" value="rowSelectFact"/>
+                <f:param name="nameRep" value="#{it.value}"/>
+                <f:param name="idRep" value="#{it.key}"/>
+                <f:param name="idRai" value="#{param['idRai']}"/>
+                <f:param name="actSect" value="#{param['actSect']}"/>
+                <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+               </a4j:commandLink>
+             </rich:column>
+            </rich:dataTable>
+        <!--table style="width:90%;margin-top:5px;margin-left:5px;">
+         <tr><td height="15">
+             <a4j:commandLink 
+                     reRender="outCenterBottom">
+                <h:outputText value="Отчёт1" />
+                <f:param name="nameRep" value="Отчёт №1"/>
+                <f:param name="idRep" value="1"/>
+                <f:param name="idRai" value="#{param['idRai']}"/>
+                <f:param name="actSect" value="#{param['actSect']}"/>
+               </a4j:commandLink>
+           </td></tr>
+           <tr><td height="15">
+             <a4j:commandLink 
+                     reRender="outCenterBottom">
+                <h:outputText value="Отчёт2" />
+                <f:param name="nameRep" value="Отчёт №2"/>
+                <f:param name="idRep" value="2"/>
+                <f:param name="idRai" value="#{param['idRai']}"/>
+                <f:param name="actSect" value="#{param['actSect']}"/>
+               </a4j:commandLink>
+           </td></tr>
+       </table-->
+    </h:form> 
+   </s:div>
+   <s:div rendered="#{auditManager.connectError!=0 or auditReportsManager.connectError!=0}">
+         <h:messages style="color:red" globalOnly="true" />
+    </s:div>
+  </a4j:outputPanel>
+ </div> 
+</ui:composition>

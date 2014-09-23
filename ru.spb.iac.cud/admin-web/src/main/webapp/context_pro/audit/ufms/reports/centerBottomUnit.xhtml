@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+<h3 class="ui-widget-header" >Отчёт</h3>
+<div class="ui-layout-content">
+<a4j:outputPanel id="outCenterBottom">
+
+<table style="width:100%;" border="0">
+ <tr>
+  <td width="90%">
+  
+   <s:div style="margin:5px;"  rendered="#{param['idRep']!=null}">
+     <table style="width:95%; font-size:13px;" >
+         <tr >
+            <td width="150px" height="30px" class="table_left_header">
+              <h:outputText value="Отчёт"/>
+            </td>
+            <td>
+               <h:outputText value="#{param['nameRep']}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="150px" height="60px" class="table_left_header">
+              
+             <table border="0" style="width:100%">
+              <tr valign="top">
+               <td rowspan="2">
+                 <h:outputText value="Период отчёта"/>
+               </td>
+               <td width="30px" height="25px">
+                 <h:outputText value="С:"/>
+                </td>
+               </tr>
+               <tr valign="top">
+                 <td width="30px" height="25px">
+                  <h:outputText value="По:"/>
+                 </td>
+                </tr>
+              </table>
+            </td>
+            <td>
+              <table>
+               <tr>
+                <td height="25px">
+                 <rich:calendar value="#{auditReportsManager.auditClearDate1}"
+				  locale="RU"
+				  datePattern="dd.MM.yyyy"
+				  todayControlMode="hidden"
+				  id="ardate1" verticalOffset="-50"/>
+                </td>
+                </tr>
+                <tr>
+                 <td height="25px">
+                  <rich:calendar value="#{auditReportsManager.auditClearDate2}"
+				     locale="RU"
+				     datePattern="dd.MM.yyyy"
+				     todayControlMode="hidden"
+				     id="ardate2" verticalOffset="-75"/>
+                 </td>
+               </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td width="150px" height="20px" class="table_left_header">
+              <table border="0" style="width:100%">
+              <tr valign="top">
+               <td rowspan="3" >
+                 <h:outputText value="Разрез"/>
+               </td>
+               <td width="30px" height="25px">
+                 <h:outputText value="Дни:"/>
+                </td>
+               </tr>
+               <tr valign="top">
+                 <td width="30px" height="25px">
+                  <h:outputText value="Пользователи:"/>
+                 </td>
+                </tr>
+                <tr valign="top">
+                 <td width="30px" height="25px">
+                  <h:outputText value="Таблицы:"/>
+                 </td>
+                </tr>
+              </table>
+            </td>
+            <td>
+              <table>
+               <tr>
+                <td height="25px">
+                  <input id="inContextDate" type="checkbox"
+                     name="inContextDate" checked="checked" />
+                </td>
+                </tr>
+                <tr>
+                 <td height="25px">
+                   <input id="inContextUser" type="checkbox"
+                     name="inContextUser" checked="checked" />
+                 </td>
+                </tr>
+                <tr>
+                 <td height="25px">
+                  <input id="inContextTable" type="checkbox"
+                 name="inContextTable" checked="checked" />
+                 </td>
+               </tr>
+              </table> 
+            </td>
+          </tr>
+           <tr>
+            <td width="150px" height="25px" class="table_left_header">
+              <h:outputText value="Формат"/>
+            </td>
+            <td >
+              <a4j:commandLink onclick="openWindow('#{param['idRep']}','#{param['idRai']}');return false;"> 
+  	             <h:graphicImage url="/img/icons/htmlB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" HTML" escape="false"/>  
+              </a4j:commandLink>
+              <!--s:link view="/context_pro/audit/ufms/reports/html/report1.seam"
+                 target="#" id="link_html">
+                 <h:graphicImage url="/img/icons/htmlB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" HTML1" escape="false"/>  
+                 <f:param name="idRai" value="#{param['idRai']}"/>
+                 <f:param name="nameRep" value="#{param['nameRep']}"/>
+              </s:link-->
+              <s:link view="/context_pro/audit/ufms/reports/word/report1.xhtml"
+               action="#{auditReportsManager.forViewWord}"
+                target="#" id="link_word" onmouseup="link_option(this,1)">
+                 <h:graphicImage url="/img/icons/docB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" Word" escape="false"/> 
+                 <f:param name="idRai" value="#{param['idRai']}"/>
+                 <f:param name="idRep" value="#{param['idRep']}"/> 
+              </s:link> 
+              <s:link view="/context_pro/audit/ufms/reports/pdf/report1.xhtml"
+                target="#" id="link_pdf" onmouseup="link_option(this,2)">
+                 <h:graphicImage url="/img/icons/pdfB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" PDF" escape="false"/> 
+                 <f:param name="idRai" value="#{param['idRai']}"/>
+                 <f:param name="idRep" value="#{param['idRep']}"/> 
+              </s:link>
+            </td>
+          </tr>
+         </table>
+       </s:div>
+     </td>
+     <td width="90px" valign="top">
+     </td>
+    </tr>
+   </table>
+   <script>
+//<![CDATA[
+
+    var link_word= document.getElementById('link_word').href;
+    var link_pdf= document.getElementById('link_pdf').href;
+//]]>
+</script>
+  </a4j:outputPanel>
+ </div>
+<script>
+//<![CDATA[
+ var pictureWindow;
+
+ function openWindow(idRep,idRai) {
+
+	//alert(jQuery("input[name='inContextTable'][type=checkbox]").is(':checked'))
+    contextDate = jQuery("input[name='inContextDate'][type=checkbox]").is(':checked');
+    contextUser = jQuery("input[name='inContextUser'][type=checkbox]").is(':checked');
+    contextTable = jQuery("input[name='inContextTable'][type=checkbox]").is(':checked');
+
+    if (typeof(pictureWindow)!='undefined' && !pictureWindow.closed) {
+          pictureWindow.close();
+    }
+    var strPath="${facesContext.externalContext.requestContextPath}/context_pro/audit/ufms/reports/html/report"+idRep+".seam?"+
+     "date1="+#{rich:component('ardate1')}.getSelectedDateString('dd.MM.yyyy')+
+     "&date2="+#{rich:component('ardate2')}.getSelectedDateString('dd.MM.yyyy')+
+     "&idRep="+idRep+"&idRai="+idRai+"&contextDate="+contextDate+
+     "&contextUser="+contextUser+"&contextTable="+contextTable;
+    pictureWindow=window.open(
+      strPath,
+      "picture_view",
+      "height=500,width=800,location=no,menubar=yes,resizable=yes,scrollbars=yes,status=0,toolbar=no,top=10,left=10");
+    pictureWindow.focus();
+ }
+ function link_option(slink,type) {
+	    contextDate = jQuery("input[name='inContextDate'][type=checkbox]").is(':checked');
+	    contextUser = jQuery("input[name='inContextUser'][type=checkbox]").is(':checked');
+	    contextTable = jQuery("input[name='inContextTable'][type=checkbox]").is(':checked');
+
+		if(type==1) {
+	      slink.href=link_word+"&date1="+#{rich:component('ardate1')}.getSelectedDateString('dd.MM.yyyy')+
+	      "&date2="+#{rich:component('ardate2')}.getSelectedDateString('dd.MM.yyyy')+
+	      "&contextDate="+contextDate+"&contextUser="+contextUser+"&contextTable="+contextTable;
+	    }else{
+	      slink.href=link_pdf+"&date1="+#{rich:component('ardate1')}.getSelectedDateString('dd.MM.yyyy')+
+		  "&date2="+#{rich:component('ardate2')}.getSelectedDateString('dd.MM.yyyy')+
+		  "&contextDate="+contextDate+"&contextUser="+contextUser+"&contextTable="+contextTable;
+  	    }
+  }
+ /*
+ function link_option_pdf(slink) {
+	   slink.href=link_pdf+"&date1="+#{rich:component('acdate1')}.getSelectedDateString('dd.MM.yyyy')+
+	   "&date2="+#{rich:component('acdate2')}.getSelectedDateString('dd.MM.yyyy');
+ }*/
+
+//]]>
+</script>
+</ui:composition> 
+ 
+ 

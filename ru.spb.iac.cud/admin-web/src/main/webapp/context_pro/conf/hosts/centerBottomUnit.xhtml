@@ -1,0 +1,398 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+<h3 class="ui-widget-header" >Подробнее</h3>
+<div class="ui-layout-content">
+
+<a4j:outputPanel id="outCenterBottom">
+
+ <table style="width:100%; font-size:13px;" border="0">
+   <tr>
+    <td width="90%">
+  
+  <div style="margin:5px;"> 
+  
+   <c:if test="#{hostsManager.evaluteForBean}"> 
+ 
+    <h:form>
+   
+    <h:messages style="color:red" globalOnly="false" />
+    
+      <table style="width:100%; font-size:13px;">
+       <c:forEach items="#{hostsManager.auditItemsListContext}" var="field">
+           <tr>
+            <td width="150px" height="25px" class="table_left_header">
+              <h:outputText value="#{field.itemLabel}"/>
+            </td>
+            <td>
+               <h:outputText value="#{hostsBean[field.itemField]}"/>
+            </td>
+          </tr>
+        </c:forEach>   
+      </table>
+    </h:form>
+   </c:if>
+  </div>
+ </td>
+  <td width="110px" valign="top">
+     
+  </td>
+ </tr>
+</table>
+
+  </a4j:outputPanel>
+ </div>
+
+ <div class="ui-widget-footer" style="background:#E6E6E6;">
+   <!--a4j:outputPanel id="outCenterBottomFooter">
+   
+    <table>
+      <tr>
+       <td>
+        <s:div rendered="#{param['remoteAudit']!=null}">
+        <h:form>
+        <table style="width:300px" border="0">
+         <tr>
+         <td width="70px">
+          <a4j:commandButton style="width:60px;" value="Создать"
+               reRender="outCBmpCrt" ajaxSingle="true"
+               oncomplete="disableProtHost();/*#{rich:component('CBmpCrt')}.show();*/"
+               rendered="#{authenticator.accessPerm('0033','2')}"
+               styleClass="but_class">
+             <f:param name="onCreate" value="1"/>
+             <f:param name="remoteAudit" value="hostsOpenCrtFact"/>
+             <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+            </a4j:commandButton>
+         </td>
+         <td>
+           <s:div rendered="#{param['sessionId']!=null}">
+           
+           <a4j:commandButton style="width:60px;" value="Изменить"
+               reRender="outCBmpUpd" ajaxSingle="true"
+               action="#{hostsManager.forViewUpdDel}"
+               rendered="#{authenticator.accessPerm('0033','3')}"
+               styleClass="but_class">
+             <f:param name="onUpdate" value="1"/>
+             <f:param name="remoteAudit" value="hostsOpenUpdFact"/>
+             <f:param name="sessionId" value="#{param['sessionId']}"/>
+             <f:param name="idRai" value="#{hostsBean.acRaionId}"/>
+            </a4j:commandButton>
+            <a4j:commandButton style="width:60px;margin-left:10px;" value="Удалить"
+               reRender="outCBmpDel" ajaxSingle="true"
+               action="#{hostsManager.forViewUpdDel}"
+               rendered="#{authenticator.accessPerm('0033','4')}"
+               styleClass="but_class">
+             <f:param name="onDelete" value="1"/>
+             <f:param name="remoteAudit" value="hostsOpenDelFact"/>
+             <f:param name="sessionId" value="#{param['sessionId']}"/>
+            </a4j:commandButton>
+           </s:div>
+          </td> 
+       </tr>
+      </table> 
+      </h:form>
+     </s:div>
+         </td>
+        <td height="25px;">
+         <h:outputText value="&amp;nbsp;" escape="false"/>
+       </td>
+      </tr>
+     </table>
+    </a4j:outputPanel-->
+    
+   <a4j:outputPanel id="outCBmpCrt">
+    <rich:modalPanel id="CBmpCrt" rendered="#{param['onCreate']!=null}"
+      width="450" autosized="true" showWhenRendered="true">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Хост"></h:outputText>
+             </h:panelGroup>
+      </f:facet>
+       <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage onclick="#{rich:component('CBmpCrt')}.hide();"
+                value="/img/icons/close.gif" />
+              </h:panelGroup>
+        </f:facet>
+         <h:form id="CBformCrt">
+          <table style="width:100%;">
+           <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="Доменое имя"/></td>
+            <td><h:inputText value="#{hostsBeanCrt.dnsName}"
+                 id="dns" maxlength="250" size="55"/></td>
+            </tr>
+            <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="IP-адрес"/></td>
+            <td><h:inputText value="#{hostsBeanCrt.ipAddress}" 
+                             id="ipad" maxlength="250" size="55"/></td>
+            </tr>
+            <tr>
+             <td width="100px" height="25px">
+              <h:outputText value="Месторасположение узла"/></td>
+             <td>
+               <h:selectOneMenu style="width:300px;" id="rais"
+                                value="#{hostsBeanCrt.acRaionId}"> 
+                  <!--f:selectItem itemLabel="Город" itemValue="-1"/-->                            
+	  	          <s:selectItems value="#{hostsManager.getRaions()}"
+	  	               var="n"
+	  	               label="#{n.name}"
+                       itemValue="#{n.idRai}"/>   
+               </h:selectOneMenu>
+             </td>
+            </tr>
+            <tr>
+             <td width="100px" height="25px" valign="top">
+              <h:outputText value="Протоколы и порты"/></td>
+             <td>
+              <table style="width:100%;" border="0">
+              <tr>
+                 <td width="70px" height="25px" > <h:outputText value="Протокол"/> </td>
+                 <td> <h:outputText value="Порт"/> </td> 
+              </tr>
+               <a4j:repeat id="CBdtCrt"
+                           var="it" rowKeyVar="rkv"
+                           value="#{hostsManager.protocols}">
+                <tr>
+                 <td>
+                  <h:selectBooleanCheckbox value="#{it.usrChecked}" id="CBsdtchbCrt" 
+                      onclick="fooName(this,'CBformCrt\\:CBdtCrt\\:'+#{rkv}+'\\:CBsdtcl1Crt');"/>
+                    <h:outputText value=" #{it.name}"/>   
+                   </td>
+                   <td>
+                    <h:inputText id="CBsdtcl1Crt" value="#{it.portHost}"/>  
+                    </td> 
+                   </tr>
+              </a4j:repeat>
+             </table>
+          </td>
+          </tr>
+            <tr>
+             <td colspan="2" align="center" height="35px">
+              <a4j:commandButton value="Отмена"
+                     onclick="#{rich:component('CBmpCrt')}.hide();return false;"
+                     styleClass="but_class"/>
+              <a4j:commandButton value="Сохранить"
+                    action="#{hostsManager.addHosts}"
+                    reRender="outCenterCenter, outCenterCenterFooter"
+                    oncomplete="#{rich:component('CBmpCrt')}.hide();" 
+                    onclick="if(check('Crt')){return false;}"
+                    styleClass="but_class">
+                  <f:param name="onCreate" value="1"/> 
+                  <f:param name="remoteAudit" value="CrtFact"/> 
+                  <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+              </a4j:commandButton>
+             </td>
+            </tr>
+          </table>
+       </h:form>
+    </rich:modalPanel>
+  </a4j:outputPanel>
+  <a4j:outputPanel id="outCBmpUpd">
+    <rich:modalPanel id="CBmpUpd" rendered="#{param['onUpdate']!=null}"
+      width="450" autosized="true" showWhenRendered="true">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Хост"></h:outputText>
+             </h:panelGroup>
+      </f:facet>
+       <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage onclick="#{rich:component('CBmpUpd')}.hide();"
+                value="/img/icons/close.gif" />
+              </h:panelGroup>
+        </f:facet>
+         <h:form id="CBformUpd">
+           <!--h:inputHidden value="#{hostsBean.created}"/>
+           <h:inputHidden value="#{hostsBean.creator}"/-->
+           <table style="width:100%;">
+            <tr>
+             <td width="100px" height="25px">
+             <h:outputText value="Доменое имя"/></td>
+             <td><h:inputText value="#{hostsBean.dnsName}"
+                 id="dns" maxlength="250" size="55"/></td>
+            </tr>
+            <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="IP-адрес"/></td>
+            <td><h:inputText value="#{hostsBean.ipAddress}" 
+                             id="ipad" maxlength="250" size="55"/></td>
+            </tr>
+            <tr>
+             <td width="100px" height="25px">
+              <h:outputText value="Месторасположение узла"/></td>
+             <td>
+               <h:selectOneMenu style="width:300px;" id="rais"
+                                value="#{hostsBean.acRaionId}"> 
+                  <!--f:selectItem itemLabel="Город" itemValue="-1"/-->                            
+	  	          <s:selectItems value="#{hostsManager.getRaions()}"
+	  	               var="n"
+	  	               label="#{n.name}"
+                       itemValue="#{n.idRai}"/>   
+               </h:selectOneMenu>
+             </td>
+            </tr>
+            <tr>
+             <td width="100px" height="25px" valign="top">
+              <h:outputText value="Протоколы и порты"/></td>
+             <td>
+              <table style="width:100%;" border="0">
+              <tr>
+                 <td width="70px" height="25px" > <h:outputText value="Протокол"/> </td>
+                 <td> <h:outputText value="Порт"/> </td> 
+              </tr>
+               <a4j:repeat id="CBdtUpd"
+                           var="it" rowKeyVar="rkv"
+                           value="#{hostsManager.protocols}">
+                <tr>
+                 <td>
+                  <h:selectBooleanCheckbox value="#{it.usrChecked}" id="CBsdtchbUpd" 
+                      onclick="fooName(this,'CBformUpd\\:CBdtUpd\\:'+#{rkv}+'\\:CBsdtcl1Upd');"/>
+                    <h:outputText value=" #{it.name}"/>   
+                   </td>
+                   <td>
+                    <h:inputText id="CBsdtcl1Upd" 
+                                 value="#{it.portHost}"
+                                 disabled="#{!it.usrChecked and param['remoteAudit']!='UpdFact'}"/>  
+                    </td> 
+              <!--h:selectManyCheckbox id="prots" 
+                layout="pageDirection"
+                value="#{hostsBeanCrt.protocols}"
+                style="width:100%;">
+	  	        <s:selectItems value="#{hostsManager.protocols}"
+	  	                  var="n2"
+                          itemValue="#{n2.id}"
+                          label="#{n2.name}"/>
+                </h:selectManyCheckbox-->
+               </tr>
+              </a4j:repeat>
+             </table>
+          </td>
+          </tr>
+            <tr>
+             <td colspan="2" align="center" height="35px">
+              <a4j:commandButton value="Отмена"
+                     onclick="#{rich:component('CBmpUpd')}.hide();return false;"
+                     styleClass="but_class"/>
+              <a4j:commandButton value="Сохранить"
+                    action="#{hostsManager.updHosts}"
+                    reRender="outCenterCenter, outCenterBottom"
+                    oncomplete="#{rich:component('CBmpUpd')}.hide();" 
+                    onclick="if(check('Upd')){return false;}"
+                    styleClass="but_class">
+                  <f:param name="onUpdate" value="1"/> 
+                  <f:param name="remoteAudit" value="UpdFact"/> 
+                  <f:param name="sessionId" value="#{param['sessionId']}"/>
+                  <f:param name="idRai" value="#{param['idRai']}"/>
+                  <f:param name="saveEditFlag" value="1"/>
+              </a4j:commandButton>
+             </td>
+            </tr>
+          </table>
+       </h:form>
+    </rich:modalPanel>
+  </a4j:outputPanel>
+  
+   <a4j:outputPanel id="outCBmpDel">
+    <rich:modalPanel id="CBmpDel" rendered="#{param['onDelete']!=null}"
+      width="300" autosized="true" showWhenRendered="true">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Хост"></h:outputText>
+             </h:panelGroup>
+      </f:facet>
+       <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage onclick="#{rich:component('CBmpDel')}.hide();"
+                value="/img/icons/close.gif" />
+              </h:panelGroup>
+        </f:facet>
+         <h:form id="CBformDel">
+          <h:inputHidden value="#{hostsBean.idHost}"/>
+          <table style="width:100%;">
+            <tr>
+             <td colspan="2" height="25px">
+               <h:outputText style="display:block;margin-bottom:7px;"
+                             value="Удалить #{hostsBean.dnsName}?"/>
+             </td>
+            </tr>               
+            <tr>
+             <td colspan="2" align="center" height="35px">
+              <a4j:commandButton value="Отмена"
+                     onclick="#{rich:component('CBmpDel')}.hide();return false;"
+                     styleClass="but_class"/>
+              <a4j:commandButton value="Удалить"
+                    action="#{hostsManager.delHosts}"
+                    reRender="outCenterCenter, outCenterCenterFooter, outCenterBottom, outCenterCenterHeader"
+                    oncomplete="#{rich:component('CBmpDel')}.hide();" 
+                    styleClass="but_class">
+                  <f:param name="onDelete" value="1"/> 
+                  <f:param name="remoteAudit" value="DelFact"/> 
+                  <!--f:param name="sessionId" value="#{param['sessionId']}"/-->
+              </a4j:commandButton>
+             </td>
+            </tr>
+          </table>
+       </h:form>
+    </rich:modalPanel>
+  </a4j:outputPanel>
+ </div>    
+ <script>
+//<![CDATA[
+ function disableProtHost() {
+	jQuery("input[id$='CBsdtcl1Crt']").attr('disabled','true');
+ }
+ function fooName(t,st){
+	 if(t.checked){
+		jQuery("input[id='"+st+"']").removeAttr('disabled');
+	 }else{
+        jQuery("input[id='"+st+"']").attr('disabled','true');
+    }
+ };
+ function check(tform){
+  var msg="";
+  if (document.getElementById("CBform"+tform+":dns").value==""){
+	  msg+="Нет Доменого имени !\n";
+  }
+  if (document.getElementById("CBform"+tform+":ipad").value==""){
+	  msg+="Нет IP-адреса !\n";
+  }
+  if(check_ports(tform)){
+	  msg+="Не указан порт!";
+  }
+  if(msg!=""){
+     alert(msg);
+     return true;
+  }else{
+     return false;
+  }
+}
+ function check_ports(tf) {
+	var sign = 0;
+    jQuery("input[id$='CBsdtcl1"+tf+"']:not(:disabled)").each(
+ 	    function() { 
+ 	    	if(this.value==""){
+ 	    	     sign=1;
+                 return false;
+ 	 	 	}
+ 	    } 
+    );
+    if(sign==0){
+    	return false;
+    }else{
+    	 return true;
+    }
+    
+ }
+//]]>
+</script>
+</ui:composition>

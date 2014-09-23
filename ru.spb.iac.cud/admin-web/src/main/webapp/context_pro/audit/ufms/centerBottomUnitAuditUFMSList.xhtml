@@ -1,0 +1,390 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+<h3 class="ui-widget-header" >Карточка Аудита</h3>
+<div class="ui-layout-content">
+<a4j:outputPanel id="outCenterBottom">
+
+<table style="width:100%;" border="0">
+<tr>
+<td width="90%">
+  
+ <s:div style="margin:5px;"  rendered="#{param['sessionId']!=null and param['entryid']!=null}">
+   
+    <h:messages style="color:red" globalOnly="false" />
+    
+    <table style="width:70%; font-size:13px;">
+         <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="action"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.action}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="auditType"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.auditType}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="authPrivileges"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.authPrivileges}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="clientidentifier"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.clientidentifier}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="commentText"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.commentText}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="dbUser"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.dbUser}"/>
+            </td>
+          </tr>
+          
+            <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="dbid"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.dbid}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="econtextId"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.econtextId}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="entryid"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.entryid}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="execType"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.execType}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="extName"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.extName}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="extendedTimestamp"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.extendedTimestamp}">
+                <s:convertDateTime pattern="dd.MM.yy HH:mm:ss.SSS"/>
+              </h:outputText>
+            </td>
+          </tr>
+          
+          
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="globalUid"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.globalUid}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="grantee"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.grantee}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="instanceNumber"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.instanceNumber}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="newName"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.newName}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="newOwner"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.newOwner}"/>
+            </td>
+          </tr>
+          
+           <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="objEditionName"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.objEditionName}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="objectSchema"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.objectSchema}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="osHost"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.osHost}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="osPrivilege"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.osPrivilege}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="osProcess"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.osProcess}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="osUser"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.osUser}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="policyName"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.policyName}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="privUsed"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.privUsed}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="proxySessionid"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.proxySessionid}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="returncode"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.returncode}"/>
+            </td>
+          </tr>
+          
+           <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="scn"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.scn}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="sesActions"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.sesActions}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="sessionId"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.sessionId}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="sqlBind"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.sqlBind}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="sqlText"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.sqlText}"/>
+            </td>
+          </tr>
+          
+          
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="statementType"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.statementType}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="statementid"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditReportBean.statementid}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="terminal"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.terminal}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="transactionid"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditReportBean.transactionidValue}"/>
+            </td>
+          </tr>
+         </table>
+       </s:div>
+    </td>
+    <td width="110px" valign="top">
+      <rich:panel style="margin:5px 5px 0 0;">
+       <f:facet name="header">
+         Действия:
+       </f:facet>
+       <a4j:form>
+     <!--a4j:commandButton style="width:60px;" 
+       value="Отметить всё"
+       reRender="outCBmpCrt" ajaxSingle="true"
+       oncomplete="#{rich:component('CBmpCrt')}.show();"
+       rendered="#{authenticator.accessPerm('004','2')}"
+       styleClass="but_class">
+          <f:param name="onCreate" value="1"/>
+      </a4j:commandButton-->
+     <a4j:commandButton style="margin-top:5px;width:90px;"
+         ajaxSingle="true" reRender="outCenterCenter, outCenterBottom"
+         value="Отметить все" action="#{auditManager.selectRecordAll}"
+         rendered="true" 
+         styleClass="but_class">
+          <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+          <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+          <f:param name="remoteAudit" value="1"/>
+          <f:param name="idRai" value="#{param['idRai']}"/>
+       </a4j:commandButton>
+       
+     <a4j:commandButton style="margin-top:5px;width:90px;"
+         ajaxSingle="false" reRender="outCenterCenter, outCenterBottom"
+         value="Очистить все" action="#{auditManager.clearRecordAll}"
+         rendered="true" 
+         styleClass="but_class">
+          <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+          <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+          <f:param name="remoteAudit" value="1"/>
+          <f:param name="idRai" value="#{param['idRai']}"/>
+       </a4j:commandButton>  
+       
+     <s:div rendered="#{param['sessionId']!=null and param['entryid']!=null}">
+     
+      <a4j:commandButton style="margin-top:5px;width:90px;"
+         ajaxSingle="false" reRender="outCenterCenter, outCenterBottom"
+         value="#{vAuditReportBean.selected == 'true' ? 'Очитить' : 'Отметить'}" action="#{auditManager.selectRecord}"
+         rendered="true" 
+         styleClass="but_class">
+          <f:param name="sessionId" value="#{param['sessionId']}"/>
+          <f:param name="entryid" value="#{param['entryid']}"/>
+          <f:param name="remoteAudit" value="1"/>
+          <f:param name="idRai" value="#{param['idRai']}"/>
+       </a4j:commandButton>
+
+     </s:div>
+    </a4j:form>
+   </rich:panel>
+ </td>
+ </tr>
+ </table>
+
+  </a4j:outputPanel>
+ </div>
+
+
+ <script>
+//<![CDATA[
+
+//]]>
+</script>
+</ui:composition>

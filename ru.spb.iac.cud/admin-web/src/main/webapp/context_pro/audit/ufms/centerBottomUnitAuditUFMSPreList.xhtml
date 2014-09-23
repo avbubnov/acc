@@ -1,0 +1,288 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+<h3 class="ui-widget-header" >Узел Подключения</h3>
+<div class="ui-layout-content">
+<a4j:outputPanel id="outCenterBottom">
+
+<s:div rendered="#{auditManager.connectError==0}">
+<table style="width:100%;" border="0">
+ <tr>
+  <td width="90%" valign="top">
+  
+   <s:div style="margin:5px;"  rendered="#{param['idRai']!=null}">
+     <table style="width:70%; font-size:13px;">
+         <tr>
+            <td width="150px" height="25px" class="table_left_header">
+              <h:outputText value="Район"/>
+            </td>
+            <td>
+               <h:outputText value="#{acRaiBean.name}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="150px" height="25px" class="table_left_header">
+               <h:outputText value="Состояние Аудита"/>
+            </td>
+            <td>
+               <h:outputText value="#{auditManager.auditStatus=='auditEnable' ? 'Включено' : 'Отключено'}"/>
+            </td>
+          </tr>
+         </table>
+       </s:div>
+   </td>
+   <td width="90px" valign="top">
+   <rich:panel style="margin:5px 5px 0 0;">
+   <f:facet name="header">
+    Действия:
+   </f:facet>
+   <a4j:form>
+       <s:div rendered="#{param['idRai']!=null}" style="text-align:center;">
+     
+         <!--s:button value="Просмотр"  style="margin-top:5px;width:60px;"
+                view="/context_pro/audit/ufms/ufms_list.xhtml">
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+         </s:button>
+         <s:button value="Поиск" style="margin-top:5px;width:60px;"
+                view="/context_pro/audit/ufms/ufms_search.xhtml">
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+         </s:button-->
+         <s:link value="Просмотр" 
+                view="/context_pro/audit/ufms/ufms_list.xhtml">
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+         </s:link><br/>
+         <s:link value="Поиск"  action="#{auditSearchManager.prepareSearch}"
+                view="/context_pro/audit/ufms/ufms_search.xhtml">
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+        </s:link><br/>
+        <s:link value="Отчёты" 
+                view="/context_pro/audit/ufms/reports.xhtml">
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+         </s:link>
+        <a4j:commandButton style="margin-top:5px;width:60px;"
+         ajaxSingle="true" reRender="outCenterBottom"
+         value="Отключить" rendered="#{(param['auditDisable']!=null and auditManager.auditStatusChangeFlag!=null) or auditManager.auditStatus=='auditEnable'}" 
+         action="#{auditManager.auditStatusChange('auditDisable')}"
+         styleClass="but_class">
+         <f:param name="idRai" value="#{param['idRai']}"/>
+         <f:param name="actSect" value="#{param['actSect']}"/>
+         <f:param name="auditDisable" value="1"/>
+       </a4j:commandButton>  
+       <a4j:commandButton style="margin-top:5px;width:60px;"
+         ajaxSingle="true" reRender="outCenterBottom"
+         value="Включить" rendered="#{(param['auditEnable']!=null and auditManager.auditStatusChangeFlag!=null) or auditManager.auditStatus=='auditDisable'}" 
+         action="#{auditManager.auditStatusChange('auditEnable')}"
+         styleClass="but_class">
+         <f:param name="idRai" value="#{param['idRai']}"/>
+         <f:param name="actSect" value="#{param['actSect']}"/>
+         <f:param name="auditEnable" value="1"/>
+       </a4j:commandButton>
+       
+      <a4j:commandButton style="margin-top:5px;width:60px;"
+         value="Очистить" 
+         onclick="if(confirm('Внимание!\\nОперация очистки не обратима!\\nВы уверены в необходимости проведения очистки? ')){#{rich:component('CBClearDate')}.show();}return false; " 
+         styleClass="but_class"/>
+         
+      <!--a4j:commandButton style="margin-top:5px;width:60px;"
+         value="Отчёты" 
+         onclick="#{rich:component('CBReport')}.show();return false;" 
+         styleClass="but_class"/-->
+     </s:div>
+    </a4j:form>
+   </rich:panel>
+ </td>
+ </tr>
+ </table>
+    <rich:modalPanel id="CBClearDate" trimOverlayedElements="false" 
+     autosized="false" width="250" height="150">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Очистка"/>
+             </h:panelGroup>
+        </f:facet>
+        <f:facet name="controls">
+             <h:panelGroup>
+               <h:graphicImage onclick="#{rich:component('CBClearDate')}.hide();"
+                 value="/img/icons/close.gif" />
+             </h:panelGroup>
+       </f:facet>
+       <h:form id="CBfClearDate">
+         <table>
+          <tr>
+             <td colspan="3" height="25px">
+               <h:outputText value="Период очистки:"/>
+             </td>
+          </tr>
+          <tr>
+             <td width="20px"/>
+             <td width="20px" height="25px">
+               <h:outputText value="С:"/></td>
+             <td>
+             <rich:calendar value="#{auditManager.auditClearDate1}"
+				  locale="RU"
+				  datePattern="dd.MM.yy"
+				  todayControlMode="hidden"
+				  id="acdate1"/>
+             </td>
+            </tr>
+             <tr>
+             <td width="20px"/>
+             <td width="20px" height="25px">
+               <h:outputText value="По:"/></td>
+             <td>
+             <rich:calendar value="#{auditManager.auditClearDate2}"
+				  locale="RU"
+				  datePattern="dd.MM.yy"
+				  todayControlMode="hidden"
+				  id="acdate2"/>
+             </td>
+            </tr>
+            </table>
+          <div style="white-space: nowrap;text-align:center;margin-top:5px;">
+             <a4j:commandButton value="Очистить"
+                    action="#{auditManager.auditClear}"
+                    reRender="outCenterBottom" 
+                    oncomplete=" #{rich:component('CBClearDate')}.hide();" 
+                    onclick="if(check()){return false;}"
+                    styleClass="but_class">
+               <f:param name="idRai" value="#{param['idRai']}"/>
+               <f:param name="actSect" value="#{param['actSect']}"/>
+             </a4j:commandButton>
+             <a4j:commandButton value="Отмена" 
+                onclick="#{rich:component('CBClearDate')}.hide();return false;"
+                styleClass="but_class"/>
+           </div>
+         </h:form>
+        </rich:modalPanel>
+        <rich:modalPanel id="CBReport" trimOverlayedElements="false" 
+          autosized="false" width="300" height="200" resizeable="false">
+           <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Отчёт"/>
+             </h:panelGroup>
+            </f:facet>
+            <f:facet name="controls">
+             <h:panelGroup>
+               <h:graphicImage onclick="#{rich:component('CBReport')}.hide();"
+                 value="/img/icons/close.gif" />
+             </h:panelGroup>
+             </f:facet>
+             <h:form id="CBfReport">
+               <table style="width:270px;">
+               <tr>
+               <td colspan="3" height="25px">
+               <h:outputText value="Период отчёта:"/>
+                </td>
+               </tr>
+              <tr>
+             <td width="20px"/>
+             <td width="20px" height="25px">
+               <h:outputText value="С:"/></td>
+             <td>
+             <rich:calendar value="#{auditReportsManager.auditClearDate1}"
+				  locale="RU"
+				  datePattern="dd.MM.yy"
+				  todayControlMode="hidden"
+				  id="acdate1"/>
+             </td>
+             </tr>
+             <tr>
+             <td width="40px"/>
+             <td width="20px" height="25px">
+               <h:outputText value="По:"/></td>
+             <td>
+             <rich:calendar value="#{auditReportsManager.auditClearDate2}"
+				  locale="RU"
+				  datePattern="dd.MM.yy"
+				  todayControlMode="hidden"
+				  id="acdate2"/>
+             </td>
+            </tr>
+            <tr>
+             <td colspan="3" height="25px">
+               <h:outputText value="Формат:"/>
+             </td>
+            </tr>
+             <tr>
+             <td colspan="3" height="30px" align="center">
+               <a4j:commandLink onclick="openWindow();return false;"> 
+  	             <h:graphicImage url="/img/icons/htmlB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" HTML" escape="false"/>  
+               </a4j:commandLink>                         
+              <s:link view="/context_pro/audit/ufms/reports/word/report1.xhtml"
+                target="#" id="link_word" >
+                 <h:graphicImage url="/img/icons/docB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" Word" escape="false"/>  
+              </s:link> 
+              <s:link view="/context_pro/audit/ufms/reports/pdf/report1.xhtml"
+                target="#" id="link_pdf">
+                 <h:graphicImage url="/img/icons/pdfB.gif" style="border:0;vertical-align:middle;"/>
+                 <h:outputText value=" PDF" escape="false"/> 
+              </s:link>
+            
+             </td>
+            </tr>
+           </table>
+           <div style="width:270px;white-space:nowrap;text-align:center;margin-top:10px;">
+             <a4j:commandButton value="Отмена" 
+                onclick="#{rich:component('CBReport')}.hide();return false;"
+                styleClass="but_class"/>
+           </div>
+         </h:form>
+        </rich:modalPanel>
+     </s:div>
+     <s:div rendered="#{auditManager.connectError!=0}"
+         style="color:red;">
+          Ошибка подключения к удалённому серверу!
+      </s:div>
+        
+  </a4j:outputPanel>
+  </div>
+ <script>
+//<![CDATA[
+function check(){
+ var msg="";
+ if (#{rich:component('acdate1')}.getSelectedDateString('dd.MM.yy')==""){
+	  msg+="Нет даты С:!\n";
+ }
+ if (#{rich:component('acdate2')}.getSelectedDateString('dd.MM.yy')==""){
+	  msg+="Нет даты По:!\n";
+ }
+ if(msg!=""){
+  alert(msg);
+  return true;
+ }else{
+  return false;
+}
+}
+var pictureWindow;
+function openWindow() {
+    if (typeof(pictureWindow)!='undefined' && !pictureWindow.closed) {
+          pictureWindow.close();
+    }
+    var strPath="${facesContext.externalContext.requestContextPath}/context_pro/audit/ufms/report/html/report1.seam?"+
+     "date1="+#{rich:component('acdate1')}.getSelectedDateString('dd.MM.yy');
+    pictureWindow=window.open(
+      strPath,
+      "picture_view",
+      "height=500,width=800,location=no,menubar=yes,resizable=yes,scrollbars=yes,status=0,toolbar=no,top=10,left=10");
+    pictureWindow.focus();
+}
+
+//]]>
+</script>
+</ui:composition> 
+ 
+ 

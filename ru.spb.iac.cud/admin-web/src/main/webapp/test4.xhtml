@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich">
+
+  <head>
+  <title>АИС ГРН СПб</title> 
+  <style type="text/css">
+
+ </style>
+ </head>
+ <body >
+ <h:form id="myform2">
+ 
+   <input type="image" id="im_id"
+            src="/infoscud/a4j/g/3_3_3.Finalorg.richfaces.renderkit.html.images.SpinnerButtonUp/DATB/eAFjYGD4%21%218%21AAYAAv4_" 
+            onclick="alert('onclick');return false;"/>
+ 
+  <h:inputText id="iti2" value="qqq2" onclick="mytest();"/>
+          <h:panelGrid columns="2">
+            <h:inputText id="myinput2" value="#{proba.name2}" onkeydown="alert('onkeydown')"  
+            onkeypress="alert('onkeypress:'+event.keyCode);if (event.keyCode != 13) {}else{mytest();}">
+                 <a4j:support event="onkeyup" reRender="outtext2" onsubmit="alert('onsubmit');if (event.keyCode != 13) { return false;}"/>
+             </h:inputText>
+             <h:outputText id="outtext2" value="#{proba.name2}" />
+         </h:panelGrid>
+     </h:form>
+     <script>
+ //<![CDATA[
+ function mytest() {
+	   alert("mytest2");
+	   A4J.AJAX.Submit('myform2',
+			   event,
+			   {'similarityGroupingId':'myform2:j_id4','parameters':{'myform2:j_id4':'myform2:j_id4'} 
+			   } );
+  }
+ //]]>
+ </script>
+ </body>
+</html>

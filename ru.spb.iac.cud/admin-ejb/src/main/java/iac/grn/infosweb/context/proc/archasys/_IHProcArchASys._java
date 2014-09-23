@@ -1,0 +1,84 @@
+package iac.grn.infosweb.context.proc.archasys;
+
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import javax.ejb.Stateless;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.log.Log;
+
+
+//@Name("iHProcArchASys")
+//@Stateless
+//@LocalBinding(jndiBinding="procarchasys.IHProcArchASys.local")
+public class _IHProcArchASys implements _IHProcArchASysLocal{
+	
+	@Logger private Log log;
+	
+	private static final ScheduledExecutorService scheduler =  null;
+		     // Executors.newScheduledThreadPool(1);
+  	public void startTask(Date startDate, Long period) throws Exception{
+		log.info("IHConfLogContr:startTask:01");
+		
+	/*	if(startDate==null||period==null){
+    		return;
+    	}  */
+		
+		Long currentTime=System.currentTimeMillis();
+		Long trans=startDate.getTime();
+		
+		Long start=trans-currentTime;
+		
+		log.info("IHConfLogContr:startTask:start:1:"+start);
+		
+		while(start<0){
+			
+			log.info("IHConfLogContr:startTask:01:2");
+			
+			int batch=0;
+			while(trans<currentTime){
+				batch++;
+				trans+=period*24*60*60*1000;
+				if(batch % 100 == 0){
+					log.info("IHConfLogContr:startTask:batch:"+batch);
+				}
+			}
+			start=trans-System.currentTimeMillis();
+			currentTime=System.currentTimeMillis();
+			
+			log.info("IHConfLogContr:startTask:start:2:"+start);
+		}
+		
+		try{
+	    	 ScheduledFuture shf =  scheduler.scheduleAtFixedRate(
+	    			 new _ProcArchASysTask(startDate, period),	
+	    			 start, period*24*60*60*1000, TimeUnit.MILLISECONDS);
+		     
+		     log.info("IHConfLogContr:startTask:02");
+		     
+		     Contexts.getApplicationContext().set("confLogContrScheduled", shf);
+		     
+	    }catch(Exception e){
+	    	log.error("IHConfLogContr:startTask:error:"+e);
+			throw e;
+		 }
+	}
+  	
+	public void stopTask() throws Exception{
+		log.info("IHConfLogContr:stopTask:01");
+	    try{
+	    	 ScheduledFuture shf = (ScheduledFuture) Contexts.getApplicationContext().get("confLogContrScheduled");
+	    	 log.info("IHConfLogContr:stopTask:02");
+             if(shf!=null){       //может быть = null, когда приостановили, а потом отключаем
+	    	   shf.cancel(true);
+	    	 }
+       }catch(Exception e){
+	    	log.error("IHConfLogContr:stopTask:error"+e);
+			throw e;
+		 }
+	}
+}

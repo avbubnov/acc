@@ -1,0 +1,149 @@
+package iac.grn.infosweb.context.proc.archasys;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Future;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+import iac.cud.infosweb.dataitems.BaseParamItem;
+import iac.cud.infosweb.entity.AcUser;
+import iac.cud.infosweb.local.service.ServiceReestrAction;
+import iac.cud.infosweb.local.service.ServiceReestrPro;
+import iac.cud.infosweb.remote.frontage.IRemoteFrontageLocal;
+
+
+import mypackage.MyPhaseListener;
+
+import org.apache.log4j.Logger;
+import org.jboss.ejb3.common.proxy.plugins.async.AsyncUtils;
+import org.jboss.seam.Component;
+//import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.contexts.Lifecycle;
+import org.jboss.seam.log.Log;
+
+
+public class _ProcArchASysTask implements Runnable {
+
+	private Date startDate;
+		
+	private Long period;
+	
+	private static String jndiBinding = "infoscud.IRemoteFrontage.local";
+	
+	//@Logger private Log log;
+	
+	private Logger log = Logger.getLogger(_ProcArchASysTask.class);
+	
+	public _ProcArchASysTask(Date startDate, Long period){
+		this.startDate=startDate;
+		this.period=period;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public synchronized void run() {
+		
+		log.info("ConfLogContrTask:run:01");
+		String result="";
+		boolean hit = true;
+		
+		Properties properties = new Properties();
+		String path = System.getProperty("jboss.server.config.url")+"conf_logcontr_exec.info";
+		OutputStream os = null;
+		 
+		try{
+			
+			 Context ctx = new InitialContext(); 
+			 
+			 BaseParamItem bpi = new BaseParamItem(ServiceReestrPro.ArchiveAuditSys.name());
+	    	 //bpi.put("gactiontype", ServiceReestrAction.TO_ARCHIVE.name());
+	    	 bpi.put("gactiontype", ServiceReestrAction.PROCESS_STOP.name());
+	    	 
+             ((IRemoteFrontageLocal)ctx.lookup(jndiBinding)).run(bpi);
+		/*
+			// Transaction.instance().begin()  Transaction.instance().commit() I
+		  Lifecycle.beginCall();
+		  
+          ServiceManagerPro<IRemoteFrontageRemote> smp2 = null;
+		  
+		  String serviceNamePro=ServiceReestrPro.ConfLogContr.name();
+		  
+		  BaseParamItem bpi = new BaseParamItem(serviceNamePro);
+		  bpi.put("gactiontype", ServiceReestrAction.GENERATE.name());
+          bpi.put("idUser", null);		 
+		   
+		for(int i=3; i<=4; i++){   
+			   
+		   log.info("ConfLogContrTask:run:02:i:"+i);
+			 
+		   try{
+		   
+			   smp2 = (ServiceManagerPro<IRemoteFrontageRemote>)Component.getInstance("serviceManagerPro");
+			   smp2.clearInitialContext();
+	     	 
+			   IRemoteFrontageRemote obj2 = smp2.getFrontageServiceType(Integer.toString(i), "IRemoteFrontage.remote");
+				 
+			   IRemoteFrontageRemote asyncObj = AsyncUtils.mixinAsync(obj2);
+				
+				log.info("ConfLoadDataTask:run:03");
+				 
+				asyncObj.run(bpi);
+			 
+			  log.info("ConfLogContrTask:run:04");
+			 
+
+		   }catch(Exception e){
+			   log.error("ConfLogContrTask:run:iterate:Error:"+ e);
+			   hit=false;
+		   }
+		   }
+			*/
+             log.info("ConfLogContrTask:run:02");
+             
+		 }catch(Exception e){
+			 log.error("ConfLogContrTask:run:error:"+e);
+			 hit=false;
+		 }finally{
+			// Lifecycle.endCall();
+			 try{
+				 
+				 log.info("ConfLogContrTask:run:finally:hit:"+hit);
+				 
+			   DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
+			   URL url = new URL(path);
+			   File f=new File(url.toURI()); 
+			   
+			   properties.setProperty("exec_date", df.format(System.currentTimeMillis()));
+			   properties.setProperty("exec_hit", hit ? "true" : "false");
+			   
+			   properties.setProperty("conf_date", df.format(this.startDate));
+		       properties.setProperty("conf_period", this.period.toString());
+              
+		       
+		       properties.store(os=new FileOutputStream(f), null);
+			   
+			 }catch(Exception e){
+				log.error("ConfLogContrTask:run:error:2:"+e);
+			 }finally{
+			   try {
+			 	if(os!=null){
+					os.close();
+				 }
+				} catch (Exception e) {
+					log.error("ConfLogContrTask:run:error:3:"+e);
+				}
+			}
+			 
+		 }  
+	}
+
+}

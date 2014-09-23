@@ -1,0 +1,434 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+<h3 class="ui-widget-header" >Роль</h3>
+<div class="ui-layout-content">
+<a4j:outputPanel id="outCenterBottom">
+
+<table style="width:100%;" border="0">
+<tr>
+<td width="90%">
+  
+ <s:div style="margin:5px;"  rendered="#{param['idRol']!=null}">
+      <table style="width:70%; font-size:13px;">
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+            <h:outputText value="Название"/></td>
+            <td><h:outputText value="#{acRolBean.roleTitle}"/></td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+            <h:outputText value="Описание"/></td>
+            <td><h:outputText value="#{acRolBean.roleDescription}"/></td>
+           </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+            <h:outputText value="Консоль"/></td>
+            <td><h:outputText value="#{acRolBean.acApplication2.name}"/></td>
+          </tr>
+        </table>
+       </s:div>
+
+ </td>
+ <td width="90px" valign="top">
+   <rich:panel style="margin:5px 5px 0 0;">
+   <f:facet name="header">
+    Действия:
+   </f:facet>
+   <a4j:form>
+    <a4j:commandButton style="width:60px;" value="Создать"
+       reRender="outCBmpCrt" 
+       oncomplete="#{rich:component('CBmpCrt')}.show();"
+       rendered="#{authenticator.accessPerm('005','2')}"
+       styleClass="but_class">
+     <f:param name="onCreate" value="1"/>
+    </a4j:commandButton>
+    
+     <!--a4j:commandButton style="width:60px;" 
+     value="Создать" 
+     onclick="/*jQuery('#CBformCrt')[0].reset();*/#{rich:component('CBmpCrt')}.show();return false;" /-->
+     <s:div rendered="#{param['idRol']!=null}">
+       <a4j:commandButton 
+         reRender="outCBmpUpd"
+         value="Изменить" style="margin-top:5px;width:60px;"
+         action="#{rolManager.forView}"
+         oncomplete="#{rich:component('CBmpUpd')}.show();"
+         rendered="#{authenticator.accessPerm('005','3')}"
+         styleClass="but_class">
+         <f:param name="onUpdate" value="1"/>
+         <f:param name="idRol" value="#{param['idRol']}"/>
+       </a4j:commandButton>
+  
+       <!--a4j:commandButton 
+       style="margin-top:5px;width:60px;" 
+       value="Изменить" 
+       onclick="#{rich:component('CBmpUpd')}.show();return false;" /-->
+       <a4j:commandButton 
+         reRender="outCBmpDel"
+         value="Удалить"  style="margin-top:5px;width:60px;"
+         action="#{rolManager.forView}"
+         oncomplete="#{rich:component('CBmpDel')}.show();"
+         rendered="#{authenticator.accessPerm('005','4')}"
+         styleClass="but_class">
+         <f:param name="onDelete" value="1"/>
+         <f:param name="idRol" value="#{param['idRol']}"/>
+       </a4j:commandButton>
+       <!--a4j:commandButton 
+       style="margin-top:5px;width:60px;" 
+       value="Удалить" 
+       onclick="#{rich:component('CBmpDel')}.show();return false;" /-->
+      
+     </s:div>
+    </a4j:form>
+   </rich:panel>
+ </td>
+ </tr>
+ </table>
+  <a4j:outputPanel id="outCBmpCrt">
+   <rich:modalPanel id="CBmpCrt" rendered="#{param['onCreate']!=null}"
+    width="800" autosized="true">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Роль"></h:outputText>
+             </h:panelGroup>
+      </f:facet>
+       <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage onclick="#{rich:component('CBmpCrt')}.hide();"
+                value="/img/icons/close.gif" />
+              </h:panelGroup>
+        </f:facet>
+        <div id="CBmpCrtHDiv" style="width:100%;overflow:auto;">
+         <h:form id="CBformCrt">
+          <table style="width:90%;">
+           <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="Название"/></td>
+            <td><h:inputText value="#{acRolBeanCrt.roleTitle}"
+                 id="name" maxlength="250" size="55"/></td>
+            </tr>
+            <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="Описание"/></td>
+            <td>
+            <h:inputTextarea value="#{acRolBeanCrt.roleDescription}" 
+            id="descr" cols="51" rows="3" />
+            <!--h:inputText value="#{acRolBeanCrt.roleDescription}"
+                 id="descr" maxlength="100" size="55"/-->
+             </td>
+            </tr>
+            <tr>
+             <td width="100px" valign="top" height="25px">
+            <h:outputText value="Консоль"/></td>
+            <td style="padding-top:5px;padding-bottom:5px;">
+             <h:selectOneMenu style="width:300px;" 
+                              id="appl" 
+                              value="#{acRolBeanCrt.acApplication}" 
+                              immediate="true">
+                <f:selectItem itemLabel="-------" itemValue="-1"/>              
+	  	        <s:selectItems value="#{armManager.listArm}" 
+	                      var="n" 
+                          label="#{n.name}"
+                          itemValue="#{n.idArm}"/>         
+                   <a4j:support event="onchange" 
+                   reRender="outCBmpPermCrt"
+                   ajaxSingle="true" 
+                   oncomplete="setMPTop();setHDiv('CBmpCrtHDiv');">
+                      <f:param name="onCreate" value="1"/>
+                   </a4j:support>
+               </h:selectOneMenu>
+             </td>
+            </tr>
+            <tr>
+            <td width="100px" valign="top">
+                <h:outputText value="Привилегии:"/>
+            </td>
+            <td>
+    <a4j:outputPanel id="outCBmpPermCrt" layout="block">
+
+   <rich:dataTable style="width:100%" id="Rdt"
+             rowKeyVar="rkv" var="record" 
+             value="#{rolManager.listRolRes}" >
+        <f:facet name="header">
+            <rich:columnGroup>
+                <rich:column rowspan="2">
+                  <h:outputText value="Наименование ресурса" />
+                </rich:column>
+                <rich:column >
+                  <h:outputText value="Привилегии" />
+                </rich:column>
+                 <rich:column breakBefore="true"> 
+                <span style="white-space:nowrap;">   
+                   <a4j:repeat value="#{rolManager.listRolPerm}" var="lp" rowKeyVar="rkv_lp">   
+                     <h:outputText value="#{rkv_lp=='0' ? lp.permName : ' / '.concat(lp.permName)}"/>  
+                  </a4j:repeat>
+                 </span> 
+                  </rich:column>
+               </rich:columnGroup>
+        </f:facet>
+ 
+        <rich:column style="font-weight:bold;">
+               <h:outputText value=" #{record.fullPageName}" />
+        </rich:column>
+        <rich:column style="padding-left:20px;">
+          <h:selectManyCheckbox id="perml" value="#{record.permList}" style="width:100%;">
+	  	   <s:selectItems value="#{rolManager.listRolPerm}"
+	  	                  var="n"
+                          itemValue="#{n.idPerm}"
+                          label=""/>
+          </h:selectManyCheckbox>
+		 
+        </rich:column>
+    </rich:dataTable>
+ 
+     </a4j:outputPanel>
+            </td>
+            </tr>
+           <tr>
+            <td colspan="2" align="center" height="35px">
+            <a4j:commandButton value="Отмена" 
+            onclick="#{rich:component('CBmpCrt')}.hide();return false;"
+            styleClass="but_class"/>
+            <a4j:commandButton id="cbCrt"
+                    value="Сохранить"
+                    action="#{rolManager.addRol}"
+                    reRender="outCenterCenter"
+                    oncomplete="#{rich:component('CBmpCrt')}.hide();"
+                    onclick="if(check('CBformCrt')){return false;}"
+                    styleClass="but_class">
+                    <f:param name="onCreate" value="1"/>
+                    <!--f:param name="idRootNode" value="#{param['idRol']}"/-->
+              </a4j:commandButton>
+             </td>
+            </tr>
+            </table>
+            </h:form>
+        </div>
+      </rich:modalPanel>
+  </a4j:outputPanel>
+ <a4j:outputPanel id="outCBmpUpd">
+  <rich:modalPanel id="CBmpUpd" 
+   rendered="#{param['onUpdate']!=null}"
+   width="800" autosized="true" onbeforeshow="setHDiv('CBmpUpdHDiv');">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Роль"></h:outputText>
+             </h:panelGroup>
+      </f:facet>
+       <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage onclick="#{rich:component('CBmpUpd')}.hide();"
+                value="/img/icons/close.gif"/>
+              </h:panelGroup>
+        </f:facet>
+        <div id="CBmpUpdHDiv" style="width:100%;height:500px;overflow:auto;"> 
+        <h:form  id="CBformUpd">
+        <h:inputHidden value="#{acRolBean.idRol}"/>
+         <table style="width:90%;">
+          <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="Название"/></td>
+            <td><h:inputText value="#{acRolBean.roleTitle}"
+                id="name" maxlength="250" size="55"/></td>
+            </tr>
+            <tr>
+            <td width="100px" height="25px">
+            <h:outputText value="Описание"/></td>
+            <td>
+            <h:inputTextarea value="#{acRolBean.roleDescription}" 
+            id="descr" cols="51" rows="3" />
+            <!--h:inputText value="#{acRolBean.roleDescription}"
+                id="descr" maxlength="100" size="55"/-->
+             </td>
+            </tr>
+           <tr>
+             <td width="100px" height="25px">
+            <h:outputText value="Консоль"/></td>
+            <td style="padding-top:5px;padding-bottom:5px;">
+            <h:selectOneMenu style="width:300px;"
+                             id="appl"  
+                             value="#{acRolBean.acApplication}" 
+                             immediate="true">
+               <f:selectItem itemLabel="-------" itemValue="-1"/>              
+	  	       <s:selectItems value="#{armManager.listArm}" 
+	                      var="n" 
+                          label="#{n.name}"
+                          itemValue="#{n.idArm}"/>         
+                   <a4j:support event="onchange" reRender="outCBmpPermUpd" 
+                      ajaxSingle="true">
+                      <f:param name="onUpdate" value="1"/>
+                      <f:param name="idForAjax" value="#{acRolBean.idRol}"/>
+                   </a4j:support>
+              </h:selectOneMenu>
+             </td>
+            </tr>
+            <tr>
+            <td width="100px" valign="top">
+                <h:outputText value="Привилегии:"/>
+            </td>
+            <td>
+    <a4j:outputPanel id="outCBmpPermUpd" layout="block">
+
+   <rich:dataTable style="width:100%" id="Rdt"
+             rowKeyVar="rkv" var="record" 
+             value="#{rolManager.listRolResEdit}" >
+        <f:facet name="header">
+            <rich:columnGroup>
+                <rich:column rowspan="2">
+                  <h:outputText value="Наименование ресурса" />
+                </rich:column>
+                <rich:column >
+                  <h:outputText value="Привилегии" />
+                </rich:column>
+                 <rich:column breakBefore="true"> 
+                <span style="white-space:nowrap;">   
+                   <a4j:repeat value="#{rolManager.listRolPerm}" var="lp" rowKeyVar="rkv_lp">   
+                     <h:outputText value="#{rkv_lp=='0' ? lp.permName : ' / '.concat(lp.permName)}"/>  
+                  </a4j:repeat>
+                 </span> 
+                  </rich:column>
+               </rich:columnGroup>
+        </f:facet>
+ 
+        <rich:column style="font-weight:bold;">
+               <h:outputText value=" #{record.fullPageName}" />
+        </rich:column>
+        <rich:column style="padding-left:20px;">
+          <h:selectManyCheckbox id="perml" 
+           value="#{record.permList}" style="width:100%;">
+	  	   <s:selectItems value="#{rolManager.listRolPerm}"
+	  	                  var="n"
+                          itemValue="#{n.idPerm}"
+                          label=""/>
+          </h:selectManyCheckbox>
+		 
+        </rich:column>
+    </rich:dataTable>
+ 
+     </a4j:outputPanel>
+            </td>
+            </tr>
+            <tr>
+            <td colspan="2" align="center" height="35px">
+            <!--h:button value="Отмена" outcome="/context/mc/org/org_list.xhtml"/-->
+            <!--h:commandButton value="Удалить" action="#{orgManager.delOrg}"/-->
+             <a4j:commandButton value="Отмена" 
+             onclick="#{rich:component('CBmpUpd')}.hide();return false;"
+             styleClass="but_class"/>
+             <a4j:commandButton value="Сохранить"
+                    id="cbUpd"
+                    action="#{rolManager.editRol}"
+                    reRender="outCenterCenter, outCenterBottom"
+                    oncomplete="#{rich:component('CBmpUpd')}.hide();"
+                    onclick="if(check('CBformUpd')){return false;}" 
+                    styleClass="but_class">
+                    <f:param name="onUpdate" value="1"/>
+                    <f:param name="idRol" value="#{acRolBean.idRol}"/>
+                    <f:param name="saveEditFlag" value="1"/>
+                    <!--f:param name="idRootNode" value="#{param['idRol']}"/-->
+              </a4j:commandButton>
+             </td>
+            </tr>
+            </table>
+            </h:form>
+       </div>
+  </rich:modalPanel>
+  </a4j:outputPanel>
+  <a4j:outputPanel id="outCBmpDel">
+   <rich:modalPanel id="CBmpDel" 
+    rendered="#{param['onDelete']!=null}"
+    width="300" autosized="true">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Роль"/>
+             </h:panelGroup>
+      </f:facet>
+       <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage onclick="#{rich:component('CBmpDel')}.hide();"
+                value="/img/icons/close.gif" />
+              </h:panelGroup>
+        </f:facet>
+        <h:form>
+         <h:inputHidden value="#{acRolBean.idRol}"/>
+         
+         <h:outputText style="display:block;margin-bottom:7px;"
+          value="Удалить #{acRolBean.roleTitle}?"/>
+         
+         <div style="white-space: nowrap;text-align:center;">
+         <a4j:commandButton value="Отмена" 
+         onclick="#{rich:component('CBmpDel')}.hide();return false;"
+         styleClass="but_class"/>
+         <a4j:commandButton value="Удалить"
+                    action="#{rolManager.delRol}"
+                    reRender="outCenterCenter, outCenterBottom"
+                    oncomplete="#{rich:component('CBmpDel')}.hide();" 
+                    styleClass="but_class">
+                   <f:param name="onDelete" value="1"/>
+               </a4j:commandButton>
+              </div>
+           </h:form>
+        </rich:modalPanel>
+      </a4j:outputPanel>
+  </a4j:outputPanel>
+ </div>
+  <script>
+//<![CDATA[
+ function check(tform){
+ var msg="";
+ if (document.getElementById(tform+":name").value==""){
+	  msg+="Нет Названия !\n";
+  }
+ if (document.getElementById(tform+":descr").value==""){
+	  msg+="Нет Описания !\n";
+ }else{
+	 if(document.getElementById(tform+":descr").value.length>1000){
+		    msg+="Превышена длина поля Описание!\n";
+	 } 
+ }
+ if (document.getElementById(tform+":appl").value=="-1"){
+     msg+="Не выбрана Консоль!\n";
+ }
+ var n= jQuery("input[name^='"+tform+":Rdt'][type=checkbox]:checked").length;
+ if (n==0) {
+	 msg+="Не установлены Привилегии!\n";
+  }
+// CBformCrt:Rdt:0:perml:0 CBformCrt:Rdt:0:perml:1
+ //CBformCrt:Rdt:1:perml:0 CBformCrt:Rdt:1:perml:1
+ 
+ if(msg!=""){
+  alert(msg);
+  return true;
+ }else{
+  return false;
+}
+};
+ function click(){
+  
+   /* jQuery("input[name^='CBformCrt:Rdt'][type=checkbox]:checked").each(
+    	    function() { 
+    	    	alert('333');
+    	    } 
+    );*/
+   var n= jQuery("input[name^='CBformCrt:Rdt'][type=checkbox]:checked").length;
+   if (n==0) {
+     alert('!!!');
+	}	    
+  }
+ function setHDiv(hdiv){
+		jQuery('#'+hdiv).height(Math.floor(jQuery(window).height()*(2/3)));
+ }
+ function setMPTop(){
+		jQuery('#CBmpCrtCDiv').css('top',Math.floor(jQuery(window).height()*(1/6)))
+ }
+ //jQuery("a[name='"+st+":CBsdtcl1Crt']")
+//]]>
+</script>
+</ui:composition>

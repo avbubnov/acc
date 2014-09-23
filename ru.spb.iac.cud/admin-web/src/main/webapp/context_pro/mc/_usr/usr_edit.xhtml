@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+    <ui:composition template="/templates/template_YUI.xhtml">
+    <ui:param name="pageName" value="Редактирование Пользователя"/>
+        <ui:define name="topUnit">
+            <ui:include src="/context/incl/topUnit.xhtml"/>
+        </ui:define> 
+           
+        <ui:define name="bottomUnit">
+            <ui:include src="/context/incl/bottomUnit.xhtml" />
+        </ui:define>
+        
+        <ui:define name="leftUnit">
+            <ui:include src="/context/incl/leftUnit.xhtml" />
+        </ui:define>
+        
+        <ui:define name="rightUnit">
+            <ui:include src="/context/incl/rightUnit.xhtml" />
+        </ui:define>
+        
+        <ui:define name="centerUnit">
+             <ui:include src="/context/mc/usr/centerUnitUsrEdit.xhtml" />
+        </ui:define>
+    </ui:composition> 
+</body> 
+</html>

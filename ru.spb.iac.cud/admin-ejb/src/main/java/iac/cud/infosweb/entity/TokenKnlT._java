@@ -1,0 +1,104 @@
+package iac.cud.infosweb.entity;
+
+import java.io.Serializable;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Set;
+
+
+/**
+ * The persistent class for the TOKEN_KNL_T database table.
+ * 
+ */
+@Entity
+@Table(name="TOKEN_KNL_T")
+public class TokenKnlT implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@SequenceGenerator(name="TOKEN_KNL_T_IDSRV_GENERATOR", sequenceName="TOKEN_KNL_SEQ")
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="TOKEN_KNL_T_IDSRV_GENERATOR")
+	@Column(name="ID_SRV")
+	private Long idSrv;
+
+	@Column(name="ATTEMPT_SRV")
+	private Long attemptSrv;
+
+    @Temporal( TemporalType.DATE)
+	private Date created;
+
+    @Temporal( TemporalType.DATE)
+	@Column(name="DATE_EVENT_SRV")
+	private Date dateEventSrv;
+
+	@Column(name="SIGN_OBJECT")
+	private String sign;
+
+	/*@OneToMany(mappedBy="tokenKnlT")
+	private Set<ActionsLogKnlT> actionsLogKnlTs;
+     */
+	
+	
+    @ManyToOne
+	@JoinColumn(name="UP_USERS")
+	private AcUser acUsersKnlT;
+
+    public TokenKnlT() {
+    }
+
+	public Long getIdSrv() {
+		return this.idSrv;
+	}
+
+	public void setIdSrv(Long idSrv) {
+		this.idSrv = idSrv;
+	}
+
+	public Long getAttemptSrv() {
+		return this.attemptSrv;
+	}
+
+	public void setAttemptSrv(Long attemptSrv) {
+		this.attemptSrv = attemptSrv;
+	}
+
+	public Date getCreated() {
+		return this.created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Date getDateEventSrv() {
+		return this.dateEventSrv;
+	}
+
+	public void setDateEventSrv(Date dateEventSrv) {
+		this.dateEventSrv = dateEventSrv;
+	}
+
+	public String getSign() {
+		return this.sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
+/*	public Set<ActionsLogKnlT> getActionsLogKnlTs() {
+		return this.actionsLogKnlTs;
+	}
+    public void setActionsLogKnlTs(Set<ActionsLogKnlT> actionsLogKnlTs) {
+		this.actionsLogKnlTs = actionsLogKnlTs;
+	}*/
+	
+	public AcUser getAcUsersKnlT() {
+		return this.acUsersKnlT;
+	}
+
+	public void setAcUsersKnlT(AcUser acUsersKnlT) {
+		this.acUsersKnlT = acUsersKnlT;
+	}
+	
+}

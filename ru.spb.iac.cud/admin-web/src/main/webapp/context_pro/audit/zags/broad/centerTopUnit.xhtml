@@ -1,0 +1,309 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+ 
+ <h3 class="ui-widget-header">Подключение</h3>
+  
+ <div class="ui-layout-content" >
+  
+ <a4j:form>
+ 
+<!--a4j:jsFunction name="invokeRemoteAudit" 
+                reRender="outCenterTop,outCenterTopFooter,outCenterCenter,outCenterCenterFooter,outCenterBottomFooter"
+                action="#{raiManager.forViewZagsTestConnect}" 
+                rendered="#{param['idRai']!=null}">
+    <f:param name="remoteAudit" value="1"/>
+    <f:param name="idRai" value="#{param['idRai']}"/>
+    <f:param name="actSect" value="#{param['actSect']}"/>
+    <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+</a4j:jsFunction-->
+<a4j:jsFunction name="invokeRemoteAudit" 
+                reRender="outCenterTop,outCenterTopFooter,outCenterCenter,outCenterCenterFooter,outCenterBottomFooter"
+                action="#{raiManager.forViewZagsTestConnect}" 
+                rendered="#{param['idRai']!=null}">
+    <f:param name="remoteAudit" value="1"/>
+    <f:param name="idRai" value="#{param['idRai']}"/>
+    <f:param name="actSect" value="#{param['actSect']}"/>
+    <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+</a4j:jsFunction>
+</a4j:form>
+ <a4j:outputPanel id="outCenterTop">
+
+<s:div rendered="#{auditZagsManager.evaluteForStatus}">
+<!--s:div rendered="#{param['remoteAudit']!=null and auditZagsManager.connectError==0}"-->
+<table style="width:100%;" border="0">
+ <tr>
+  <td width="90%" valign="top">
+  
+   <s:div style="margin:5px;"  rendered="#{param['idRai']!=null}">
+     <table style="width:70%; font-size:13px;">
+         <tr>
+            <td width="150px" height="25px" class="table_left_header">
+              <h:outputText value="Район"/>
+            </td>
+            <td>
+               <h:outputText value="#{acRaiBean.name}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="150px" height="25px" class="table_left_header">
+               <h:outputText value="Состояние Аудита"/>
+            </td>
+            <td>
+               <h:outputText value="#{auditZagsManager.auditStatus=='auditEnable' ? 'Включено' : 'Отключено'}"/>
+            </td>
+          </tr>
+         </table>
+       </s:div>
+   </td>
+   <td width="90px" valign="top">
+  
+   </td>
+  </tr>
+  </table>
+     </s:div>  
+       
+      <s:div rendered="#{auditZagsManager.connectError!=0}"
+         style="color:red;">
+          Ошибка подключения к удалённому серверу!
+      </s:div>
+        
+  </a4j:outputPanel>
+ </div>
+
+<div class="ui-widget-footer" style="background:#E6E6E6;">
+ 
+  <a4j:outputPanel id="outCenterTopFooter">
+    <table>
+      <tr>
+       <td>
+       <!--s:div rendered="#{param['idRai']!=null and param['remoteAudit']!=null and auditZagsManager.connectError==0}"-->
+        <s:div rendered="#{auditZagsManager.evaluteForStatus}">
+         <a4j:form>
+           <table style="width:300px">
+         <tr>
+         <!--td>
+          <s:link value="Просмотр" 
+                view="/context_pro/audit/zags/list.xhtml">
+             <f:param name="reloadPage" value="1"/>
+             <f:param name="inAudit" value="1"/>
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+             <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+         </s:link>
+         </td>
+         <td>
+         <s:link value="Поиск"  action="#{auditZagsSearchManager.prepareSearch}"
+                view="/context_pro/audit/zags/search.xhtml">
+             <f:param name="reloadPage" value="1"/>
+             <f:param name="inAudit" value="1"/>
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+             <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+        </s:link>
+       </td>
+       <td>
+        <s:link value="Отчёты" 
+                view="/context_pro/audit/zags/reports.xhtml">
+             <f:param name="reloadPage" value="1"/>
+             <f:param name="inAudit" value="1"/>
+             <f:param name="idRai" value="#{param['idRai']}"/>
+             <f:param name="actSect" value="#{param['actSect']}"/>
+             <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+         </s:link>
+        </td-->
+        <td>
+         <s:link value="Переключиться"  
+             view="/context_pro/audit/zags/list.xhtml">
+             <f:param name="actSect" value="#{param['actSect']}"/>
+             <f:param name="actSectItem" value="007"/>
+             <f:param name="auditEnable" value="1"/>
+         </s:link> 
+        </td>
+        <td>
+        <a4j:commandButton style="margin-top:5px;width:60px;"
+         ajaxSingle="true" reRender="outCenterTop,outCenterTopFooter"
+         value="Отключить" rendered="#{(param['auditDisable']!=null and auditZagsManager.auditStatusChangeFlag!=null) or auditZagsManager.auditStatus=='auditEnable'}" 
+         action="#{auditZagsManager.auditStatusChange('auditDisable')}"
+         styleClass="but_class">
+         <f:param name="remoteAudit" value="auditDisableFact"/>
+         <f:param name="idRai" value="#{param['idRai']}"/>
+         <f:param name="actSect" value="#{param['actSect']}"/>
+         <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+         <f:param name="auditDisable" value="1"/>
+       </a4j:commandButton> 
+       <a4j:commandButton style="margin-top:5px;width:60px;"
+         ajaxSingle="true" reRender="outCenterTop,outCenterTopFooter"
+         value="Включить" rendered="#{(param['auditEnable']!=null and auditZagsManager.auditStatusChangeFlag!=null) or auditZagsManager.auditStatus=='auditDisable'}" 
+         action="#{auditZagsManager.auditStatusChange('auditEnable')}"
+         styleClass="but_class">
+         <f:param name="remoteAudit" value="auditEnableFact"/>
+         <f:param name="idRai" value="#{param['idRai']}"/>
+         <f:param name="actSect" value="#{param['actSect']}"/>
+         <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+         <f:param name="auditEnable" value="1"/>
+       </a4j:commandButton>
+       </td>
+       <td>
+      <a4j:commandButton style="margin-top:5px;width:60px;"
+         value="Очистить" 
+         onclick="#{rich:component('CTClearDate')}.show();return false; " 
+         styleClass="but_class"/>
+        </td>
+        </tr>
+        </table>
+        </a4j:form> 
+       </s:div>
+       </td>
+        <td>
+         <s:div rendered="#{auditZagsManager.connectError!=0}">
+          <s:link value="Переключиться"  
+             view="/context_pro/audit/zags/list.xhtml">
+             <f:param name="actSect" value="#{param['actSect']}"/>
+             <f:param name="actSectItem" value="007"/>
+             <!--f:param name="actSectItem" value="#{param['actSectItem']}"/-->
+             <f:param name="auditEnable" value="1"/>
+         </s:link> 
+         </s:div>
+       </td>
+        <td height="25px;"><!-- Placeholder-->
+         <h:outputText value="&amp;nbsp;" escape="false"/>
+       </td>
+      </tr>
+     </table>
+       <rich:modalPanel id="CTClearDate" trimOverlayedElements="false" 
+         width="250" height="150">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Очистка"/>
+             </h:panelGroup>
+        </f:facet>
+        <f:facet name="controls">
+             <h:panelGroup>
+               <h:graphicImage onclick="#{rich:component('CTClearDate')}.hide();"
+                 value="/img/icons/close.gif" />
+             </h:panelGroup>
+       </f:facet>
+       <h:form id="CTfClearDate">
+         <table>
+          <tr>
+             <td colspan="3" height="25px">
+               <h:outputText value="Период очистки:"/>
+             </td>
+          </tr>
+          <tr>
+             <td width="20px"/>
+             <td width="20px" height="25px">
+               <h:outputText value="С:"/></td>
+             <td>
+             <rich:calendar value="#{auditZagsManager.auditClearDate1}"
+				  locale="RU"
+				  datePattern="dd.MM.yy HH:mm"
+				  defaultTime="00:00" 
+				  todayControlMode="hidden"
+				  id="acdate1"/>
+             </td>
+            </tr>
+             <tr>
+             <td width="20px"/>
+             <td width="20px" height="25px">
+               <h:outputText value="По:"/></td>
+             <td>
+             <rich:calendar value="#{auditZagsManager.auditClearDate2}"
+				  locale="RU"
+				  datePattern="dd.MM.yy HH:mm"
+				  defaultTime="23:59" 
+				  todayControlMode="hidden"
+				  id="acdate2"/>
+             </td>
+            </tr>
+            </table>
+          <div style="white-space: nowrap;text-align:center;margin-top:5px;">
+             <a4j:commandButton value="Очистить"
+                    action="#{auditZagsManager.auditClear}"
+                    reRender="outCenterCenterFooter,outCenterCenter,outCenterBottomFooter,outCenterBottom" 
+                    oncomplete=" #{rich:component('CTClearDate')}.hide();" 
+                    onclick="if(check_clean_date()){return false;}else{if(!confirm('Внимание!\\nОперация очистки не обратима!\\nВы уверены в необходимости проведения очистки? ')){return false;}}"
+                    styleClass="but_class">
+               <f:param name="remoteAudit" value="1"/>     
+               <f:param name="idRai" value="#{param['idRai']}"/>
+               <f:param name="actSect" value="#{param['actSect']}"/>
+               <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+             </a4j:commandButton>
+             <a4j:commandButton value="Отмена" 
+                onclick="#{rich:component('CTClearDate')}.hide();return false;"
+                styleClass="but_class"/>
+           </div>
+         </h:form>
+        </rich:modalPanel>
+    </a4j:outputPanel>
+    
+    <a4j:outputPanel id="outCenterTopFooterMPRS">
+    <rich:modalPanel id="CTRaiSelect" trimOverlayedElements="false" 
+         width="250" autosized="true" showWhenRendered="true"
+         rendered="#{(param['idRai']==null or param['raiSelect']!=null) 
+          and raiManager.raiSelectDialog==1 }">
+         <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Подключение"/>
+             </h:panelGroup>
+        </f:facet>
+        <f:facet name="controls">
+             <h:panelGroup>
+               <h:graphicImage onclick="#{rich:component('CTRaiSelect')}.hide();"
+                 value="/img/icons/close.gif" />
+             </h:panelGroup>
+       </f:facet>
+       <h:form id="CTfRaiSelect">
+        <table style="width:90%;">
+         <!--a4j:repeat value="#{raiManager.getRaionsUser('007')}"  var="it"-->
+         <a4j:repeat value="#{raiManager.getRaionsUser(param['actSectItem'])}"  var="it">
+          <tr><td height="10">
+              <s:link value="#{it.name}"  action="#{raiManager.raiSelect}"  
+                view="#{linksMap.getLink(param['actSectItem'])}">
+                <f:param name="reloadPage" value="1"/>
+                <f:param name="raiSelect" value="1"/>
+                <f:param name="idRai" value="#{it.idRai}"/>
+                <f:param name="actSect" value="#{param['actSect']}"/>
+                <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+             </s:link>
+           </td></tr>
+         </a4j:repeat>
+         </table>
+            <div style="white-space: nowrap;text-align:center;margin-top:5px;">
+             <a4j:commandButton value="Отмена" 
+                onclick="#{rich:component('CTRaiSelect')}.hide();return false;"
+                styleClass="but_class"/>
+           </div>
+         </h:form>
+        </rich:modalPanel>
+    </a4j:outputPanel>
+</div>
+
+ <script>
+//<![CDATA[
+function check_clean_date(){
+ var msg="";
+ if (#{rich:component('acdate1')}.getSelectedDateString('dd.MM.yy')==""){
+	  msg+="Нет даты С:!\n";
+ }
+ if (#{rich:component('acdate2')}.getSelectedDateString('dd.MM.yy')==""){
+	  msg+="Нет даты По:!\n";
+ }
+ if(msg!=""){
+  alert(msg);
+  return true;
+ }else{
+  return false;
+}
+}
+
+//]]>
+</script>
+ </ui:composition>

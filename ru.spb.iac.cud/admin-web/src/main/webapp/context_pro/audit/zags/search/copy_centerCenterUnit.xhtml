@@ -1,0 +1,255 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+ <h3 class="ui-widget-header">Аудит Данных КЗАГС - Поиск</h3>
+ <div class="ui-layout-content" >
+<!--a4j:form>
+<a4j:jsFunction name="invokeRemoteAudit" 
+                reRender="outCenterCenter"
+                process="audit_dt">
+    <f:param name="remoteAudit" value="1"/>
+    <f:param name="idRai" value="#{param['idRai']}"/>
+</a4j:jsFunction>
+</a4j:form-->
+ <!--a4j:outputPanel id="outCenterCenter">
+ 
+ <h:form>
+      <table style="width:95%; font-size:12px;" border="1">
+          <tr>
+            <td width="100px" height="25px">
+              <h:outputText value="Образец поиска"/>
+            </td>
+            <td><h:inputText value="#{auditSearch.searchString}"
+               id="name" maxlength="100" size="55"/>
+            </td>
+            </tr>
+            <tr>
+            <td colspan="2" align="center" height="35px">
+             <a4j:commandButton value="Поиск"
+                    action="#{auditSearch.search}"
+                    reRender="outCenterCenter"
+                    styleClass="but_class">
+                    <f:param name="idRai" value="#{param['idRai']}"/>
+                    <f:param name="actSect" value="#{param['actSect']}"/>
+              </a4j:commandButton>
+             </td>
+            </tr>
+            </table>
+ </h:form-->
+ 
+
+ <a4j:outputPanel id="outCenterCenter">
+  <a4j:form> 
+   <a4j:jsFunction name="invokeRemoteAuditBean" 
+                   reRender="outCenterBottom"
+                   action="#{auditZagsSearchManager.forView}"
+                   ajaxSingle="true">
+     <f:param name="sessionId"/>
+     <f:param name="entryid"/>
+     <f:param name="onSearch"/>
+     <f:param name="idRai"/>
+     <f:param name="antiInvoke"/>
+   </a4j:jsFunction>
+  </a4j:form>
+  <h:messages id="messCCUA" style="color:red" globalOnly="true" />
+   <!--s:div rendered="#{param['onSearch']!=null}"-->
+    <h:form id="fAuditSearchP">
+    <table style="margin-top:5px;margin-left:5px; width:95%; font-size:12px;"
+         border="0">
+          <tr>
+            <td width="100px" height="25px">
+              <h:outputText value="Образец поиска"/>
+            </td>
+            <td width="200px">
+            <h:inputText value="#{auditZagsSearchManager.searchZagsString}"
+               id="searchPattern" maxlength="100" size="55" 
+               onkeypress="if (event.keyCode == 13) { return false;}">
+               <!--a4j:support 
+		            id="searchPi"
+		            event="onkeypress"  onsubmit="if (event.keyCode != 13) { return false;}" 
+		            ignoreDupResponses="true" focus="searchPi" 
+			        requestDelay="700" reRender="outCenterCenter">
+			        <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+                    <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+                    <f:param name="onSearch" value="1"/>
+                    <f:param name="idRai" value="#{param['idRai']}"/>
+                 </a4j:support-->
+               </h:inputText>  
+            </td>
+            <td><a4j:commandButton value="Поиск"
+                    reRender="outCenterCenter"  styleClass="but_class" 
+                    action="#{auditZagsSearchDataModel.searchAction}"
+                    onclick="if(!check()){return false;}">
+                    <f:param name="onSearch" value="1"/>
+                    <f:param name="idRai" value="#{param['idRai']}"/>
+                    <f:param name="actSect" value="#{param['actSect']}"/>
+                    <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+              </a4j:commandButton>
+            </td>
+         </tr>
+      </table>
+      </h:form>
+     <h:form id="fAuditList">
+     <a4j:queue requestDelay="550" ignoreDupResponce="true"/>  
+    <rich:dataTable id="audit_dt"
+	    style="width:100%" var="it"
+        value="#{auditZagsSearchDataModel}"
+        rows="#{profile.rowsCountAuditSearch}" 
+        rendered="#{param['onSearch']!=null}" 
+        reRender="audit_dt_dscr"
+        onRowClick="/*fooNameRow(this);*/
+                    invokeRemoteAuditBean('#{it.sessionId}',
+                                          '#{it.entryid}',
+                                          '1',
+                                          '#{param['idRai']}',
+                                          '1');">
+         
+         <rich:columns value="#{auditZagsSearchManager.auditItemsListSelect}" var="field" 
+           index="index" id="column#{index}" 
+           style="#{it.selected=='true' ? 'background-color: yellow;' : ''}" 
+           styleClass="#{(it.sessionId==param['sessionId'] and it.entryid==param['entryid']) ? 'audit_record_active' : ''}">
+           <f:facet name="header">
+             <h:outputText value="#{field.itemColumn}" />
+           </f:facet>
+           <c:choose> 
+             <c:when test="#{field.itemField=='extendedTimestamp'}" > 
+               <h:outputText value="#{it[field.itemField]}">
+                  <s:convertDateTime pattern="dd.MM.yy HH:mm:ss.SSS"/>
+               </h:outputText>
+             </c:when> 
+             <c:otherwise> 
+                <h:outputText value="#{it[field.itemField]}" />
+             </c:otherwise> 
+          </c:choose>  
+         </rich:columns>
+         <f:facet name="footer">
+         <h:panelGroup>
+          <table style="width:95%" border="0">
+           <tr>
+            <td width="40px;">
+             <h:outputText value="Строк:" />
+            </td>
+            <td width="50px;">
+            <rich:inputNumberSpinner 
+                       value="#{profile.rowsCountAuditSearch}" 
+                       inputSize="1"
+                       id="rowCId"
+                       minValue="5"
+                       enableManualInput="false"
+                       oninputkeypress="return false;"/>
+             </td>
+             <td width="20px;">
+              <a4j:commandLink reRender="outCenterCenter"
+                             ajaxSingle="true" process="rowCId">
+              <h:graphicImage url="/img/icons/Da.gif" styleClass="img-in-link" height="14" width="14"/>
+              <f:param name="auditListCount" value="#{auditZagsSearchDataModel.rowCount}"/>
+              <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+              <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+              <f:param name="onSearch" value="1"/>
+              <f:param name="idRai" value="#{param['idRai']}"/>
+            </a4j:commandLink>
+           </td>
+           <td>
+            <rich:datascroller align="center" for="audit_dt" 
+                          maxPages="5" stepControls="hide" 
+                          id="audit_dt_dscr" immediate="true"
+                          renderIfSinglePage="false"
+                          reRender="outCenterCenter" ajaxSingle="true">
+                         <f:param name="auditListCount" value="#{auditZagsSearchDataModel.rowCount}"/>
+                         <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+                         <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+                         <f:param name="onSearch" value="1"/>
+                         <f:param name="idRai" value="#{param['idRai']}"/>
+             </rich:datascroller> 
+             </td>
+             <td width="80px;">
+              <a4j:commandLink 
+               reRender="outCCSelCol"
+               value="Столбцы" ajaxSingle="true"
+               oncomplete="#{rich:component('CCSelCol')}.show();">
+                 <f:param name="auditListCount" value="#{auditZagsSearchDataModel.rowCount}"/>
+                 <f:param name="onSelCol" value="1"/>
+                 <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+                 <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+                 <f:param name="onSearch" value="1"/>
+                 <f:param name="idRai" value="#{param['idRai']}"/>
+               </a4j:commandLink>
+              </td>
+             </tr>
+           </table>
+          </h:panelGroup>
+         </f:facet>
+         <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+         <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+         <f:param name="onSearch" value="1"/>
+         <f:param name="idRai" value="#{param['idRai']}"/>
+      </rich:dataTable>
+  </h:form>
+  <a4j:outputPanel id="outCCSelCol">
+   <rich:modalPanel id="CCSelCol" 
+    rendered="#{param['onSelCol']!=null}"
+    autosized="false" width="200" height="350">
+      <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="Столбцы"/>
+             </h:panelGroup>
+        </f:facet>
+        <f:facet name="controls">
+             <h:panelGroup>
+               <h:graphicImage onclick="#{rich:component('CCSelCol')}.hide();"
+                 value="/img/icons/close.gif" />
+             </h:panelGroup>
+       </f:facet>
+       <h:form>
+        <h:selectManyCheckbox value="#{datatableZagsSearchStateHolder.auditFieldListSelect}"
+                              layout="pageDirection">
+	  	  <s:selectItems value="#{auditZagsSearchManager.auditItemsListContext}"
+	  	               var="n"
+                       label="#{n.itemColumn}"
+                       itemValue="#{n.itemField}"/>
+	     </h:selectManyCheckbox>
+           <div style="white-space: nowrap;">
+             <a4j:commandButton value="Сохранить"
+                    reRender="outCenterCenter" 
+                    oncomplete=" #{rich:component('CCSelCol')}.hide();" 
+                    onclick="/*if(check('CBformUpd')){return false;}*/"
+                    styleClass="but_class">
+               <f:param name="auditListCount" value="#{param['auditListCount']}"/>
+               <f:param name="onSelCol" value="1"/>     
+               <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+               <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+               <f:param name="onSearch" value="1"/>
+               <f:param name="idRai" value="#{param['idRai']}"/>
+             </a4j:commandButton>
+             <a4j:commandButton value="Отмена" 
+                onclick="#{rich:component('CCSelCol')}.hide();return false;"
+                styleClass="but_class"/>
+           </div>
+         </h:form>
+        </rich:modalPanel>
+       </a4j:outputPanel>
+     <!--/s:div-->
+ </a4j:outputPanel>
+</div> 
+<script>
+//<![CDATA[
+
+function check(){
+ var search_pattern = document.getElementById("fAuditSearchP:searchPattern").value;
+ if (search_pattern=="" || jQuery.trim(search_pattern)==""){
+	 return false;
+ }else{
+	 return true;
+ }
+}
+//]]>
+</script>
+</ui:composition>

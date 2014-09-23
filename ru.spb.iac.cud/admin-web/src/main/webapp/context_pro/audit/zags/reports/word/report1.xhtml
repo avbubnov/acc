@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://jboss.com/products/seam/taglib"> 
+<ui:composition>     
+   <f:view contentType="application/msword"/>
+
+<head></head> 
+<body>
+         <h:outputText value="#{auditZagsReportsManager.nameReport}"
+         style="font-weight:bold;" /> 
+    	  <br/>
+    	  <h:outputText value="Период: "/> 
+    	  <h:outputText value="c #{param['date1']} " rendered="#{param['date1']!='' and param['date1']!=null}"/>
+    	  <h:outputText value="по #{param['date2']}" rendered="#{param['date2']!='' and param['date2']!=null}"/>
+    	  <h:outputText value="Всё время " rendered="#{(param['date1']=='' or param['date1']==null) and (param['date2']=='' or param['date2']==null)}"/> 
+    
+		 <rich:dataTable id="rep_dt" style="width:100%" var="it"
+           value="#{auditZagsReportsManager.reportItemsList}" rowKeyVar="rkv"
+           border="1">
+              <rich:column>
+               <f:facet name="header">
+                 <h:outputText value="№" />
+               </f:facet>
+               <h:outputText value="#{rkv+1}"/>
+             </rich:column>
+             <rich:column rendered="#{param['contextDate']=='true'}">
+               <f:facet name="header">
+                 <h:outputText value="Дата" />
+               </f:facet>
+               <h:outputText value="#{it.currdate}">
+                   <s:convertDateTime pattern="dd.MM.yyyy"/>
+               </h:outputText> 
+             </rich:column>
+             <rich:column rendered="#{param['contextUser']=='true'}">
+               <f:facet name="header">
+                 <h:outputText value="Пользователь" />
+               </f:facet>
+               <h:outputText value="#{it.osUser}"/>
+             </rich:column>
+             <rich:column rendered="#{param['contextUser']=='true'}">
+               <f:facet name="header">
+                 <h:outputText value="IP-адрес" />
+               </f:facet>
+               <h:outputText value="#{it.ipAddress}"/>
+             </rich:column>
+             <rich:column rendered="#{param['contextTable']=='true'}">
+               <f:facet name="header">
+                 <h:outputText value="Таблица" />
+               </f:facet>
+               <h:outputText value="#{it.tableName}"/>
+             </rich:column>
+             <rich:column>
+               <f:facet name="header">
+                 <h:outputText value="Удаление" />
+               </f:facet>
+               <h:outputText value="#{it.qdelete}"/>
+             </rich:column>
+             <rich:column >
+               <f:facet name="header">
+                 <h:outputText value="Вставка" />
+               </f:facet>
+               <h:outputText value="#{it.qinsert}"/>
+             </rich:column>
+             <rich:column>
+               <f:facet name="header">
+                 <h:outputText value="Просмотр" />
+               </f:facet>
+               <h:outputText value="#{it.qselect}"/>
+             </rich:column>
+             <rich:column>
+               <f:facet name="header">
+                 <h:outputText value="Изменение" />
+               </f:facet>
+               <h:outputText value="#{it.qupdate}"/>
+             </rich:column>
+           </rich:dataTable>
+ </body> 
+</ui:composition>
+</html>

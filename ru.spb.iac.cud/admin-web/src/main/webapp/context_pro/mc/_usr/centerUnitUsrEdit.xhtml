@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich">
+
+	
+ <h:outputStylesheet>
+  .raionDisable{
+    color:silver!important;
+    cursor:default!important;
+  }
+</h:outputStylesheet>
+<h:form id="idUsrEdit">
+<h:inputHidden value="#{editUsr.idUser}"/>
+<rich:panel>
+   <f:facet name="header">
+     Управление Полномочиями : Редактирование Пользователя
+   </f:facet>
+   <table style="width:90%; font-size:13px;">
+            <tr>
+            <td width="100px">
+            <h:outputText value="Фамилия"/></td>
+            <td><h:inputText value="#{editUsr.surname}"/></td>
+            </tr>
+            <tr>
+            <td width="100px">
+            <h:outputText value="Имя"/></td>
+            <td><h:inputText value="#{editUsr.name1}"/></td>
+            </tr>
+            <tr>
+            <td width="100px">
+            <h:outputText value="Отчество"/></td>
+            <td><h:inputText value="#{editUsr.name2}"/></td>
+            </tr>
+            <tr>
+            <td width="100px">
+            <h:outputText value="Телефон"/></td>
+            <td><h:inputText value="#{editUsr.phone}"/></td>
+            </tr>
+            <tr>
+            <td width="100px">
+            <h:outputText value="E-mail"/></td>
+            <td><h:inputText value="#{editUsr.email}"/></td>
+            </tr>
+            <tr>
+            <td width="100px" valign="top">
+            <h:outputText value="Организация"/></td>
+            <td style="padding-top:5px;padding-bottom:5px;">
+             <h:selectOneRadio id="idOrg" layout="pageDirection" 
+                               value="#{editUsr.acOrganization}">
+	  	      <f:selectItems value="#{orgManager.listOrg}"
+	  	               var="n"
+                       itemValue="#{n.idOrg}"
+                       itemLabel="#{n.fullName}"/>
+              </h:selectOneRadio>
+             </td>
+            </tr>
+            <tr>
+            <td width="100px">
+            <h:outputText value="Логин"/></td>
+            <td><h:inputText value="#{editUsr.login}"/></td>
+            </tr>
+            <tr>
+            <td width="100px">
+            <h:outputText value="Пароль"/></td>
+            <td><h:inputText value="#{editUsr.password}"/></td>
+            </tr>
+ 
+            <tr>
+            <td width="100px" valign="top">
+         <h:outputText value="Роли:"/></td>
+            <td style="padding-top:5px;">
+   <rich:dataTable id="UAt1" style="width:100%" 
+             rowKeyVar="rkv" var="record"
+        value="#{usrManager.listUsrArmEdit}">
+        <f:facet name="header">
+            <rich:columnGroup>
+                <rich:column colspan="2">
+                  <h:outputText value="Название" />
+                </rich:column>
+               </rich:columnGroup>
+        </f:facet>
+ 
+        <rich:column colspan="2" style="font-weight:bold;">
+            <!--h:selectBooleanCheckbox id="UAchb1" onchange="fooName(this,'idUsrEdit:UAt1:'+#{rkv}+':UAst1');"/--> 
+            
+            <h:outputText value=" #{record.name}:" />
+        </rich:column>
+ 
+        <rich:collapsibleSubTable rowKeyVar="rkvs" id="UAst1"
+       var="it" value="#{record.acRoles}" keepSaved="true">
+            <rich:column style="padding-left:30px;">
+               <h:selectBooleanCheckbox value="#{it.usrChecked}" id="UAchb1" onchange="fooName(this,'idUsrEdit:UAt1:'+#{rkv}+':UAst1:'+#{rkvs});"/>
+      
+              <h:outputText value=" #{it.roleTitle}"/>
+             </rich:column>
+            <rich:column  style="width:60">
+                <a4j:commandLink id="UAcl1" rendered="#{it.isRaions==1}" 
+                 onclick="#{rich:component('editPane')}.show();return false;"
+                 style="#{it.usrChecked ? 'display:block' : 'display:none'}">
+                     <h:graphicImage value="/img/icons/edit.gif" alt="edit"/>
+                      <h:outputText value=" Районы" />
+                 </a4j:commandLink>
+                 <a4j:commandLink id="UAcl2" rendered="#{it.isRaions==1}" 
+                 onclick="return false;" styleClass="raionDisable"
+                  style="#{it.usrChecked ? 'display:none' : 'display:block'}">
+                     <h:graphicImage value="/img/icons/edit.gif" alt="edit"/>
+                      <h:outputText value=" Районы" />
+                 </a4j:commandLink>
+                         <rich:popupPanel header="Районы Санкт-Петербурга" id="editPane"  width="200" height="350" modal="true">
+	    <h:selectManyCheckbox value="#{it.raions}"
+	                        layout="pageDirection">
+	  	  <f:selectItems value="#{usrManager.raions}"
+	  	               var="n"
+                       itemValue="#{n.idRai}"
+                       itemLabel="#{n.name}"/>
+	  	  
+	  </h:selectManyCheckbox>
+	  <div align="center">
+	     <a4j:commandButton value="Сохранить"
+                onclick="#{rich:component('editPane')}.hide(); return false;" />
+      </div>
+    </rich:popupPanel>
+            </rich:column>
+        </rich:collapsibleSubTable>
+ 
+    </rich:dataTable>
+    </td>
+            </tr>
+            <tr>
+            
+            <td colspan="2" align="center" height="35px" width="40px">
+            <h:button value="Назад" outcome="/context/mc/usr/usr_list.xhtml"/>
+             <h:commandButton value="Удалить" action="#{usrManager.delUsr}">
+             <f:param name="scipAllFlag" value="1"/>
+             </h:commandButton>
+            <h:commandButton value="Сохранить" action="#{usrManager.editUsr}">
+              <f:param name="saveEditFlag" value="1"/>
+            </h:commandButton>
+            </td>
+            </tr>
+            </table>
+            
+<script>
+function fooName(t,st){
+		   if(t.checked){
+		        jQuery("a[name='"+st+":UAcl1']").css('display','block');
+		        jQuery("a[name='"+st+":UAcl2']").css('display','none');
+	       }else{
+       	        jQuery("a[name='"+st+":UAcl1']").css('display','none');
+       	        jQuery("a[name='"+st+":UAcl2']").css('display','block');
+           }
+};
+ </script>
+ 
+              
+	</rich:panel>
+
+</h:form>
+ 
+</ui:composition>

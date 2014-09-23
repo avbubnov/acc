@@ -1,0 +1,353 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+<h3 class="ui-widget-header" >Поиск</h3>
+ <div class="ui-layout-content">
+  <a4j:outputPanel id="outCenterBottom">
+<table style="width:100%;" border="0">
+<tr>
+<td width="90%">
+  
+ <s:div style="margin:5px;"  rendered="#{param['sessionId']!=null and param['entryid']!=null}">
+   
+    <h:messages style="color:red" globalOnly="false" />
+    
+     <!--h:outputText value="#{auditBubnovBean}"/-->
+    <table style="width:70%; font-size:13px;">
+         <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="action"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.action}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="auditType"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.auditType}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="authPrivileges"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.authPrivileges}"/>
+             </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="clientidentifier"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.clientidentifier}"/>
+            </td>
+          </tr>
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="commentText"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.commentText}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="dbUser"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.dbUser}"/>
+            </td>
+          </tr>
+          
+         <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="dbid"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.dbid}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="econtextId"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.econtextId}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="entryid"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.entryid}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="execType"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.execType}"/>
+            </td>
+          </tr>
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="extName"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.extName}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="extendedTimestamp"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.extendedTimestamp}">
+                <s:convertDateTime pattern="dd.MM.yy HH:mm:ss.SSS"/>
+              </h:outputText>
+            </td>
+          </tr>
+          
+          
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="globalUid"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.globalUid}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="grantee"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.grantee}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="instanceNumber"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.instanceNumber}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="ipAddress"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.ipAddress}"/>
+            </td>
+          </tr>
+           <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="module"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.module}"/>
+            </td>
+          </tr>
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="newName"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.newName}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="newOwner"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.newOwner}"/>
+            </td>
+          </tr>
+          
+           <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="objEditionName"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.objEditionName}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="objectSchema"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.objectSchema}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="osHost"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.osHost}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="osPrivilege"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.osPrivilege}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="osProcess"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.osProcess}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="osUser"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.osUser}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="policyName"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.policyName}"/>
+            </td>
+          </tr>
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="privUsed"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.privUsed}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="proxySessionid"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.proxySessionid}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="returncode"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.returncode}"/>
+            </td>
+          </tr-->
+          
+           <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="scn"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.scn}"/>
+            </td>
+          </tr>
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="sesActions"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.sesActions}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="sessionId"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.sessionId}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="sqlBind"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.sqlBind}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="sqlText"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.sqlText}"/>
+            </td>
+          </tr>
+          
+          
+          <!--tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="statementType"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.statementType}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="statementid"/>
+            </td>
+            <td>
+               <h:outputText value="#{vAuditZagsReportBeanSearch.statementid}"/>
+            </td>
+          </tr-->
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+              <h:outputText value="terminal"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.terminal}"/>
+             </td>
+          </tr>
+          <tr>
+            <td width="100px" height="25px" class="table_left_header">
+               <h:outputText value="transactionid"/>
+            </td>
+            <td>
+              <h:outputText value="#{vAuditZagsReportBeanSearch.transactionidValue}"/>
+            </td>
+          </tr>
+         </table>
+       </s:div>
+    </td>
+    <td width="110px" valign="top">
+    </td>
+ </tr>
+ </table>
+
+  </a4j:outputPanel>
+ </div>
+ <script>
+//<![CDATA[
+
+//]]>
+</script>
+</ui:composition>

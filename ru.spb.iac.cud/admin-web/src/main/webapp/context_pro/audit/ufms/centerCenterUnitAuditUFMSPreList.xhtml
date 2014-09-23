@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+
+ <h3 class="ui-widget-header">Узлы Подключения</h3>
+ <div class="ui-layout-content" >
+  <!--a4j:form>
+    <a4j:jsFunction name="invokeRemoteAudit" reRender="outCenterCenter">
+     <f:param name="remoteAudit" value="1"/>
+     <f:param name="actSect" value="#{navigManager.activeSection}"/>
+    </a4j:jsFunction>
+  </a4j:form-->
+  <a4j:outputPanel id="outCenterCenter">
+  
+  <h:form>
+  <rich:dataTable id="rai_dt" style="width:100%" var="it"
+        value="#{raiManager.getRaionsUser('006')}" 
+        rows="#{profile.rowsCountRai}" rowKeyVar="rkv">
+          <rich:column style="#{it.idRai==param['idRai'] ? 'font-weight: bolder;' : ''}" >
+              <f:facet name="header">
+                  <h:outputText value="№" />
+             </f:facet>
+                <h:outputText value="#{rkv+1}"/>
+             </rich:column>
+          <rich:column style="#{it.idRai==param['idRai'] ? 'font-weight: bolder;' : ''}" >
+             <f:facet name="header">
+                  <h:outputText value="Район" />
+             </f:facet>
+               <a4j:commandLink action="#{raiManager.forViewTestConnect}"
+                     reRender="outCenterCenter, outCenterBottom">
+                <h:outputText value="#{it.name}" />
+                <f:param name="idRai" value="#{it.idRai}"/>
+                <f:param name="actSect" value="#{param['actSect']}"/>
+               </a4j:commandLink>
+            </rich:column>
+          <f:facet name="footer">
+              <h:panelGroup>
+               <table style="width:95%" border="0">
+                <tr>
+                 <td width="40px;">
+                  <h:outputText value="Строк:" />
+                 </td>
+                 <td width="40px;">
+                     <rich:inputNumberSpinner 
+                        value="#{profile.rowsCountRai}" 
+                        inputSize="1"
+                        id="rowCId"
+                        minValue="5" 
+                        enableManualInput="false"
+                        oninputkeypress="return false;"/>
+                 </td>
+                 <td width="20px;">
+                  <a4j:commandLink id="cl_for_da"
+                   reRender="outCenterCenter">
+                    <h:graphicImage url="/img/icons/Da.gif" styleClass="img-in-link" height="14" width="14"/>
+                    <f:param name="#{param['idRai']!=null ? 'idRai' : 'xxx'}" value="#{param['idRai']}"/>
+                    <f:param name="actSect" value="#{param['actSect']}"/>
+                   </a4j:commandLink> 
+                 </td>
+                 <td>
+                   <rich:datascroller align="center" for="rai_dt" 
+                          maxPages="5" stepControls="hide" 
+                          ajaxSingle="true" 
+                          renderIfSinglePage="false" immediate="true"
+                          reRender="outCenterCenter">
+                     <f:param name="#{param['idRai']!=null ? 'idRai' : 'xxx'}" value="#{param['idRai']}"/>
+                     <f:param name="actSect" value="#{param['actSect']}"/>    
+                 </rich:datascroller>          
+                 </td>
+               </tr>
+               </table>
+               
+         <!--h:panelGrid columns="5">
+            <h:outputText value="Строк:" />
+            <h:inputText value="#{profile.rowsCountRai}" size="1" maxlength="3"/>
+            <a4j:commandLink id="cl_for_da"
+                   reRender="outCenterCenter">
+            <h:graphicImage url="/img/icons/Da.gif" styleClass="img-in-link" height="14" width="14"/>
+              <f:param name="#{param['idRai']!=null ? 'idRai' : 'xxx'}" value="#{param['idRai']}"/>
+              <f:param name="actSect" value="#{param['actSect']}"/>
+            </a4j:commandLink> 
+             <div style="width:50px;"></div>
+                <rich:datascroller align="center" for="rai_dt" 
+                          maxPages="5" stepControls="hide" 
+                          ajaxSingle="true" 
+                          renderIfSinglePage="false" immediate="true"
+                          reRender="outCenterCenter">
+                     <f:param name="#{param['idRai']!=null ? 'idRai' : 'xxx'}" value="#{param['idRai']}"/>
+                     <f:param name="actSect" value="#{param['actSect']}"/>    
+                 </rich:datascroller>                    
+             </h:panelGrid-->
+             </h:panelGroup>
+              </f:facet>
+        </rich:dataTable>
+       </h:form> 
+   <!--s:div style="padding:10px;" 
+          rendered="#{not empty raiManager.getRaionsUser('006')}">
+    <table style="width:100%;">
+      <ui:repeat var="it" value="#{raiManager.getRaionsUser('006')}">
+           <tr><td height="25">
+              <s:link value="#{it.name}" 
+                view="/context_pro/audit/ufms/ufms_list.xhtml">
+                 <f:param name="idRai" value="#{it.idRai}"/>
+                 <f:param name="actSect" value="#{navigManager.activeSection}"/>
+              </s:link>
+           </td></tr>
+      </ui:repeat>
+    </table>
+   </s:div> 
+   <s:div style="padding:10px;color:red;" 
+          rendered="#{empty raiManager.getRaionsUser('006')}">
+       <h:outputText value="Нет доступных районных сегментов"/>
+   </s:div--> 
+  </a4j:outputPanel>
+ </div> 
+</ui:composition>

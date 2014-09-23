@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+ <head>
+  <link rel="stylesheet" type="text/css" href="/infos/jscss/jquery/jquery.ui.all.css"/>
+  <link rel="stylesheet" type="text/css" href="/infos/stylesheet/theme.css"/>
+ 
+    <script type="text/javascript" src="/infos/jscss/jquery/1.8.7/jquery-latest.js"/>
+	<script type="text/javascript" src="/infos/jscss/jquery/1.8.7/jquery-ui-latest.js"/>
+	<script type="text/javascript" src="/infos/jscss/jquery/1.8.7/jquery.layout-latest.js"/>
+	<script type="text/javascript" src="/infos/jscss/jquery/1.8.7/jquery.layout.resizePaneAccordions-1.0.js"/>
+	
+	
+	<link rel="stylesheet" type="text/css" href="/infos/jscss/YUI.css"/>
+ 
+  <style>
+  .mp-test-content{
+    height:500px;
+    }
+   .mp-test-content-out{
+    height:200px;
+    overflow:scroll!important;
+   }
+  .rich-mpnl-body{
+   color:yellow;
+   border:2px solid red;
+   padding:0;
+   }
+  </style>
+  <script>
+   jQuery.noConflict();
+
+   // jQuery(document).ready(function () {
+	  
+	  
+   jQuery(function() {
+
+      var windowWidth = jQuery(window).width()-parseInt(200);
+  	  var windowHeight = jQuery(window).height()-parseInt(100);
+
+
+  	jQuery('#list1b').accordion({ 
+  	    autoheight: false,
+  	    active:'#_a2' 
+  	});
+      
+	  jQuery( "#dialog" ).dialog({
+			  modal: true,
+			  autoOpen: false,
+			  height: windowHeight,
+			  width: windowWidth 
+	  });
+	  
+	});
+
+	//})
+ /* jQuery("#dialog" ).dialog("option", "height", 100 );
+  alert(jQuery("#dialog" ).dialog("option", "height"));*/
+  </script>
+  </head>
+ <body>
+ <div id="dialog" title="Basic dialog">
+	<div style="height:500px;">This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.
+	</div>
+</div>
+ 
+ <a4j:commandLink onclick="jQuery('#dialog').dialog('open');/*#{rich:component('mpTest')}.show();*/return false;">
+                     <h:graphicImage value="/img/icons/edit.gif"/>
+                     <h:outputText value=" Районы" />
+  </a4j:commandLink><br/>
+   <rich:modalPanel id="mpTest"
+                 autosized="true">
+                <f:facet name="header">
+                  <h:panelGroup>
+                    <h:outputText value="Районы Санкт-Петербурга"></h:outputText>
+                  </h:panelGroup>
+               </f:facet>
+               <f:facet name="controls">
+                 <h:panelGroup>
+                    <h:graphicImage onclick="#{rich:component('mpTest')}.hide();"
+                     value="/img/icons/close.gif"/>
+                 </h:panelGroup>
+                </f:facet>
+                <div id="mpTestContentOut" class="mp-test-content-out">
+                  <div id="mpTestContent" class="mp-test-content">
+                  12345
+                  </div>
+                </div>
+                </rich:modalPanel>
+                
+<div id="list1b">
+	<h3 id="_a1"><a href="#">Section 1</a></h3>
+	<div>
+		<p>
+		Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
+		ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
+		amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
+		odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
+		</p>
+	</div>
+	<h3 id="_a2"><a href="#">Section 2</a></h3>
+	<div>
+		<p>
+		Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
+		purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
+		velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
+		suscipit faucibus urna.
+		</p>
+	</div>
+	<h3 id="_a3"><a href="#">Section 3</a></h3>
+	<div>
+		<p>
+		Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
+		Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
+		ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
+		lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
+		</p>
+		<ul>
+			<li>List item one</li>
+			<li>List item two</li>
+			<li>List item three</li>
+		</ul>
+	</div>
+	<h3 id="_a4"><a href="#">Section 4</a></h3>
+	<div>
+		<p>
+		Cras dictum. Pellentesque habitant morbi tristique senectus et netus
+		et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
+		faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
+		mauris vel est.
+		</p>
+		<p>
+		Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
+		Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
+		inceptos himenaeos.
+		</p>
+	</div>
+</div>
+
+ </body>
+</html>

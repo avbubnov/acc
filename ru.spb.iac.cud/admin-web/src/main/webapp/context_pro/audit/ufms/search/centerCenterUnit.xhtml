@@ -1,0 +1,230 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<ui:composition 
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:s="http://jboss.com/products/seam/taglib"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+ <h3 class="ui-widget-header">Аудит Данных УФМС - Поиск</h3>
+ <div class="ui-layout-content" >
+
+   <a4j:jsFunction name="invokeRemoteAuditBean" 
+                   reRender="outInvokeForBean, outCenterCenter, outCenterCenterFooter, outCenterBottom"
+                   action="#{auditSearchManager.forView}"
+                   ajaxSingle="true">
+     <f:param name="sessionId"/>
+     <f:param name="entryid"/>
+     <f:param name="onSearch"/>
+     <f:param name="idRai"/>
+     <f:param name="remoteAudit"/>
+     <f:param name="auditListCount"/>
+   </a4j:jsFunction>
+   <a4j:outputPanel id="outInvokeForBean">
+  <a4j:jsFunction name="invokeSelectColumns" 
+                  reRender="outCCSelCol"
+                  ajaxSingle="true"
+                  oncomplete="#{rich:component('CCSelCol')}.show();">
+           <f:param name="onSearch"/>
+           <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}"/>
+           <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}"/>
+           <f:param name="remoteAudit"/>
+           <f:param name="idRai"/>
+           <f:param name="auditListCount"/>
+  </a4j:jsFunction>
+  </a4j:outputPanel>
+  <!--/a4j:form-->
+  
+ <a4j:outputPanel id="outCenterCenter">
+ 
+  <!--h:messages id="messCCUA" style="color:red" globalOnly="true" /-->
+ <s:div rendered="#{auditSearchManager.evaluteForList and auditManager.connectError==0}"> 
+ <!--s:div rendered="#{param['remoteAudit']!=null and auditManager.connectError==0}"-->
+  
+    <!--h:form id="fAuditSearchP"-->
+    <table style="margin-top:5px;margin-left:5px; width:95%; font-size:12px;"
+         border="0">
+          <tr>
+            <td width="100px" height="25px">
+              <h:outputText value="Образец поиска"/>
+            </td>
+            <td width="200px">
+            <h:inputText value="#{auditSearchManager.searchString}"
+               id="searchPattern" maxlength="100" size="55" 
+               onkeypress="if (event.keyCode == 13) { return false;}">
+               <!--a4j:support 
+		            id="searchPi"
+		            event="onkeypress"  onsubmit="if (event.keyCode != 13) { return false;}" 
+		            ignoreDupResponses="true" focus="searchPi" 
+			        requestDelay="700" reRender="outCenterCenter">
+			        <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+                    <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+                    <f:param name="onSearch" value="1"/>
+                    <f:param name="idRai" value="#{param['idRai']}"/>
+                 </a4j:support-->
+               </h:inputText>  
+            </td>
+            <td><a4j:commandButton value="Поиск"
+                    reRender="outCenterCenter,outCenterCenterFooter"  styleClass="but_class" 
+                    action="#{auditSearchDataModel.searchAction}"
+                    onclick="if(!check()){return false;}">
+                    <f:param name="onSearch" value="1"/>
+                    <f:param name="idRai" value="#{param['idRai']}"/>
+                    <f:param name="actSect" value="#{param['actSect']}"/>
+                    <f:param name="actSectItem" value="#{param['actSectItem']}"/>
+                    <f:param name="remoteAudit" value="searchFact"/>
+              </a4j:commandButton>
+            </td>
+         </tr>
+      </table>
+      
+    <!--/s:div-->  
+      
+      <!--/h:form>
+     <h:form id="fAuditList"-->
+    <a4j:queue requestDelay="550" ignoreDupResponce="true"/>  
+    <rich:dataTable id="audit_dt"
+	    style="width:100%" var="it"
+        value="#{auditSearchDataModel}"
+        rows="#{profile.rowsCountAuditSearch}" 
+        rendered="#{param['onSearch']!=null}" 
+        reRender="audit_dt_dscr"
+        onRowClick="/*fooNameRow(this);*/
+                    invokeRemoteAuditBean('#{it.sessionId}',
+                                          '#{it.entryid}',
+                                          '1',
+                                          '#{param['idRai']}',
+                                          'rowSelectFact',
+                                          '#{param['auditListCount'] != null ? param['auditListCount'] : auditSearchDataModel.rowCount}');">
+         
+         <rich:columns value="#{auditSearchManager.auditItemsListSelect}" var="field" 
+           index="index" id="column#{index}" 
+           style="#{it.selected=='true' ? 'background-color: yellow;' : ''} cursor:pointer;" 
+           styleClass="#{(it.sessionId==param['sessionId'] and it.entryid==param['entryid']) ? 'audit_record_active' : ''}">
+           <f:facet name="header">
+             <h:outputText value="#{field.itemColumn}" />
+           </f:facet>
+           <c:choose> 
+             <c:when test="#{field.itemField=='extendedTimestamp'}" > 
+               <h:outputText value="#{it[field.itemField]}">
+                  <s:convertDateTime pattern="dd.MM.yy HH:mm:ss.SSS"/>
+               </h:outputText>
+             </c:when> 
+             <c:otherwise> 
+                <h:outputText value="#{it[field.itemField]}" />
+             </c:otherwise> 
+          </c:choose>  
+         </rich:columns>
+         
+         <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+         <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+         <f:param name="onSearch" value="1"/>
+         <f:param name="idRai" value="#{param['idRai']}"/>
+      </rich:dataTable>
+     </s:div> 
+     <s:div rendered="#{auditManager.connectError!=0 or auditSearchManager.connectError!=0}">
+         <h:messages style="color:red" globalOnly="true" />
+    </s:div>
+ </a4j:outputPanel>
+</div> 
+
+ <div class="ui-widget-footer" style="background:#E6E6E6;">
+      <a4j:outputPanel id="outCenterCenterFooter">
+        <table>
+         <tr>
+          <td>
+           <!--s:div rendered="#{param['idRai']!=null and param['onSearch']!=null and auditManager.connectError==0}"-->
+           <s:div rendered="#{auditSearchManager.evaluteForListFooter and param['onSearch']!=null and auditManager.connectError==0}">
+          <table style="width:95%" border="0">
+           <tr>
+            <td width="40px;">
+             <h:outputText value="Строк:" />
+            </td>
+            <td width="50px;">
+            <rich:inputNumberSpinner 
+                       value="#{profile.rowsCountAuditSearch}" 
+                       inputSize="1"
+                       id="rowCId"
+                       minValue="5"
+                       enableManualInput="false"
+                       oninputkeypress="return false;"/>
+             </td>
+             <td width="20px;">
+              <a4j:commandLink reRender="outCenterCenter,outCenterCenterFooter"
+                             ajaxSingle="true" process="rowCId">
+              <h:graphicImage url="/img/icons/Da.gif" styleClass="img-in-link" height="14" width="14"/>
+              <f:param name="auditListCount" value="#{auditSearchDataModel.rowCount}"/>
+              <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+              <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+              <f:param name="onSearch" value="1"/>
+              <f:param name="idRai" value="#{param['idRai']}"/>
+              <f:param name="remoteAudit" value="rowCountFact"/>
+             </a4j:commandLink>
+           </td>
+           <td>
+            <rich:datascroller align="center" for="audit_dt" 
+                          maxPages="5" stepControls="hide" 
+                          id="audit_dt_dscr" immediate="true"
+                          renderIfSinglePage="true"
+                          reRender="outCenterCenter" ajaxSingle="true">
+                         <f:param name="auditListCount" value="#{auditSearchDataModel.rowCount}"/>
+                         <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+                         <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+                         <f:param name="onSearch" value="1"/>
+                         <f:param name="idRai" value="#{param['idRai']}"/>
+                         <f:param name="remoteAudit" value="dScrollFact"/>
+             </rich:datascroller> 
+             </td>
+             <td width="80px;">
+              <h:outputText value="&amp;nbsp;&amp;nbsp;" escape="false"/>
+              <a4j:commandLink 
+               value="Столбцы"
+               onclick="invokeSelectColumns(
+                   '1',
+                   '#{param['sessionId']}',
+                   '#{param['entryid']}',
+                   'onSelColFact',
+                   '#{param['idRai']}',
+                   '#{param['auditListCount'] != null ? param['auditListCount'] : auditSearchDataModel.rowCount}');return false;">
+               </a4j:commandLink>
+              <!--a4j:commandLink 
+               reRender="outCCSelCol"
+               value="Столбцы" ajaxSingle="true"
+               oncomplete="#{rich:component('CCSelCol')}.show();">
+                 <f:param name="auditListCount" value="#{auditSearchDataModel.rowCount}"/>
+                 <f:param name="onSelCol" value="1"/>
+                 <f:param name="#{param['sessionId']!=null ? 'sessionId' : 'xxx1'}" value="#{param['sessionId']}"/>
+                 <f:param name="#{param['entryid']!=null ? 'entryid' : 'xxx2'}" value="#{param['entryid']}"/>
+                 <f:param name="onSearch" value="1"/>
+                 <f:param name="idRai" value="#{param['idRai']}"/>
+               </a4j:commandLink-->
+              </td>
+             </tr>
+           </table>
+      </s:div>
+       </td>
+        <td height="25px;"><!-- Placeholder-->
+         <h:outputText value="&amp;nbsp;" escape="false"/>
+       </td>
+      </tr>
+     </table>
+      
+      </a4j:outputPanel>
+   </div>    
+<script>
+//<![CDATA[
+
+function check(){
+ var search_pattern = document.getElementById("fAuditSearchP:searchPattern").value;
+ if (search_pattern=="" || jQuery.trim(search_pattern)==""){
+	 return false;
+ }else{
+	 return true;
+ }
+}
+//]]>
+</script>
+</ui:composition>

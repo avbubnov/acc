@@ -1,0 +1,2463 @@
+package iac.grn.infosweb.context.app.system;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Out;
+import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.log.Log;
+
+import java.io.File;
+
+import iac.cud.infosweb.dataitems.BaseItem;
+import iac.cud.infosweb.dataitems.UserItem;
+import iac.cud.infosweb.entity.AcApplication;
+import iac.cud.infosweb.entity.AcLinkUserToRoleToRaion;
+import iac.cud.infosweb.entity.AcRole;
+import iac.cud.infosweb.entity.AcUser;
+import iac.cud.infosweb.entity.GroupUsersKnlT;
+import iac.cud.infosweb.entity.IspBssT;
+import iac.cud.infosweb.entity.LinkGroupUsersUsersKnlT;
+import iac.grn.infosweb.session.Authenticator;
+import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.export.AuditExportData;
+import iac.grn.infosweb.session.audit.export.ResourcesMap;
+import iac.grn.infosweb.session.navig.LinksMap;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import org.jboss.seam.Component;
+import javax.faces.context.FacesContext;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.persistence.CascadeType;
+import javax.persistence.EntityManager;
+import javax.persistence.OneToMany;
+
+import iac.grn.ramodule.entity.VAuditReport;
+import iac.grn.serviceitems.BaseTableItem;
+import javax.persistence.NoResultException;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Управляющий Бин
+ * @author bubnov
+ *
+ */
+@Name("appSystemManager")
+public class AppSystemManager {//implements OrgManagerInterface{
+	
+	 @Logger private Log log;
+	
+	 @In EntityManager entityManager;
+	 
+	/**
+     * Экспортируемая сущности 
+     * для отображения
+     */
+	//private BaseItem usrBean;             !!! Проверить !!!
+	
+		
+	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	
+	private Long auditCount;
+	
+	private List <BaseTableItem> auditItemsListSelect;
+	
+	private List <BaseTableItem> auditItemsListContext;
+	
+	private int connectError=0;
+	private Boolean evaluteForList;
+	private Boolean evaluteForListFooter;  
+	private Boolean evaluteForBean;
+	
+	//private String pidAppSystem=null;
+	  
+	private boolean addLoginExist=false;
+	
+	private List<AcApplication> listAppSystemArm = null;
+	private List<AcApplication> listAppSystemArmEdit = null;
+	private List<AcApplication> listAppSystemArmForView = null;
+	
+	private List<GroupUsersKnlT> listAppSystemGroupForView = null;
+	
+	private LinksMap linksMap = null;
+	private AcUser currentUser = null;
+	
+	private List<BaseItem> roleList;
+	
+	private List<BaseItem> applicantList;
+	
+	private String dellMessage = null;
+	
+	private String[] fioArray={"", "", ""};
+	
+	private Boolean searchOrgExact=true;
+	
+    public boolean getAddLoginExist() {
+	    return addLoginExist;
+	}
+	
+	//@In
+    //private AuditGlobal auditGlobal;
+	
+	/*
+	private static final String[] CSV_FIELDS = {
+         "extendedTimestamp", "sessionId", "objectName", "osUser", "osHost"
+    };
+	public String[] getCsvFields() {
+        return CSV_FIELDS;
+    }*/
+	public List<BaseItem> getAuditList(int firstRow, int numberOfRows){
+	  String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
+	             .getRequestParameterMap()
+	             .get("remoteAudit");
+	   log.info("auditManager:getAuditList:remoteAudit:"+remoteAudit);
+	  
+	  
+	  log.info("getAuditList:firstRow:"+firstRow);
+	  log.info("getAuditList:numberOfRows:"+numberOfRows);
+	  
+	  List<BaseItem> appSystemListCached = (List<BaseItem>)
+			  Component.getInstance("appSystemListCached",ScopeType.SESSION);
+	  if(auditList==null){
+		  log.info("getAuditList:01");
+		 	if((remoteAudit.equals("rowSelectFact")||
+			    remoteAudit.equals("selRecAllFact")||
+			    remoteAudit.equals("clRecAllFact")||
+			    remoteAudit.equals("clSelOneFact")||
+			    remoteAudit.equals("onSelColSaveFact"))&&
+			    appSystemListCached!=null){
+		 		log.info("getAuditList:02:"+appSystemListCached.size());
+			    	this.auditList=appSystemListCached;
+			}else{
+				log.info("getAuditList:03");
+		    	invokeLocal("list", firstRow, numberOfRows, null);
+			    Contexts.getSessionContext().set("appSystemListCached", this.auditList);
+			    log.info("getAuditList:03:"+this.auditList.size());
+			}
+		 	
+		 	ArrayList<String> selRecAppSystem = (ArrayList<String>)
+					  Component.getInstance("selRecAppSystem",ScopeType.SESSION);
+		 	if(this.auditList!=null && selRecAppSystem!=null) {
+		 		 for(BaseItem it:this.auditList){
+				   if(selRecAppSystem.contains(it.getBaseId().toString())){
+					// log.info("invoke:Selected!!!");
+					 it.setSelected(true);
+				   }else{
+					 it.setSelected(false);
+				   }
+				 }
+		      }
+		}
+		return this.auditList;
+	}
+	public void setAuditList(List<BaseItem> auditList){
+		this.auditList=auditList;
+	}
+	public void invokeLocal(String type, int firstRow, int numberOfRows,
+	           String sessionId) {
+		try{
+			 String orderQuery=null;
+			 log.info("hostsManager:invokeLocal");
+			 
+			 AppSystemStateHolder appSystemStateHolder = (AppSystemStateHolder)
+					  Component.getInstance("appSystemStateHolder",ScopeType.SESSION);
+			 HashMap<String, String> filterMap = appSystemStateHolder.getColumnFilterValues();
+			 String st=null;
+			  
+			 if(type.equals("list")){
+				 log.info("invokeLocal:list:01");
+				 
+				 Set<Map.Entry<String, String>> set = appSystemStateHolder.getSortOrders().entrySet();
+                 for (Map.Entry<String, String> me : set) {
+      		       log.info("me.getKey+:"+me.getKey());
+      		       log.info("me.getValue:"+me.getValue());
+      		       
+      		       if(orderQuery==null){
+      		    	 orderQuery="order by "+me.getKey()+" "+me.getValue();
+      		       }else{
+      		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
+      		       }
+      		     }
+                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 
+                 if(filterMap!=null){
+    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : set_filter) {
+    	            	  log.info("me.getKey+:"+me.getKey());
+    	            	  log.info("me.getValue:"+me.getValue());
+    	   		      
+    	   		     if(me.getKey().equals("t1_crt_date")){  
+    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	        	   //делаем фильтр на начало  
+    	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
+    	    	   
+    	   		     }else if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	    	    	 
+    	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
+    	    	    	 
+    	    	     }else{
+    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
+    	        		//делаем фильтр на начало
+    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
+    	        	  }
+    	              }
+    	    	   }
+                 log.info("invokeLocal:list:filterQuery:"+st);
+
+             
+               List<Object[]> lo=null;
+               UserItem ui = null;
+               DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
+               
+/*
+               lo=entityManager.createNativeQuery(
+"select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos, t1.t1_dep_name, "+ 
+"t1.t1_org_code, t1.t1_org_name, t1.t1_org_adr, t1.t1_org_tel, t1.t1_start, t1.t1_end, t1.t1_status, "+ 
+ "t1.t1_crt_date, t1.t1_crt_usr_login, t1.t1_upd_date, t1.t1_upd_usr_login, "+ 
+ "t1.t1_dep_code, t1.t1_org_status, t1.t1_usr_status, t1.t1_dep_status, t1.t1_iogv_bind_type "+ 
+"from( "+
+"select AU.ID_SRV t1_id, AU.LOGIN t1_login, AU.UP_SIGN_USER t1_usr_code, AU.CERTIFICATE t1_cert, AU.SURNAME||' '||AU.NAME_ ||' '|| AU.PATRONYMIC t1_fio, "+
+"AU.POSITION t1_pos, AU.PHONE t1_tel, AU.E_MAIL t1_email, AU.DEPARTMENT t1_dep_name, ORG.SIGN_OBJECT t1_org_code, "+ 
+"ORG.FULL_ t1_org_name, ORG.PREFIX || decode(ORG.HOUSE, null, null, ','  ||ORG.HOUSE  ) t1_org_adr, ORG.PHONE t1_org_tel, "+
+"to_char(AU.START_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_start, to_char(AU.END_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_end, "+
+"AU.STATUS t1_status, AU.CREATED t1_crt_date, USR_CRT.LOGIN t1_crt_usr_login, "+
+"to_char(AU.MODIFIED, 'DD.MM.YY HH24:MI:SS') t1_upd_date, "+
+"USR_UPD.LOGIN t1_upd_usr_login, null t1_dep_code, ORG.STATUS t1_org_status,  null t1_usr_status, null t1_dep_status, " +
+"AU.UP_BINDING t1_iogv_bind_type "+
+"from AC_USERS_KNL_T au, "+ 
+"(select max(CL_ORG.ID_SRV) CL_ORG_ID,  CL_ORG.SIGN_OBJECT  CL_ORG_CODE "+ 
+"from ISP_BSS_T cl_org, "+
+"AC_USERS_KNL_T au "+ 
+"where AU.UP_SIGN = CL_ORG.SIGN_OBJECT "+ 
+"group by CL_ORG.SIGN_OBJECT)  org_narrow, ISP_BSS_T org, AC_USERS_KNL_T usr_crt, AC_USERS_KNL_T usr_upd "+
+"where "+ 
+//"(AU.UP_SIGN_USER is null or AU.UP_BINDING = 2) and 
+ "org.ID_SRV= org_narrow.CL_ORG_ID "+
+"and AU.UP_SIGN =org_narrow.CL_ORG_CODE "+
+"and au.CREATOR=USR_CRT.ID_SRV "+
+"and au.MODIFICATOR=USR_UPD.ID_SRV(+)) t1 "+
+                      (st!=null ? " where "+st :" where t1_usr_code is null ")+
+                      (orderQuery!=null ? orderQuery+", t1_fio " : " order by t1_fio "))
+              .setFirstResult(firstRow)
+              .setMaxResults(numberOfRows)
+              .getResultList();
+ */              
+      
+ lo=entityManager.createNativeQuery(
+"select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos, t1.t1_dep_name, "+
+"t1.t1_org_code, t1.t1_org_name, t1.t1_org_adr, t1.t1_org_tel, t1.t1_start, t1.t1_end, t1.t1_status, "+
+ "t1.t1_crt_date, t1.t1_crt_usr_login, t1.t1_upd_date, t1.t1_upd_usr_login, "+
+ "t1.t1_dep_code, t1.t1_org_status, t1.t1_usr_status, t1.t1_dep_status, t1.t1_iogv_bind_type  "+ 
+"from( "+
+"select AU_FULL.ID_SRV t1_id, AU_FULL.login t1_login, AU_FULL.CERTIFICATE t1_cert, t2.CL_USR_CODE t1_usr_code, "+
+ "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.SURNAME||' '||AU_FULL.NAME_ ||' '|| AU_FULL.PATRONYMIC,  CL_USR_FULL.FIO ) t1_fio, "+  
+  "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.PHONE, CL_USR_FULL.PHONE ) t1_tel, "+   
+  "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.E_MAIL, CL_USR_FULL.EMAIL) t1_email, "+  
+  "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.POSITION, CL_USR_FULL.POSITION)t1_pos, "+  
+  "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.DEPARTMENT, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.FULL_)) t1_dep_name, "+ 
+  "t1.CL_ORG_CODE t1_org_code, CL_ORG_FULL.FULL_ t1_org_name, "+
+  "CL_ORG_FULL.PREFIX || decode(CL_ORG_FULL.HOUSE, null, null, ','  ||CL_ORG_FULL.HOUSE  ) t1_org_adr, "+
+  "CL_ORG_FULL.PHONE t1_org_tel, "+
+  "to_char(AU_FULL.START_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_start, "+ 
+  "to_char(AU_FULL.END_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_end, "+  
+  "AU_FULL.STATUS t1_status, "+  
+  "AU_FULL.CREATED t1_crt_date, "+ 
+  "USR_CRT.LOGIN t1_crt_usr_login, "+ 
+  "to_char(AU_FULL.MODIFIED, 'DD.MM.YY HH24:MI:SS') t1_upd_date, "+ 
+  "USR_UPD.LOGIN t1_upd_usr_login, "+ 
+  "decode(AU_FULL.UP_SIGN_USER, null, null, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.sign_object)) t1_dep_code, "+ 
+  "CL_ORG_FULL.STATUS t1_org_status,  CL_usr_FULL.STATUS t1_usr_status, "+ 
+   "decode(AU_FULL.UP_SIGN_USER, null, null, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.STATUS)) t1_dep_status, " +
+   "AU_FULL.UP_BINDING t1_iogv_bind_type "+      
+"from "+
+"(select max(CL_ORG.ID_SRV) CL_ORG_ID,  CL_ORG.SIGN_OBJECT  CL_ORG_CODE "+
+"from ISP_BSS_T cl_org, "+
+"AC_USERS_KNL_T au "+
+"where AU.UP_SIGN = CL_ORG.SIGN_OBJECT "+
+"group by CL_ORG.SIGN_OBJECT) t1, "+
+"(select max(CL_usr.ID_SRV) CL_USR_ID,  CL_USR.SIGN_OBJECT  CL_USR_CODE "+
+"from ISP_BSS_T cl_usr, "+
+"AC_USERS_KNL_T au "+
+"where AU.UP_SIGN_USER  = CL_usr.SIGN_OBJECT "+
+"group by CL_usr.SIGN_OBJECT) t2, "+
+"(select max(CL_dep.ID_SRV) CL_DEP_ID,  CL_DEP.SIGN_OBJECT  CL_DEP_CODE "+
+"from ISP_BSS_T cl_dep, "+
+"AC_USERS_KNL_T au "+
+"where substr(au.UP_SIGN_USER,1,5)||'000'  =cl_dep.SIGN_OBJECT(+) "+
+"group by CL_DEP.SIGN_OBJECT) t3, "+
+"ISP_BSS_T cl_org_full, "+
+"ISP_BSS_T cl_usr_full, "+
+"ISP_BSS_T cl_dep_full, "+
+"AC_USERS_KNL_T au_full, "+
+"AC_USERS_KNL_T usr_crt, "+  
+"AC_USERS_KNL_T usr_upd "+
+"where cl_org_full.ID_SRV= CL_ORG_ID "+
+"and cl_usr_full.ID_SRV(+)=CL_USR_ID "+
+"and cl_DEP_full.ID_SRV(+)=CL_DEP_ID "+
+"and au_full.UP_SIGN = CL_ORG_CODE "+
+"and au_full.UP_SIGN_USER  =  CL_USR_CODE(+) "+
+"and substr(au_full.UP_SIGN_USER,1,5)||'000'  =  CL_DEP_CODE(+) "+
+"and au_full.CREATOR=USR_CRT.ID_SRV "+ 
+"and au_full.MODIFICATOR=USR_UPD.ID_SRV(+) "+ 
+")t1 "+
+              (st!=null ? " where "+st :" where t1_usr_code is null ")+
+                      (orderQuery!=null ? orderQuery+", t1_fio " : " order by t1_fio "))
+              .setFirstResult(firstRow)
+              .setMaxResults(numberOfRows)
+              .getResultList();
+               auditList = new ArrayList<BaseItem>();
+               
+               for(Object[] objectArray :lo){
+            	   try{
+            	     ui= new UserItem(
+            			   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
+            			   (objectArray[1]!=null?objectArray[1].toString():""),
+            			   (objectArray[2]!=null?objectArray[2].toString():""),
+            			   (objectArray[3]!=null?objectArray[3].toString():""),
+            			   (objectArray[4]!=null?objectArray[4].toString():""),
+            			   (objectArray[5]!=null?objectArray[5].toString():""),
+            			   (objectArray[6]!=null?objectArray[6].toString():""),
+            			   (objectArray[7]!=null?objectArray[7].toString():""),
+            			   (objectArray[8]!=null?objectArray[8].toString():""),
+            			   (objectArray[9]!=null?objectArray[9].toString():""),
+            			   (objectArray[10]!=null?objectArray[10].toString():""),
+            			   (objectArray[11]!=null?objectArray[11].toString():""),
+            			   (objectArray[12]!=null?objectArray[12].toString():""),
+            			   (objectArray[13]!=null?objectArray[13].toString():""),
+            			   (objectArray[14]!=null?objectArray[14].toString():""),
+            			   (objectArray[15]!=null?new Long(objectArray[15].toString()):null),
+            			   (objectArray[16]!=null?df.format((Date)objectArray[16]) :""),
+            			   (objectArray[17]!=null?objectArray[17].toString():""),
+            			   (objectArray[18]!=null?objectArray[18].toString():""),
+            			   (objectArray[19]!=null?objectArray[19].toString():""),
+            			   (objectArray[20]!=null?new Long(objectArray[20].toString()):null)
+            			   );
+            	     auditList.add(ui);
+            	   }catch(Exception e1){
+            		   log.error("invokeLocal:for:error:"+e1);
+            	   }
+               }  
+               
+             log.info("invokeLocal:list:02");
+             
+			 } else if(type.equals("count")){
+				 log.info("IHReposList:count:01");
+				 
+                 
+                 if(filterMap!=null){
+    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : set_filter) {
+    	            	  log.info("me.getKey+:"+me.getKey());
+    	            	  log.info("me.getValue:"+me.getValue());
+    	   		    
+    	            	  /*
+    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
+    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	        	//   }else{
+    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
+    	        		//делаем фильтр на начало
+    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
+    	        	 //  }
+    	            	 */ 
+    	            	  
+    	              if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+     	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
+    	              }else{
+    	            	 st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
+    	              }	 
+     	    	 
+    	            	  
+    	              }
+    	    	   }
+				 
+				/* 
+				 auditCount = (Long)entityManager.createQuery(
+						 "select count(au) " +
+				         "from AcUser au "+
+				         (st!=null ? " where "+st :""))
+		                .getSingleResult();*/
+				 
+				
+				 auditCount = ((java.math.BigDecimal)entityManager.createNativeQuery(
+						 "select count(*) "+ 
+								 "from( "+
+								 "select AU_FULL.ID_SRV t1_id, AU_FULL.login t1_login, AU_FULL.CERTIFICATE t1_cert, t2.CL_USR_CODE t1_usr_code, "+
+								  "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.SURNAME||' '||AU_FULL.NAME_ ||' '|| AU_FULL.PATRONYMIC,  CL_USR_FULL.FIO ) t1_fio, "+  
+								   "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.PHONE, CL_USR_FULL.PHONE ) t1_tel, "+   
+								   "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.E_MAIL, CL_USR_FULL.EMAIL) t1_email, "+  
+								   "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.POSITION, CL_USR_FULL.POSITION)t1_pos, "+  
+								   "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.DEPARTMENT, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.FULL_)) t1_dep_name, "+ 
+								   "t1.CL_ORG_CODE t1_org_code, CL_ORG_FULL.FULL_ t1_org_name, "+
+								   "CL_ORG_FULL.PREFIX || decode(CL_ORG_FULL.HOUSE, null, null, ','  ||CL_ORG_FULL.HOUSE  ) t1_org_adr, "+
+								   "CL_ORG_FULL.PHONE t1_org_tel, "+
+								   "to_char(AU_FULL.START_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_start, "+ 
+								   "to_char(AU_FULL.END_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_end, "+  
+								   "AU_FULL.STATUS t1_status, "+  
+								   "AU_FULL.CREATED t1_crt_date, "+ 
+								   "USR_CRT.LOGIN t1_crt_usr_login, "+ 
+								   "to_char(AU_FULL.MODIFIED, 'DD.MM.YY HH24:MI:SS') t1_upd_date, "+ 
+								   "USR_UPD.LOGIN t1_upd_usr_login, "+ 
+								   "decode(AU_FULL.UP_SIGN_USER, null, null, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.sign_object)) t1_dep_code, "+ 
+								   "CL_ORG_FULL.STATUS t1_org_status,  CL_usr_FULL.STATUS t1_usr_status, "+ 
+								    "decode(AU_FULL.UP_SIGN_USER, null, null, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.STATUS)) t1_dep_status, " +
+								    "AU_FULL.UP_BINDING t1_iogv_bind_type "+       
+								 "from "+
+								 "(select max(CL_ORG.ID_SRV) CL_ORG_ID,  CL_ORG.SIGN_OBJECT  CL_ORG_CODE "+
+								 "from ISP_BSS_T cl_org, "+
+								 "AC_USERS_KNL_T au "+
+								 "where AU.UP_SIGN = CL_ORG.SIGN_OBJECT "+
+								 "group by CL_ORG.SIGN_OBJECT) t1, "+
+								 "(select max(CL_usr.ID_SRV) CL_USR_ID,  CL_USR.SIGN_OBJECT  CL_USR_CODE "+
+								 "from ISP_BSS_T cl_usr, "+
+								 "AC_USERS_KNL_T au "+
+								 "where AU.UP_SIGN_USER  = CL_usr.SIGN_OBJECT "+
+								 "group by CL_usr.SIGN_OBJECT) t2, "+
+								 "(select max(CL_dep.ID_SRV) CL_DEP_ID,  CL_DEP.SIGN_OBJECT  CL_DEP_CODE "+
+								 "from ISP_BSS_T cl_dep, "+
+								 "AC_USERS_KNL_T au "+
+								 "where substr(au.UP_SIGN_USER,1,5)||'000'  =cl_dep.SIGN_OBJECT(+) "+
+								 "group by CL_DEP.SIGN_OBJECT) t3, "+
+								 "ISP_BSS_T cl_org_full, "+
+								 "ISP_BSS_T cl_usr_full, "+
+								 "ISP_BSS_T cl_dep_full, "+
+								 "AC_USERS_KNL_T au_full, "+
+								 "AC_USERS_KNL_T usr_crt, "+  
+								 "AC_USERS_KNL_T usr_upd "+
+								 "where cl_org_full.ID_SRV= CL_ORG_ID "+
+								 "and cl_usr_full.ID_SRV(+)=CL_USR_ID "+
+								 "and cl_DEP_full.ID_SRV(+)=CL_DEP_ID "+
+								 "and au_full.UP_SIGN = CL_ORG_CODE "+
+								 "and au_full.UP_SIGN_USER  =  CL_USR_CODE(+) "+
+								 "and substr(au_full.UP_SIGN_USER,1,5)||'000'  =  CL_DEP_CODE(+) "+
+								 "and au_full.CREATOR=USR_CRT.ID_SRV "+ 
+								 "and au_full.MODIFICATOR=USR_UPD.ID_SRV(+) "+ 
+								 ")t1 "+
+		         (st!=null ? " where "+st :" where t1_usr_code is null "))
+               .getSingleResult()).longValue();
+                 
+                 
+               log.info("invokeLocal:count:02:"+auditCount);
+           	 } else if(type.equals("bean")){
+				 
+			 }
+		}catch(Exception e){
+			  log.error("invokeLocal:error:"+e);
+			  evaluteForList=false;
+			  FacesMessages.instance().add("Ошибка!");
+		}
+	}
+	  /**
+	  * Подготовка сущности Аудит УФМС 
+	  * для последующих операций просмотра
+	  */
+   public void forView(String modelType) {
+	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	  log.info("forView:sessionId:"+sessionId);
+	  log.info("forView:modelType:"+modelType);
+	  if(sessionId!=null /*&& usrBean==null*/){
+		  
+		    String service="";
+			if(modelType==null){
+		    	return ;
+		    }
+			if(modelType.equals("appSystemDataModel")){
+				//service=ServiceReestr.Repos;
+			}  
+		//  invoke("bean", 0, 0, sessionId, service);
+		//  Contexts.getEventContext().set("logContrBean", logContrBean);
+	
+		 /* 
+	 	 List<AcUser> usrListCached = (List<AcUser>)
+				  Component.getInstance("usrListCached",ScopeType.SESSION);
+		  if(usrListCached!=null){
+			 for(AcUser it : usrListCached){
+				 
+				 log.info("forView_inside_for");
+				 
+				 if(it.getBaseId().toString().equals(sessionId)){
+					 log.info("forView_Achtung!!!");
+					// this.usrBean=it;
+					// Contexts.getEventContext().set("usrBean", usrBean);
+					 Contexts.getEventContext().set("usrBean", it);
+					 return;
+				 }
+			 }
+		 }*/
+		 
+		 UserItem au = (UserItem)searchBean(sessionId);
+		 
+		/* Long appCode = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode();
+			
+    	 
+	     List<AcRole> rlist = entityManager.createQuery(
+	    			"select ar from AcRole ar, AcLinkUserToRoleToRaion alur " +
+	    	 		"where alur.acRole = ar and alur.pk.acUser = :acUser " +
+	    	 		"and ar.acApplication= :acApplication ")
+	    	 		// .setParameter("acUser", au.getIdUser())
+	    	 		 .setParameter("acUser", new Long(sessionId))
+	    	 		 .setParameter("acApplication", appCode)
+	    	 		 .getResultList();
+	    	
+	    	// log.info("forView:rlist.size:"+rlist.size());
+	    	 
+	    	if(!rlist.isEmpty()){
+	    		log.info("forView:setCudRole");
+	    		au.setIsCudRole(1L);
+	    		
+	    		for(AcRole ar :rlist){
+	    			
+	    			if (ar.getSign().equals("role:urn:sys_admin_cud")){
+	    				au.setIsSysAdmin(1L);
+	    				break;
+	    			}
+	    			
+	    		}
+	    		
+	    }*/
+	    	
+     /*    try{
+        	String[] fio = au.getFio().trim().split("\\s+");
+	    	
+	    	for(int i=0; i<3; i++ ){
+				 
+				 if(i<fio.length){
+					 this.fioArray[i]=fio[i];
+				 }
+				 
+			 }
+	      	
+	     }catch(Exception e){
+	    	  System.out.println("AppSystemManager:forView:split:Error:"+e);
+	     }*/
+ 
+	     Contexts.getEventContext().set("appSystemBeanView", au);
+		 //Contexts.getEventContext().set("usrBean", au);
+	     
+	     AcUser uzp = entityManager.find(AcUser.class, new Long(sessionId));
+	     Contexts.getEventContext().set("appSystemBeanViewUzp", uzp);
+	  }
+   }
+   
+   private BaseItem searchBean(String sessionId){
+    	
+      if(sessionId!=null){
+    	 List<BaseItem> appSystemListCached = (List<BaseItem>)
+				  Component.getInstance("appSystemListCached",ScopeType.SESSION);
+		if(appSystemListCached!=null){
+			for(BaseItem it : appSystemListCached){
+				 
+			// log.info("searchBean_inside_for");
+			  if(it.getBaseId().toString().equals(sessionId)){
+					 log.info("searchBean_Achtung!!!");
+					 return it;
+			  }
+			}
+		 }
+	   }
+	   return null;
+    }
+    public Long getAuditCount(){
+	   log.info("getAuditCount");
+	 
+	   invokeLocal("count",0,0,null);
+	  
+	   return auditCount;
+	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+   }
+   
+   public void addAppSystem(){
+	   log.info("AppSystemManager:addAppSystem:01");
+	   
+	   List<AcLinkUserToRoleToRaion> arList = new ArrayList<AcLinkUserToRoleToRaion>();
+	   AcUser appSystemBeanCrt = (AcUser)
+				  Component.getInstance("appSystemBeanCrt",ScopeType.CONVERSATION);
+	   
+	   IspBssT clUsrBean = (IspBssT)
+				  Component.getInstance("clUsrBean",ScopeType.CONVERSATION);
+	 
+	   IspBssT clOrgBean = (IspBssT)
+				  Component.getInstance("clOrgBean",ScopeType.CONVERSATION);
+	   
+	   if(appSystemBeanCrt==null){
+		   return;
+	   }
+	 
+	   try {
+	    	
+		   log.info("hostsManager:addAppSystem:clUsrBean:SignObject:"+clUsrBean.getSignObject());
+					 
+		   
+	       if(!loginExist(appSystemBeanCrt.getLogin())) {
+	    	   
+	    	  // usrBeanCrt.setAcOrganization(1L);
+	    	   
+	    	   if(clUsrBean.getSignObject()!=null){
+	    	   
+	    		  
+	    		   appSystemBeanCrt.setName1(" ");
+	    		   appSystemBeanCrt.setName2(" ");
+	    		   appSystemBeanCrt.setSurname(" ");
+	    	/*	   
+	    	  IspBssT ibt_usr = (IspBssT)entityManager.createQuery(
+	    				"select o from IspBssT o where o.status='A' " +
+	    				"and o.signObject = :signObject ")
+	    		    	.setParameter("signObject", clUsrBean.getSignObject())
+	    		    	.getSingleResult();
+	    	  log.info("hostsManager:addUsr:ibt_usr:IdSrv:"+ibt_usr.getIdSrv());	    	
+	    	*/
+	    		   
+	    	 /* 
+	    	  //убрано при переходе на createNativeQuery в list
+	    	
+	    	  //!!! для сортировки по фамилии
+	    	   String fio = ibt_usr.getFio();
+	    	  String family = null;
+	    	  
+	    	  if(fio!=null){
+	    		  family =fio.split(" ")[0];
+	    	  }
+	    	  if(family!=null&&!family.equals("")){
+	    	     usrBeanCrt.setSurname(family);
+	    	  }else{
+	    		 usrBeanCrt.setSurname(" ");
+	    	  }
+	    	  
+	    	  //!!! для сортировки по телефону
+	    	  if(ibt_usr.getPhone()!=null){
+	    		  usrBeanCrt.setPhone(ibt_usr.getPhone());
+	    	  }
+	    	  
+	    	  //!!! для сортировки по email
+	    	  if(ibt_usr.getEmail()!=null){
+	    		  usrBeanCrt.setEmail(ibt_usr.getEmail());
+	    	  }
+	    	  */
+	    	  
+	    	// usrBeanCrt.setAcClUser(ibt_usr.getIdSrv());
+	    	
+	    	 appSystemBeanCrt.setUpSignUser(clUsrBean.getSignObject());
+	    	 
+	    	 /* IspBssT ibt_org = (IspBssT)entityManager.createQuery(
+	    				"select o from IspBssT o where o.status='A' " +
+	    				"and o.signObject = :signObject ")
+	    		    	.setParameter("signObject", clUsrBean.getSignObject().substring(0,3)+"00000")
+	    		    	.getSingleResult();
+	    	 
+	    	  log.info("hostsManager:addUsr:ibt_org:IdSrv:"+ibt_org.getIdSrv());
+	    	  
+	    	  usrBeanCrt.setAcClOrganization(ibt_org.getIdSrv()); 
+	    	  */
+	    	  
+	    	  appSystemBeanCrt.setUpSign(clUsrBean.getSignObject().substring(0,3)+"00000");
+	    	  
+	       }else{
+	    	/*   IspBssT ibt_org = (IspBssT)entityManager.createQuery(
+	    				"select o from IspBssT o where o.status='A' " +
+	    				"and o.signObject = :signObject ")
+	    		    	.setParameter("signObject", clOrgBean.getSignObject())
+	    		    	.getSingleResult();
+	    	  log.info("hostsManager:addUsr:ibt_org:IdSrv:"+ibt_org.getIdSrv());
+	    	  
+	    	  usrBeanCrt.setAcClOrganization(ibt_org.getIdSrv()); 
+	    	  */
+	    	  appSystemBeanCrt.setUpSign(clOrgBean.getSignObject());
+	       }
+	    	 
+	    	 if(appSystemBeanCrt.getCertificate()!=null&&!appSystemBeanCrt.getCertificate().trim().equals("")){
+	    	   appSystemBeanCrt.setCertificate(appSystemBeanCrt.getCertificate().replaceAll(" ", "") .toUpperCase());
+	          }else{
+	           appSystemBeanCrt.setCertificate(null); 
+	          }
+	    	 
+	    	 
+	    	  AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
+	    	   
+	    	  appSystemBeanCrt.setCreator(cau.getIdUser()); 
+	    	  appSystemBeanCrt.setCreated(new Date());
+	    	  entityManager.persist(appSystemBeanCrt);
+	    	      
+	    	 /*
+	    	  for(AcApplication arm:listUsrArm){
+		    		  log.info("UsrManager:addUsr:Arm:"+arm.getName());
+		    		  for(AcRole rol:arm.getAcRoles()){
+		    			  log.info("UsrManager:addUsr:RolTitle:"+rol.getRoleTitle());
+		    			  log.info("UsrManager:addUsr:RolChecked:"+rol.getUsrChecked());
+		    			  
+		    			  if(rol.getUsrChecked().booleanValue()){
+		    				  
+		    			       AcLinkUserToRoleToRaion au = new AcLinkUserToRoleToRaion(rol.getIdRol(), usrBeanCrt.getIdUser());
+		    			       au.setCreated(new Date());
+		    			       au.setCreator(new Long(1));
+		    			       arList.add(au);
+		    			  }
+		    		  }
+		    	  }
+	    	     
+	    	     if(arList.size()>0){
+	    	 		//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    	 	     usrBeanCrt.setAcLinkUserToRoleToRaions(arList);
+	    	 	 }
+	    	 	 
+	    	     */
+	    	     
+	    	 	 entityManager.flush();
+	    	  	 entityManager.refresh(appSystemBeanCrt);
+	    	     
+	    	  	 audit(ResourcesMap.USER, ActionsMap.CREATE); 
+	    	  	 
+	    	   }   
+	          }catch (Exception e) {
+	             log.error("appSystemManager:addAppSystem:ERROR="+e);
+	             e.printStackTrace(System.out);
+	          }
+	   
+   }
+   
+   public void updAppSystem(){
+	   
+	   log.info("hostsManager:updHosts:01");
+	   
+	   DateFormat df = new SimpleDateFormat ("dd.MM.yy");
+	   DateFormat df_time = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
+	   
+	   List<AcLinkUserToRoleToRaion> arList = new ArrayList<AcLinkUserToRoleToRaion>();
+	   AcUser appSystemBean = (AcUser)
+				  Component.getInstance("appSystemBean",ScopeType.CONVERSATION);
+	   
+	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	   log.info("hostsManager:updAppSystem:sessionId:"+sessionId);
+	
+	   if(appSystemBean==null || sessionId==null){
+		   return;
+	   }
+	
+	   try {
+		   
+		  AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
+		  
+		  AcUser aum = entityManager.find(AcUser.class, new Long(sessionId));
+		  
+		  
+		  if(aum.getUpSignUser()==null){
+		   aum.setName1(appSystemBean.getName1());
+		   aum.setName2(appSystemBean.getName2());
+		   aum.setSurname(appSystemBean.getSurname());
+		   aum.setEmail(appSystemBean.getEmail());
+		   aum.setPhone(appSystemBean.getPhone());
+		   aum.setPosition(appSystemBean.getPosition());
+		   //нет setDepartment, так как на форме он disabled
+		  }
+		//  aum.setAcClOrganization(appSystemBean.getAcClOrganization());
+		  
+		 // aum.setCertificate(appSystemBean.getCertificate());
+		  
+		  if(appSystemBean.getCertificate()!=null&&!appSystemBean.getCertificate().trim().equals("")){
+			  aum.setCertificate(appSystemBean.getCertificate().replaceAll(" ", "").toUpperCase());
+	      }else{
+	    	  aum.setCertificate(null);
+	      }
+		  
+		  aum.setPassword(appSystemBean.getPassword());
+		  
+		 
+		  if(appSystemBean.getStatus()!=null) { 
+			  // статус при определённых условиях 
+			  // <c:if test="#{param['onUpdate']!=null and currentUser.idUser!=appSystemBean.idUser}"> 
+	          // <!--условие ослабленное, так как добавляется условие видимости кнопки 'изменить'.
+	          //    изменить сам себя может только суперюзер-->
+	          // <!--c:if test="#{currentUser.idUser!=linksMap.superUserCode or appSystemBean.idUser!=linksMap.superUserCode}"--> 
+			  // disabled
+		     aum.setStatus(appSystemBean.getStatus());
+		     
+		  // статус и старт/финиш идут одним блоком 
+			  aum.setStart(appSystemBean.getStart());
+			  aum.setFinish(appSystemBean.getFinish());
+		  }
+		  aum.setModificator(cau.getIdUser());
+		  aum.setModified(new Date());
+		  
+		  /*
+		  for(AcLinkUserToRoleToRaion apl : aum.getAcLinkUserToRoleToRaions()){
+			   entityManager.remove(apl);
+		  }
+		  aum.setAcLinkUserToRoleToRaions(null);*/
+		   
+		  entityManager.flush();
+		  
+	    	  //pidAppSystem - global переменная!!!
+	    
+		  /*
+	    	  for(AcApplication arm:listUsrArmEdit){
+	    		  log.info("UsrManager:editUsr:Arm:"+arm.getName());
+	    		  for(AcRole rol:arm.getAcRoles()){
+	    			  log.info("UsrManager:editUsr:RolTitle:"+rol.getRoleTitle());
+	    			  log.info("UsrManager:editUsr:RolChecked:"+rol.getUsrChecked());
+	    			  
+	    			  if(rol.getUsrChecked().booleanValue()){
+	    			            AcLinkUserToRoleToRaion au = new AcLinkUserToRoleToRaion(rol.getIdRol(), new Long(sessionId));
+	    			            au.setCreated(new Date());
+	    			            au.setCreator(new Long(1));
+	    			            arList.add(au);
+	    			  }
+	    		  }
+	    	  }
+	    	  
+	    	  if(arList.size()>0){
+	    	 	//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    		  aum.setAcLinkUserToRoleToRaions(arList);
+	    	  }
+	    	  
+	    	   entityManager.flush();
+	    	  */
+	    	  
+	    	
+	    	 entityManager.refresh(aum);
+	    	  
+	    	//  appSystemBean = entityManager.find(AcUser.class, new Long(sessionId)/*appSystemBean.getIdUser()*/);
+	    	// Contexts.getEventContext().set("appSystemBean", aum);
+	    	 
+	    	 UserItem au = (UserItem)searchBean(sessionId);
+	    	 
+	    	 if(au!=null){
+	    		 
+	    		 if(aum.getUpSignUser()==null){
+	    			   au.setFio(appSystemBean.getSurname()+" "+appSystemBean.getName1()+" "+appSystemBean.getName2());
+	    			   au.setEmail(appSystemBean.getEmail());
+	    			   au.setPhone(appSystemBean.getPhone());
+	    			   au.setPosition(appSystemBean.getPosition());
+	    			   //нет setDepartment, так как на форме он disabled
+	    		 }
+	    			//  aum.setAcClOrganization(appSystemBean.getAcClOrganization());
+	    			  
+	    			 // aum.setCertificate(appSystemBean.getCertificate());
+	    			  if(appSystemBean.getCertificate()!=null&&!appSystemBean.getCertificate().trim().equals("")){
+	    				  au.setCert(appSystemBean.getCertificate().replaceAll(" ", "").toUpperCase());
+	    		      }else{
+	    		    	  au.setCert(null);
+	    		      }
+	    			  
+	    			
+	    			//  log.info("hostsManager:updUsr:appSystemBean:Status:"+appSystemBean.getStatus());
+	    			  if(appSystemBean.getStatus()!=null) { 
+	    				  // статус при определённых условиях 
+	    				  // <c:if test="#{param['onUpdate']!=null and currentUser.idUser!=appSystemBean.idUser}"> 
+	    		          // <!--условие ослабленное, так как добавляется условие видимости кнопки 'изменить'.
+	    		          //    изменить сам себя может только суперюзер-->
+	    		          // <!--c:if test="#{currentUser.idUser!=linksMap.superUserCode or appSystemBean.idUser!=linksMap.superUserCode}"--> 
+	    				  // disabled
+	    			     au.setStatus(appSystemBean.getStatus());
+	    			     
+	    			     // статус и старт/финиш идут одним блоком 
+	    			     au.setStart(appSystemBean.getStart()!=null?df.format(appSystemBean.getStart()):null);
+		    			 au.setFinish(appSystemBean.getFinish()!=null?df.format(appSystemBean.getFinish()):null);
+	    			  }
+	    			  
+	    			 // log.info("hostsManager:updUsr:au:Status:"+au.getStatus());
+	    			  
+	    			  au.setUpdUserLogin(cau.getLogin());
+	    			  au.setUpdDate(df_time.format(new Date()));
+	    			  
+	    			  Contexts.getEventContext().set("appSystemBeanView", au); 
+	    	 }else{
+	    		 
+	    		 au = getUserItem(new Long(sessionId));
+	    		 if(au!=null){
+	    		   Contexts.getEventContext().set("appSystemBeanView", au); 
+	    		 }
+	    	 }
+	    	 
+	    	 audit(ResourcesMap.USER, ActionsMap.UPDATE); 
+	    	 
+	     }catch (Exception e) {
+           log.error("AppSystemManager:editAppSystem:ERROR:"+e);
+         }
+   }
+   
+   private UserItem getUserItem(Long idUser){
+	   
+	   log.info("AppSystemManager:getUserItem:idUser:"+idUser);
+	   
+	   if(idUser==null){
+		  return null;
+	   }
+	   
+	   try{
+           List<Object[]> lo=null;
+           UserItem ui = null;
+           DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
+           
+          /* lo=entityManager.createNativeQuery(
+				      "select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos, "+
+				      "decode(t1.t1_flag, null,t1.t1_dep_ac ,decode(substr(DEP.sign_object,4,2), '00', null, DEP.FULL_)) dep_name, "+
+				      "t1.t1_org_code, t1.t1_org_name, t1.t1_org_adr, t1.t1_org_tel, " +
+				      "t1.t1_start, t1.t1_end, t1.t1_status, "+
+				      "t1.t1_crt_date, t1.t1_crt_usr_login, t1.t1_upd_date, t1.t1_upd_usr_login "+
+				      "from (select USR.ID_SRV t1_id, USR.UP_ISP_USER t1_flag, USR.LOGIN t1_login, "+  
+                  "IBT.SIGN_OBJECT t1_usr_code, "+ 
+                  "decode(USR.UP_ISP_USER, null, USR.SURNAME||' '||USR.NAME_ ||' '|| USR.PATRONYMIC,  IBT.FIO ) t1_fio, "+ 
+                  "decode(USR.UP_ISP_USER, null, USR.PHONE, ibt.PHONE ) t1_tel, "+  
+                  "decode(USR.UP_ISP_USER, null, USR.E_MAIL,IBT.EMAIL) t1_email, "+ 
+                  "decode(USR.UP_ISP_USER, null, USR.POSITION, IBT.POSITION)t1_pos, "+ 
+                  "USR.DEPARTMENT  t1_dep_ac, "+
+                  "ORG.FULL_ t1_org_name, org.SIGN_OBJECT t1_org_code, "+  
+                  "ORG.PREFIX || decode(ORG.HOUSE, null, null, ','  ||ORG.HOUSE  ) t1_org_adr, ORG.PHONE t1_org_tel, "+
+                 // "to_char(USR.CREATED, 'DD.MM.YY HH24:MI:SS') t1_crt_date, "+
+                  "USR.CREATED t1_crt_date, "+
+                  "USR_CRT.LOGIN t1_crt_usr_login, "+
+                  "to_char(USR.MODIFIED, 'DD.MM.YY HH24:MI:SS') t1_upd_date, "+
+                  "USR_UPD.LOGIN t1_upd_usr_login, "+
+                  "USR.CERTIFICATE t1_cert, " +
+                  "to_char(USR.START_ACCOUNT, 'DD.MM.YY') t1_start, "+
+                  "to_char(USR.END_ACCOUNT, 'DD.MM.YY') t1_end, " +
+                  "USR.STATUS t1_status "+ 
+                  "from "+ 
+                  "AC_USERS_KNL_T usr, "+ 
+                  "AC_USERS_KNL_T usr_crt, "+ 
+                  "AC_USERS_KNL_T usr_upd, "+ 
+                  "ISP_BSS_T ibt, "+  
+                  "ISP_BSS_T org "+ 
+                  "where "+   
+                  "ORG.ID_SRV=USR.UP_ISP "+   
+                  "and USR.UP_ISP_USER=IBT.ID_SRV(+) "+
+                  "and USR.CREATOR=USR_CRT.ID_SRV "+
+                  "and USR.MODIFICATOR=USR_UPD.ID_SRV(+) " +
+                  "and USR.ID_SRV=? "+
+                  ") t1, "+
+                  "ISP_BSS_T dep "+ 
+                  "where "+ 
+                  "DEP.STATUS (+)  ='A' "+ 
+                  "and dep.sign_object (+)  = substr(T1.t1_usr_code,1,5)||'000'")
+          .setParameter(1, idUser)
+          .getResultList();*/
+           
+           lo=entityManager.createNativeQuery(
+        		   "select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos, t1.t1_dep_name, "+
+        				   "t1.t1_org_code, t1.t1_org_name, t1.t1_org_adr, t1.t1_org_tel, t1.t1_start, t1.t1_end, t1.t1_status, "+
+        				    "t1.t1_crt_date, t1.t1_crt_usr_login, t1.t1_upd_date, t1.t1_upd_usr_login, "+
+        				    "t1.t1_dep_code, t1.t1_org_status, t1.t1_usr_status, t1.t1_dep_status, t1.t1_iogv_bind_type "+ 
+        				   "from( "+
+        				   "select AU_FULL.ID_SRV t1_id, AU_FULL.login t1_login, AU_FULL.CERTIFICATE t1_cert, t2.CL_USR_CODE t1_usr_code, "+
+        				    "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.SURNAME||' '||AU_FULL.NAME_ ||' '|| AU_FULL.PATRONYMIC,  CL_USR_FULL.FIO ) t1_fio, "+  
+        				     "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.PHONE, CL_USR_FULL.PHONE ) t1_tel, "+   
+        				     "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.E_MAIL, CL_USR_FULL.EMAIL) t1_email, "+  
+        				     "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.POSITION, CL_USR_FULL.POSITION)t1_pos, "+  
+        				     "decode(AU_FULL.UP_SIGN_USER, null, AU_FULL.DEPARTMENT, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.FULL_)) t1_dep_name, "+ 
+        				     "t1.CL_ORG_CODE t1_org_code, CL_ORG_FULL.FULL_ t1_org_name, "+
+        				     "CL_ORG_FULL.PREFIX || decode(CL_ORG_FULL.HOUSE, null, null, ','  ||CL_ORG_FULL.HOUSE  ) t1_org_adr, "+
+        				     "CL_ORG_FULL.PHONE t1_org_tel, "+
+        				     "to_char(AU_FULL.START_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_start, "+ 
+        				     "to_char(AU_FULL.END_ACCOUNT, 'DD.MM.YY HH24:MI:SS') t1_end, "+  
+        				     "AU_FULL.STATUS t1_status, "+  
+        				     "AU_FULL.CREATED t1_crt_date, "+ 
+        				     "USR_CRT.LOGIN t1_crt_usr_login, "+ 
+        				     "to_char(AU_FULL.MODIFIED, 'DD.MM.YY HH24:MI:SS') t1_upd_date, "+ 
+        				     "USR_UPD.LOGIN t1_upd_usr_login, "+ 
+        				     "decode(AU_FULL.UP_SIGN_USER, null, null, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.sign_object)) t1_dep_code, "+ 
+        				     "CL_ORG_FULL.STATUS t1_org_status,  CL_usr_FULL.STATUS t1_usr_status, "+ 
+        				      "decode(AU_FULL.UP_SIGN_USER, null, null, decode(substr(CL_DEP_FULL.sign_object,4,2), '00', null, CL_DEP_FULL.STATUS)) t1_dep_status, " +
+        				      "AU_FULL.UP_BINDING t1_iogv_bind_type "+      
+        				   "from "+
+        				   "(select max(CL_ORG.ID_SRV) CL_ORG_ID,  CL_ORG.SIGN_OBJECT  CL_ORG_CODE "+
+        				   "from ISP_BSS_T cl_org, "+
+        				   "AC_USERS_KNL_T au "+
+        				   "where AU.UP_SIGN = CL_ORG.SIGN_OBJECT "+
+        				   "group by CL_ORG.SIGN_OBJECT) t1, "+
+        				   "(select max(CL_usr.ID_SRV) CL_USR_ID,  CL_USR.SIGN_OBJECT  CL_USR_CODE "+
+        				   "from ISP_BSS_T cl_usr, "+
+        				   "AC_USERS_KNL_T au "+
+        				   "where AU.UP_SIGN_USER  = CL_usr.SIGN_OBJECT "+
+        				   "group by CL_usr.SIGN_OBJECT) t2, "+
+        				   "(select max(CL_dep.ID_SRV) CL_DEP_ID,  CL_DEP.SIGN_OBJECT  CL_DEP_CODE "+
+        				   "from ISP_BSS_T cl_dep, "+
+        				   "AC_USERS_KNL_T au "+
+        				   "where substr(au.UP_SIGN_USER,1,5)||'000'  =cl_dep.SIGN_OBJECT(+) "+
+        				   "group by CL_DEP.SIGN_OBJECT) t3, "+
+        				   "ISP_BSS_T cl_org_full, "+
+        				   "ISP_BSS_T cl_usr_full, "+
+        				   "ISP_BSS_T cl_dep_full, "+
+        				   "AC_USERS_KNL_T au_full, "+
+        				   "AC_USERS_KNL_T usr_crt, "+  
+        				   "AC_USERS_KNL_T usr_upd "+
+        				   "where cl_org_full.ID_SRV= CL_ORG_ID "+
+        				   "and cl_usr_full.ID_SRV(+)=CL_USR_ID "+
+        				   "and cl_DEP_full.ID_SRV(+)=CL_DEP_ID "+
+        				   "and au_full.UP_SIGN = CL_ORG_CODE "+
+        				   "and au_full.UP_SIGN_USER  =  CL_USR_CODE(+) "+
+        				   "and substr(au_full.UP_SIGN_USER,1,5)||'000'  =  CL_DEP_CODE(+) "+
+        				   "and au_full.CREATOR=USR_CRT.ID_SRV "+ 
+        				   "and au_full.MODIFICATOR=USR_UPD.ID_SRV(+) " +
+        				   "and au_full.ID_SRV=? "+ 
+        				   ")t1 ")
+         .setParameter(1, idUser)
+         .getResultList();
+           
+           for(Object[] objectArray :lo){
+        	   try{
+        		   log.info("AppSystemManager:getUserItem:login:"+objectArray[1].toString());
+        		   
+        	     ui= new UserItem(
+        			   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
+        			   (objectArray[1]!=null?objectArray[1].toString():""),
+        			   (objectArray[2]!=null?objectArray[2].toString():""),
+        			   (objectArray[3]!=null?objectArray[3].toString():""),
+        			   (objectArray[4]!=null?objectArray[4].toString():""),
+        			   (objectArray[5]!=null?objectArray[5].toString():""),
+        			   (objectArray[6]!=null?objectArray[6].toString():""),
+        			   (objectArray[7]!=null?objectArray[7].toString():""),
+        			   (objectArray[8]!=null?objectArray[8].toString():""),
+        			   (objectArray[9]!=null?objectArray[9].toString():""),
+        			   (objectArray[10]!=null?objectArray[10].toString():""),
+        			   (objectArray[11]!=null?objectArray[11].toString():""),
+        			   (objectArray[12]!=null?objectArray[12].toString():""),
+        			   (objectArray[13]!=null?objectArray[13].toString():""),
+        			   (objectArray[14]!=null?objectArray[14].toString():""),
+        			   (objectArray[15]!=null?new Long(objectArray[15].toString()):null),
+        			   (objectArray[16]!=null?df.format((Date)objectArray[16]) :""),
+        			   (objectArray[17]!=null?objectArray[17].toString():""),
+        			   (objectArray[18]!=null?objectArray[18].toString():""),
+        			   (objectArray[19]!=null?objectArray[19].toString():""),
+        			   (objectArray[20]!=null?new Long(objectArray[20].toString()):null)
+        			   );
+        	     return ui;
+        	   }catch(Exception e1){
+        		   log.error("getUserItem:for:error:"+e1);
+        	   }
+           }  
+	   }catch(Exception e){
+		   log.error("getUserItem:error:"+e);
+	   }
+	   return null;
+   }
+ 
+   /*
+  public void updUsrRole(){
+	   
+	   log.info("usrManager:updUsrRole:01");
+	   
+	   List<AcLinkUserToRoleToRaion> arList = new ArrayList<AcLinkUserToRoleToRaion>();
+	   AcUser usrBean = (AcUser)
+				  Component.getInstance("usrBean",ScopeType.CONVERSATION);
+	   
+	   String idArm = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("idArm");
+	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	   log.info("usrManager:updUsr:idArm:"+idArm);
+	   log.info("usrManager:updUsr:sessionId:"+sessionId);
+	
+	   if(usrBean==null || sessionId==null){
+		   return;
+	   }
+	
+	   try {
+		   
+		//  AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
+		  
+		 //	entityManager.merge(acUsrBean);
+		  AcUser aum = entityManager.find(AcUser.class, new Long(sessionId));
+		  
+		  
+		  for(AcLinkUserToRoleToRaion apl : aum.getAcLinkUserToRoleToRaions()){
+			   entityManager.remove(apl);
+		  }
+		  
+		  aum.setAcLinkUserToRoleToRaions(null);
+		   
+		  entityManager.flush();
+		  
+	 	   //pidUsr - global переменная!!!
+
+		 
+		  
+           for(AcApplication arm:listUsrArmEdit){
+	    		  log.info("UsrManager:editUsr:Arm:"+arm.getName());
+	    		  for(AcRole rol:arm.getAcRoles()){
+	    			  log.info("UsrManager:editUsr:RolTitle:"+rol.getRoleTitle());
+	    			  log.info("UsrManager:editUsr:RolChecked:"+rol.getUsrChecked());
+	    			  
+	    			  if(rol.getUsrChecked().booleanValue()){
+	    				  
+	 
+	    			            AcLinkUserToRoleToRaion au = new AcLinkUserToRoleToRaion(rol.getIdRol(), new Long(sessionId));
+	    			            au.setCreated(new Date());
+	    			            au.setCreator(new Long(1));
+	    			            arList.add(au);
+	    			  }
+	    		  }
+	    	  }
+	    	  
+	    	  if(arList.size()>0){
+	    	 	//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    		  aum.setAcLinkUserToRoleToRaions(arList);
+	    	  }
+	    	 	   
+	    	 entityManager.flush();
+	    	 entityManager.refresh(aum);
+	    	  
+	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId));
+	    	 Contexts.getEventContext().set("usrBean", aum);
+	    	  
+	     }catch (Exception e) {
+           log.error("UsrManager:editUsrRole:ERROR:"+e);
+         }
+   }
+   
+ */
+ 
+  public void updAppSystemRole(){
+	   
+	   log.info("appSystemManager:updAppSystemRole:01");
+	   
+	   List<AcLinkUserToRoleToRaion> arList = new ArrayList<AcLinkUserToRoleToRaion>();
+	   List<AcLinkUserToRoleToRaion> arRemovedList = new ArrayList<AcLinkUserToRoleToRaion>();
+	   
+	   AcUser appSystemBean = (AcUser)
+				  Component.getInstance("appSystemBean",ScopeType.CONVERSATION);
+	   
+	   String idArm = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("idArm");
+	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	   log.info("appSystemManager:updAppSystem:idArm:"+idArm);
+	   log.info("appSystemManager:updAppSystem:sessionId:"+sessionId);
+	
+	   if(appSystemBean==null || sessionId==null || idArm==null){
+		   return;
+	   }
+	
+	   try {
+		   
+		  AcUser aum = entityManager.find(AcUser.class, new Long(sessionId));
+	
+		  log.info("appSystemManager:updAppSystemRole:size1:"+aum.getAcLinkUserToRoleToRaions().size());
+		  
+		  for(AcLinkUserToRoleToRaion apl : aum.getAcLinkUserToRoleToRaions()){
+			  
+			  log.info("appSystemManager:updAppSystemRole:AcApplication:"+apl.getAcRole().getAcApplication());
+			  
+			  if(apl.getAcRole().getAcApplication().equals(new Long(idArm))){
+			       entityManager.remove(apl);
+			       arRemovedList.add(apl);
+			  }
+		  }
+
+		  for(AcLinkUserToRoleToRaion rem : arRemovedList){
+			  aum.getAcLinkUserToRoleToRaions().remove(rem);
+		  }
+		   
+		  entityManager.flush();
+		  
+		  log.info("appSystemManager:updAppSystemRole:size2:"+aum.getAcLinkUserToRoleToRaions().size());
+			  
+		   for(BaseItem rol:this.roleList){
+	    			  log.info("AppSystemManager:editAppSystem:updAppSystemRole:"+((AcRole)rol).getRoleTitle());
+	    			  log.info("AppSystemManager:editAppSystem:updAppSystemRole:"+((AcRole)rol).getUsrChecked());
+	    			  
+	    			  if(((AcRole)rol).getUsrChecked().booleanValue()){
+	    			            AcLinkUserToRoleToRaion au = new AcLinkUserToRoleToRaion(((AcRole)rol).getIdRol(), new Long(sessionId));
+	    			            au.setCreated(new Date());
+	    			            au.setCreator(new Long(1));
+	    			            arList.add(au);
+	    			  }
+	    		  }
+	     	  
+	     	if(arList.size()>0){
+	    	 	//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    		  aum.getAcLinkUserToRoleToRaions().addAll(arList) ;
+	    	}
+	    	log.info("appSystemManager:updAppSystemRole:size3:"+aum.getAcLinkUserToRoleToRaions().size());
+	    	  
+	        entityManager.flush();
+	    	 
+	        entityManager.refresh(aum);
+	    	  
+	    	//Contexts.getEventContext().set("appSystemBean", aum);
+	    	
+            UserItem au = (UserItem)searchBean(sessionId);
+	    	 
+	    	if(au!=null){
+	    		Contexts.getEventContext().set("appSystemBeanView", au); 
+	    	}else{
+	    		 au = getUserItem(new Long(sessionId));
+	    		 if(au!=null){
+	    		   Contexts.getEventContext().set("appSystemBeanView", au); 
+	    		 }
+	    	 }
+	    	 
+	    	audit(ResourcesMap.USER, ActionsMap.UPDATE_ROLE); 
+	    	
+	     }catch (Exception e) {
+           log.error("AppSystemManager:editAppSystemRole:ERROR:"+e);
+         }
+   }
+  
+  public void updAppSystemGroup(){
+	   
+	   log.info("appSystemManager:updAppSystemRole:01");
+	   
+	/*   List<LinkGroupUsersUsersKnlT> arList = new ArrayList<LinkGroupUsersUsersKnlT>();
+	   List<LinkGroupUsersUsersKnlT> arRemovedList = new ArrayList<LinkGroupUsersUsersKnlT>();
+	   
+	   AcUser appSystemBean = (AcUser)
+				  Component.getInstance("appSystemBean",ScopeType.CONVERSATION);
+	   
+	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	   log.info("appSystemManager:updAppSystem:sessionId:"+sessionId);
+	
+	   if(appSystemBean==null || sessionId==null){
+		   return;
+	   }
+	
+	   try {
+		   
+		  AcUser aum = entityManager.find(AcUser.class, new Long(sessionId));
+	
+		//  log.info("appSystemManager:updAppSystemRole:size1:"+aum.getLinkGroupUsersUsersKnlTs().size());
+		  
+		  for(LinkGroupUsersUsersKnlT apl : aum.getLinkGroupUsersUsersKnlTs()){
+			  
+			   entityManager.remove(apl);
+			 //  arRemovedList.add(apl);
+		  }
+
+		// for(LinkGroupUsersUsersKnlT rem : arRemovedList){
+		//	  aum.getAcLinkUserToRoleToRaions().remove(rem);
+		//  }
+		   
+		  aum.setLinkGroupUsersUsersKnlTs(null);
+		  
+		  entityManager.flush();
+		  
+		//  log.info("appSystemManager:updUsrRole:size2:"+aum.getAcLinkUserToRoleToRaions().size());
+			  
+		  for(BaseItem group:this.groupList){
+	    		//	  log.info("UsrManager:editUsr:updUsrRole:"+((GroupUsersKnlT)group).getFull());
+	    		//	  log.info("UsrManager:editUsr:updUsrRole:"+((GroupUsersKnlT)group).getUsrChecked());
+	    			  
+	    			  if(((GroupUsersKnlT)group).getUsrChecked().booleanValue()){
+	    				   LinkGroupUsersUsersKnlT au = new LinkGroupUsersUsersKnlT(new Long(sessionId), ((GroupUsersKnlT)group).getIdSrv());
+	    			            au.setCreated(new Date());
+	    			            au.setCreator(new Long(1));
+	    			            arList.add(au);
+	    			  }
+	    		  }
+	     	  
+	     	if(arList.size()>0){
+	    	 	//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    		//  aum.getAcLinkUserToRoleToRaions().addAll(arList) ;
+	    		  aum.setLinkGroupUsersUsersKnlTs(arList) ;
+	    	}
+	   //	log.info("appSystemManager:updUsrRole:size3:"+aum.getLinkGroupUsersUsersKnlTs().size());
+	    	  
+	        entityManager.flush();
+	    	 
+	        entityManager.refresh(aum);
+	    	  
+	    	//Contexts.getEventContext().set("appSystemBean", aum);
+	    	
+           UserItem au = (UserItem)searchBean(sessionId);
+	    	 
+	    	if(au!=null){
+	    		Contexts.getEventContext().set("appSystemBeanView", au); 
+	    	}else{
+	    		 au = getUserItem(new Long(sessionId));
+	    		 if(au!=null){
+	    		   Contexts.getEventContext().set("appSystemBeanView", au); 
+	    		 }
+	    	 }
+	    	  
+	    	audit(ResourcesMap.USER, ActionsMap.UPDATE_GROUP); 
+	    	
+	     }catch (Exception e) {
+          log.error("AppSystemManager:editAppSystemRole:ERROR:"+e);
+        }*/
+  }
+  
+   public void unAppSystemRecords(){
+	 try{
+		log.info("appSystemManager:unAppSystemRecords:01");  
+		
+		String sessionId_crack = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId_crack");
+        log.info("appSystemManager:unAppSystemRecords:sessionId_crack:"+sessionId_crack);
+		
+		if(sessionId_crack==null){
+			return;
+		}
+		 
+		AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
+	    
+		AcUser aum = entityManager.find(AcUser.class, new Long(sessionId_crack));
+		
+	    entityManager.createNativeQuery(
+		          "insert into BINDING_LOG_T(ID_SRV, UP_USERS, UP_ISP_SIGN_USER, UP_BINDING, CREATOR, CREATED) " +
+       	 		  "values(BINDING_LOG_SEQ.nextval, ?, ?, ?, ?, sysdate) ")
+	              .setParameter(1, new Long(sessionId_crack))
+	              .setParameter(2, aum.getUpSignUser())
+	              .setParameter(3, 0L)
+	              .setParameter(4, cau.getIdUser())
+			      .executeUpdate();
+	       
+	     entityManager.createNativeQuery(
+	    		        "update AC_USERS_KNL_T au " +
+				        "set au.UP_SIGN_USER=null, au.UP_BINDING=? "+
+		                "where au.ID_SRV=? ")
+		              .setParameter(1, 0L)
+		              .setParameter(2, new Long(sessionId_crack))
+				      .executeUpdate();
+		
+		//audit(ResourcesMap.USER, ActionsMap.DELETE); 
+		
+	 }catch(Exception e){
+		 log.error("appSystemManager:unAppSystemRecords:error:"+e); 
+	 }
+   }
+  /* 
+   public void updHosts(){
+	   log.info("hostsManager:updHosts:01");
+	   
+	   List<AcProtList> apList = new ArrayList<AcProtList>();
+	   AcHost hostsBean = (AcHost)
+				  Component.getInstance("hostsBean",ScopeType.CONVERSATION);
+	   
+	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	   log.info("hostsManager:updHosts:sessionId:"+sessionId);
+	
+	   if(hostsBean==null || sessionId==null){
+		   return;
+	   }
+	  
+      entityManager.createQuery("UPDATE AcHost r SET " +
+		         "r.dnsName= :dnsName, " +
+		         "r.ipAddress= :ipAddress, " +
+		         "r.modificator= :modificator, " +
+		         "r.modified= :modified " +
+		         "WHERE r.idHost= :idHost")
+		         .setParameter("dnsName", hostsBean.getDnsName())
+		         .setParameter("ipAddress",  hostsBean.getIpAddress())
+		         .setParameter("modificator", new Long(1))
+		         .setParameter("modified", new Date())
+		         .setParameter("idHost", new Long(sessionId))
+		         .executeUpdate();
+	   
+	   entityManager.createQuery("DELETE FROM AcProtList r " +
+		         "WHERE r.acHostId= :acHostId ")
+		         .setParameter("acHostId", new Long(sessionId))
+		         .executeUpdate();
+	   
+	   for(AcClProtocl acp: protocols){
+		   log.info("hostsManager:updHosts:Name:"+acp.getName());
+		   log.info("hostsManager:updHosts:PortHost:"+acp.getPortHost());
+		   log.info("hostsManager:updHosts:UsrChecked:"+acp.getUsrChecked());
+		   
+		   if(acp.getUsrChecked() && acp.getPortHost()!=null){
+			     AcProtList ap = new  AcProtList(hostsBean.getIdHost(), acp.getId());
+			     ap.setPort(new Long(acp.getPortHost())); 
+			     ap.setCreator(new Long(1));
+			     ap.setCreated(new Date());
+			     
+			     apList.add(ap);
+		   }
+	   }
+	   if(apList.size()>0){
+			//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+		  hostsBean.setAcProtLists(apList);
+	   }
+		   
+	   entityManager.flush();
+	   entityManager.refresh(hostsBean);
+	   
+	   log.info("hostsManager:updHosts:02");
+   }*/
+   
+   public void beforeSearch() {
+	   log.info("appSystemManager:beforeSearch");
+	   
+	   try{
+		  String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("sessionId");
+		  log.info("appSystemManager:beforeSearch:sessionId:"+sessionId);
+		 
+		  String searchFio = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("searchFio");
+		  log.info("appSystemManager:beforeSearch:searchFio:"+searchFio);
+		  
+		  String[] fio = searchFio.trim().split("\\s+");
+		  for(int i=0; i<3; i++ ){
+			if(i<fio.length){
+				 this.fioArray[i]=fio[i];
+			 }
+		  }
+			      	
+		  search();	
+		   
+	   }catch(Exception e){
+		 log.error("appSystemManager:beforeSearch:error:"+e);
+	   }
+   }
+   
+   public void search() {
+	   
+	   log.info("appSystemManager:search:01");
+	    
+	   // MaxResults=100!
+	   
+	   String fam=null, name=null, otch = null;
+	   String search_str=null;
+	   UserItem ui = null;
+       DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
+       //String org_code_user = null;
+    		   
+	   try{
+	   
+	     String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("sessionId");
+		 log.info("appSystemManager:search:sessionId:"+sessionId);
+		   
+	     if(/*type==null||*/sessionId==null){
+	    	 return;
+	     }
+	     
+	    /* Object[] fio_user  = (Object[])entityManager.createNativeQuery(
+					"select USR.SURNAME fam, USR.NAME_ name, USR.PATRONYMIC otch "+
+                    "from AC_USERS_KNL_T usr "+
+                    "where USR.ID_SRV = ? ")
+					.setParameter(1, new Long(sessionId))
+					.getSingleResult();
+	   
+	     fam=(String)fio_user[0]; 
+	     name=(String)fio_user[1]; 
+	     otch = (String)fio_user[2];
+	    
+	     */
+	     
+	       
+	     fam = this.fioArray[0].trim();	     
+	     name = this.fioArray[1].trim();	  
+	     otch = this.fioArray[2].trim();	  
+	     
+	     log.info("appSystemManager:search:fio:"+fam+" "+name+" "+otch);
+	    
+	     /*if(type.equals("fio")){
+	    	 search_str=fam+" "+name+" "+otch+"%";
+	     }else if(type.equals("fi")){
+	    	 search_str=fam+" "+name+" %";
+	     }else if(type.equals("fo")){
+	    	 search_str=fam+" % "+otch+"%";
+	     }else if(type.equals("f")){
+	    	 search_str=fam+" %";
+	     }else{
+	    	 return;
+	     }*/
+	     
+	     /* 8 случаев
+	        последний не поддерживается
+	     fam:  +-++-+- -
+	     name: ++-+--+ -
+	     otch: +++-+-- -
+	     */
+	     
+	     if(!fam.equals("")&&!name.equals("")&&!otch.equals("")){
+	    	 search_str=fam+" "+name+" "+otch+"%";
+	     }else if(fam.equals("")&&!name.equals("")&&!otch.equals("")){
+	    	 search_str="% "+name+" "+otch+"%";
+	     }else if(!fam.equals("")&&name.equals("")&&!otch.equals("")){
+	    	 search_str=fam+" % "+otch+"%";
+	     }else if(!fam.equals("")&&!name.equals("")&&otch.equals("")){
+	    	 search_str=fam+" "+name+" %";
+	     }else if(fam.equals("")&&name.equals("")&&!otch.equals("")){
+	    	 search_str="% "+otch+"%";
+	     }else if(!fam.equals("")&&name.equals("")&&otch.equals("")){
+	    	 search_str=fam+" %";
+	     }else if(fam.equals("")&&!name.equals("")&&otch.equals("")){
+	    	 search_str="% "+name+" %";
+	     }else{
+	    	 //не поддерживается
+	     }
+	     
+	     log.info("appSystemManager:search:search_str:"+search_str);
+	     
+	     
+	     
+	    /* 
+	     if(this.searchOrgExact!=null&&this.searchOrgExact.booleanValue()==true){
+	         org_code_user  = (String)entityManager.createNativeQuery(
+					"select USR.UP_SIGN org "+
+                    "from AC_USERS_KNL_T usr "+
+                    "where USR.ID_SRV = ? ")
+					.setParameter(1, new Long(sessionId))
+					.getSingleResult();
+	  
+	     }*/
+	     
+	     UserItem au = (UserItem)searchBean(sessionId);
+	     
+	     List<Object[]> applicant_list  = (List<Object[]>) entityManager.createNativeQuery(
+					      
+             	 "select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos, t1.t1_dep_name, "+ 
+	    		 "t1.t1_org_code, t1.t1_org_name, t1.t1_org_adr, t1.t1_org_tel, t1.t1_start, t1.t1_end, t1.t1_status, "+ 
+	    		 "t1.t1_crt_date, t1.t1_crt_usr_login, t1.t1_upd_date, t1.t1_upd_usr_login, "+ 
+	    		 "t1.t1_dep_code, t1.t1_org_status, t1.t1_usr_status, t1.t1_dep_status, t1.t1_iogv_bind_type "+ 
+	    		 "from( "+
+	    		 "select USR.ID_SRV t1_id, null t1_login, USR.SIGN_OBJECT t1_usr_code, null t1_cert, USR.FIO t1_fio, "+
+	    		 "USR.POSITION t1_pos, USR.PHONE t1_tel, USR.EMAIL t1_email,DEP.FULL_ t1_dep_name, ORG.SIGN_OBJECT t1_org_code, "+ 
+	    		 "ORG.FULL_ t1_org_name, ORG.PREFIX || decode(ORG.HOUSE, null, null, ','  ||ORG.HOUSE  ) t1_org_adr, ORG.PHONE t1_org_tel, "+
+	    		 "null t1_start, null t1_end, "+
+	    		 "null t1_status,null t1_crt_date, null t1_crt_usr_login, "+
+	    		 "null t1_upd_date, "+
+	    		 "null t1_upd_usr_login, DEP.SIGN_OBJECT t1_dep_code, ORG.STATUS t1_org_status, USR.SIGN_OBJECT t1_usr_status, DEP.STATUS t1_dep_status, " +
+	    		 "null t1_iogv_bind_type "+
+	    		 "from ISP_BSS_T usr, ISP_BSS_T org, ISP_BSS_T dep, "+
+	    		 "(select max(CL_ORG.ID_SRV) CL_ORG_ID,  CL_ORG.SIGN_OBJECT  CL_ORG_CODE "+ 
+	    		 "from ISP_BSS_T cl_org "+
+	    		 "group by CL_ORG.SIGN_OBJECT)  org_narrow, "+
+	    		 "(select max(CL_dep.ID_SRV) CL_dep_ID,  CL_dep.SIGN_OBJECT  CL_dep_CODE "+ 
+	    		 "from ISP_BSS_T cl_dep "+
+	    		 "group by CL_dep.SIGN_OBJECT)  dep_narrow "+
+	    		 "where lower(usr.FIO) like  lower('"+search_str+"') "+
+	    		 "and usr.STATUS='A' "+
+	    		 "and substr(USR.SIGN_OBJECT ,1,3)||'00000'  = org_narrow.CL_ORG_CODE(+) "+
+	    		 "and ORG.ID_SRV(+)=org_narrow.CL_ORG_ID "+
+	    		 "and substr(USR.SIGN_OBJECT ,1,5)||'000'  = dep_narrow.CL_dep_CODE(+) "+
+	    		 "and dep.ID_SRV(+)=dep_narrow.CL_dep_ID " +
+	    		 "and (ORG.SIGN_OBJECT = :org_code or 1= :not_org_code_flag) " +
+	    		 "order by t1_fio "+
+	    		 ") t1 ")
+	    		.setParameter("org_code", au.getOrgCode()) 
+	    		.setParameter("not_org_code_flag", this.searchOrgExact!=null&&this.searchOrgExact.booleanValue()==true?0:1) 
+	 			.setMaxResults(100)
+	    		.getResultList();
+	     
+	     log.info("appSystemManager:search:list:size:"+applicant_list.size());
+	     
+	     applicantList= new ArrayList<BaseItem>();
+	     
+	     for(Object[] objectArray :applicant_list){
+	    	 
+	    	 try{
+        	     ui= new UserItem(
+        			   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
+        			   (objectArray[1]!=null?objectArray[1].toString():""),
+        			   (objectArray[2]!=null?objectArray[2].toString():""),
+        			   (objectArray[3]!=null?objectArray[3].toString():""),
+        			   (objectArray[4]!=null?objectArray[4].toString():""),
+        			   (objectArray[5]!=null?objectArray[5].toString():""),
+        			   (objectArray[6]!=null?objectArray[6].toString():""),
+        			   (objectArray[7]!=null?objectArray[7].toString():""),
+        			   (objectArray[8]!=null?objectArray[8].toString():""),
+        			   (objectArray[9]!=null?objectArray[9].toString():""),
+        			   (objectArray[10]!=null?objectArray[10].toString():""),
+        			   (objectArray[11]!=null?objectArray[11].toString():""),
+        			   (objectArray[12]!=null?objectArray[12].toString():""),
+        			   (objectArray[13]!=null?objectArray[13].toString():""),
+        			   (objectArray[14]!=null?objectArray[14].toString():""),
+        			   (objectArray[15]!=null?new Long(objectArray[15].toString()):null),
+        			   (objectArray[16]!=null?df.format((Date)objectArray[16]) :""),
+        			   (objectArray[17]!=null?objectArray[17].toString():""),
+        			   (objectArray[18]!=null?objectArray[18].toString():""),
+        			   (objectArray[19]!=null?objectArray[19].toString():""),
+        			   (objectArray[20]!=null?new Long(objectArray[20].toString()):null)
+        			   );
+        	     applicantList.add(ui);
+        	   }catch(Exception e1){
+        		   log.error("invokeLocal:for:error:"+e1);
+        	   } 
+	    	 
+	     }
+	   
+	     Contexts.getEventContext().set("appSystemBeanViewList", Arrays.asList(au));
+	     
+	   }catch(Exception e){
+		 log.error("appSystemManager:search:"+e);
+	   }
+   } 
+   
+   public void appSystemRecords() {
+	  //берётся sessionId_crack, а не sessionId,
+	  //чтобы при reRender не напоминать событие выбора записи 
+	   
+	   log.info("appSystemManager:appSystemRecords:01");
+	   try{
+		   String sessionId_crack = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId_crack");
+           log.info("appSystemManager:appSystemRecords:sessionId_crack:"+sessionId_crack);
+		   
+		   String signObject = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("signObject");
+	       log.info("appSystemManager:appSystemRecords:signObject:"+signObject);
+	       
+	       
+	       if(sessionId_crack==null||signObject==null){
+	    	   return;
+	       }
+	       
+	       AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
+	       
+	       entityManager.createNativeQuery(
+  		            "insert into BINDING_LOG_T(ID_SRV, UP_USERS, UP_ISP_SIGN_USER, UP_BINDING, CREATOR, CREATED) " +
+         	 		"values(BINDING_LOG_SEQ.nextval, ?, ?, ?, ?, sysdate) ")
+	              .setParameter(1, new Long(sessionId_crack))
+	              .setParameter(2, signObject)
+	              .setParameter(3, 2L)
+	              .setParameter(4, cau.getIdUser())
+			      .executeUpdate();
+	       
+	       entityManager.createNativeQuery(
+	    		        "update AC_USERS_KNL_T au " +
+				        "set au.UP_SIGN_USER=?, au.UP_BINDING=? "+
+		                "where au.ID_SRV=? ")
+		              .setParameter(1, signObject)
+		              .setParameter(2, 2L)
+		              .setParameter(3, new Long(sessionId_crack))
+				      .executeUpdate();
+	       
+	   }catch(Exception e){
+		   log.error("appSystemManager:appSystemRecords:error::"+e);
+	   }
+   }
+   
+   public void forViewUpdDel() {
+	   try{
+	     String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("sessionId");
+	     log.info("forViewUpdDel:sessionId:"+sessionId);
+	     if(sessionId!=null){
+	    	 AcUser ah = entityManager.find(AcUser.class, new Long(sessionId));
+	     	 
+	    	 if(ah!=null){
+	    		 
+	    		 UserItem ui = getUserItem(new Long(sessionId));
+	    		
+	    		 ah.setOrgName(ui.getOrgName());
+	    		 
+	    		 if(ah.getUpSignUser()!=null){
+	    			 ah.setFio(ui.getFio());
+	    			 ah.setPosition(ui.getPosition());
+	    			 ah.setPhone(ui.getPhone());
+	    			 ah.setEmail(ui.getEmail());
+	    		 }
+	    	 }
+	    	 
+	    	 Contexts.getEventContext().set("appSystemBean", ah);
+	     }
+	   }catch(Exception e){
+		   log.error("forViewUpdDel:Error:"+e);
+	   }
+   } 
+   
+   public void forViewCrt() {
+	   try{
+	     log.info("forViewCrt");
+	     AcUser au = new AcUser(); 
+	     au.setPassword(password());
+	     Contexts.getEventContext().set("appSystemBeanCrt", au);
+	   }catch(Exception e){
+		 log.error("forViewCrt:Error:"+e);
+	   }
+   } 
+   
+   public void forViewUnAppSystemMessage() {
+		  String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+				.getRequestParameterMap()
+				.get("sessionId");
+		  log.info("forViewDel:sessionId:"+sessionId);
+		  if(sessionId!=null){
+			 AcUser aa = entityManager.find(AcUser.class, new Long(sessionId));
+			 
+              if(aa!=null){
+	    		 
+	    		 UserItem ui = getUserItem(new Long(sessionId));
+	    			 
+	    		 aa.setFio(ui.getFio());
+	    	
+	       	 }
+			 Contexts.getEventContext().set("appSystemBean", aa);
+		 }	
+ }
+   private String password(){
+		String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		Random rnd = new Random();
+
+		int len=8; 
+		
+	    StringBuilder sb = new StringBuilder(len);
+		for(int i = 0; i < len; i++) {
+		   sb.append(AB.charAt(rnd.nextInt(AB.length())));
+		}
+		log.info("password:"+sb.toString());
+		return sb.toString();
+  
+   }
+   
+   public List<AcApplication> getListAppSystemArm() throws Exception{
+	    log.info("AppSystemManager:getListAppSystemArm:01");
+	    try {
+	    	if(listAppSystemArm==null){
+	    		//listAppSystemArm=entityManager.createQuery("select o from AcApplication o where o.acRoles IS NOT EMPTY").getResultList();
+	      		String query="select o from AcApplication o where o.acRoles IS NOT EMPTY ";
+	    		
+	      		AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
+	      		
+	      		LinksMap lm = (LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION);
+	      		Long appCode = lm.getAppCode();
+			
+	      		
+	      		if(!cau.getIsSysAdmin().equals(1L)){ //если не с ролью сист админ
+	    			query+="and o.idArm!="+appCode;
+	    		}/*else if(cau.getIdUser()!=lm.getSuperUserCode()){ //если текущий пользователь с ролью сист админ, но не первый суперпользовватель
+	    			query+="and o.idArm!="+appCode;
+	    		}*/
+	    		listAppSystemArm=entityManager
+	    				.createQuery(query)
+	    				.getResultList();
+				
+	    	}
+	     } catch (Exception e) {
+	    	 log.error("AppSystemManager:getListAppSystemArm:ERROR:"+e);
+	         throw e;
+	     }
+	    return listAppSystemArm;
+   }
+   public void setListAppSystemArm(List<AcApplication> listAppSystemArm){
+	   this.listAppSystemArm=listAppSystemArm;
+   }
+   
+   public List<AcApplication> getListAppSystemArmEdit() throws Exception{
+	    log.info("AppSystemManager:getListAppSystemArmEdit:01");
+	   
+	    String  idAppSystem = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    log.info("AppSystemManager:getListAppSystemArmEdit:sessionId:"+idAppSystem);
+	
+	    try {
+	
+	    	String saveEditFlag;
+	    	if(listAppSystemArmEdit==null){
+	      		//listAppSystemArmEdit=entityManager.createQuery("select o from AcApplication o where o.acRoles IS NOT EMPTY").getResultList();
+	      		
+                String query="select o from AcApplication o where o.acRoles IS NOT EMPTY ";
+	    		
+                //перенесли на disabled chekbox
+	      	/*	Long appCode = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode();
+				Authenticator authenticator = (Authenticator)
+	  				  Component.getInstance("authenticator",ScopeType.CONVERSATION);
+	    		if(!authenticator.accessPerm("0052","1")){
+	    			query+="and o.idArm!="+appCode;
+	    		}
+	    		*/
+	    		
+	    		listAppSystemArmEdit=entityManager
+	    				.createQuery(query)
+	    				.getResultList();
+	      		
+	      		
+	      		saveEditFlag= FacesContext.getCurrentInstance().getExternalContext()
+		 			        .getRequestParameterMap()
+		 			        .get("saveEditFlag");
+		    	 log.info("AppSystemManager:getListAppSystemArmEdit:saveEditFlag:"+saveEditFlag);
+		    		 
+		    	/* for(AcApplication arm :listUsrArmEdit){
+		    		 log.info("UsrManager:getListUsrArmEdit:arm:"+arm.getName());
+		    		  for(AcRole rol :arm.getAcRoles()){
+				    	  log.info("UsrManager:getListUsrArmEdit:rol:"+rol.getRoleTitle());
+		    		  }	 
+		    	 }	*/ 
+		    	if(saveEditFlag==null){	
+		    		
+		    	// List<Long> listUsrRol=em.createQuery("select o.idRol from AcRole o JOIN o.acLinkUserToRoleToRaions o1 where o1.pk.acUser = :acUser")
+		    	  List<AcRole> listAppSystemRol=entityManager.createQuery("select o from AcRole o JOIN o.acLinkUserToRoleToRaions o1 where o1.pk.acUser = :acUser")
+						 .setParameter("acUser", new Long(idAppSystem))
+			      				.getResultList();
+			     
+		    	
+		    	  
+	      	    for(AcApplication arm :listAppSystemArmEdit){
+			        	
+			      for(AcRole rol :arm.getAcRoles()){
+			    	  List<Long> ls =new ArrayList<Long>();
+			    	  log.info("AppSystemManager:getListAppSystemArmEdit:rol.getIdRol()"+rol.getIdRol());
+			    	
+			    	  //if (listAppSystemRol.contains(rol.getIdRol())){
+			    	  if (listAppSystemRol.contains(rol)){  
+			    		  rol.setUsrChecked(true);
+			    	  }
+			    	  
+			    	/*  for(AcLinkUserToRoleToRaion alu :rol.getAcLinkUserToRoleToRaions()){
+			    	   if(alu.getAcUser().getIdUser().equals(new Long(idUsr))&&alu.getAcRole().getIdRol().equals(rol.getIdRol())){
+			    		   ls.add(alu.getAcRaion().getIdRai());
+			    	   }
+			    	  }
+			    	  rol.setRaions(ls);*/
+			   	     }
+          	        } 
+	      	    }
+	    	 }
+		//	 }
+			} catch (Exception e) {
+	    	 log.error("AppSystemManager:getListAppSystemArmEdit:ERROR:"+e);
+	         throw e;
+	     }
+	    return listAppSystemArmEdit;
+   }
+   
+   public void setListAppSystemArmEdit(List<AcApplication> listAppSystemArmEdit){
+	   this.listAppSystemArmEdit=listAppSystemArmEdit;
+   }
+  /* 
+   public List<AcApplication> getListUsrArmForView() throws Exception{
+	    log.info("UsrManager:getListUsrArmForView:01");
+	   
+	    String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    
+	    log.info("UsrManager:getListUsrArmForView:sessionId:"+sessionId);
+	    
+	    try {
+	    	
+	    	if(listUsrArmForView==null && sessionId!=null){
+	      	
+	    	//	listUsrArmForView=entityManager.createQuery("select o from AcApplication o where o.acRoles IS NOT EMPTY").getResultList();
+	    		listUsrArmForView=entityManager.createQuery(
+	    				"select oo from AcApplication oo where oo.idArm IN " +
+	    				"(select o.idArm from AcApplication o, AcRole o1, AcLinkUserToRoleToRaion o2 " +
+	    				"where o1.acApplication2 = o and o2.acRole = o1 and o2.pk.acUser = :acUser " +
+	    				"group by o.idArm) ")
+	    				 .setParameter("acUser", new Long(sessionId))
+	    				.getResultList();
+
+	    		
+	    		log.info("UsrManager:getListUsrArmForView:listUsrArmForView.size:"+listUsrArmForView.size());
+	    		
+	    		//List<AcRole> listUsrRol=entityManager.createQuery("select o from AcRole o JOIN o.acLinkUserToRoleToRaions o1 where o1.pk.acUser = :acUser")
+	    		List<AcRole> listUsrRol=entityManager.createQuery("select o from AcRole o, AcLinkUserToRoleToRaion o1 " +
+	    				"where o1.acRole = o and o1.pk.acUser = :acUser")
+	    				.setParameter("acUser", new Long(sessionId))
+			      		.getResultList();
+			    
+	    		//log.info("UsrManager:getListUsrArmForView:listUsrRol.size:"+listUsrRol.size());
+	    		
+		        for(AcApplication arm :listUsrArmForView){
+		          List<AcRole> listUsrRolLocal=new ArrayList<AcRole>();	
+			      for(AcRole rol :arm.getAcRoles()){
+			    	  if (listUsrRol.contains(rol)){  
+			    		  listUsrRolLocal.add(rol);
+			    	  }
+			    	}
+			      arm.setRolList(listUsrRolLocal);
+          	      } 
+	    	   }
+			} catch (Exception e) {
+	    	 log.error("UsrManager:getListUsrArmForView:ERROR:"+e);
+	         throw e;
+	     }
+	    return listUsrArmForView;
+   }*/
+   
+   public List<AcApplication> getListAppSystemArmForView() throws Exception{
+	    log.info("AppSystemManager:getListAppSystemArmForView:01");
+	   
+	    String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    
+	    log.info("AppSystemManager:getListAppSystemArmForView:sessionId:"+sessionId);
+	    List<Object[]> lo=null;
+	    AcApplication app = null;
+	    AcRole rol = null;
+	    
+	    try {
+	    	
+	    	if(listAppSystemArmForView==null && sessionId!=null){
+	      	
+	    		lo=entityManager.createNativeQuery(
+	    				"select APP.ID_SRV app_id, APP.FULL_ app_name, ROL.FULL_ role_name "+
+                        "from AC_IS_BSS_T app, AC_ROLES_BSS_T rol, AC_USERS_LINK_KNL_T url "+
+                        "where ROL.UP_IS=APP.ID_SRV and URL.UP_ROLES=ROL.ID_SRV and URL.UP_USERS=? "+
+                        "order by  APP.FULL_, APP.ID_SRV, ROL.FULL_")
+	    				 .setParameter(1, new Long(sessionId))
+	    				.getResultList();
+
+	    		 listAppSystemArmForView = new ArrayList<AcApplication>();
+	    		
+	    		 for(Object[] objectArray :lo){
+	    			 
+	    			 if(app==null||!app.getIdArm().toString().equals(objectArray[0].toString())){
+	    			   app=new AcApplication();
+	    			   
+	    			   listAppSystemArmForView.add(app);
+	    			   
+	    			   app.setIdArm(new Long(objectArray[0].toString()));
+	    			   app.setName(objectArray[1]!=null?objectArray[1].toString():"");
+	    			   app.setRolList(new ArrayList<AcRole>());
+	    			 }
+	    			 
+	    			 rol=new AcRole();
+	    			 rol.setRoleTitle(objectArray[2]!=null?objectArray[2].toString():"");
+	    			 
+	    			 app.getRolList().add(rol);
+	    		 }
+	    		
+	    		
+	    		log.info("AppSystemManager:getListAppSystemArmForView:listAppSystemArmForView.size:"+listAppSystemArmForView.size());
+
+	    	   }
+			} catch (Exception e) {
+	    	 log.error("AppSystemManager:getListAppSystemArmForView:ERROR:"+e);
+	         throw e;
+	     }
+	    return listAppSystemArmForView;
+  }
+  
+  /*
+  public List<GroupUsersKnlT> getListUsrGroupForView() throws Exception{
+	    log.info("UsrManager:getListUsrGroupForView:01");
+	   
+	    String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    
+	    log.info("UsrManager:getListUsrGroupForView:sessionId:"+sessionId);
+	    
+	    try {
+	    	
+	    	if(listUsrGroupForView==null && sessionId!=null){
+	      	
+	    		listUsrGroupForView=entityManager.createQuery(
+	    				"select gr " +
+	    				"from GroupUsersKnlT gr, LinkGroupUsersUsersKnlT lu " +
+	    				"where lu.groupUsersKnlT.idSrv=gr.idSrv " +
+	    				"and lu.acUsersKnlT.idUser= :idUser ")
+	    				.setParameter("idUser", new Long(sessionId))
+	    				.getResultList();
+
+	    	   }
+			} catch (Exception e) {
+	    	 log.error("UsrManager:getListUsrGroupForView:ERROR:"+e);
+	         throw e;
+	     }
+	    return listUsrGroupForView;
+   }*/
+   
+   public List<GroupUsersKnlT> getListAppSystemGroupForView() throws Exception{
+	    log.info("AppSystemManager:getListAppSystemGroupForView:01");
+	   
+	    List<Object[]> lo=null;
+	    GroupUsersKnlT group = null;
+	    AcApplication app = null;
+	    AcRole rol = null;
+	    
+	    String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    
+	    log.info("AppSystemManager:getListAppSystemGroupForView:sessionId:"+sessionId);
+	    
+	    try {
+	    	
+	    	if(listAppSystemGroupForView==null && sessionId!=null){
+	      	
+	    		lo=entityManager.createNativeQuery(
+	    				"select GR.ID_SRV gr_id, GR.FULL_ gr_name, APP.ID_SRV app_id, APP.FULL_ app_name, ROL.FULL_ role_name "+
+                        "from GROUP_USERS_KNL_T gr, LINK_GROUP_USERS_USERS_KNL_T uul, "+
+                        "LINK_GROUP_USERS_ROLES_KNL_T lur, AC_ROLES_BSS_T rol, AC_IS_BSS_T app "+
+                        "where UUL.UP_GROUP_USERS=GR.ID_SRV and UUL.UP_USERS=? "+
+                        "and LUR.UP_GROUP_USERS=GR.ID_SRV and ROL.ID_SRV=LUR.UP_ROLES "+
+                        "and APP.ID_SRV=ROL.UP_IS "+
+                        "order by GR.FULL_, GR.ID_SRV, APP.FULL_, APP.ID_SRV, ROL.FULL_ ")
+	    				.setParameter(1, new Long(sessionId))
+	    				.getResultList();
+	    		
+	    		listAppSystemGroupForView = new ArrayList<GroupUsersKnlT>();
+	    		
+	    		for(Object[] objectArray :lo){
+	    			
+	    			if(group==null||!group.getIdSrv().toString().equals(objectArray[0].toString())){
+	    				
+	    				group=new GroupUsersKnlT();
+		    			   
+	    				listAppSystemGroupForView.add(group);
+		    			   
+	    				group.setIdSrv(new Long(objectArray[0].toString()));
+	    				group.setFull(objectArray[1]!=null?objectArray[1].toString():"");
+	    				group.setArmList(new ArrayList<AcApplication>());
+		    		}
+	    			
+	    			if(app==null||!app.getIdArm().toString().equals(objectArray[2].toString())){
+	    			  
+	    		       app=new AcApplication();
+	    			   
+	    			   group.getArmList().add(app);
+	    			   
+	    			   app.setIdArm(new Long(objectArray[2].toString()));
+	    			   app.setName(objectArray[3]!=null?objectArray[3].toString():"");
+	    			   app.setRolList(new ArrayList<AcRole>());
+	    			 }
+	    			 
+	    			 rol=new AcRole();
+	    			 rol.setRoleTitle(objectArray[4]!=null?objectArray[4].toString():"");
+	    			 
+	    			 app.getRolList().add(rol);
+	    		 }
+	    	   }
+			} catch (Exception e) {
+	    	 log.error("AppSystemManager:getListAppSystemGroupForView:ERROR:"+e);
+	         throw e;
+	     }
+	    return listAppSystemGroupForView;
+ }
+   
+   public List<BaseItem> getRoleList(){
+	   if(this.roleList==null){
+		   String idArm = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("idArm");
+		   String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("sessionId");
+		   String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("remoteAudit");
+		   log.error("AppSystemManager:getRoleList:idArm:"+idArm);
+		   log.error("AppSystemManager:getRoleList:sessionId:"+sessionId);
+		   log.error("AppSystemManager:getRoleList:remoteAudit:"+remoteAudit);
+		   
+		   if(idArm==null||sessionId==null){
+			   return this.roleList;
+		   }
+		   
+		   this.roleList = entityManager.createQuery("select o from AcRole o where o.acApplication= :idArm order by o.roleTitle ")
+				   .setParameter("idArm", new Long(idArm))
+                   .getResultList();
+		 
+		   if(remoteAudit!=null&&remoteAudit.equals("armSelectFact")){
+		   
+		     List<AcRole> listAppSystemRol=entityManager.createQuery("select o from AcRole o JOIN o.acLinkUserToRoleToRaions o1 where o1.pk.acUser = :acUser ")
+					 .setParameter("acUser", new Long(sessionId))
+		      		 .getResultList();
+		   
+		     for(BaseItem role :this.roleList){
+	           if (listAppSystemRol.contains((AcRole)role)){  
+	        	  ((AcRole)role).setUsrChecked(true);
+			   }
+	         } 
+		  }
+	   }
+	   return this.roleList;
+   }
+   
+   public void setRoleList(List<BaseItem> roleList){
+	   this.roleList=roleList;
+   }
+   
+   public List<BaseItem> getApplicantList(){
+	 /*  if(this.groupList==null){
+		  String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("sessionId");
+		   String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
+			        .getRequestParameterMap()
+			        .get("remoteAudit");
+		   log.info("AppSystemManager:getRoleList:sessionId:"+sessionId);
+		   log.info("AppSystemManager:getRoleList:remoteAudit:"+remoteAudit);
+		   
+		   if(sessionId==null){
+			   return this.groupList;
+		   }
+		   
+		   this.groupList = entityManager.createQuery("select o from GroupUsersKnlT o order by o.full ")
+				   .getResultList();
+		 
+		  // if(remoteAudit!=null&&remoteAudit.equals("armSelectFact")){
+		   
+		     List<GroupUsersKnlT> listAppSystemGroup=entityManager.createQuery("select o from GroupUsersKnlT o JOIN o.linkGroupUsersUsersKnlTs o1 where o1.pk.acUser = :acUser ")
+					 .setParameter("acUser", new Long(sessionId))
+		      		 .getResultList();
+		   
+		     for(BaseItem group :this.groupList){
+	           if (listAppSystemGroup.contains((GroupUsersKnlT)group)){  
+	        	  ((GroupUsersKnlT)group).setUsrChecked(true);
+			   }
+	         } 
+		//  }
+	   }*/
+	   return this.applicantList;
+   }
+   
+   public void setApplicantList(List<BaseItem> applicantList){
+	   this.applicantList=applicantList;
+   }
+   
+   
+	public String[] getFioArray(){
+		  return this.fioArray;
+	}
+	public void setFioArray(String[] fioArray){
+		this.fioArray=fioArray;
+	}
+   
+	public Boolean getSearchOrgExact(){
+		return this.searchOrgExact;
+	}
+	public void setSearchOrgExact(Boolean searchOrgExact){
+		this.searchOrgExact=searchOrgExact;
+	}
+	
+   public int getConnectError(){
+	   return connectError;
+   }
+   
+   public List <BaseTableItem> getAuditItemsListSelect() {
+		  // log.info("getAuditItemsListSelect:01");
+	
+	    AppSystemContext ac= new AppSystemContext();
+		   if( auditItemsListSelect==null){
+			   log.info("getAuditItemsListSelect:02");
+			   auditItemsListSelect = new ArrayList<BaseTableItem>();
+			   
+			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
+			      .getRequestParameterMap()
+			      .get("reposType");
+	            log.info("getAuditItemsListSelect:reposType:"+reposType);
+			    if(reposType!=null){
+					 if(reposType.equals("1")){
+					 }else if(reposType.equals("2")){
+					 }else if(reposType.equals("3")){
+					 }else if(reposType.equals("4")){
+				     }else{
+				     }
+			    }else{
+			    }*/
+			   
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("fio"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("login"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("crtDate"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
+			 /*  auditItemsListSelect.add(ac.getAuditItemsMap().get("fio"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("phone"));
+			   auditItemsListSelect.add(ac.getAuditItemsMap().get("email"));*/
+		   }
+	       return this.auditItemsListSelect;
+   }
+   
+   public void setAuditItemsListSelect(List <BaseTableItem> auditItemsListSelect) {
+		    this.auditItemsListSelect=auditItemsListSelect;
+   }
+   
+   public List <BaseTableItem> getAuditItemsListContext() {
+	   log.info("appSystemManager:getAuditItemsListContext");
+	   if(auditItemsListContext==null){
+		   AppSystemContext ac= new AppSystemContext();
+		   auditItemsListContext = new ArrayList<BaseTableItem>();
+		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
+		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   auditItemsListContext=ac.getAuditItemsCollection();
+	   }
+	   return this.auditItemsListContext;
+   }
+      
+   private boolean loginExist(String login) throws Exception {
+		log.info("AppSystemManager:loginExist:login="+login);
+		if(login!=null){
+		  try{
+			  AcUser au= (AcUser) entityManager.createQuery("select au from AcUser au " +
+			 		                               "where au.login = :login")
+			 		     .setParameter("login", login)
+			 		     .getSingleResult();
+			  addLoginExist=true;
+			  log.info("AppSystemManager:loginExist:addLoginExist!");		     
+		    }catch (NoResultException ex){
+              log.error("AppSystemManager:loginExist:NoResultException");
+           }catch(Exception e){
+	           log.error("AppSystemManager:loginExist:Error:"+e);
+	           throw e;
+         }
+		}
+		return this.addLoginExist;
+   }
+   /*
+   public void selectRecord(){
+	    String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    log.info("selectRecord:sessionId="+sessionId);
+	    
+	   //  forView(); //!!!
+	    ArrayList<String> selRecUsr = (ArrayList<String>)
+				  Component.getInstance("selRecUsr",ScopeType.SESSION);
+	    
+	    if(selRecUsr==null){
+	       selRecUsr = new ArrayList<String>();
+	       log.info("selectRecord:01");
+	    }
+	    
+	   // AcUser au = searchBean(sessionId);
+	    AcUser au = new AcUser();
+	  // в getAuditList : else{it.setSelected(false);}
+	    
+	    if(au!=null){ 
+	     if(selRecUsr.contains(sessionId)){
+	    	selRecUsr.remove(sessionId);
+	    	au.setSelected(false);
+	    	 log.info("selectRecord:02");
+	     }else{
+	    	selRecUsr.add(sessionId);
+	    	au.setSelected(true);
+	    	log.info("selectRecord:03");
+	    }
+	    Contexts.getSessionContext().set("selRecUsr", selRecUsr);	
+	    
+	    Contexts.getEventContext().set("appSystemBean", au);
+	    }
+    }*/
+  
+   public void selectRecord(){
+	    String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		        .getRequestParameterMap()
+		        .get("sessionId");
+	    log.info("selectRecord:sessionId="+sessionId);
+	    
+	   //  forView(); //!!!
+	    ArrayList<String> selRecAppSystem = (ArrayList<String>)
+				  Component.getInstance("selRecAppSystem",ScopeType.SESSION);
+	    
+	    if(selRecAppSystem==null){
+	       selRecAppSystem = new ArrayList<String>();
+	       log.info("selectRecord:01");
+	    }
+	    
+	   // AcUser au = searchBean(sessionId);
+	    UserItem au = new UserItem();
+	  // в getAuditList : else{it.setSelected(false);}
+	    
+	    if(au!=null){ 
+	     if(selRecAppSystem.contains(sessionId)){
+	    	selRecAppSystem.remove(sessionId);
+	    	au.setSelected(false);
+	    	 log.info("selectRecord:02");
+	     }else{
+	    	selRecAppSystem.add(sessionId);
+	    	au.setSelected(true);
+	    	log.info("selectRecord:03");
+	    }
+	    Contexts.getSessionContext().set("selRecAppSystem", selRecAppSystem);	
+	    
+	    Contexts.getEventContext().set("appSystemBeanView", au);
+	    }
+   }
+   
+   public boolean getDisabled(String idArm, String roleSign, String appSystemBeanIdUser) throws Exception {
+		boolean result = true;
+	   
+	   log.info("AppSystemManager:getDisabled:idArm:"+idArm);
+	   log.info("AppSystemManager:getDisabled:roleSign:"+roleSign);
+	   log.info("AppSystemManager:getDisabled:appSystemBeanIdUser:"+appSystemBeanIdUser);
+	   
+		if(idArm!=null && roleSign!=null){
+		  try{
+			 
+			//  LinksMap linksMap= (LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION);
+			//  AcUser currentUser = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
+			  
+			  LinksMap linksMap= getLinksMap();
+			  AcUser currentUser = getCurrentUser();
+			  
+			  result=!(currentUser.getIdUser().intValue()!=linksMap.getSuperUserCode().intValue() || new Long(appSystemBeanIdUser).intValue()!=linksMap.getSuperUserCode().intValue()) 
+                      || !(new Long(idArm).intValue()!=linksMap.getAppCode().intValue() || !roleSign.equals("role:urn:sys_admin_cud") || currentUser.getIdUser().intValue()==linksMap.getSuperUserCode().intValue())
+                      || (currentUser.getIsSysAdmin().intValue()!=1 && new Long(idArm).intValue()==linksMap.getAppCode().intValue());
+			  
+			  log.info("AppSystemManager:getDisabled:result:"+result);		     
+		    }catch(Exception e){
+	           log.error("AppSystemManager:getDisabled:Error:"+e);
+	           throw e;
+          }
+		}
+		return result;
+  }
+   public LinksMap getLinksMap() {
+	   if(this.linksMap==null){
+		   linksMap= (LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION);
+	   }
+	   return linksMap;
+   }
+   
+   public AcUser getCurrentUser() {
+	   if(this.currentUser==null){
+		   currentUser= (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
+	   }
+	   return currentUser;
+   }
+   
+   public String getDellMessage() {
+	   return dellMessage;
+   }
+   public void setDellMessage(String dellMessage) {
+	   this.dellMessage = dellMessage;
+   } 
+   
+   public void audit(ResourcesMap resourcesMap, ActionsMap actionsMap){
+	   try{
+		   AuditExportData auditExportData = (AuditExportData)Component.getInstance("auditExportData",ScopeType.SESSION);
+		   auditExportData.addFunc(resourcesMap.getCode()+":"+actionsMap.getCode());
+		   
+	   }catch(Exception e){
+		   log.error("GroupManager:audit:error:"+e);
+	   }
+   }
+   
+   public Boolean getEvaluteForList() {
+	
+   	log.info("appSystemManager:evaluteForList:01");
+   	if(evaluteForList==null){
+   		evaluteForList=false;
+    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
+	             .getRequestParameterMap()
+	             .get("remoteAudit");
+	   log.info("appSystemManager:evaluteForList:remoteAudit:"+remoteAudit);
+     	
+    	if(remoteAudit!=null&&
+    	 
+    	   !remoteAudit.equals("OpenCrtFact")&&	
+    	   !remoteAudit.equals("OpenUpdFact")&&
+    	   !remoteAudit.equals("OpenDelFact")&&
+   	       !remoteAudit.equals("onSelColFact")&&
+   	       !remoteAudit.equals("refreshPdFact")){
+    		log.info("appSystemManager:evaluteForList!!!");
+   		    evaluteForList=true;
+    	}
+   	 }
+       return evaluteForList;
+   }
+   public Boolean getEvaluteForListFooter() {
+		
+	  // 	log.info("reposManager:evaluteForListFooter:01");
+	   	if(evaluteForListFooter==null){
+	   		evaluteForListFooter=false;
+	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
+		             .getRequestParameterMap()
+		             .get("remoteAudit");
+		   log.info("appSystemManager:evaluteForListFooter:remoteAudit:"+remoteAudit);
+	     
+	    	if(getEvaluteForList()&&
+	    	   //new-1-	
+	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   //new-2-	
+	   	       !remoteAudit.equals("selRecAllFact")&&
+	   	       !remoteAudit.equals("clRecAllFact")&&
+	   	      // !remoteAudit.equals("clSelOneFact")&&
+	   	       !remoteAudit.equals("onSelColSaveFact")){
+	    		log.info("appSystemManager:evaluteForListFooter!!!");
+	   		    evaluteForListFooter=true;
+	    	}
+	   	 }
+	       return evaluteForListFooter;
+	   }
+   
+   public Boolean getEvaluteForBean() {
+		
+		  // 	log.info("reposManager:evaluteForListFooter:01");
+		   	if(evaluteForBean==null){
+		   		evaluteForBean=false;
+		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
+			             .getRequestParameterMap()
+			             .get("remoteAudit");
+			    log.info("appSystemManager:evaluteForBean:remoteAudit:"+remoteAudit);
+				String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+			             .getRequestParameterMap()
+			             .get("sessionId");
+			    log.info("appSystemManager:evaluteForBean:sessionId:"+sessionId);
+		    	if(sessionId!=null && remoteAudit!=null &&
+		    	   (remoteAudit.equals("rowSelectFact")||	
+		    	    remoteAudit.equals("UpdFact"))){
+		    	      log.info("appSystemManager:evaluteForBean!!!");
+		   		      evaluteForBean=true;
+		    	}
+		   	 }
+		     return evaluteForBean;
+		   }
+
+}
+/*
+Department dept = em.getReference(Department.class, 30);
+Employee emp = new Employee();
+emp.setId(53);
+emp.setName("Peter");
+emp.setDepartment(dept);
+dept.getEmployees().add(emp);
+em.persist(emp);
+*/
+
+/*
+select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos,
+ decode(t1.t1_flag, null,t1.t1_dep_ac ,decode(substr(DEP.sign_object,4,2), '00', null, DEP.FULL_)) dep_name,
+ t1.t1_org_code, t1.t1_org_name, t1.t1_org_adr, t1.t1_org_tel, 
+ t1.t1_start, t1.t1_end, t1.t1_status, 
+ t1.t1_crt_date, t1.t1_crt_usr_login, t1.t1_upd_date, t1.t1_upd_usr_login
+                      from (select USR.ID_SRV t1_id, USR.UP_ISP_USER t1_flag, USR.LOGIN t1_login,  
+                      IBT.SIGN_OBJECT t1_usr_code, 
+                      decode(USR.UP_ISP_USER, null, USR.SURNAME||' '||USR.NAME_ ||' '|| USR.PATRONYMIC,  IBT.FIO ) t1_fio, 
+                      decode(USR.UP_ISP_USER, null, USR.PHONE, ibt.PHONE ) t1_tel,  
+                      decode(USR.UP_ISP_USER, null, USR.E_MAIL,IBT.EMAIL) t1_email, 
+                      decode(USR.UP_ISP_USER, null, USR.POSITION, IBT.POSITION)t1_pos, 
+                     USR.DEPARTMENT  t1_dep_ac,
+                      ORG.FULL_ t1_org_name, org.SIGN_OBJECT t1_org_code,  
+                      ORG.PREFIX || decode(ORG.HOUSE, null, null, ','  ||ORG.HOUSE  ) t1_org_adr, ORG.PHONE t1_org_tel,
+                     to_char( USR.CREATED,'DD.MM.YY HH24:MI:SS') t1_crt_date,
+                      USR_CRT.LOGIN t1_crt_usr_login,
+                     to_char( USR.MODIFIED,'DD.MM.YY HH24:MI:SS') t1_upd_date,
+                      USR_UPD.LOGIN t1_upd_usr_login,
+                      USR.CERTIFICATE t1_cert,
+                     to_char( USR.START_ACCOUNT,'DD.MM.YY HH24:MI:SS') t1_start,
+                     to_char( USR.END_ACCOUNT,'DD.MM.YY HH24:MI:SS') t1_end,
+                      USR.STATUS t1_status
+                      from 
+                      AC_USERS_KNL_T usr, 
+                      AC_USERS_KNL_T usr_crt, 
+                      AC_USERS_KNL_T usr_upd, 
+                      ISP_BSS_T ibt,  
+                      ISP_BSS_T org 
+                      where   
+                      ORG.ID_SRV=USR.UP_ISP   
+                      and USR.UP_ISP_USER=IBT.ID_SRV(+) 
+                     and USR.CREATOR=USR_CRT.ID_SRV
+                     and USR.MODIFICATOR=USR_UPD.ID_SRV(+)
+                 --  and  to_char(USR.CREATED,'DD.MM.YY HH24:MI:SS')='07.02.2013 14:01:57'
+                      ) t1,
+                      ISP_BSS_T dep 
+                      where 
+                      DEP.STATUS (+)  ='A' 
+                      and dep.sign_object (+)  = substr(T1.t1_usr_code,1,5)||'000'
+*/
+

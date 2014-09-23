@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+  <head>
+  <title>АИС ГРН СПб</title> 
+  </head>
+ <body >
+  <h:graphicImage value="/img/msg!info.png"/>
+   <rich:inputNumberSpinner 
+                       value="#{profile.rowsCountHosts}" 
+                       inputSize="1"
+                       id="rowCId"
+                       minValue="5"
+                       enableManualInput="false"
+                       oninputkeypress="return false;"/>
+  
+ <a4j:outputPanel id="out1">
+ =#{param['remote']}
+  <h:form>
+   name1:<h:inputText value="#{proba.name1}" /><!--br/>
+   name2:<h:inputText value="#{mastery.name2}" /><br/>
+   name1:<h:outputText value="#{mastery.name1}" /><br/>
+   name2:<h:outputText value="#{mastery.name2}" /--><br/>
+   <a4j:commandButton 
+         reRender="out1"
+         value="Включить1" >
+         <f:param name="remote" value="1"/>
+   </a4j:commandButton>
+    <a4j:commandButton 
+         reRender="out1"
+         value="Включить2" >
+         <f:param name="remote" value="2"/>
+   </a4j:commandButton>
+  </h:form>
+ </a4j:outputPanel>
+ 
+ <a4j:outputPanel id="out2">
+ =#{param['remote']}
+  <h:form>
+  <!-- name1:<h:inputText value="#{mastery.name1}" /><br/-->
+   name2:<h:inputText value="#{proba.name2}" /><!--br/>
+   name1:<h:outputText value="#{mastery.name1}" /><br/>
+   name2:<h:outputText value="name2: #{mastery.name2}" /--><br/>
+   <a4j:commandButton 
+         reRender="out2"
+         value="Включить3" >
+         <f:param name="remote" value="2"/>
+   </a4j:commandButton>
+   <!--c:if test="#{proba.evalute()==2}"--> 
+   <rich:dataTable id="arm_dt"
+	    style="width:100%" var="it"
+        value="#{armManager.listArm}"
+        rows="2" rendered="#{proba.evalute()==2}">
+       <rich:column>
+        <f:facet name="header">
+           <h:outputText value="Название" />
+        </f:facet>
+        <a4j:commandLink action="#{armManager.forView}" reRender="outCenterBottom">
+            <h:outputText value="#{it.name}"/>
+            <f:param name="idArm" value="#{it.idArm}"/>
+        </a4j:commandLink>
+       </rich:column>
+       <rich:column>
+         <f:facet name="header">
+            <h:outputText value="Описание" />
+         </f:facet>
+         <h:outputText value="#{it.description}" />
+       </rich:column>
+       <f:facet name="footer">
+        <h:panelGroup>
+         <h:panelGrid columns="5">
+          <h:outputText value="Строк:" />
+          <h:inputText value="#{profile.rowsCountArm}" size="1" maxlength="3"/>
+          <a4j:commandLink reRender="outCenterCenter">
+             <h:graphicImage url="/img/icons/Da.gif" styleClass="img-in-link" height="14" width="14"/>
+          </a4j:commandLink> 
+          <div style="width:50px;"></div>
+          <rich:datascroller align="center" for="arm_dt" 
+                          maxPages="20" stepControls="hide" 
+                          ajaxSingle="true" 
+                          renderIfSinglePage="false" immediate="false"
+                          reRender="out2">
+                     <f:param name="remote" value="2"/>
+         </rich:datascroller>          
+        </h:panelGrid>
+       </h:panelGroup>
+      </f:facet>
+     </rich:dataTable>
+    <!--/c:if-->
+   </h:form>
+  </a4j:outputPanel>
+  <!--a4j:log popup="false" level="ALL" style="width: 800px; height: 300px;"></a4j:log-->
+  
+ </body>
+</html>

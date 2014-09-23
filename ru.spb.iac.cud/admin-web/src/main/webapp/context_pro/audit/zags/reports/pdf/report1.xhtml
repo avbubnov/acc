@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+<p:document xmlns:p="http://jboss.com/products/seam/pdf"
+          xmlns:ui="http://java.sun.com/jsf/facelets" 
+          xmlns:f="http://java.sun.com/jsf/core"
+          xmlns:s="http://jboss.com/products/seam/taglib"
+          xmlns:h="http://java.sun.com/jsf/html"
+          xmlns:a4j="http://richfaces.org/a4j"
+          pageSize="792 612">
+
+<p:font name="/oracle/jboss/jboss-5.1.0.GA/server/default/verdana1251.ttf"
+      encoding="Cp1251"
+      embedded="true" size="10">
+
+      <p:paragraph alignment="center">#{auditZagsReportsManager.nameReport}</p:paragraph>
+      <p:paragraph spacingAfter="5" >
+        <p:text value="Период: "/> 
+        <p:text value="c #{param['date1']} " rendered="#{param['date1']!='' and param['date1']!=null}"/> 
+        <p:text value="по #{param['date2']}" rendered="#{param['date2']!='' and param['date2']!=null}"/> 
+        <p:text value="Всё время " rendered="#{(param['date1']=='' or param['date1']==null) and (param['date2']=='' or param['date2']==null)}"/> 
+      </p:paragraph>
+      
+      <p:table columns="#{auditZagsReportsManager.reportPDFColumnsCount}" widthPercentage="100" spacingAfter="0"
+               headerRows="1" widths="#{auditZagsReportsManager.reportPDFColumnsWidths}">
+        <f:facet name="defaultCell">
+            <p:cell horizontalAlignment="center" verticalAlignment="middle" />
+        </f:facet>
+        <p:cell><p:paragraph>№</p:paragraph></p:cell>
+        <p:cell rendered="#{param['contextDate']=='true'}"><p:paragraph>Дата</p:paragraph></p:cell>
+        <p:cell rendered="#{param['contextUser']=='true'}"><p:paragraph>Пользователь</p:paragraph></p:cell>
+        <p:cell rendered="#{param['contextUser']=='true'}"><p:paragraph>IP-адрес</p:paragraph></p:cell>
+        <p:cell rendered="#{param['contextTable']=='true'}"><p:paragraph>Таблица</p:paragraph></p:cell>
+        <p:cell><p:paragraph>Удаление</p:paragraph></p:cell>
+        <p:cell><p:paragraph>Вставка</p:paragraph></p:cell>
+        <p:cell><p:paragraph>Просмотр</p:paragraph></p:cell>
+        <p:cell><p:paragraph>Изменение</p:paragraph></p:cell>
+        
+        <a4j:repeat value="#{auditZagsReportsManager.reportItemsList}" 
+                  var="it" rowKeyVar="rkv">
+          <p:cell><p:paragraph>#{rkv+1}</p:paragraph></p:cell>
+          <p:cell rendered="#{param['contextDate']=='true'}"><p:paragraph>
+           <p:text value="#{it.currdate}">
+             <s:convertDateTime pattern="dd.MM.yyyy"/>
+           </p:text>
+          </p:paragraph></p:cell>
+          <p:cell rendered="#{param['contextUser']=='true'}"><p:paragraph>#{it.osUser}</p:paragraph></p:cell>
+          <p:cell rendered="#{param['contextUser']=='true'}"><p:paragraph>#{it.ipAddress}</p:paragraph></p:cell>
+          <p:cell rendered="#{param['contextTable']=='true'}"><p:paragraph>#{it.tableName}</p:paragraph></p:cell>
+          <p:cell><p:paragraph>#{it.qdelete}</p:paragraph></p:cell>
+          <p:cell><p:paragraph>#{it.qinsert}</p:paragraph></p:cell>
+          <p:cell><p:paragraph>#{it.qselect}</p:paragraph></p:cell>
+          <p:cell><p:paragraph>#{it.qupdate}</p:paragraph></p:cell>
+         </a4j:repeat>
+        </p:table>  
+ 
+ </p:font>
+</p:document>

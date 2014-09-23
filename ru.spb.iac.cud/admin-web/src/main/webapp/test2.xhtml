@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='windows-1251' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich">
+
+  <head>
+  <title>АИС ГРН СПб</title> 
+  <style type="text/css">
+    html{
+      background:#edf5ff;
+    }
+    .rich-message-label {
+         color:red;
+  }
+ .col1 {
+ width:240px;
+ }
+ .col2 {
+   width:80px;
+   }
+ .col4 {
+  width:80px;
+ }
+ </style>
+ </head>
+ <body >
+3+
+ <TABLE id="CBformCrt:grus_crt" style="margin:0; padding:0;" cellpadding="0" cellspacing="0"><TBODY>
+<TR>
+<TD style="line-height:50%;" height="3px"><INPUT style="border:0; MARGIN: 0px; padding:0;height:5" id="CBformCrt:grus_crt:0" value="1" type="checkbox" name="CBformCrt:grus_crt"/> <LABEL for="CBformCrt:grus_crt:0">Лесков Николай Семёнович</LABEL></TD></TR>
+<TR>
+<TD style="line-height:50%;" height="3px"><INPUT style="border:0; MARGIN: 0; padding:0;" id="CBformCrt:grus_crt:1" value="21" type="checkbox" name="CBformCrt:grus_crt"/> <LABEL for="CBformCrt:grus_crt:1">Савельев Савелий Савельевич</LABEL></TD></TR>
+<TR>
+<TD style="line-height:50%;" height="3px"><INPUT style="border:0;MARGIN: 0px; padding:0;" id="CBformCrt:grus_crt:2" value="61" type="checkbox" name="CBformCrt:grus_crt"/> <LABEL for="CBformCrt:grus_crt:2">Тютчев+ Фёдор Иванович</LABEL></TD></TR>
+ </TBODY>
+ </TABLE>
+  <!--a4j:form>
+    <a4j:jsFunction name="test" reRender="outCenterCenter" 
+                    action="#{auditManager.invokeTest}"
+                    oncomplete="alert('123')"/>
+  </a4j:form>
+  <a4j:outputPanel id="outCenterCenter">
+    <h:messages style="color:red" globalOnly="false" /-->
+  <a4j:form id="f1">11
+     <rich:panel>
+     <rich:inputNumberSpinner 
+                        value="#{profile.rowsCountRai}" 
+                        inputSize="1"
+                        id="rowCId1"
+                        minValue="5" 
+                        enableManualInput="false"
+                        oninputkeypress="return false;"/>
+       </rich:panel>
+ </a4j:form>
+ <h:form>
+   <div>
+     <h:outputText value="ufms"/><br/>
+     <h:commandButton value="00" action="#{auditSearchManager.invokeIndexing('localhost:1199')}" />
+     <h:commandButton value="01" action="#{auditSearchManager.invokeIndexing('192.168.2.218:1099')}" />
+     <h:commandButton value="02" action="#{auditSearchManager.invokeIndexing('192.168.2.214:1099')}" />
+   </div>
+   <div>
+     <h:outputText value="zags"/><br/>
+     <h:commandButton value="00" action="#{auditZagsSearchManager.invokeIndexing('localhost:1199')}" />
+     <h:commandButton value="01" action="#{auditZagsSearchManager.invokeIndexing('192.168.2.218:1099')}" />
+     <h:commandButton value="02" action="#{auditZagsSearchManager.invokeIndexing('192.168.2.214:1099')}" />
+   </div>
+ </h:form>
+    <!--h:form>
+         <rich:datascroller for="auction" maxPages="5"/>
+          <rich:spacer height="30" />                             
+          <rich:messages style="color:red"></rich:messages>
+    <rich:dataTable id="auction" value="#{auctionDataModel}" columnClasses="col1,col2,col3,col4"
+              var="item" rows="10" width="100%">
+        <rich:column>
+        <f:facet name="header">
+        <h:outputText value="Description"/>
+  </f:facet>
+  <h:outputText value="#{item.description}"/>
+  </rich:column>
+  <rich:column>
+   <f:facet name="header">
+ <h:outputText value="Highest Bid"/>
+   </f:facet>
+ <h:outputText id="highestBid" value="#{item.highestBid}">
+  <f:convertNumber pattern="$#,##0.00"/>
+ </h:outputText>
+ </rich:column>
+ <rich:column>
+ <f:facet name="header">
+ <h:outputText value="Your Bid"/>
+    </f:facet>
+ <rich:message for="bid" /><br/>
+ <h:inputText id="bid" value="#{item.bid}" label="Bid">
+    <f:validateDoubleRange minimum="0" maximum="1000000"/>
+   </h:inputText>
+ <a4j:commandLink id="bid_link" actionListener="#{item.placeBid}" value="Place a bid!" reRender="bid,amount,highestBid" />
+  </rich:column>
+ <rich:column>
+  <f:facet name="header">
+<h:outputText value="Amount"/>
+  </f:facet>
+ <h:outputText id="amount" value="#{item.amount}" >
+     <f:convertNumber pattern="$#,##0.00"/>
+    </h:outputText>
+ </rich:column>
+ </rich:dataTable>
+  <rich:messages style="color:red"></rich:messages>
+</h:form-->
+<!--h:form>
+<a4j:queue requestDelay="100" />
+  <rich:messages />
+ <rich:dataTable value="#{hibernateDataModel}" var="row" rows="10"
+ rowKeyConverter="org.jboss.seam.ui.EntityConverter" reRender="datascroller" width="650"
+ rendered="#{componentNavigator.currentComponent.activeTab == 'modifiableDataModel'}">
+ <rich:columns value="#{hibernateBean.csvFields}" var="field"
+ sortBy="#{field}" filterBy="#{field}" filterEvent="onkeyup"
+ index="index" id="column#{index}"
+sortOrder="#{dataTableStateHolder.sortOrders[field]}"
+  filterValue="#{dataTableStateHolder.columnFilterValues[field]}">
+ <f:facet name="header">
+ <h:outputText value="#{field}" />
+ </f:facet>
+ <h:outputText value="#{row[field]}" />
+ </rich:columns>
+ <f:facet name="footer">
+ <rich:datascroller id="datascroller" />
+ </f:facet>
+ </rich:dataTable>
+ </h:form>
+  </a4j:outputPanel-->
+ </body>
+</html>

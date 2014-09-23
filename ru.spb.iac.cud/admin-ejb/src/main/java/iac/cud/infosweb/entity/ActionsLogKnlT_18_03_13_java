@@ -1,0 +1,194 @@
+package iac.cud.infosweb.entity;
+
+import iac.cud.infosweb.dataitems.BaseItem;
+
+import java.io.Serializable;
+import javax.persistence.*;
+
+import java.util.Date;
+
+
+/**
+ * The persistent class for the ACTIONS_LOG_KNL_T database table.
+ * 
+ */
+//@Entity
+//@Table(name="ACTIONS_LOG_KNL_T")
+public class ActionsLogKnlT_18_03_13 extends BaseItem implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	//@Id
+	//@SequenceGenerator(name="ACTIONS_LOG_KNL_T_IDSRV_GENERATOR", sequenceName="ACTIONS_LOG_KNL_SEQ")
+	//@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="ACTIONS_LOG_KNL_T_IDSRV_GENERATOR")
+	@Column(name="ID_SRV")
+	private Long idSrv;
+
+	@Column(name="ATTEMPT_SRV")
+	private Long attemptSrv;
+
+    @Temporal( TemporalType.DATE)
+	private Date created;
+
+    @Temporal(TemporalType.TIMESTAMP)
+	@Column(name="DATE_ACTION")
+	private Date dateAction;
+
+    @Temporal( TemporalType.DATE)
+	@Column(name="DATE_EVENT_SRV")
+	private Date dateEventSrv;
+
+    @Temporal( TemporalType.DATE)
+	private Date modified;
+
+	//bi-directional many-to-one association to ActionsBssT
+    @ManyToOne
+	@JoinColumn(name="UP_ACTIONS")
+	private ActionsBssT actionsBssT;
+
+	//bi-directional many-to-one association to TokenKnlT
+    @ManyToOne
+	@JoinColumn(name="UP_TOKEN")
+	private TokenKnlT tokenKnlT;
+
+    @Transient
+	private String actName;
+    
+    @Transient
+   	private String isName;
+    
+    @Transient
+   	private String tokenName;
+    
+    @Transient
+   	private String userName;
+    
+    @Transient
+   	private String createdValue;
+    
+    public ActionsLogKnlT_18_03_13() {
+    }
+
+    public Long getBaseId() {
+   	   return this.idSrv;
+   	} 
+    
+	public Long getIdSrv() {
+		return this.idSrv;
+	}
+
+	public void setIdSrv(Long idSrv) {
+		this.idSrv = idSrv;
+	}
+
+	public Long getAttemptSrv() {
+		return this.attemptSrv;
+	}
+
+	public void setAttemptSrv(Long attemptSrv) {
+		this.attemptSrv = attemptSrv;
+	}
+
+	public Date getCreated() {
+		return this.created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Date getDateAction() {
+		return this.dateAction;
+	}
+
+	public void setDateAction(Date dateAction) {
+		this.dateAction = dateAction;
+	}
+
+	public Date getDateEventSrv() {
+		return this.dateEventSrv;
+	}
+
+	public void setDateEventSrv(Date dateEventSrv) {
+		this.dateEventSrv = dateEventSrv;
+	}
+
+	public Date getModified() {
+		return this.modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public ActionsBssT getActionsBssT() {
+		return this.actionsBssT;
+	}
+
+	public void setActionsBssT(ActionsBssT actionsBssT) {
+		this.actionsBssT = actionsBssT;
+	}
+	
+	public TokenKnlT getTokenKnlT() {
+		return this.tokenKnlT;
+	}
+
+	public void setTokenKnlT(TokenKnlT tokenKnlT) {
+		this.tokenKnlT = tokenKnlT;
+	}
+	
+	public String getActName() {
+		if(this.actName==null){
+			if(this.actionsBssT!=null){
+			  this.actName = this.actionsBssT.getFull();
+			}
+		}
+		return this.actName;
+	}
+	public void setActName(String actName) {
+		this.actName = actName;
+	}
+	
+	public String getIsName() {
+		if(this.isName==null){
+			if(this.actionsBssT!=null){
+			  this.isName = this.actionsBssT.getAcIsBssT().getName();
+			}
+		}
+		return this.isName;
+	}
+	public void setIsName(String isName) {
+		this.isName = isName;
+	}
+	
+	public String getTokenName() {
+		if(this.tokenName==null){
+			if(this.tokenKnlT!=null){
+			  this.tokenName = this.tokenKnlT.getSign();
+			}
+		}
+		return this.tokenName;
+	}
+	public void setTokenName(String tokenName) {
+		this.tokenName = tokenName;
+	}
+	
+	public String getUserName() {
+		if(this.userName==null){
+			if(this.tokenKnlT!=null){
+			  this.userName = this.tokenKnlT.getAcUsersKnlT().getFio();
+			}
+		}
+		return this.userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	
+	public String getCreatedValue() {
+		return this.createdValue;
+	}
+    public void setCreatedValue(String createdValue) {
+		this.createdValue = createdValue;
+	}
+	
+}

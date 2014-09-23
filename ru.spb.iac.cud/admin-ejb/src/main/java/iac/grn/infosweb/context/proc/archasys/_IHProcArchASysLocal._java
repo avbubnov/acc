@@ -1,0 +1,14 @@
+package iac.grn.infosweb.context.proc.archasys;
+
+import java.util.Date;
+
+import javax.ejb.Local;
+
+@Local
+public interface _IHProcArchASysLocal {
+
+	public void startTask (Date startDate, Long period) throws Exception;
+	
+	public void stopTask() throws Exception;
+
+}

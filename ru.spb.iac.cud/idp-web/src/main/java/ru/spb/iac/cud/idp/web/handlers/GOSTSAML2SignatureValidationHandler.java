@@ -28,7 +28,7 @@ import java.util.Map;
 public class GOSTSAML2SignatureValidationHandler extends
 		AbstractSignatureHandler {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(GOSTSAML2SignatureValidationHandler.class);
 
 	// private SAML2Signature saml2Signature = new AML2Signature();
@@ -53,7 +53,7 @@ public class GOSTSAML2SignatureValidationHandler extends
 	private void validateSender(SAML2HandlerRequest request,
 			SAML2HandlerResponse response) throws ProcessingException {
 		
-		loggerslf4j.info("validateSender:01");
+		LOGGERSLF4J.debug("validateSender:01");
 		
 		if (!isSupportsSignature(request)) {
 			return;
@@ -67,7 +67,7 @@ public class GOSTSAML2SignatureValidationHandler extends
 		if (ignoreSignatures == Boolean.TRUE)
 			return;
 
-		loggerslf4j.info("validateSender:02");
+		LOGGERSLF4J.debug("validateSender:02");
 		
 		Document signedDocument = request.getRequestDocument();
 
@@ -88,7 +88,7 @@ public class GOSTSAML2SignatureValidationHandler extends
 			logger.trace("HTTP method for validating response: "
 					+ httpContext.getRequest().getMethod());
 
-			loggerslf4j.info("isPost:" + isPost);
+			LOGGERSLF4J.debug("isPost:" + isPost);
 
 			if (isPost) {
 				isValid = verifyPostBindingSignature(signedDocument, publicKey);
@@ -96,7 +96,7 @@ public class GOSTSAML2SignatureValidationHandler extends
 				isValid = verifyRedirectBindingSignature(httpContext, publicKey);
 			}
 
-			loggerslf4j.info("validateSender:03:"+isValid);
+			LOGGERSLF4J.debug("validateSender:03:"+isValid);
 			
 			if (!isValid) {
 				if (auditHelper != null) {
@@ -152,12 +152,12 @@ public class GOSTSAML2SignatureValidationHandler extends
 		try {
 			String queryString = httpContext.getRequest().getQueryString();
 
-			// loggerslf4j.info("GOSTSAML2SignatureValidationHandler:verifyRedirectBindingSignature:01:"+queryString);
+			 
 
 			byte[] sigValue;
 
 			// sigValue =
-			// RedirectBindingSignatureUtil.getSignatureValueFromSignedURL(queryString);
+			// RedirectBindingSignatureUtil/.getSignatureValueFromSignedURL/(queryString);
 			sigValue = GOSTRedirectBindingSignatureUtil
 					.getSignatureValueFromSignedURL(queryString);
 
@@ -166,7 +166,7 @@ public class GOSTSAML2SignatureValidationHandler extends
 			}
 
 			// return
-			// RedirectBindingSignatureUtil.validateSignature(queryString,
+			// RedirectBindingSignatureUtil/.validateSignature/(queryString,
 			// publicKey, sigValue);
 			return GOSTRedirectBindingSignatureUtil.validateSignature(
 					queryString, publicKey, sigValue);

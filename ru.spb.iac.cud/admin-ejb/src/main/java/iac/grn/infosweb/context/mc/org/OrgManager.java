@@ -35,8 +35,6 @@ import javax.naming.InitialContext;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
-
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletResponse;
@@ -58,11 +56,10 @@ public class OrgManager {
      * Экспортируемая сущности 
      * для отображения
      */
-	//private BaseItem usrBean;             !!! Проверить !!!
 	
 	 private String dellMessage;
 	 
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -93,14 +90,13 @@ public class OrgManager {
 			  Component.getInstance("orgListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    orgListCached!=null){
-		 	//	log.info("getAuditList:02:"+orgListCached.size());
-			    	this.auditList=orgListCached;
+		 	    	this.auditList=orgListCached;
 			}else{
 				log.info("getAuditList:03");
 		    	invokeLocal("list", firstRow, numberOfRows, null);
@@ -108,12 +104,12 @@ public class OrgManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecOrg = (ArrayList<String>)
+		 	List<String>  selRecOrg = (ArrayList<String>)
 					  Component.getInstance("selRecOrg",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecOrg!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecOrg.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					  it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -132,7 +128,7 @@ public class OrgManager {
 			 String orderQuery=null;
 			 log.info("hostsManager:invokeLocal");
 			 
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 OrgStateHolder orgStateHolder = (OrgStateHolder)
@@ -150,14 +146,13 @@ public class OrgManager {
       		     }
                  log.info("invokeLocal:list:orderQuery:"+orderQuery);
                  
-				// auditList = new ArrayList<BaseItem>();
 				 auditList = entityManager.createQuery("select o from AcOrganization o "+(orderQuery!=null ? orderQuery : ""))
                        .setFirstResult(firstRow)
                        .setMaxResults(numberOfRows)
                        .getResultList();
              log.info("invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
+			 } else if("count".equals(type)){
 				 log.info("IHReposList:count:01");
 				 auditCount = (Long)entityManager.createQuery(
 						 "select count(o) " +
@@ -165,7 +160,7 @@ public class OrgManager {
 		                .getSingleResult();
 				 
                log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
@@ -184,35 +179,13 @@ public class OrgManager {
 		        .get("sessionId");
 	  log.info("forView:sessionId:"+sessionId);
 	  log.info("forView:modelType:"+modelType);
-	  if(sessionId!=null /*&& usrBean==null*/){
+	  if(sessionId!=null){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
-			if(modelType.equals("orgDataModel")){
-				//service=ServiceReestr.Repos;
-			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
+			
 		 AcOrganization ar = searchBean(sessionId);
 		 Contexts.getEventContext().set("orgBean", ar);
 	  }
@@ -226,7 +199,7 @@ public class OrgManager {
 		if(orgListCached!=null){
 			for(AcOrganization it : orgListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -242,7 +215,7 @@ public class OrgManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+	  
    }
    
    public void addOrg(){
@@ -290,7 +263,7 @@ public class OrgManager {
 	   try {
 		   AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
 		   
-		 //	entityManager.merge(acUsrBean);
+		 
 		  AcOrganization aom = entityManager.find(AcOrganization.class, new Long(sessionId));
 		  
 		  aom.setFullName(orgBean.getFullName());
@@ -307,7 +280,6 @@ public class OrgManager {
 		  entityManager.flush();
 	      entityManager.refresh(aom);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
 	      Contexts.getEventContext().set("orgBean", aom);
 	    	  
 	     }catch (Exception e) {
@@ -360,9 +332,7 @@ public class OrgManager {
 		  log.info("forViewDel:sessionId:"+sessionId);
 		  if(sessionId!=null){
 			 AcOrganization ao = entityManager.find(AcOrganization.class, new Long(sessionId));
-			// if(ao.getAcUsers()!=null&&!ao.getAcUsers().isEmpty()){
-				dellMessage="У организации есть порождённые записи! При удалении они будут удалены!";
-			// }
+					dellMessage="У организации есть порождённые записи! При удалении они будут удалены!";
 			 Contexts.getEventContext().set("orgBean", ao);
 		 }	
     }
@@ -398,26 +368,14 @@ public class OrgManager {
    }
    
    public List <BaseTableItem> getAuditItemsListSelect() {
-		  // log.info("getAuditItemsListSelect:01");
+		   
 	
 	    OrgContext ac= new OrgContext();
 		   if( auditItemsListSelect==null){
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("fullName"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("letValue"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("contactEmployeePosition"));
@@ -436,8 +394,8 @@ public class OrgManager {
 	   if(auditItemsListContext==null){
 		   OrgContext ac= new OrgContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
@@ -450,8 +408,8 @@ public class OrgManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecOrg = (ArrayList<String>)
+	   //  for/View(/); //!!!
+	    List<String>  selRecOrg = (ArrayList<String>)
 				  Component.getInstance("selRecOrg",ScopeType.SESSION);
 	    
 	    if(selRecOrg==null){
@@ -459,9 +417,9 @@ public class OrgManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	  //  AcOrganization ao = searchBean(sessionId);
+	  
 	   AcOrganization ao = new AcOrganization();
-	 // в getAuditList : else{it.setSelected(false);}
+	 
 	    
 	    if(ao!=null){
 	     if(selRecOrg.contains(sessionId)){
@@ -498,11 +456,11 @@ public class OrgManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("reposManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -511,7 +469,7 @@ public class OrgManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
+	  
 	   	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -521,12 +479,12 @@ public class OrgManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		  log.info("orgManager:evaluteForListFooter!!!");
 	   		      evaluteForListFooter=true;
 	    	}
@@ -536,7 +494,7 @@ public class OrgManager {
    
    public Boolean getEvaluteForBean() {
 		
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForBean==null){
 		   		evaluteForBean=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -548,8 +506,8 @@ public class OrgManager {
 			             .get("sessionId");
 			    log.info("orgManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("orgManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -558,12 +516,4 @@ public class OrgManager {
 		   }
 
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/
+

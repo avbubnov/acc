@@ -12,7 +12,7 @@ public class StartupServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	Logger logger = LoggerFactory.getLogger(StartupServlet.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(StartupServlet.class);
 
 	public StartupServlet() {
 		super();
@@ -21,28 +21,10 @@ public class StartupServlet extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		try {
 
-			/*
-			 * <!--context-param> <param-name>JBOSS_JNDI_PORT</param-name>
-			 * <param-value>1099</param-value> </context-param--> <!--servlet>
-			 * <display-name>StartupServlet</display-name> ...
-			 * </servlet-mapping-->
-			 */
-
-			/*
-			 * try{ ServletContext context = config.getServletContext(); String
-			 * jboss_jndi_port = context.getInitParameter("JBOSS_JNDI_PORT");
-			 * ContextAccessManager.initContext(jboss_jndi_port);
-			 * ContextSyncManager.initContext(jboss_jndi_port);
-			 * ContextUtilManager.initContext(jboss_jndi_port); }catch(Exception
-			 * e){
-			 * System.out.println("CudServices:StartupServlet:init:error:"+e); }
-			 */
+			
 
 			ServletContext context = config.getServletContext();
-			String jboss_jndi_port = context
-					.getInitParameter("JBOSS_JNDI_PORT");
-			// ContextIDPUtilManager.initContext(jboss_jndi_port);
-
+				
             String signRequired = context.getInitParameter("SIGN_REQUIRED"); 
 			
 			Configuration.setSignRequired(
@@ -50,7 +32,7 @@ public class StartupServlet extends HttpServlet {
 	
 
 		} catch (Exception e) {
-			logger.error("init:error:" + e);
+			LOGGER.error("init:error:", e);
 		}
 	}
 

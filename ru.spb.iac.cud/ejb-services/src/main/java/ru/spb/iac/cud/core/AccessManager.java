@@ -8,7 +8,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,8 +32,6 @@ import javax.ejb.TransactionAttributeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import ch.qos.logback.classic.LoggerContext;
-//import ch.qos.logback.core.util.StatusPrinter;
 
 /**
  * EJB для аутентификации и аудита
@@ -47,12 +45,9 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 	@PersistenceContext(unitName = "AuthServices")
 	EntityManager em;
 
-	static {
-		// System.setProperty("logback.configurationFile",
-		// "/Development/test/log/logback.xml");
-	}
+	
 
-	Logger logger = LoggerFactory.getLogger(AccessManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(AccessManager.class);
 
 	private static String reestr_path = System
 			.getProperty("jboss.server.config.dir")
@@ -69,11 +64,10 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			AuthMode authMode, String IPAddress, String codeSys)
 			throws GeneralFailure, InvalidCredentials {
 
-		logger.info("authenticate_login:login:" + login);
+		LOGGER.debug("authenticate_login:login:" + login);
 
-		// LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		// StatusPrinter.print(lc);
-
+		 
+		
 		Object[] dataUser = null;
 
 		Long idUser = null;
@@ -94,7 +88,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 		try {
 
 			if (authModeValue.equals(78L)) {
-				logger.info("authenticate:01");
+				LOGGER.debug("authenticate:01");
 
 				dataUser = (Object[]) em
 						.createNativeQuery(
@@ -116,11 +110,11 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 				}
 				idUser = ((java.math.BigDecimal) dataUser[0]).longValue();
 				loginUser = dataUser[1].toString();
-				logger.info("authenticate:02");
+				LOGGER.debug("authenticate:02");
 
 			} else {
 
-				logger.info("authenticate:03");
+				LOGGER.debug("authenticate:03");
 
 				dataUser = (Object[]) em
 						.createNativeQuery(
@@ -138,7 +132,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 				idUser = ((java.math.BigDecimal) dataUser[0]).longValue();
 				loginUser = dataUser[1].toString();
 
-				logger.info("authenticate:04");
+				LOGGER.debug("authenticate:04");
 			}
 
 			sys_audit(authModeValue, "login:" + login + "; passw:***", "true",
@@ -151,14 +145,14 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(authModeValue, "login:" + login + "; passw:" + password,
 					"false", IPAddress, null, codeSys);
 
-			logger.error("authenticate:NoResultException");
+			LOGGER.debug("authenticate:NoResultException");
 			throw new InvalidCredentials("Учетной записи нет в системе!");
 		} catch (Exception e) {
 
 			sys_audit(authModeValue, "login:" + login + "; passw:***", "error",
 					IPAddress, idUser, codeSys);
 
-			logger.error("authenticate:Error:" + e);
+			LOGGER.error("authenticate:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -177,17 +171,17 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 		// передаём token_id
 		// а в нём указан uid пользователя
 
-		logger.info("aauthenticate_login:login_obo:" + login);
+		LOGGER.debug("aauthenticate_login:login_obo:" + login);
 
 		Long idUser = null;
 		Long authModeValue = null;
 
-		// authMode.equals(AuthMode.WEB_SERVICES)
+		// auth/Mode.equals(AuthM/ode.WEB_SER/VICES)
 		authModeValue = 82L;
 
 		try {
 
-			logger.info("authenticate_login_obo:01");
+			LOGGER.debug("authenticate_login_obo:01");
 			idUser = ((java.math.BigDecimal) em
 					.createNativeQuery(
 							"select AU.ID_SRV "
@@ -199,7 +193,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 									+ "and AU.STATUS = 1 ")
 					.setParameter(1, login).getSingleResult()).longValue();
 
-			logger.info("authenticate_login_obo:idUser:"
+			LOGGER.debug("authenticate_login_obo:idUser:"
 					+ idUser);
 
 			sys_audit(authModeValue, "login:" + login + "; passw:***", "true",
@@ -212,14 +206,14 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(authModeValue, "login:" + login + "; ", "false",
 					IPAddress, null, codeSys);
 
-			logger.error("authenticate_login_obo:NoResultException");
+			LOGGER.debug("authenticate_login_obo:NoResultException");
 			throw new GeneralFailure("Учетной записи нет в системе!");
 		} catch (Exception e) {
 
 			sys_audit(authModeValue, "login:" + login + "; passw:***", "error",
 					IPAddress, idUser, codeSys);
 
-			logger.error("authenticate_login_obo:Error:" + e);
+			LOGGER.error("authenticate_login_obo:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -231,12 +225,12 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 	public String authenticate_uid_obo(String uid, AuthMode authMode,
 			String IPAddress, String codeSys) throws GeneralFailure {
 
-		logger.info("authenticate_uid_obo:" + uid);
+		LOGGER.debug("authenticate_uid_obo:" + uid);
 
 		String loginUser = null;
 		Long authModeValue = null;
 
-		// authMode.equals(AuthMode.WEB_SERVICES)
+		// authMo/de.equa/ls(AuthMode.W/EB_SERVICES)
 		authModeValue = 82L;
 
 		if (uid == null || uid.trim().isEmpty()) {
@@ -245,7 +239,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 		try {
 
-			logger.info("authenticate_login_obo:01");
+			LOGGER.debug("authenticate_login_obo:01");
 
 			loginUser = ((String) em
 					.createNativeQuery(
@@ -258,7 +252,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 									+ "and AU.STATUS = 1 ")
 					.setParameter(1, new Long(uid)).getSingleResult());
 
-			logger.info("authenticate_login_obo:loginUser:"
+			LOGGER.debug("authenticate_login_obo:loginUser:"
 					+ loginUser);
 
 			sys_audit(authModeValue, "uid:" + uid + "; passw:***", "true",
@@ -271,14 +265,14 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(authModeValue, "uid:" + uid + "; ", "false", IPAddress,
 					null, codeSys);
 
-			logger.error("authenticate_uid_obo:NoResultException");
+			LOGGER.debug("authenticate_uid_obo:NoResultException");
 			throw new GeneralFailure("Учетной записи нет в системе!");
 		} catch (Exception e) {
 
 			sys_audit(authModeValue, "uid:" + uid + "; passw:***", "error",
 					IPAddress, new Long(uid), codeSys);
 
-			logger.error("authenticate_uid_obo:Error:" + e);
+			LOGGER.error("authenticate_uid_obo:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 
 		}
@@ -291,7 +285,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			String IPAddress, String codeSys) throws GeneralFailure,
 			InvalidCredentials, RevokedCertificate {
 
-		logger.info("authenticate_cert_sn:01");
+		LOGGER.debug("authenticate_cert_sn:01");
 
 		Object[] dataUser = null;
 
@@ -315,7 +309,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 		try {
 
-			logger.info("authenticate_cert_sn:02+:" + sn);
+			LOGGER.debug("authenticate_cert_sn:02+:" + sn);
 
 			// с учётом множественности сертификатов
 			dataUser = ((Object[]) em
@@ -334,20 +328,20 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			idUser = ((java.math.BigDecimal) dataUser[0]).longValue();
 			loginUser = dataUser[1].toString();
 
-			logger.info("authenticate_cert_sn:03+:" + loginUser);
+			LOGGER.debug("authenticate_cert_sn:03+:" + loginUser);
 
 			if (isRevoked(get_reestr("curr_crl"), sn)) {
 				throw new RevokedCertificate("Сертификат отозван!");
 			}
 
-			logger.info("authenticate_cert_sn:04");
+			LOGGER.debug("authenticate_cert_sn:04");
 
-			logger.info("authenticate_cert_sn:06");
+			LOGGER.debug("authenticate_cert_sn:06");
 
 			sys_audit(authModeValue, "sn:" + sn, "true", IPAddress, idUser,
 					codeSys);
 
-			logger.info("authenticate_cert_sn:07");
+			LOGGER.debug("authenticate_cert_sn:07");
 
 			return loginUser;
 
@@ -356,14 +350,14 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(authModeValue, "sn:" + sn, "false", IPAddress, null,
 					codeSys);
 
-			logger.error("authenticate_cert_sn:NoResultException");
+			LOGGER.debug("authenticate_cert_sn:NoResultException");
 			throw new InvalidCredentials("Учетной записи нет в системе!");
 		} catch (RevokedCertificate er) {
 
 			sys_audit(authModeValue, "sn:" + sn, "false, RevokedCertificate",
 					IPAddress, null, codeSys);
 
-			logger.error("authenticate_cert_sn:RevokedCertificate");
+			LOGGER.debug("authenticate_cert_sn:RevokedCertificate");
 			throw er;
 
 		} catch (Exception e) {
@@ -371,7 +365,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(authModeValue, "sn:" + sn, "error", IPAddress, idUser,
 					codeSys);
 
-			logger.error("authenticate_cert_sn:Error+:" + e);
+			LOGGER.error("authenticate_cert_sn:Error+:", e);
 
 			throw new GeneralFailure(e.getMessage());
 		}
@@ -384,30 +378,30 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			List<AuditFunction> userFunctions, Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("audit:01");
+		LOGGER.debug("audit:01");
 
-		HashMap<String, Long> act_cl = new HashMap<String, Long>();
+		Map<String, Long> act_cl = new HashMap<String, Long>();
 		Long idFunc = null;
 		Long idIS = null;
 		Long idUserSubject = null;
 
 		if (userFunctions == null || userFunctions.isEmpty()) {
-			logger.info("audit:return");
+			LOGGER.debug("audit:return");
 			return;
 		}
 
 		try {
 
 			if (codeSys == null) {
-				logger.info("audit:System Code is null");
+				LOGGER.debug("audit:System Code is null");
 				throw new GeneralFailure("System Code is null");
 			}
 			if (!codeSys.startsWith(CUDConstants.armPrefix)&&!codeSys.startsWith(CUDConstants.subArmPrefix)) {
-				logger.info("audit:System Code is incorrect");
+				LOGGER.debug("audit:System Code is incorrect");
 				throw new GeneralFailure("System Code is incorrect");
 			}
 			if (login == null) {
-				logger.info("audit:User login is nul");
+				LOGGER.debug("audit:User login is nul");
 				throw new GeneralFailure("User login is null");
 			}
 
@@ -416,8 +410,8 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			// idUser = get_id_user(login);
 			idUserSubject = new Long(login);
 
-			logger.info("audit:02:idIS:" + idIS);
-			logger.info("audit:03:idUserSubject:" + idUserSubject);
+			LOGGER.debug("audit:02:idIS:" + idIS);
+			LOGGER.debug("audit:03:idUserSubject:" + idUserSubject);
 
 			List<Object[]> lo = em
 					.createNativeQuery(
@@ -427,7 +421,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 									+ "where APP.ID_SRV = ACT.UP_IS "
 									+ "and APP.ID_SRV=?").setParameter(1, idIS)
 					.getResultList();
-			logger.info("audit:04");
+			LOGGER.debug("audit:04");
 
 			for (Object[] objectArray : lo) {
 				act_cl.put(
@@ -477,9 +471,9 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			
 			for (AuditFunction func : userFunctions) {
 				idFunc = act_cl.get(func.getCodeFunction());
-				logger.info("audit:05:func.getIdFunction():"
+				LOGGER.debug("audit:05:func.getIdFunction():"
 						+ func.getCodeFunction());
-				logger.info("audit:06:idFunc:" + idFunc);
+				LOGGER.debug("audit:06:idFunc:" + idFunc);
 
 				if (func.getDetailsFunction() != null
 						&& func.getDetailsFunction().length() > 500) {
@@ -519,7 +513,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 					+ userFunctions.size(), "error", IPAddress, idUserAuth,
 					codeSys);
 
-			logger.error("audit:Error:" + e);
+			LOGGER.error("audit:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -534,11 +528,11 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 		// !!!
 		// пока метод не используется
 
-		logger.info("change_password:login:" + login);
+		LOGGER.debug("change_password:login:" + login);
 
 		Long idUser = null;
 		try {
-			logger.info("change_password:01");
+			LOGGER.debug("change_password:01");
 			idUser = ((java.math.BigDecimal) em
 					.createNativeQuery(
 							"select AU.ID_SRV "
@@ -551,7 +545,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 					.setParameter(1, login).setParameter(2, password)
 					.getSingleResult()).longValue();
 
-			logger.info("change_password:idUser:" + idUser);
+			LOGGER.debug("change_password:idUser:" + idUser);
 
 			if (new_password == null || new_password.trim().equals("")) {
 				throw new GeneralFailure("Некорректный новый пароль!");
@@ -571,7 +565,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(22L, "login:" + login + "; passw:***", "false",
 					IPAddress, null, null);
 
-			logger.error("change_password:NoResultException");
+			LOGGER.debug("change_password:NoResultException");
 			throw new InvalidCredentials("Учетной записи нет в системе!");
 
 		} catch (GeneralFailure e) {
@@ -579,7 +573,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			sys_audit(22L, "login:" + login + "; passw:***",
 					"error: empty new password", IPAddress, idUser, null);
 
-			logger.error("change_password:Error:" + e);
+			LOGGER.error("change_password:Error:", e);
 			throw e;
 
 		} catch (Exception e) {
@@ -587,7 +581,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 			// sys_audit(22L, "login:"+login+"; passw:***", "error", IPAddress,
 			// idUser );
 
-			logger.error("change_password:Error:" + e);
+			LOGGER.error("change_password:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -597,7 +591,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 	 */
 	public void is_exist(String idIS) throws GeneralFailure {
 
-		logger.info("AuthManager:is_exist:idIS:" + idIS);
+		LOGGER.debug("AuthManager:is_exist:idIS:" + idIS);
 
 		try {
 
@@ -607,10 +601,10 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 					.getSingleResult();
 
 		} catch (NoResultException ex) {
-			logger.error("createAuth:NoResultException");
+			LOGGER.debug("createAuth:NoResultException");
 			throw new GeneralFailure("Информационная система не определёна!");
 		} catch (Exception e) {
-			logger.error("is_exist:Error:" + e);
+			LOGGER.debug("is_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -620,7 +614,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 	 */
 	private void sys_audit(Long idServ, String inp_param, String result,
 			String ip_adr, Long idUser, String codeSys) {
-		logger.info("sys_audit");
+		LOGGER.debug("sys_audit");
 
 		Long idSys = null;
 		Long idGrSys = null;
@@ -677,7 +671,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 						.executeUpdate();
 			}
 		} catch (Exception e) {
-			logger.error("sys_audit:Error:" + e);
+			LOGGER.error("sys_audit:Error:", e);
 		}
 
 	}
@@ -690,7 +684,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 		// используется при аутентификации системы и logout
 
-		logger.info("sys_audit_public:01");
+		LOGGER.debug("sys_audit_public:01");
 		try {
 			// при аудите logout
 			// передаётся логин, а не ид пользователя
@@ -705,13 +699,13 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 					idUser = get_id_user(loginUser);
 
 				} catch (Exception e) {
-					logger.error("sys_audit_public:02");
+					LOGGER.error("sys_audit_public:02");
 				}
 			}
 			sys_audit(idServ, inp_param, result, ip_adr, idUser, codeSys);
 
 		} catch (Exception e) {
-			logger.error("sys_audit_public:Error:" + e);
+			LOGGER.error("sys_audit_public:Error:", e);
 		}
 
 	}
@@ -724,7 +718,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 		InputStream is = null;
 		String result = null;
 
-		logger.info("get_reestr");
+		LOGGER.debug("get_reestr");
 
 		try {
 
@@ -736,18 +730,18 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 				result = properties.getProperty(prop_name);
 
-				logger.info("get_reestr:result:" + result);
+				LOGGER.debug("get_reestr:result:" + result);
 			}
 
 		} catch (Exception e) {
-			logger.error("initTask:error:" + e);
+			LOGGER.error("initTask:error:", e);
 		} finally {
 			try {
 				if (is != null) {
 					is.close();
 				}
 			} catch (Exception e) {
-				logger.error("get_reestr:finally:is:error:" + e);
+				LOGGER.error("get_reestr:finally:is:error:", e);
 			}
 		}
 		return result;
@@ -769,14 +763,14 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 			crlFile = new File(curr_crl);
 
-			logger.info("isRevoked:01");
+			LOGGER.debug("isRevoked:01");
 
 			cf = CertificateFactory.getInstance("X.509");
 
 			x509Crls = (Collection<? extends X509CRL>) cf
 					.generateCRLs(is = new FileInputStream(crlFile));
 
-			logger.info("isRevoked:02");
+			LOGGER.debug("isRevoked:02");
 
 			// List<CRL> cpCrls = new ArrayList<CRL>(x509Crls.size());
 
@@ -788,21 +782,21 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 				if (xce != null) {
 					return true;
 				}
-				logger.info("isRevoked:revoked:" + (xce == null));
+				LOGGER.debug("isRevoked:revoked:" + (xce == null));
 				// cpCrls.add(crl);
 			}
 
-			logger.info("isRevoked:03");
+			LOGGER.debug("isRevoked:03");
 
 		} catch (Exception e) {
-			logger.error("isRevoked:error:" + e);
+			LOGGER.error("isRevoked:error:", e);
 		} finally {
 			try {
 				if (is != null) {
 					is.close();
 				}
 			} catch (Exception e) {
-				logger.error("isRevoked:finally:is:error:" + e);
+				LOGGER.error("isRevoked:finally:is:error:", e);
 			}
 		}
 
@@ -820,9 +814,9 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 			bi = new BigInteger(hex, 16);
 
-			logger.info("hex_to_dec:num:" + bi);
+			LOGGER.debug("hex_to_dec:num:" + bi);
 		} catch (NumberFormatException e) {
-			logger.error("hex_to_dec:Error:" + e);
+			LOGGER.error("hex_to_dec:Error:", e);
 		}
 		return bi;
 
@@ -848,7 +842,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 					.longValue();
 
 		} catch (NoResultException ex) {
-			logger.error("get_id_is:NoResultException");
+			LOGGER.debug("get_id_is:NoResultException");
 			throw new GeneralFailure("System is not defined");
 		} catch (Exception e) {
 			throw new GeneralFailure(e.getMessage());
@@ -862,7 +856,7 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 	 */
 	private Long get_id_user(String login) throws GeneralFailure {
 
-		logger.info("get_id_user:login:" + login);
+		LOGGER.debug("get_id_user:login:" + login);
 
 		Long result = null;
 		try {
@@ -878,12 +872,12 @@ public class AccessManager implements AccessManagerLocal, AccessManagerRemote {
 
 		} catch (NoResultException ex) {
 
-			logger.error("get_id_user:NoResultException");
+			LOGGER.debug("get_id_user:NoResultException");
 			throw new GeneralFailure("User is not defined!");
 
 		} catch (Exception e) {
 
-			logger.error("get_id_user:Error:" + e);
+			LOGGER.error("get_id_user:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 

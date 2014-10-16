@@ -35,9 +35,7 @@ public class ProcArchAFuncSettingsManager {
 	@In
 	EntityManager entityManager;
 	 
-	//private static final String proc_aafunc_settings_file=System.getProperty("jboss.server.config.url")+"proc_aafunc_settings.properties";
-	//private static final String proc_aafunc_settings_file=System.getProperty("jboss.server.config.dir")+"/"+"proc_aafunc_settings.properties";
-
+	
 	private static String param_code="to_archive_audit_func";
 	
 	public void init(){
@@ -52,7 +50,7 @@ public class ProcArchAFuncSettingsManager {
 			        .get("remoteAudit");
 		    log.info("confLoadDataManager:init:remoteAudit:"+remoteAudit);
 	
-		     if(remoteAudit!=null /*&& !remoteAudit.equals("procSetting")*/){ 
+		     if(remoteAudit!=null ){ 
 		    	 //при сохранении настроек
 		    	 //procArchAFuncSettingsBean устанавливать не нужно
 			     //он автоматически продолжается в EventContext
@@ -60,50 +58,18 @@ public class ProcArchAFuncSettingsManager {
 			   return;
 			 }
 		   
-		    // ProcAASSettingsItem bean = new ProcAASSettingsItem();
+		    
 		     ProcArchAFuncSettingsBean beanSettings = new ProcArchAFuncSettingsBean();
 		    	
 		     
-			 String directory=null, url=null, interrupt=null, directory_output=null, 
-					yesterday_only=null, current_today=null, run_eas=null, run_meta=null;
-			 Properties properties = new Properties();
-			 
-			// String path = FacesContext.getCurrentInstance().getExternalContext().getInitParameter("conf_loaddata_settings");
-			// String path = proc_aafunc_settings_file;
-			 
+				 
 			 log.info("ConfLoadDataSettingsManager:getCLDSBeanView:01");
 			 
 			 InputStream is = null;
 			 
 			 try {
 				 
-				/* 
-				URL url_path = new URL(path);
-			    File f=new File(url_path.toURI());
-			     
-			     if(f.exists()) { 
-			    	 
-			    	 properties.load(is=new FileInputStream(f));
-			    	 
-			    	 run_eas=properties.getProperty("run_eas");
-			    	 run_meta=properties.getProperty("run_meta");
-			    	 
-			    	 bean.setRun_eas(run_eas != null ? (run_eas.equals("true") ? "Да" : "Нет") : "");
-			    	 bean.setRun_meta(run_meta != null ? (run_meta.equals("true") ? "Да" : "Нет") : "");
-			     
-			     	 beanSettings.setRun_eas((run_eas!=null&&run_eas.equals("true") ? true : false));
-			    	 beanSettings.setRun_meta((run_meta!=null&&run_meta.equals("true") ? true : false));
-			  
-			    }else{
-			    	 bean.setRun_eas("Нет");
-			    	 bean.setRun_meta("Нет");
-
-			    	 beanSettings.setRun_eas(false);
-			    	 beanSettings.setRun_meta(false);
-
-			     }
-			     
-			     Contexts.getEventContext().set("cLDSBeanView", bean);*/
+				
 				 List<String> los = entityManager.createNativeQuery(
 			              "select ST.VALUE_PARAM "+
 	                      "from SETTINGS_KNL_T st "+
@@ -146,14 +112,13 @@ public class ProcArchAFuncSettingsManager {
 	public void save(){
 		try{
 		   log.info("confLoadDataSettingsManager:save:01");
-		   Properties properties = new Properties();
-		  // String path = proc_aafunc_settings_file;
+		  
 		   OutputStream os = null;
 			 
 		   ProcArchAFuncSettingsBean beanSettings = (ProcArchAFuncSettingsBean) 
 				   Contexts.getEventContext().get("procArchAFuncSettingsBean");
 		   
-		  // log.info("confLoadDataSettingsManager:save:ParamActualData:"+beanSettings.getParamActualData());
+		   
 		   
 			  if(beanSettings.getParamActualData()==null){
 				  log.info("confLoadDataSettingsManager:save:02");
@@ -161,15 +126,7 @@ public class ProcArchAFuncSettingsManager {
 			  }
 			   
 			  try {
-				/*  
-				 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-			     URL url = new URL(path);
-			     File f=new File(url.toURI());
-			     properties.setProperty("run_eas", (beanSettings.getRun_eas().booleanValue()==true?"true":"false"));
-			     properties.setProperty("run_meta", (beanSettings.getRun_meta().booleanValue()==true?"true":"false"));
-			       
-			     properties.store(os=new FileOutputStream(f), null);
-			      */
+				
 				  entityManager.createNativeQuery(
 			              "update SETTINGS_KNL_T st " +
 			              "set ST.VALUE_PARAM=? "+
@@ -212,63 +169,6 @@ public class ProcArchAFuncSettingsManager {
 		   }
 	  }
 	
-/*	@Factory
-	public ConfLoadDataSettingsItem getCLDSBeanView(){
-		 log.info("ConfLoadDataSettingsManager:getCLDSBeanView:01");
-		 
-		 ConfLoadDataSettingsItem bean = new ConfLoadDataSettingsItem();
-		 
-		 String directory=null, url=null, interrupt=null, directory_output=null, 
-				yesterday_only=null, current_today=null, run_eas=null, run_meta=null;
-		 Properties properties = new Properties();
-		 
-		// String path = FacesContext.getCurrentInstance().getExternalContext().getInitParameter("conf_loaddata_settings");
-		 String path = System.getProperty("jboss.server.config.url")+"conf_loaddata_exec.settings";
-		 
-		 log.info("ConfLoadDataSettingsManager:getCLDSBeanView:path:"+path);
-		 
-		 InputStream is = null;
-		 
-		 try {
-			// DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		    URL url_path = new URL(path);
-		    File f=new File(url_path.toURI());
-		    // File f=new File(path);
-		     
-		     if(f.exists()) { 
-		    	 
-		    	 properties.load(is=new FileInputStream(f));
-		    	 
-		    	 directory=properties.getProperty("directory");
-		    	 url=properties.getProperty("url");
-		    	 interrupt=properties.getProperty("interrupt");
-		    	 directory_output=properties.getProperty("directory_output");
-		    	 yesterday_only=properties.getProperty("yesterday_only");
-		    	 current_today=properties.getProperty("current_today");
-		    	 run_eas=properties.getProperty("run_eas");
-		    	 run_meta=properties.getProperty("run_meta");
-		    	 
-		    	 bean.setDirectory (directory != null ? directory : "");
-		    	 bean.setUrl(url != null ? url : "");
-		    	 bean.setInterrupt(interrupt!= null ? (interrupt.equals("true") ? "Да" : "Нет") : "");
-		    	 bean.setDirectory_output(directory_output != null ? directory_output : "");
-		    	 bean.setYesterday_only(yesterday_only != null ? (yesterday_only.equals("true") ? "Да" : "Нет") : "");
-		    	 bean.setCurrent_today(current_today != null ? (current_today.equals("true") ? "Да" : "Нет") : "");
-		    	 bean.setRun_eas(run_eas != null ? (run_eas.equals("true") ? "Да" : "Нет") : "");
-		    	 bean.setRun_meta(run_meta != null ? (run_meta.equals("true") ? "Да" : "Нет") : "");
-		     }
-		  }catch (Exception e) {
-				log.error("confLoadDataManager:initConfLDInfoBean:error:"+e);
-		 }finally{
-			try {
-			  if(is!=null){
-			    is.close();
-			   }
-			} catch (Exception e) {
-				log.error("confLoadDataManager:initConfLDInfoBean:finally:is:error:"+e);
-			}
-	   }    
-		return bean; 
-	}*/
+
 	
 }

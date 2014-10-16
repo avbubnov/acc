@@ -33,7 +33,7 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserOrgManBean implements Serializable {
 
-	final static Logger logger = LoggerFactory.getLogger(UserOrgManBean.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserOrgManBean.class);
 	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserOrgManEJB")
 	private UserOrgManEJB userOrgManEJB;
@@ -51,11 +51,9 @@ public class UserOrgManBean implements Serializable {
 
 		try {
 
-			logger.info("userOrgManBean:action:01");
+			LOGGER.debug("userOrgManBean:action:01");
 
-			//String version = FacesContext.class.getPackage()
-			//		.getImplementationVersion();
-
+			
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
@@ -72,7 +70,6 @@ public class UserOrgManBean implements Serializable {
 			
 			userOrgManEJB.save(t1);
 
-			// return "home?faces-redirect=true";
 			FacesContext
 					.getCurrentInstance()
 					.getExternalContext()
@@ -83,7 +80,7 @@ public class UserOrgManBean implements Serializable {
 									+ "/context/app/org_man/list.xhtml");
 
 		} catch (Exception e) {
-			logger.error("userOrgManBean:action:error:" + e);
+			LOGGER.error("userOrgManBean:action:error:", e);
 		}
 	}
 

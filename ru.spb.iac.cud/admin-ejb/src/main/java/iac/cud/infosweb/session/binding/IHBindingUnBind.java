@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,12 +36,11 @@ import org.jboss.seam.contexts.Contexts;
 import iac.cud.infosweb.local.service.ServiceReestr;
 import iac.grn.infosweb.context.proc.TaskProcessor;
 
-//import org.jboss.seam.annotations.Logger;
-//import org.jboss.seam.log.Log;
+ 
+ 
 import org.apache.log4j.Logger;
 
 @Stateless
-//@LocalBinding(jndiBinding=ServiceReestr.BindingUnBind)
 @TransactionManagement(TransactionManagementType.BEAN)  
 public class IHBindingUnBind extends IHBindingBase implements IHLocal {
   
@@ -50,10 +49,8 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 
    @Resource UserTransaction utx;
    
-   //@Logger private Log log;
    private Logger log = Logger.getLogger(IHBindingUnBind.class);
 
-   //private static final String proc_binding_unbind_info_file=System.getProperty("jboss.server.config.url")+"proc_binding_unbind_info.properties";
    private static final String proc_binding_unbind_info_file=System.getProperty("jboss.server.config.dir")+"/"+"proc_binding_unbind_info.properties";
 	
    
@@ -89,7 +86,6 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 			while(trans<currentTime){
 				batch++;
 				trans+=period*24*60*60*1000;
-				//trans+=period*1000;
 				if(batch % 100 == 0){
 					log.info("IHBindingUnBind:process_start:batch:"+batch);
 				}
@@ -103,26 +99,20 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 	ScheduledFuture shf =  scheduler.scheduleAtFixedRate(new Runnable() {
 	      public void run() {
 	    	 
-	    	// String path = System.getProperty("jboss.server.config.url")+"conf_loaddata_exec.properties";
-			
+	    	
 		     try {
 		   
 		       log.info("IHBindingUnBind:process_start:run");
 		        
-		     //  synchronized(this){
-		      
-		    	Calendar cln = Calendar.getInstance();   
+		     	Calendar cln = Calendar.getInstance();   
 		    	
 		    	int day = cln.get(Calendar.DAY_OF_MONTH);
 		    		
 		    	log.info("IHBindingUnBind:process_start:run:day:"+day);		
 		    	
-		    //	if(day==1){
 		    	  
 		    		process_start_content();
-		    //	}
-			
-		   //   }
+		
 		     }catch (Exception e) {
 		        log.error("IHBindingUnBind:process_start:run:error:"+e);
 		     }finally{
@@ -135,8 +125,7 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 	 }
 	},	start, period*24*60*60*1000, TimeUnit.MILLISECONDS);  
 	
-	//Contexts.getApplicationContext().set("archiveAuditSysScheduled", shf);
-
+	
 	if(TaskProcessor.getControls().containsKey("bindingUnBindScheduled")){
 		try{
 			TaskProcessor.getControls().get("bindingUnBindScheduled").cancel(false);
@@ -156,7 +145,6 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 	log.info("IHConfLoadData:stopTask:01");
 	
 	 try{
-    	// ScheduledFuture shf = (ScheduledFuture) Contexts.getApplicationContext().get("archiveAuditSysScheduled");
     	
     	 ScheduledFuture shf =TaskProcessor.getControls().get("bindingUnBindScheduled");
     	 
@@ -180,7 +168,6 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 		log.info("IHBindingUnBind:task_run:01");
 		
 		try{
-			//Long archiveParamValue=(Long)paramMap.get("archiveParamValue");
 			
 			process_start_content();
 			 
@@ -208,7 +195,6 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 	    	
 	    	 BindingProcessor.getControls().put("binding_un_bind", "");
 	    	
-	    	// Thread.sleep(10000);
 	    	 
 	    	  utx.begin();
 
@@ -231,8 +217,7 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 	    	  
 	 	    
 	    	  utx.commit();
-	    	//  jpi.put("list", JiList) ;
-	      }catch(Exception e){
+	       }catch(Exception e){
 	    	  log.error("IHBindingUnBind:process_start_content:error"+e);
 	    	  
 	    	  utx.rollback();
@@ -248,9 +233,7 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 				 log.info("IHBindingUnBind:process_start_content:finally:hit:"+hit);
 						 
 					   DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
-					  // URL url = new URL(proc_binding_unbind_info_file);
-					 //  File f=new File(url.toURI());
-					   
+						   
 					   File f=new File(proc_binding_unbind_info_file); 
 					   
 					   Properties properties = new Properties();
@@ -271,32 +254,6 @@ public class IHBindingUnBind extends IHBindingBase implements IHLocal {
 			}
 		 }
 	}
-  /* 
-   private static Long calendar() {
-		// System.out.println("calendar:01");
-		 
-		 Long currentTime=System.currentTimeMillis();
-		 
-		 // 5.00 в jboss - это в реальном времени 6.00
-		 
-		 Calendar cln = Calendar.getInstance();
-		 cln.set(Calendar.HOUR_OF_DAY, 6);
-		 cln.set(Calendar.MINUTE, 0);
-		 cln.set(Calendar.SECOND, 0);
-		 cln.set(Calendar.MILLISECOND, 0);
-		 
-		 Long trans = cln.getTimeInMillis();
-		 
-		 Long start = trans-currentTime;
-		 
-		 if(start<=0){
-			 start=start+24*60*60*1000;
-		 }
-		 
-		 System.out.println("IHBindingUnBind:calendar:start:"+start);
-			
-		 return start;
-		// return 5000L;
-		}*/
+  	
    
 }

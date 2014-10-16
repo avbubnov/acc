@@ -35,7 +35,7 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserForgotEJB {
 
-	final static Logger logger = LoggerFactory.getLogger(UserForgotEJB.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserForgotEJB.class);
 	
 	@Resource(mappedName="java:jboss/mail/Default")
 	private Session mailSession;
@@ -53,15 +53,10 @@ public class UserForgotEJB {
 
     public void save(JournAppUserBssT user) {
 
-       logger.info("UserForgotEJB:save:01");
-       logger.info("UserForgotEJB:save:02:"+user.getNameUser());
+       LOGGER.debug("UserForgotEJB:save:01");
+       LOGGER.debug("UserForgotEJB:save:02:"+user.getNameUser());
        try{
-    	  /*List<JournAppUserBssT>  app_user_list = entityManager
-    			  .createQuery("select t1 from JournAppUserBssT t1 ")
-    			  .getResultList();
-    	  
-    	  logger.info("UserForgotEJB:save:03:"+app_user_list.size());
-    	  */
+    	 
     	   
     	   user.setStatus(0L);
     	   user.setCreated(new Date());
@@ -69,7 +64,7 @@ public class UserForgotEJB {
     	   
     	   
        }catch(Exception e){
-    	   logger.error("UserForgotEJB:save:error:"+e);
+    	   LOGGER.error("UserForgotEJB:save:error:"+e);
        }
      }
     
@@ -78,8 +73,8 @@ public class UserForgotEJB {
     	//email_up_to_date - уточнённый email
     	//когда у пользователя несколько email, и он выбирает один из них
     	
-        logger.info("UserForgotEJB:step1:01:"+login);
-        logger.info("UserForgotEJB:step1:01_2:"+context_url);
+        LOGGER.debug("UserForgotEJB:step1:01:"+login);
+        LOGGER.debug("UserForgotEJB:step1:01_2:"+context_url);
         
         List<String> result = null;
         		
@@ -140,7 +135,6 @@ public class UserForgotEJB {
         	Address[] to = new InternetAddress[] {
         			new InternetAddress(email) 
         			};
-        	//Address[] to = new InternetAddress[] {new InternetAddress("bubnov@iac.spb.ru") };
         	
         	
         	m.setFrom(from);
@@ -150,13 +144,12 @@ public class UserForgotEJB {
         	
         	String validationKey = (new BigInteger((email+login).getBytes("utf-8"))).toString(16);
         	
-        	 //String link = "http://localhost:8080/uarm/userForgotServlet?email=" +
         	 String link = context_url+"/userForgotServlet?email=" +
            	 URLEncoder.encode(email, "UTF-8")+"&validationKey=" +
            	 URLEncoder.encode(validationKey, "UTF-8")+"&login="+
            	 URLEncoder.encode(login, "UTF-8");
         	
-        	logger.info("UserForgotEJB:step1:02:"+link);
+        	LOGGER.debug("UserForgotEJB:step1:02:"+link);
         	 
         	String content = "Добрый день!<br/>"+
         	 "Мы получили запрос на сброс Вашего пароля в ИАЦ ПААА.<br/>" +
@@ -169,18 +162,17 @@ public class UserForgotEJB {
         	 "ИАЦ";
         	
         	m.setContent(content, "text/html; charset=utf-8");
-        	//m.setContent(content, "text/plain");
         	
         	Transport.send(m);
         	
-        	logger.info("UserForgotEJB:step1:03");
+        	LOGGER.debug("UserForgotEJB:step1:03");
         
         }catch(BaseError be){
-        	logger.error("UserForgotEJB:step1:berror:"+be);
+        	LOGGER.error("UserForgotEJB:step1:berror:"+be);
         	throw be;
         	
         }catch(Exception e){
-     	   logger.error("UserForgotEJB:step1:error:"+e);
+     	   LOGGER.error("UserForgotEJB:step1:error:"+e);
         }
         
         return result;
@@ -188,7 +180,7 @@ public class UserForgotEJB {
     
     public void changePassword(String loginUser, String newPassword) throws Exception{
     	
-   	 logger.info("UserForgotEJB:changePassword:01");
+   	 LOGGER.debug("UserForgotEJB:changePassword:01");
    	 
    	 try{
    		 
@@ -201,8 +193,7 @@ public class UserForgotEJB {
                  .executeUpdate();
            
         }catch(Exception e){
- 		  logger.error("UserForgotEJB:changePassword:error:"+e);
- 		 // e.printStackTrace(System.out);
+ 		  LOGGER.error("UserForgotEJB:changePassword:error:"+e);
  		  throw e;
  	   }
    	 

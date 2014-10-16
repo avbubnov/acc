@@ -27,7 +27,7 @@ public class StartupServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	final static Logger logger = LoggerFactory.getLogger(StartupServlet.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(StartupServlet.class);
 
 	public StartupServlet() {
 		super();
@@ -35,12 +35,12 @@ public class StartupServlet extends HttpServlet {
 
 	public void init(ServletConfig config) throws ServletException {
 
-		logger.info("init:01");
+		LOGGER.debug("init:01");
 		try {
 			LaunchCRLTask.initTask(25);
 			LaunchAuditSysArchiveTask.initTask(30);
 			LaunchAuditFuncArchiveTask.initTask(35);
-			// LaunchTokenArchiveTask.initTask(40);
+			// Launch/TokenArchiveTask.ini/tTask(40);
 			LaunchBindingUnBindTask.initTask(45);
 			LaunchBindingNoActTask.initTask(50);
 			LaunchUCCertTask.initTask(55);
@@ -50,10 +50,10 @@ public class StartupServlet extends HttpServlet {
 			
 			Configuration.setCrlReestr(crlReestr);
 			
-			logger.info("StartupServlet:init:02");
+			LOGGER.debug("StartupServlet:init:02");
 
 		} catch (Exception e) {
-			logger.error("StartupServlet:init:error:" + e);
+			LOGGER.error("StartupServlet:init:error:", e);
 		}
 	}
 

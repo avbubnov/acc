@@ -51,7 +51,6 @@ public class AcSubsystemCertBssT extends BaseItem implements Serializable {
 	@Column(name="SUBSYSTEM_NAME")
 	private String subsystemName;
 
-	//bi-directional many-to-one association to AcIsBssT
 	@ManyToOne
 	@JoinColumn(name="UP_IS", insertable=false, updatable=false)
 	private AcApplication acIsBssT;

@@ -18,7 +18,7 @@ public class LocalWebUtil {
 			return null;
 
 		int end = queryString.indexOf("&", start);
-		// int end = queryString.indexOf("&amp;", start);
+		//"&amp;"
 
 		if (end == -1)
 			return queryString.substring(start);

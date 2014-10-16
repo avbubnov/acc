@@ -24,7 +24,7 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserRegBean implements Serializable {
  
-	final static Logger logger = LoggerFactory.getLogger(UserRegBean.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserRegBean.class);
 	
 	private static final long serialVersionUID = 1L;
 	   
@@ -53,11 +53,11 @@ public class UserRegBean implements Serializable {
         
     	try{
         
-    	logger.info("UserRegBean:action:01");
+    	LOGGER.debug("UserRegBean:action:01");
         
         String version = FacesContext.class.getPackage().getImplementationVersion();
         
-        logger.info("UserRegBean:action:02:"+version);
+        LOGGER.debug("UserRegBean:action:02:"+version);
         
         HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 		String email = (String) hs.getAttribute(CUDUserConsoleConstants.userEmailReg);
@@ -68,8 +68,7 @@ public class UserRegBean implements Serializable {
         t1.setSurnameUser(userFam);
         t1.setNameUser(userName);
  	    t1.setPatronymicUser(userOtch);
- 	   // t1.setEmailUser(userEmail);
- 	    t1.setEmailUser(email);
+ 	     t1.setEmailUser(email);
  	    t1.setPhoneUser(userPhone);
  	    t1.setNameOrg(orgName);
  	    t1.setNameDepartament(depName);
@@ -77,12 +76,11 @@ public class UserRegBean implements Serializable {
         
         userRegEJB.save(t1);
         
-        //return "home?faces-redirect=true";
-        FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
+         FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
         		.getContextPath()+"/context/registr/reg_user_step2_message.xhtml");
    
     	}catch(Exception e){
-    		logger.error("UserRegBean:action:error:"+e);
+    		LOGGER.error("UserRegBean:action:error:"+e);
     	}
    }
 
@@ -90,11 +88,11 @@ public class UserRegBean implements Serializable {
         
      try{
         
-    	logger.info("UserRegBean:step1:01");
+    	LOGGER.debug("UserRegBean:step1:01");
         
         String version = FacesContext.class.getPackage().getImplementationVersion();
         
-        logger.info("UserRegBean:step1:02:"+version);
+        LOGGER.debug("UserRegBean:step1:02:"+version);
         
         HttpServletRequest request = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
     	String context_url=request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();
@@ -104,12 +102,11 @@ public class UserRegBean implements Serializable {
         FacesContext.getCurrentInstance().getExternalContext().getFlash()
              .put(userEmailReg, this.userEmail);
         
-        //return "home?faces-redirect=true";
         FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
         		.getContextPath()+"/context/registr/reg_user_step1_message.xhtml");
    
     	}catch(Exception e){
-    		logger.error("UserRegBean:step1:error:"+e);
+    		LOGGER.error("UserRegBean:step1:error:"+e);
     	}
     	}
 

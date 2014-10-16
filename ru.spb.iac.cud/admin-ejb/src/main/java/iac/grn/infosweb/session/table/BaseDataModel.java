@@ -3,7 +3,7 @@ package iac.grn.infosweb.session.table;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -79,23 +79,9 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 	public void walk(FacesContext context, DataVisitor visitor, Range range, Object argument) throws IOException {
 		
 		log.info("walk:01:start");
-	/*	if(componentState!=null){
-			log.info("walk:01:2");
-			Range range2=componentState.getRange();
-			int firstRow = ((SequenceRange)range2).getFirstRow();
-			int numberOfRows = ((SequenceRange)range2).getRows();
-			
-			log.info("walkt:firstRow:"+firstRow);
-			log.info("walk:numberOfRows:"+numberOfRows);
-		}else{
-			log.info("walk:01:3");
-		}*/
+	
 		
-	/*	try{
-			throw new NullPointerException();
-		}catch(Exception e){
-			e.printStackTrace(System.out);
-		}*/
+	
 		
 		int firstRow = ((SequenceRange)range).getFirstRow();
 		int numberOfRows = ((SequenceRange)range).getRows();
@@ -109,23 +95,20 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 			log.info("walk:cachedItems:02");
 			 this.cachedItems=findObjects(firstRow, numberOfRows, null, true, 
 					 modelType);
-			/* this.cachedItems=getDataProvider().getItemsByrange(firstRow, numberOfRows, null, true, 
-					 ServiceReestr.JournInpContr, "journDataModel",
-					 ServiceReestrPro.JournInpContr.name());*/
+			
 		}
 		log.info("walk:cachedItems:03");
 		if(this.cachedItems!=null){
 		  for (T item:cachedItems) {
 			  
-		//	log.info("walk:cachedItems:04:getId:"+getId(item));
+		
 			  
 			wrappedKeys.add(getId(item));
 			wrappedData.put(getId(item), item);  
-		//	wrappedKeys.add(item.getSessionId());
-		//	wrappedData.put(item.getSessionId(), item);
-			//log.info("visitor:start:"+item.getId().toString());
+	
+			 
 		    visitor.process(context, getId(item), argument);
-		  //  log.info("walk:cachedItems:05");
+		   
 		 }
 		}
 		log.info("walk:end");
@@ -157,26 +140,7 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 		
 	
 		log.info("auditDataModel:getRowCount:01");
-		/*if(componentState!=null){
-			log.info("getRowCount:01:2");
-			Range range=componentState.getRange();
-			int firstRow = ((SequenceRange)range).getFirstRow();
-			int numberOfRows = ((SequenceRange)range).getRows();
-			
-			log.info("getRowCount:firstRow:"+firstRow);
-			log.info("getRowCount:numberOfRows:"+numberOfRows);
-		}else{
-			log.info("getRowCount:01:3");
-		}*/
 		
-		/*if (rowCount==null) {
-			rowCount = new Integer(getDataProvider().getRowCount(filterColumnValues));
-			log.info("getRowCount:02:rowCount:"+rowCount);
-			return rowCount.intValue();
-		} else {
-			log.info("getRowCount:03:rowCount:"+rowCount);
-			return rowCount.intValue();
-		}*/
 		String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
 		         .getRequestParameterMap()
 		         .get("remoteAudit");
@@ -200,16 +164,13 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 				// При selRecAllFact, clRecAllFact, clSelOneFact запросах
 				// dataScroller не рендерится, а в параметрах
 				// rowCount и так определяется через param['auditListCount']
-				if((remoteAudit.equals("rowSelectFact")/*||
-				    remoteAudit.equals("selRecAllFact")||
-					remoteAudit.equals("clRecAllFact")||
-					remoteAudit.equals("clSelOneFact")*/)&&
+				if(("rowSelectFact".equals(remoteAudit)/*||
+				    "selRecAllFact".equals(remoteAudit)||
+					"clRecAllFact".equals(remoteAudit)||
+					"clSelOneFact".equals(remoteAudit)*/)&&
 					auditListCount!=null){
 					rowCount = new Integer(auditListCount);
 				}else{
-				/*	rowCount = new Integer(
-						getDataProvider().getRowCount(ServiceReestr.JournInpContr, "journDataModel",
-								 ServiceReestrPro.JournInpContr.name()));*/
 					rowCount = getNumRecords(modelType);
 				}
 				log.info("getRowCount:03:rowCount:"+rowCount);
@@ -223,15 +184,12 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 	 */
 	@Override
 	public T getRowData() {
-	//	log.info("getRowData:currentPk:"+currentPk);
 		if (currentPk==null) {
 			return null;
 		} else {
 			T ret = wrappedData.get(currentPk);
 			if (ret==null) {
-				//ret = getDataProvider().getAuctionItemByPk(currentPk);
-				//wrappedData.put(currentPk, ret);
-			//	log.info("getRowData:currentPk:ret==null!!");
+			
 				return ret;
 			} else {
 				return ret;
@@ -241,70 +199,17 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 	//@Override
 	 public void modify(List<FilterField> filterFields, List<SortField2> sortFields) {
 		 log.info("!!!modify!!!");
-		// this.filterFields = filterFields;
-		if(this.flagAction==1){
-		// appendFilters(filterFields,FacesContext.getCurrentInstance());
-		}// this.cachedItems = null;
+	
+		
 	 }
-/*
-	 private void appendFilters(List<FilterField> filterFields, FacesContext context) {
-        
-		 if (filterFields != null && !filterFields.isEmpty()) {
-			 
-		//	 filterFieldsHM.clear();
-			 
-        	      for (FilterField filterField : filterFields) {
-        	    	  
-                       //для rich:columns 
-        	    	    String propertyName = getPropertyName(context, filterField.getExpression());
-                       
-        	    	    log.info("appendFilters:1:"+(filterField.getExpression().getExpressionString()));
-        	    	     
-        	    	     //  для rich:column 
-        	    	     //  String propertyName = (filterField.getExpression().getExpressionString()).replaceAll("[#|$]{1}\\{.*?\\.", "").replaceAll("\\}", "");
-        	    	    
-        	    	     String filterValue=null;
-        	    	     try{ 
-        	    	    	 log.info("appendFilters:filterField.getClass:"+filterField.getClass());
-        	    	         filterValue = ((ExtendedFilterField) filterField).getFilterValue();
-                        }catch(Exception e){
-                        	log.info("appendFilters:error:"+e);
-                        }
-        	    	     
-        	    	   //log.info("appendFilters:filterColumnValue:"+filterColumnValues.get(propertyName));
-        	    	     
-                         log.info("appendFilters:propertyName:"+propertyName);
-                         log.info("appendFilters:filterValue:"+filterValue);
-                         
-                      //   if (propertyName!=null && filterColumnValues.get(propertyName)!=null && filterColumnValues.get(propertyName).length() != 0 ) {
-                         if (propertyName!=null && filterValue!=null && filterValue.length() != 0 ) {
-                                 	 
-                        	 filterColumnValues.put(propertyName, filterValue);   
-                        	 //filterColumnValues.put(propertyName, filterColumnValues.get(propertyName));   
-                                  
-                         }
-                 }
-         }
-    }
-	 
-	 
-	 private String getPropertyName(FacesContext facesContext, Expression expression) {
-         try {
-                 return (String) ((ValueExpression) expression).getValue(facesContext.getELContext());
-         } catch (ELException e) {
-                 throw new FacesException(e.getMessage(), e);
-         }
-    }
-	 */
+
 	 public void filterAction() {
 		 log.info("filterAction");
 		 this.cachedItems = null;
 		 this.rowCount=null;
 		 this.flagAction=1;
 		 
-		/* JournStateHolder journStateHolder = (JournStateHolder)Component.getInstance("journStateHolder",ScopeType.SESSION);
-		 journStateHolder.clearFilters("journDataModel");*/
-	}
+		}
 	/**
 	 * Unused rudiment from old JSF staff.
 	 */
@@ -326,17 +231,17 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 	 */
 	@Override
 	public boolean isRowAvailable() {
-		//log.info("isRowAvailable1");
+		 
 		if (currentPk==null) {
 			return false;
 		} else {
-			//log.info("isRowAvailable2");
+			 
 			if(wrappedKeys!=null){
-				//log.info("isRowAvailable3:"+(wrappedKeys.contains(currentPk)));
+				 
 			}
 			
 			return true;
-		//	return getDataProvider().hasAuctionItemByPk(currentPk);
+		
 		}
 	}
 
@@ -372,11 +277,7 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 		}
 	}
 	
-	private <V> V lookupInContext(String expression, Class<? extends V> c) {
-		FacesContext facesContext = FacesContext.getCurrentInstance();
-		Application application = facesContext.getApplication();
-		return c.cast(application.evaluateExpressionGet(facesContext, MessageFormat.format("#'{'{0}'}'", expression), c));
-	}
+
 	
 	private String auctionDataModelExpressionString;
 
@@ -389,32 +290,10 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 	 */
 	@Override
 	public void update() {
-	/*	AuditDataModel auctionDataModel = lookupInContext(auctionDataModelExpressionString, AuditDataModel.class);
-		Object savedKey = getRowKey();
-		for (Integer key : wrappedKeys) {
-			auctionDataModel.setRowKey(key);
-			auctionDataModel.getRowData().setBid(wrappedData.get(key).getBid());
-		}
-		setRowKey(savedKey);
-		//getDataProvider().update();
-		
-		this.wrappedData.clear();
-		this.wrappedKeys.clear();
-		resetDataProvider();*/
+	
 	}
 	
-	/*
-	protected void resetDataProvider() {
-		this.journDataProvider = null;
-	}
-
-	public JournDataProvider getDataProvider() {
-		  log.info("getDataProvider:01");
-		if (journDataProvider == null) {
-			log.info("getDataProvider:02");
-			}
-		return journDataProvider;
-	}*/
+	
 	
 	public String getAuctionDataModelExpressionString() {
 		return auctionDataModelExpressionString;
@@ -431,7 +310,7 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 		this.auctionDataProviderExpressionString = auctionDataProviderExpressionString;
 	}
 	    
-	   public HashMap<String, String> getFilterColumnValues() {
+	   public Map<String, String> getFilterColumnValues() {
 		   if(filterColumnValues!=null){
 		       log.info("getFilterColumnValues:01:"+filterColumnValues.size());
 		   }else{
@@ -447,13 +326,7 @@ public class BaseDataModel<T, U> extends SerializableDataModel {
 		   };
 		   this.filterColumnValues=filterColumnValues;
 	   }
-	/*   public DataComponentState getComponentState(){
-		   return this.componentState;
-	   }
-	   public void setComponentState(DataComponentState componentState){
-		   log.info("setComponentState!");
-		   this.componentState=componentState;
-	   }*/
+	
 	
 }
 

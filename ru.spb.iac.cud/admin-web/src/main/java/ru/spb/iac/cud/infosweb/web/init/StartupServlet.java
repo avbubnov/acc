@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StartupServlet extends HttpServlet {
 
-	final static Logger logger = LoggerFactory.getLogger(StartupServlet.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(StartupServlet.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,6 +66,15 @@ public class StartupServlet extends HttpServlet {
 			
 			String classifService = context.getInitParameter("CLASSIF_SERVICE");
 			
+			String classifLoadPatch = context.getInitParameter("CLASSIF_LOAD_PATH");
+			
+			String classifLoadTmp = context.getInitParameter("CLASSIF_LOAD_TMP");
+			
+			String jasperServer = context.getInitParameter("JASPER_SERVER");
+			
+			String jasperLogin = context.getInitParameter("JASPER_LOGIN");
+			
+			String jasperPassword = context.getInitParameter("JASPER_PASSWORD");
 			
 			Configuration.setSignRequired(
 						!"FALSE".equals(signRequired)&&!"false".equals(signRequired));
@@ -76,7 +85,7 @@ public class StartupServlet extends HttpServlet {
 			Configuration.setSamlAssertion(samlAssertion);
 			Configuration.setStorePath(storePath);
 			Configuration.setArchiveAuditFunc(archiveAuditFunc);
-			Configuration.setArchiveAuditSys(archiveAuditSys);;
+			Configuration.setArchiveAuditSys(archiveAuditSys);
 			Configuration.setArchiveToken(archiveToken);
 			Configuration.setUccert(uccert);
 			Configuration.setAuditService(auditService);
@@ -84,9 +93,14 @@ public class StartupServlet extends HttpServlet {
 			Configuration.setStsService(stsService);
 			Configuration.setUcCertReestr(ucCertReestr);
 			Configuration.setClassifService(classifService);
+			Configuration.setClassifLoadPatch(classifLoadPatch);
+			Configuration.setClassifLoadTmp(classifLoadTmp);
+			Configuration.setJasperServer(jasperServer);
+			Configuration.setJasperLogin(jasperLogin);
+			Configuration.setJasperPassword(jasperPassword);
 			
 		} catch (Exception e) {
-			logger.error("init:error:" + e);
+			LOGGER.error("init:error:", e);
 		}
 	}
 

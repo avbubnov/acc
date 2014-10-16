@@ -28,7 +28,7 @@ public class LinksMap {
 	/**
 	 * Список предоставляемых приложением ресурсов
 	 */
-	 private HashMap lm= new HashMap();
+	 private Map lm= new HashMap();
 
 	 /**
 	  * Идентификационный код приложения
@@ -37,11 +37,9 @@ public class LinksMap {
 	 
 	 private Long superUserCode=new Long(1);
 	 
-	// private String sysAdminRoleCode="";
 	 
 	 private String main="-1";
 	 private String notFound="0";
-	// private String lOrg="001";
 	 private String lClOrg="001";
 	 private String lUsr="002";
 	 
@@ -93,28 +91,15 @@ public class LinksMap {
 	 private String appMyUserCertModify="urn_appmy_user_cert_modify";
 	 
 	 private String auditUFMSView="006";
-	// private String auditUFMSSearch="0062";
 	 private String auditUFMSReports="0063";
 	 private String auditZAGSView="007";
-	// private String auditZAGSSearch="0072";
 	 private String auditZAGSReports="0073";
 	 
 	 private String reposAll="Repos";
-	/* private String reposInstr="008";
-	 private String reposLaw="0082";
-	 private String reposRegl="0083";
-	 private String reposMet="0084";*/
+	
 	
 	 private String confHosts="0033";
 	 
-	 private String digestPerm="009";
-	 private String digestProt="0092";
-	 private String digestRai="0093";
-	 
-	 
-	 private String auditConnectView="010";
-	 private String auditConnectReports="0102";
-
 	 private String errorPerm="_errorPerm_";
 	 
 	 /**
@@ -127,7 +112,6 @@ public class LinksMap {
 		 lm.put(notFound, "/notFound.xhtml");
 		 lm.put(errorPerm, "/error_perm.seam");
 		 
-		// lm.put(lOrg, "/context_pro/mc/org/org_list.xhtml");
 		 lm.put(lClOrg, "/context_pro/mc/clorg/clorg_list.xhtml");
 		 lm.put(lUsr, "/context_pro/mc/usr/usr_list.xhtml");
 		 lm.put(lClUsr, "/context_pro/mc/clusr/clusr_list.xhtml");
@@ -174,30 +158,17 @@ public class LinksMap {
 		 lm.put(appMyUserCertModify, "/context_pro/appmy/user_cert_modify/list.xhtml");
 		 
 		 lm.put(auditUFMSView, "/context_pro/audit/ufms/ufms_list.xhtml");
-		 //lm.put(auditUFMSSearch, "/context_pro/audit/ufms/ufms_search.xhtml");
+		 
 		 lm.put(auditUFMSReports, "/context_pro/audit/ufms/reports.xhtml");
 		 lm.put(auditZAGSView, "/context_pro/audit/zags/list.xhtml");
-		 //lm.put(auditZAGSSearch, "/context_pro/audit/zags/search.xhtml");
+		 
 		 lm.put(auditZAGSReports, "/context_pro/audit/zags/reports.xhtml");
 		 
 		 lm.put(reposAll, "/context_pro/repos/repos.seam");
-		/* lm.put(reposInstr, "/context_pro/repos/repos.seam?reposType=3");
-		 lm.put(reposLaw, "/context_pro/repos/repos.seam?reposType=1");
-		 lm.put(reposRegl, "/context_pro/repos/repos.seam?reposType=2");
-		 lm.put(reposMet, "/context_pro/repos/repos.seam?reposType=4");*/
-		 
-		/* lm.put(reposInstr, "/context_pro/repos/instr.xhtml");
-		 lm.put(reposLaw, "/context_pro/repos/law.xhtml");
-		 lm.put(reposRegl, "/context_pro/repos/regl.xhtml");
-		 lm.put(reposMet, "/context_pro/repos/met.xhtml");*/
+		
 		 
 		 
 		 lm.put(confHosts, "/context_pro/conf/hosts.xhtml");
-		/* lm.put(digestPerm, "/context_pro/digest/perm.xhtml");
-		 lm.put(digestProt, "/context_pro/digest/prot.xhtml");
-		 lm.put(digestRai, "/context_pro/digest/rai.xhtml");
-		 lm.put(auditConnectView, "/context_pro/audit/connect/list.xhtml");
-		 lm.put(auditConnectReports, "/context_pro/audit/connect/reports.xhtml");*/
 		 
 		 
 	 }
@@ -208,7 +179,7 @@ public class LinksMap {
 	  */
 	 public String getLink(String pCode){
 		 
-		// log.info("LinksMap:getLink:pCode:"+pCode);
+		 
 		 
 		 String link=null;
 		 if(pCode!=null){
@@ -258,12 +229,6 @@ public class LinksMap {
 	 public String getlArm() {
 			return lArm;
 	 }
-/*	 
-	 public String getSysAdminRoleCode(){
-		 return sysAdminRoleCode;
-	 }
-	 public void setSysAdminRoleCode(String sysAdminRoleCode){
-		 this.sysAdminRoleCode=sysAdminRoleCode;
-	 }*/
+
 	
 }

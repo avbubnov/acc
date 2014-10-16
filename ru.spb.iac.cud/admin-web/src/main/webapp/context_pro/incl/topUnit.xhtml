@@ -59,8 +59,8 @@
             </h:outputLink>
 
          </rich:toolBarGroup-->
-         <rich:toolBarGroup location="right">
-          <!--h:form-->
+         <!--rich:toolBarGroup location="right">
+         
           <rich:dropDownMenu submitMode="none"  
                              itemClass="logout_mi" 
                              selectItemClass="logout_mis">
@@ -77,7 +77,7 @@
                   <s:link onclick="#{rich:component('help_mp')}.show(); return false;">
                      <h:outputText value="Написать сообщение" style="color:#0090FF"/>
                    </s:link>
-                </rich:menuItem>
+                </rich:menuItem-->
                 <!--rich:menuItem>
                    <f:facet name="icon">
                      <h:graphicImage value="/img/icons/group-by.gif" style="border:0;vertical-align:middle;" styleClass="pic"/> 
@@ -86,9 +86,9 @@
                       <h:outputText value="Список сообщений" style="color:#0090FF"/>
                     </s:link>
                  </rich:menuItem-->
-                </rich:dropDownMenu>
-         <!--/h:form--> 
-         </rich:toolBarGroup>
+                <!--/rich:dropDownMenu>
+        
+         </rich:toolBarGroup-->
          <rich:toolBarGroup location="right">
            <h:graphicImage id="help_org" value="/img/icons/personal.gif" styleClass="pic_tbar" alt="account"/>
            </rich:toolBarGroup>

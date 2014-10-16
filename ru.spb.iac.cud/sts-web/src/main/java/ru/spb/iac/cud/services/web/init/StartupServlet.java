@@ -17,7 +17,7 @@ import ru.spb.iac.cud.context.ContextIDPUtilManager;
  */
 public class StartupServlet extends HttpServlet {
 
-	final static Logger logger = LoggerFactory.getLogger(StartupServlet.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(StartupServlet.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +48,7 @@ public class StartupServlet extends HttpServlet {
 					!"FALSE".equals(signRequired)&&!"false".equals(signRequired));
 			
 		} catch (Exception e) {
-			logger.error("init:error:" + e);
+			LOGGER.error("init:error:", e);
 		}
 	}
 

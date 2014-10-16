@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.faces.context.FacesContext;
@@ -21,6 +22,9 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.spb.iac.cud.uarm.ejb.audit.ActionsMap;
+import ru.spb.iac.cud.uarm.ejb.audit.AuditExportData;
+import ru.spb.iac.cud.uarm.ejb.audit.ResourcesMap;
 import ru.spb.iac.cud.uarm.ejb.entity.AcIsBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.AcRolesBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersCertBssT;
@@ -39,10 +43,13 @@ import ru.spb.iac.cud.uarm.util.CUDUserConsoleConstants;
 @LocalBean
 public class UserManagerEJB {
 
-	final static Logger logger = LoggerFactory.getLogger(UserManagerEJB.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserManagerEJB.class);
 	
 	@PersistenceContext(unitName = "CUDUserConsolePU")
     private EntityManager entityManager;
+	
+	@EJB(beanName = "CUDUserConsole-ejb.jar#AuditExportData")
+	private AuditExportData auditExportData;
 	
     public UserManagerEJB() {
        
@@ -51,7 +58,7 @@ public class UserManagerEJB {
     
     public AcUsersKnlT getUserItem(Long idUser){
  	   
-    	logger.info("UserManagerEJB:getUserItem:idUser:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getUserItem:idUser:"+idUser);
  	   
  	   if(idUser==null){
  		  return null;
@@ -128,52 +135,52 @@ public class UserManagerEJB {
             
             for(Object[] objectArray :lo){
          	   try{
-         		  logger.info("UserManagerEJB:getUserItem:login:"+objectArray[1].toString());
+         		  LOGGER.debug("UserManagerEJB:getUserItem:login:"+objectArray[1].toString());
          		 
          		 AcUsersKnlT userDataItem = new AcUsersKnlT();
          		 
          	     ui= userDataItem.new UserItem(
-         			   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-         			   (objectArray[1]!=null?objectArray[1].toString():""),
-         			   (objectArray[2]!=null?objectArray[2].toString():""),
-         			   (objectArray[3]!=null?objectArray[3].toString():""),
-         			   (objectArray[4]!=null?objectArray[4].toString():""),
-         			   (objectArray[5]!=null?objectArray[5].toString():""),
+         			  objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+         			  objectArray[1]!=null?objectArray[1].toString():"",
+         			  objectArray[2]!=null?objectArray[2].toString():"",
+         			  objectArray[3]!=null?objectArray[3].toString():"",
+         			  objectArray[4]!=null?objectArray[4].toString():"",
+         			  objectArray[5]!=null?objectArray[5].toString():"",
          			   //!!!
          			   //для email вместо "" ставим null [для UserForgotEJB.step1()]
-         			   (objectArray[6]!=null?objectArray[6].toString():null),
-         			   (objectArray[7]!=null?objectArray[7].toString():""),
-         			   (objectArray[8]!=null?objectArray[8].toString():""),
-         			   (objectArray[9]!=null?objectArray[9].toString():""),
-         			   (objectArray[10]!=null?objectArray[10].toString():""),
-         			   (objectArray[11]!=null?objectArray[11].toString():""),
-         			   (objectArray[12]!=null?objectArray[12].toString():""),
-         			   (objectArray[13]!=null?objectArray[13].toString():""),
-         			   (objectArray[14]!=null?objectArray[14].toString():""),
-         			   (objectArray[15]!=null?new Long(objectArray[15].toString()):null),
-         			   (objectArray[16]!=null?df.format((Date)objectArray[16]) :""),
-         			   (objectArray[17]!=null?objectArray[17].toString():""),
-         			   (objectArray[18]!=null?objectArray[18].toString():""),
-         			   (objectArray[19]!=null?objectArray[19].toString():""),
-         			   (objectArray[20]!=null?objectArray[20].toString():""),
-         			   (objectArray[21]!=null?objectArray[21].toString():""),
-         			   (objectArray[22]!=null?objectArray[22].toString():""),
-         			   (objectArray[23]!=null?objectArray[23].toString():""),
-         			   (objectArray[24]!=null?new Long(objectArray[24].toString()):null),
+         			  objectArray[6]!=null?objectArray[6].toString():null,
+         			  objectArray[7]!=null?objectArray[7].toString():"",
+         			  objectArray[8]!=null?objectArray[8].toString():"",
+         			  objectArray[9]!=null?objectArray[9].toString():"",
+         			  objectArray[10]!=null?objectArray[10].toString():"",
+         			  objectArray[11]!=null?objectArray[11].toString():"",
+         			  objectArray[12]!=null?objectArray[12].toString():"",
+         			  objectArray[13]!=null?objectArray[13].toString():"",
+         			  objectArray[14]!=null?objectArray[14].toString():"",
+         			  objectArray[15]!=null?new Long(objectArray[15].toString()):null,
+         			  objectArray[16]!=null?df.format((Date)objectArray[16]) :"",
+         			  objectArray[17]!=null?objectArray[17].toString():"",
+         			  objectArray[18]!=null?objectArray[18].toString():"",
+         			  objectArray[19]!=null?objectArray[19].toString():"",
+         			  objectArray[20]!=null?objectArray[20].toString():"",
+         			  objectArray[21]!=null?objectArray[21].toString():"",
+         			  objectArray[22]!=null?objectArray[22].toString():"",
+         			  objectArray[23]!=null?objectArray[23].toString():"",
+         			  objectArray[24]!=null?new Long(objectArray[24].toString()):null,
          			   //!!!
          			   //для email вместо "" ставим null [для UserForgotEJB.step1()]
-         			   (objectArray[25]!=null?objectArray[25].toString():null)
+         			  objectArray[25]!=null?objectArray[25].toString():null
          			   );
          	     
          	     userDataItem.setUserItem(ui);
          	     
          	     return userDataItem;
          	   }catch(Exception e1){
-         		  logger.error("UserManagerEJB:getUserItem:for:error:"+e1);
+         		  LOGGER.error("UserManagerEJB:getUserItem:for:error:"+e1);
          	   }
             }  
  	   }catch(Exception e){
- 		  logger.error("UserManagerEJB:getUserItem:error:"+e);
+ 		  LOGGER.error("UserManagerEJB:getUserItem:error:"+e);
  	   }
  	   return null;
     }
@@ -184,7 +191,7 @@ public class UserManagerEJB {
     
     public List<AcIsBssT> getUserRoles(Long idUser){
   	   
-    	logger.info("UserManagerEJB:getUserRoles:idUser:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getUserRoles:idUser:"+idUser);
  	   
  	   if(idUser==null){
  		  return null;
@@ -192,13 +199,12 @@ public class UserManagerEJB {
  	   
  	   try{
             List<Object[]> lo=null;
-            List<AcIsBssT> arm_list=null;
-            List<AcRolesBssT> role_list=null;
+            List<AcIsBssT> armList=null;
+            List<AcRolesBssT> roleList=null;
             AcIsBssT arm = null;
             AcRolesBssT role = null;
             Long idArm = null;
-            DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
-            
+           
              lo=entityManager.createNativeQuery(
          		    "select  sys_full.id_srv sys_id,  sys_full.FULL_ sys_name, " +
          		    "rol_full.id_srv role_id, rol_full.FULL_ role_name "+
@@ -233,151 +239,145 @@ public class UserManagerEJB {
             	
             	idArm = (objectArray[0]!=null?new Long(objectArray[0].toString()):0L);
             			
-            	if(arm_list==null){
-            		arm_list = new ArrayList<AcIsBssT>();
+            	if(armList==null){
+            		armList = new ArrayList<AcIsBssT>();
             	}
               	
             	if(arm==null||!idArm.equals(arm.getIdSrv())){
             		
             	  arm = new AcIsBssT();
-            	  role_list = new ArrayList<AcRolesBssT>();
-                  arm.setAcRolesBssTs(role_list);
+            	  roleList = new ArrayList<AcRolesBssT>();
+                  arm.setAcRolesBssTs(roleList);
                  
                   arm.setIdSrv(idArm);
-                  arm.setFull((objectArray[1]!=null?objectArray[1].toString():""));
+                  arm.setFull (objectArray[1]!=null?objectArray[1].toString():"");
               
-                  arm_list.add(arm);
+                  armList.add(arm);
                  
                 }
             	
                 role = new AcRolesBssT();
-                role_list.add(role);
+                roleList.add(role);
                 
-                role.setIdSrv((objectArray[2]!=null?new Long(objectArray[2].toString()):null));
-                role.setFull((objectArray[3]!=null?objectArray[3].toString():""));
+                role.setIdSrv (objectArray[2]!=null?new Long(objectArray[2].toString()):null);
+                role.setFull (objectArray[3]!=null?objectArray[3].toString():"");
        
             }  
             
-            return arm_list;
+            return armList;
             
  	   }catch(Exception e){
- 		  logger.error("UserManagerEJB:getUserRoles:error:"+e);
- 		  e.printStackTrace(System.out);
+ 		  LOGGER.error("UserManagerEJB:getUserRoles:error:"+e);
  	   }
  	   return null;
     }
     
     public List<AcIsBssT> getArmList(){
     	   
-    	logger.info("UserManagerEJB:getArmList:01");
+    	LOGGER.debug("UserManagerEJB:getArmList:01");
  	   
  	   
     	 try{
-             List<AcIsBssT> arm_list=entityManager.createQuery(
+             List<AcIsBssT> armList=entityManager.createQuery(
           		   "select t1 from AcIsBssT t1 "+
           		   "order by t1.full ")
                   .getResultList();
             
-            return arm_list;
+            return armList;
              
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getArmList:error:"+e);
-  		  e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getArmList:error:"+e);
   	   }
  	   return null;
     }
     
     public List<JournAppAccessBssT> getAppAccessList(Long idUser){
  	   
-    	logger.info("UserManagerEJB:getAppAccessList:01:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getAppAccessList:01:"+idUser);
  	   
  	   
     	 try{
-             List<JournAppAccessBssT> arm_list=entityManager.createQuery(
+             List<JournAppAccessBssT> armList=entityManager.createQuery(
           		   "select t1 from JournAppAccessBssT t1 " +
           		   "where t1.acUsersKnlT2.idSrv = :idUser "+
           		   "order by t1.idSrv desc ")
           		  .setParameter("idUser", idUser)
                   .getResultList();
             
-            return arm_list;
+            return armList;
              
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getAppAccessList:error:"+e);
-  		  e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getAppAccessList:error:"+e);
   	   }
  	   return null;
     }
     
     public List<JournAppAccessBssT> getAppAccessGroupsList(Long idUser){
   	   
-    	logger.info("UserManagerEJB:getAppAccessGroupsList:01:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getAppAccessGroupsList:01:"+idUser);
  	   
  	   
     	 try{
-             List<JournAppAccessBssT> arm_list=entityManager.createQuery(
+             List<JournAppAccessBssT> armList=entityManager.createQuery(
           		   "select t1 from JournAppAccessGroupsBssT t1 " +
           		   "where t1.acUsersKnlT2.idSrv = :idUser "+
           		   "order by t1.idSrv desc ")
           		  .setParameter("idUser", idUser)
                   .getResultList();
             
-            return arm_list;
+            return armList;
              
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getAppAccessGroupsList:error:"+e);
-  		  e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getAppAccessGroupsList:error:"+e);
   	   }
  	   return null;
     }
     
     public List<JournAppAdminUserSysBssT> getAppAdminUserSysList(Long idUser){
   	   
-    	logger.info("UserManagerEJB:getAppAdminUserSysList:01:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getAppAdminUserSysList:01:"+idUser);
  	   
  	   
     	 try{
-             List<JournAppAdminUserSysBssT> arm_list=entityManager.createQuery(
+             List<JournAppAdminUserSysBssT> armList=entityManager.createQuery(
           		   "select t1 from JournAppAdminUserSysBssT t1 " +
           		   "where t1.acUsersKnlT2.idSrv = :idUser "+
           		   "order by t1.idSrv desc ")
           		  .setParameter("idUser", idUser)
                   .getResultList();
             
-            return arm_list;
+            return armList;
              
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getAppAdminUserSysList:error:"+e);
-  		  e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getAppAdminUserSysList:error:"+e);
   	   }
  	   return null;
     }
     
     public List<JournAppOrgManagerBssT> getAppOrgManList(Long idUser){
    	   
-    	logger.info("UserManagerEJB:getAppOrgManList:01:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getAppOrgManList:01:"+idUser);
  	   
  	   
     	 try{
-             List<JournAppOrgManagerBssT> arm_list=entityManager.createQuery(
+             List<JournAppOrgManagerBssT> armList=entityManager.createQuery(
           		   "select t1 from JournAppOrgManagerBssT t1 " +
           		   "where t1.acUsersKnlT2.idSrv = :idUser "+
           		   "order by t1.idSrv desc ")
           		  .setParameter("idUser", idUser)
                   .getResultList();
             
-            return arm_list;
+            return armList;
              
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getAppOrgManList:error:"+e);
-  		  e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getAppOrgManList:error:"+e);
   	   }
  	   return null;
     }
     
     public List<AcRolesBssT> getListRolesFromArm(Long pidArm){
     	   
-    	logger.info("UserManagerEJB:getListRolesFromArm:01:"+pidArm);
+    	LOGGER.debug("UserManagerEJB:getListRolesFromArm:01:"+pidArm);
  	   
  	   if(pidArm==null){
  		   return null;
@@ -385,8 +385,8 @@ public class UserManagerEJB {
     	
     	 try{
              List<Object[]> lo=null;
-             List<AcIsBssT> arm_list=null;
-             List<AcRolesBssT> role_list=null;
+             List<AcIsBssT> armList=null;
+             List<AcRolesBssT> roleList=null;
              AcIsBssT arm = null;
              AcRolesBssT role = null;
              Long idArm = null;
@@ -416,47 +416,46 @@ public class UserManagerEJB {
              	
              	idArm = (objectArray[0]!=null?new Long(objectArray[0].toString()):0L);
              			
-             	if(arm_list==null){
-             		arm_list = new ArrayList<AcIsBssT>();
+             	if(armList==null){
+             		armList = new ArrayList<AcIsBssT>();
              	}
                	
              	if(arm==null||!idArm.equals(arm.getIdSrv())){
              		
              	  arm = new AcIsBssT();
-             	  role_list = new ArrayList<AcRolesBssT>();
-                   arm.setAcRolesBssTs(role_list);
+             	  roleList = new ArrayList<AcRolesBssT>();
+                   arm.setAcRolesBssTs(roleList);
                   
                    arm.setIdSrv(idArm);
-                   arm.setFull((objectArray[1]!=null?objectArray[1].toString():""));
+                   arm.setFull (objectArray[1]!=null?objectArray[1].toString():"");
                
-                   arm_list.add(arm);
+                   armList.add(arm);
                   
                  }
              	
                  role = new AcRolesBssT();
-                 role_list.add(role);
+                 roleList.add(role);
                  
-                 role.setIdSrv((objectArray[2]!=null?new Long(objectArray[2].toString()):null));
-                 role.setFull((objectArray[3]!=null?objectArray[3].toString():""));
-                 role.setSignObject((objectArray[4]!=null?objectArray[4].toString():""));
+                 role.setIdSrv (objectArray[2]!=null?new Long(objectArray[2].toString()):null);
+                 role.setFull (objectArray[3]!=null?objectArray[3].toString():"");
+                 role.setSignObject (objectArray[4]!=null?objectArray[4].toString():"");
         
              }  
              
-             if(!arm_list.isEmpty()){
-                return arm_list.get(0).getAcRolesBssTs();
+             if(!armList.isEmpty()){
+                return armList.get(0).getAcRolesBssTs();
              }else{
             	return null;
              }
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getListRolesFromArm:error:"+e);
-  		  e.printStackTrace(System.out);
-  	   }
+  		  LOGGER.error("UserManagerEJB:getListRolesFromArm:error:"+e);
+  		   }
  	   return null;
     } 
     
     public List<GroupUsersKnlT> getListGroupsFromArm(Long pidArm){
  	   
-    	logger.info("UserManagerEJB:getListGroupsFromArm:01:"+pidArm);
+    	LOGGER.debug("UserManagerEJB:getListGroupsFromArm:01:"+pidArm);
  	   
  	   if(pidArm==null){
  		   return null;
@@ -464,7 +463,7 @@ public class UserManagerEJB {
     	
     	 try{
              List<Object[]> lo=null;
-             List<AcIsBssT> arm_list=null;
+             List<AcIsBssT> armList=null;
              List<GroupUsersKnlT> group_list=null;
              AcIsBssT arm = null;
              GroupUsersKnlT group = null;
@@ -495,8 +494,8 @@ public class UserManagerEJB {
              	
              	idArm = (objectArray[0]!=null?new Long(objectArray[0].toString()):0L);
              			
-             	if(arm_list==null){
-             		arm_list = new ArrayList<AcIsBssT>();
+             	if(armList==null){
+             		armList = new ArrayList<AcIsBssT>();
              	}
                	
              	if(arm==null||!idArm.equals(arm.getIdSrv())){
@@ -506,36 +505,35 @@ public class UserManagerEJB {
                    arm.setGroups(group_list);
                   
                    arm.setIdSrv(idArm);
-                   arm.setFull((objectArray[1]!=null?objectArray[1].toString():""));
+                   arm.setFull (objectArray[1]!=null?objectArray[1].toString():"");
                
-                   arm_list.add(arm);
+                   armList.add(arm);
                   
                  }
              	
                  group = new GroupUsersKnlT();
                  group_list.add(group);
                  
-                 group.setIdSrv((objectArray[2]!=null?new Long(objectArray[2].toString()):null));
-                 group.setFull((objectArray[3]!=null?objectArray[3].toString():""));
-                 group.setSignObject((objectArray[4]!=null?objectArray[4].toString():""));
+                 group.setIdSrv (objectArray[2]!=null?new Long(objectArray[2].toString()):null);
+                 group.setFull (objectArray[3]!=null?objectArray[3].toString():"");
+                 group.setSignObject (objectArray[4]!=null?objectArray[4].toString():"");
         
              }  
              
-             if(!arm_list.isEmpty()){
-                return arm_list.get(0).getGroups();
+             if(!armList.isEmpty()){
+                return armList.get(0).getGroups();
              }else{
             	return null;
              }
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getListGroupsFromArm:error:"+e);
-  		  e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getListGroupsFromArm:error:"+e);
   	   }
  	   return null;
     } 
     
     public void changePassword(Long idUser, String userOldPassword, String newPassword) throws Exception{
     	
-    	 logger.info("UserManagerEJB:changePassword:01");
+    	 LOGGER.debug("UserManagerEJB:changePassword:01");
     	 
     	 try{
     		 
@@ -555,35 +553,37 @@ public class UserManagerEJB {
           		   .setParameter(2, idUser)
                   .executeUpdate();
             
+           audit(ResourcesMap.USER, ActionsMap.UPDATE_PASSWORD); 
+           
          }catch(Exception e){
-  		  logger.error("UserManagerEJB:changePassword:error:"+e);
-  		 // e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:changePassword:error:"+e);
   		  throw e;
   	   }
     	 
      }
     
     public void uploadCertFile(AcUsersCertBssT userCert) throws Exception {
-      logger.info("UserManagerEJB:uploadCertFile:01");
+      LOGGER.debug("UserManagerEJB:uploadCertFile:01");
     	 
     	 try{
     		 
     		 entityManager.persist(userCert);
             
+    		 audit(ResourcesMap.USER, ActionsMap.ADD_CERTIFICATE);
+    		 
          }catch(Exception e){
-  		  logger.error("UserManagerEJB:uploadCertFile:error:"+e);
-  		 // e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:uploadCertFile:error:"+e);
   		  throw e;
   	   }
     }
     
     public boolean certNumExistCrt(String certNum) throws Exception {
  	   
-    	logger.info("UserManagerEJB:certNumExistCrt:certNum="+certNum);
+    	LOGGER.debug("UserManagerEJB:certNumExistCrt:certNum="+certNum);
 		
     	boolean result = false;
     	
-		if(certNum!=null&&!certNum.trim().equals("")){
+		if(certNum!=null&&!"".equals(certNum.trim())){
 		  try{
 			  certNum = certNum.replaceAll(" ", "").toUpperCase();
 			  
@@ -596,11 +596,11 @@ public class UserManagerEJB {
 			  
 			  result=true;
 			  
-				  logger.info("UserManagerEJB:certNumExistCrt:addCertNumExist!");		     
+				  LOGGER.debug("UserManagerEJB:certNumExistCrt:addCertNumExist!");		     
 		    }catch (NoResultException ex){
-		    	logger.error("UserManagerEJB:certNumExistCrt:NoResultException");
+		    	LOGGER.error("UserManagerEJB:certNumExistCrt:NoResultException");
           }catch(Exception e){
-        	  logger.error("UserManagerEJB:certNumExistCrt:Error:"+e);
+        	  LOGGER.error("UserManagerEJB:certNumExistCrt:Error:"+e);
 	           throw e;
         }
 		}
@@ -611,7 +611,7 @@ public class UserManagerEJB {
     
     private Long getIdUser(String loginUser){
   	   
-       logger.info("UserManagerEJB:getIdUser:01:"+loginUser);
+       LOGGER.debug("UserManagerEJB:getIdUser:01:"+loginUser);
  	   
        Long result = null;
        
@@ -620,10 +620,7 @@ public class UserManagerEJB {
  	   }
  	   
  	   try{
-            AcUsersKnlT.UserItem ui = null;
-            DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
-            
-          
+             
             result= ((BigDecimal) entityManager.createNativeQuery(
          		   "select AU_FULL.ID_SRV "+
                    "from AC_USERS_KNL_T au_full "+
@@ -632,9 +629,9 @@ public class UserManagerEJB {
              .getSingleResult()).longValue();
               
  	   }catch(NullPointerException e){
- 		  logger.error("UserManagerEJB:getIdUser:error_NPE:"+e);
+ 		  LOGGER.error("UserManagerEJB:getIdUser:error_NPE:"+e);
  	   }catch(Exception e){
- 		  logger.error("UserManagerEJB:getIdUser:error:"+e);
+ 		  LOGGER.error("UserManagerEJB:getIdUser:error:"+e);
  	   }
  	   return result;
     }
@@ -642,7 +639,7 @@ public class UserManagerEJB {
     
     public List<GroupUsersKnlT> getUserGroups(Long idUser) throws Exception{
   	   
-    	logger.info("UserManagerEJB:getUserGroups:01:"+idUser);
+    	LOGGER.debug("UserManagerEJB:getUserGroups:01:"+idUser);
  	   
  	   if(idUser==null){
  		   return null;
@@ -706,8 +703,7 @@ public class UserManagerEJB {
     		    return listUsrGroupForView;
     		    
   	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getUserGroups:error:"+e);
-  		 // e.printStackTrace(System.out);
+  		  LOGGER.error("UserManagerEJB:getUserGroups:error:"+e);
   		  throw e;
   	   }
  	  
@@ -733,7 +729,7 @@ public class UserManagerEJB {
 			    		.setMaxResults(100)
 			    		.getResultList();
 			     
-			   logger.info("UserManagerEJB:getUserCertList:size:"+user_cert_list.size());
+			   LOGGER.debug("UserManagerEJB:getUserCertList:size:"+user_cert_list.size());
 			     
 			     userCertList= new ArrayList<BaseItem>();
 			     
@@ -741,103 +737,38 @@ public class UserManagerEJB {
 			    	 
 			    	 try{
 		        	     ui= new UCCertItem(
-		        			   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-		        			   (objectArray[1]!=null?objectArray[1].toString():""),
-		        			   (objectArray[2]!=null?objectArray[2].toString():""),
-		        			   (objectArray[3]!=null?objectArray[3].toString():""),
+		        			  objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+		        			  objectArray[1]!=null?objectArray[1].toString():"",
+		        			  objectArray[2]!=null?objectArray[2].toString():"",
+		        			  objectArray[3]!=null?objectArray[3].toString():"",
 		        			   "",
-		        			   (objectArray[4]!=null?objectArray[4].toString():""),
-		        			   (objectArray[5]!=null?objectArray[5].toString():""),
+		        			  objectArray[4]!=null?objectArray[4].toString():"",
+		        			  objectArray[5]!=null?objectArray[5].toString():"",
 		        			   "");
 		        	     userCertList.add(ui);
 		        	   }catch(Exception e1){
-		        		   logger.error("UserManagerEJB:getUserCertList:for:error:"+e1);
+		        		   LOGGER.error("UserManagerEJB:getUserCertList:for:error:"+e1);
 		        	   } 
 			    	 
 			     }
      		
       }catch(Exception e){
-		  logger.error("UserManagerEJB:getUserCertList:error:"+e);
-		 // e.printStackTrace(System.out);
+		  LOGGER.error("UserManagerEJB:getUserCertList:error:"+e);
 		  throw e;
 	   }
 		
 		return userCertList;
 	}
 
- /*  
-   public List<AcIsBssT> getFullArmRoles(Long pidArm){
-   	   
-    	logger.info("UserManagerEJB:getFullArmRoles:01:"+pidArm);
- 	   
- 	   
-    	 try{
-             List<Object[]> lo=null;
-             List<AcIsBssT> arm_list=null;
-             List<AcRolesBssT> role_list=null;
-             AcIsBssT arm = null;
-             AcRolesBssT role = null;
-             Long idArm = null;
-              
-              lo=entityManager.createNativeQuery(
-          		   "select sys_full.id_srv sys_id,  sys_full.FULL_ sys_name, " +
-          		   "rol_full.id_srv role_id, rol_full.FULL_ role_name, rol_full.SIGN_OBJECT role_code "+
-          		   "from( "+
-          		   "select SYS.ID_SRV sys_id,  ROL.ID_SRV role_id "+
-          		   "from "+ 
-          		   "AC_IS_BSS_T sys, "+
-          		   "AC_ROLES_BSS_T rol "+
-          		   "where  "+
-          		   "ROL.UP_IS= SYS.ID_SRV "+
-          		   (pidArm!=null?"and SYS.ID_SRV="+pidArm+" ":"")+
-                   " group by SYS.ID_SRV,  ROL.ID_SRV "+
-          		   "),  "+
-          		   "AC_IS_BSS_T sys_full,  AC_ROLES_BSS_T rol_full "+
-          		   "where sys_full.id_srv = sys_id "+
-          		   "and rol_full.id_srv =  role_id "+
-          		   "order by  sys_full.FULL_ , rol_full.FULL_ "
-             		)
-           .getResultList();
-             
-             for(Object[] objectArray :lo){
-             	
-             	
-             	idArm = (objectArray[0]!=null?new Long(objectArray[0].toString()):0L);
-             			
-             	if(arm_list==null){
-             		arm_list = new ArrayList<AcIsBssT>();
-             	}
-               	
-             	if(arm==null||!idArm.equals(arm.getIdSrv())){
-             		
-             	  arm = new AcIsBssT();
-             	  role_list = new ArrayList<AcRolesBssT>();
-                   arm.setAcRolesBssTs(role_list);
-                  
-                   arm.setIdSrv(idArm);
-                   arm.setFull((objectArray[1]!=null?objectArray[1].toString():""));
-               
-                   arm_list.add(arm);
-                  
-                 }
-             	
-                 role = new AcRolesBssT();
-                 role_list.add(role);
-                 
-                 role.setIdSrv((objectArray[2]!=null?new Long(objectArray[2].toString()):null));
-                 role.setFull((objectArray[3]!=null?objectArray[3].toString():""));
-                 role.setSignObject((objectArray[4]!=null?objectArray[4].toString():""));
-        
-             }  
-             
-             return arm_list;
-             
-  	   }catch(Exception e){
-  		  logger.error("UserManagerEJB:getFullArmRoles:error:"+e);
-  		  e.printStackTrace(System.out);
-  	   }
- 	   return null;
-    }
-    */
+  public void audit(ResourcesMap resourcesMap, ActionsMap actionsMap){
+	   try{
+		  
+		   auditExportData.addFunc(resourcesMap.getCode()+":"+actionsMap.getCode());
+		   
+	   }catch(Exception e){
+		   LOGGER.error("UserManagerEJB:audit:error:"+e);
+	   }
+ }
+
     
 }

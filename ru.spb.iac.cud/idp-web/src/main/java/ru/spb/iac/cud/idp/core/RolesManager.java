@@ -16,15 +16,15 @@ public class RolesManager implements CUDRoleGenerator {
 
 	private String codeSystem;
 
-	final static Logger logger = LoggerFactory.getLogger(RolesManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(RolesManager.class);
 
 	public List<String> generateRoles(Principal principal) {
 
 		List<String> roles = new ArrayList<String>();
 		try {
 
-			// logger.info("generateRoles:01:"+principal);
-			// logger.info("generateRoles:02:"+this.codeSystem);
+			 
+			 
 
 			String domain = this.codeSystem;
 
@@ -32,7 +32,7 @@ public class RolesManager implements CUDRoleGenerator {
 					principal.getName(), domain);
 
 		} catch (Exception e) {
-			logger.error("generateRoles:error:" + e);
+			LOGGER.error("generateRoles:error:", e);
 		}
 		return roles;
 	}
@@ -42,8 +42,8 @@ public class RolesManager implements CUDRoleGenerator {
 		List<String> resources = new ArrayList<String>();
 		try {
 
-			logger.info("generateResources:01:" + principal);
-			logger.info("generateResources:02:" + this.codeSystem);
+			LOGGER.debug("generateResources:01:" + principal);
+			LOGGER.debug("generateResources:02:" + this.codeSystem);
 
 			String domain = this.codeSystem;
 
@@ -51,7 +51,7 @@ public class RolesManager implements CUDRoleGenerator {
 					principal.getName(), domain);
 
 		} catch (Exception e) {
-			logger.info("generateResources:error:" + e);
+			LOGGER.debug("generateResources:error:", e);
 		}
 		return resources;
 	}

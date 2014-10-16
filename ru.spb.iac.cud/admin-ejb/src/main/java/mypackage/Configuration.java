@@ -5,7 +5,7 @@ public class Configuration{
  
   private static boolean signRequired;
 
- // private static boolean encryptRequired;
+ 
   
   private static String samlRequestLogin ; 
 	
@@ -32,6 +32,16 @@ public class Configuration{
   private static String ucCertReestr ;
   
   private static String classifService ;
+  
+  private static String classifLoadPatch ;
+  
+  private static String classifLoadTmp ;
+  
+  private static String jasperServer ;
+  
+  private static String jasperLogin ;
+  
+  private static String jasperPassword;
   
   public static boolean isSignRequired() {
 	return signRequired;
@@ -151,6 +161,46 @@ public static String getClassifService() {
 
 public static void setClassifService(String classifService) {
 	Configuration.classifService = classifService;
+}
+
+public static String getClassifLoadPatch() {
+	return classifLoadPatch;
+}
+
+public static String getClassifLoadTmp() {
+	return classifLoadTmp;
+}
+
+public static void setClassifLoadTmp(String classifLoadTmp) {
+	Configuration.classifLoadTmp = classifLoadTmp;
+}
+
+public static void setClassifLoadPatch(String classifLoadPatch) {
+	Configuration.classifLoadPatch = classifLoadPatch;
+}
+
+public static String getJasperServer() {
+	return jasperServer;
+}
+
+public static void setJasperServer(String jasperServer) {
+	Configuration.jasperServer = jasperServer;
+}
+
+public static String getJasperLogin() {
+	return jasperLogin;
+}
+
+public static void setJasperLogin(String jasperLogin) {
+	Configuration.jasperLogin = jasperLogin;
+}
+
+public static String getJasperPassword() {
+	return jasperPassword;
+}
+
+public static void setJasperPassword(String jasperPassword) {
+	Configuration.jasperPassword = jasperPassword;
 }   
 
   

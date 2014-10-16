@@ -38,7 +38,7 @@ import static org.picketlink.common.util.StringUtil.isNotNull;
 public class GOSTSAML2SignatureGenerationHandler extends
 		AbstractSignatureHandler {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(GOSTSAML2SignatureGenerationHandler.class);
 
 	@Override
@@ -64,7 +64,7 @@ public class GOSTSAML2SignatureGenerationHandler extends
 			 
 		Document responseDocument = response.getResultingDocument();
 
-		loggerslf4j.info("handleRequestType:01");
+		LOGGERSLF4J.debug("handleRequestType:01");
 
 		if (responseDocument == null) {
 			logger.trace("No response document found");

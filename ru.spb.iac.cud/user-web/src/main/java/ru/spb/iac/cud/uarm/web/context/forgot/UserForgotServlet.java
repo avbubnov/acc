@@ -32,7 +32,7 @@ import test.ejb.HomeBean;
 @WebServlet(value="/userForgotServlet")
 public class UserForgotServlet extends HttpServlet {
  
-  final static Logger logger = LoggerFactory.getLogger(UserForgotServlet.class);
+  final static Logger LOGGER = LoggerFactory.getLogger(UserForgotServlet.class);
 	
    private static final long serialVersionUID = 1L;
  
@@ -45,7 +45,7 @@ public class UserForgotServlet extends HttpServlet {
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
-		logger.info("UserForgotServlet:service:01");
+		LOGGER.debug("UserForgotServlet:service:01");
 		boolean success = false;
 		String email = null;
 		String login = null;
@@ -66,7 +66,7 @@ public class UserForgotServlet extends HttpServlet {
 				
 				String validationKeyTrue = (new BigInteger((email+login).getBytes("utf-8"))).toString(16);
 			
-				logger.info("UserForgotServlet:service:02:"+validationKeyTrue);
+				LOGGER.debug("UserForgotServlet:service:02:"+validationKeyTrue);
 				
 				if(validationKey.equals(validationKeyTrue)){
 					success = true;
@@ -74,13 +74,13 @@ public class UserForgotServlet extends HttpServlet {
 			}
 			
 	    }catch(Exception e){
-	    	logger.error("UserForgotServlet:service:error:"+e);
+	    	LOGGER.error("UserForgotServlet:service:error:"+e);
 	    }
 		
 		if(success){
 			//!!!
 			HttpSession hs = (HttpSession) request.getSession(true); 
-			logger.info("UserForgotServlet:service:03:"+hs.getId());
+			LOGGER.debug("UserForgotServlet:service:03:"+hs.getId());
 			hs.setAttribute(CUDUserConsoleConstants.userLoginForgot, login);
 		
 			response.sendRedirect(request.getContextPath()+"/context/forgot/pass_step2.xhtml");

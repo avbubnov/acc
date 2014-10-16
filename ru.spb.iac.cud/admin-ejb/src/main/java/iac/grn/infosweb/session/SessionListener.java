@@ -30,8 +30,8 @@ public class SessionListener implements HttpSessionListener {
 		try{
 		  HttpSession hs = (HttpSession) arg0.getSession();
 		
-		  //final String token =(String)hs.getAttribute("auditExportToken");
-		  //final String login =(String)hs.getAttribute("auditExportLogin");
+		  
+		  
 		  final String uid =(String)hs.getAttribute("auditExportUid");
 		  
 		  final List<AuditFunction> funcList =(List<AuditFunction>)hs.getAttribute("auditExportFuncList");
@@ -41,8 +41,8 @@ public class SessionListener implements HttpSessionListener {
 				new Runnable(){
 				      public void run() {
 				    	  
-				    	 // auditExport(funcList, token);
-				    	 // auditExport(funcList, login);
+				    	 
+				    	 
 				    	  auditExport(funcList, uid);
 				    }
 				   }
@@ -52,7 +52,7 @@ public class SessionListener implements HttpSessionListener {
 		  log.info("+++SessionListener:sessionDestroyed:02");
 		
 		}catch(Exception e){
-			   System.out.println("SessionListener:sessionDestroyed:error:"+e);
+			 log.error("SessionListener:sessionDestroyed:error:"+e);
 		}
 	  }	
 	  

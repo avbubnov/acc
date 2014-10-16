@@ -41,8 +41,7 @@ public class BindingLogT implements Serializable {
 	@Column(name="UP_ISP_SIGN_USER")
 	private String upIspSignUser;
 
-	//bi-directional many-to-one association to AcUsersKnlT
-    @ManyToOne
+	 @ManyToOne
 	@JoinColumn(name="UP_USERS")
 	private AcUser acUsersKnlT;
 

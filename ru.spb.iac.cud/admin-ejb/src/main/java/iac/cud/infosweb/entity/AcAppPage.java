@@ -27,7 +27,7 @@ public class AcAppPage implements Serializable {
 	@Column(name="ID_SRV")
 	private Long idRes;
 
-	@ManyToOne(/*cascade={CascadeType.REFRESH}*/)
+	@ManyToOne()
 	@JoinColumn(name="UP", insertable=false,updatable=false)
 	private AcAppPage idParent;
 	
@@ -41,7 +41,7 @@ public class AcAppPage implements Serializable {
 	private String pageCode;
 	
 	//осознанно убрано CascadeType.REFRESH, так как это важно для resManager:delRes()
-	@OneToMany(mappedBy="idParent", cascade={CascadeType.REMOVE, /*CascadeType.REFRESH*/})
+	@OneToMany(mappedBy="idParent", cascade={CascadeType.REMOVE})
 	@OrderBy("orderNum")
     private Set<AcAppPage> idResCollection;
 	
@@ -55,9 +55,6 @@ public class AcAppPage implements Serializable {
 	@OneToMany(mappedBy="acAppPage", cascade=CascadeType.REMOVE)
 	private Set<AcLinkRoleAppPagePrmssn> acLinkRoleAppPagePrmssns;
 
-	/*@OneToMany(mappedBy="acAppPage", fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
-	private Set<AcLinkRoleAppPagePrmssn> acLinkRoleAppPagePrmssns;*/
-	
 	@Column(name="IS_VISIBLE")
 	private Long visible;
 	
@@ -78,8 +75,6 @@ public class AcAppPage implements Serializable {
 	
 	@Transient
 	private String fullPageName;
-	//@Transient
-//	private String appName;
 	
 	@Transient
 	private String visibleValue;
@@ -90,11 +85,9 @@ public class AcAppPage implements Serializable {
 	public AcAppPage() {
     }
     public List<Long> getPermList(){
-    //	System.out.println("AcAppPage:getPermList");
-    	return this.permList;
+     	return this.permList;
     }
     public void setPermList(List<Long>permList){
-   // 	System.out.println("AcAppPage:setPermList");
     	this.permList=permList;
     }
 		
@@ -213,14 +206,7 @@ public class AcAppPage implements Serializable {
 	public void setFullPageName(String fullPageName) {
 		this.fullPageName = fullPageName;
 	}
-/*	public String getAppName() {
-		
-		return this.appName;
-	}
-	public void setAppName(String appName) {
-		this.appName = appName;
-	}*/
-	
+
 	public String getVisibleValue() {
 		if(this.visibleValue==null){
 			if(this.visible!=null){

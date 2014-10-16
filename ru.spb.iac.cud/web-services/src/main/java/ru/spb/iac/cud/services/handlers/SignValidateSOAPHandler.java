@@ -44,7 +44,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.apache.xml.security.transforms.Transforms;
 import org.picketlink.common.util.Base64;
-//import org.jboss.ws.core.soap.SOAPElementImpl;
+ 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -56,7 +56,7 @@ import ru.spb.iac.cud.services.web.init.Configuration;
 
 public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
-	Logger logger = LoggerFactory.getLogger(SignValidateSOAPHandler.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(SignValidateSOAPHandler.class);
 
 	private static PublicKey publicKey = null;
 	
@@ -75,7 +75,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 
 	public boolean handleMessage(SOAPMessageContext mc) {
 
-		logger.info("handleMessage:01+:"
+		LOGGER.debug("handleMessage:01+:"
 				+ mc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY));
 
 		try {
@@ -100,7 +100,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 			if (Boolean.FALSE.equals(mc
 					.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY))) {
 
-				// logger.info("handleMessage:02");
+				 
 
 				// взятие ключа из хранилища доверенных
 
@@ -108,7 +108,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 						"Assertion");
 
 				if (assertionList == null || assertionList.getLength() == 0) {
-					// logger.info("handleMessage:03_1");
+					 
 					throw new GeneralFailure(
 							"This service requires <saml:Assertion>, which is missing!!!");
 				}
@@ -117,7 +117,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 						.getElementsByTagNameNS("*", "Subject");
 
 				if (subjectList == null || subjectList.getLength() == 0) {
-					// logger.info("handleMessage:03_2");
+					 
 					throw new GeneralFailure(
 							"This service requires <Subject>, which is missing!!!");
 				}
@@ -126,18 +126,15 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 						.getElementsByTagNameNS("*", "NameID");
 
 				if (nameIDList == null || nameIDList.getLength() == 0) {
-					// logger.info("handleMessage:03_3");
+					 
 					throw new GeneralFailure(
 							"This service requires <NameID>, which is missing!!!");
 				}
 
-				// SOAPElementImpl sei_codeSystem =
-				// (SOAPElementImpl)nameIDList.item(0);
-				// String codeSystem = sei_codeSystem.getValue();
-
+			
 				String codeSystem = nameIDList.item(0).getTextContent();
 
-				// logger.info("handleMessage:04:"+codeSystem);
+				 
 
 				cud_sts_principal = codeSystem;
 				http_session.setAttribute("cud_sts_principal",
@@ -148,8 +145,8 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 				 * //1-й вариант: взять код системы из Assertion/subject/NameID
 				 * //по этому коду найти в базе сертификат
 				 * 
-				 * cert_user = (new
-				 * ContextIDPUtilManager()).system_cert(codeSystem);
+				 * cert_/user = (n/ew
+				 * Contex/tIDPUtilManager()).syst/em_cert(codeSystem);
 				 */
 
 				// 2-й вариант: взять прямо сертификат из
@@ -160,7 +157,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 
 				if (x509CertificateList == null
 						|| x509CertificateList.getLength() == 0) {
-					// logger.info("handleMessage:05");
+					 
 					throw new GeneralFailure(
 							"This service requires SubjectConfirmationData/X509Certificate, which is missing!!!");
 				}
@@ -168,7 +165,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 				String x509CertSystem = x509CertificateList.item(0)
 						.getTextContent();
 
-				// logger.info("handleMessage:06:"+x509CertSystem);
+				 
 
 				byte[] byteX509Certificate = Base64.decode(x509CertSystem);
 
@@ -185,19 +182,18 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 
 					/*
 					 * cert_verify_sign =
-					 * HandlerUtils.getStore().getCertificate(domainAlias);
+					 * Han/dlerUtils.getStore().getCertificate(domainAlias);
 					 * 
-					 * logger.info("handleMessage:06:"+cert_verify_sign);
 					 * 
-					 * if(cert_verify_sign!=null){
-					 * publicKey2=cert_verify_sign.getPublicKey(); }
+					 * if(cer/t_verify_sign!=null){
+					 * public/Key2=cert_veri/fy_sign.getPublicKey(); }
 					 */
 				} else {
 					throw new GeneralFailure(
 							"Cannot to define a client public key!!!");
 				}
 
-				// logger.info("handleMessage:07+:"+publicKey2);
+				 
 
 				Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
 
@@ -207,7 +203,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 				Node securityNode = soapHeader.getFirstChild();
 
 				if (securityNode == null) {
-					// logger.info("handleMessage:07_1");
+					 
 					throw new GeneralFailure(
 							"This service requires <wsse:Security>, which is missing!!!");
 				}
@@ -218,7 +214,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 
 				for (int i = 0; i < securityNodeChilds.getLength(); i++) {
 
-					// logger.info("handleMessage:07_2:"+securityNodeChilds.item(i).getLocalName());
+					 
 
 					if (securityNodeChilds.item(i).getLocalName() != null
 							&& securityNodeChilds.item(i).getLocalName()
@@ -227,17 +223,17 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 					}
 				}
 
-				// logger.info("handleMessage:07_3");
+				 
 
 				// signature
 
 				if (signatureNode1 == null) {
-					// logger.info("handleMessage:08");
+					 
 					throw new GeneralFailure(
 							"This service requires <dsig:Signature>, which is missing!!!");
 				}
 
-				// logger.info("handleMessage:09:"+signatureNode1.getNodeName());
+				 
 
 				DOMValidateContext valContext1 = new DOMValidateContext(
 						publicKey2, signatureNode1);
@@ -260,7 +256,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 
 				boolean result1 = signature1.validate(valContext1);
 
-				logger.info("010:" + result1);
+				LOGGER.debug("010:" + result1);
 
 				if (result1 == false) {
 					throw new GeneralFailure("Signature is not valid!!!");
@@ -299,8 +295,7 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 
 				Node SecuritySOAP = soapHeader.getFirstChild();
 
-				// System.out.println("TestClientCryptoSOAPHandler:handleMessage:02:"+SecuritySOAP.getLocalName());
-
+			
 				soapBody.addNamespaceDeclaration(
 						"wsu",
 						"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
@@ -354,18 +349,11 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 				KeyValue kv = kif.newKeyValue(publicKey);
 				KeyInfo ki = kif.newKeyInfo(Collections.singletonList(kv));
 
-				// X509Data x509d =
-				// kif.newX509Data(Collections.singletonList((X509Certificate)
-				// cert));
-				// KeyInfo ki =
-				// kif.newKeyInfo(Collections.singletonList(x509d));
-
+			
 				javax.xml.crypto.dsig.XMLSignature sig = fac.newXMLSignature(
 						si, ki);
 
 				// куда вставлять подпись
-				// DOMSignContext signContext = new DOMSignContext(privateKey,
-				// newDoc.getDocumentElement());
 				DOMSignContext signContext = new DOMSignContext(privateKey,
 						SecuritySOAP);
 
@@ -386,76 +374,20 @@ public class SignValidateSOAPHandler implements SOAPHandler<SOAPMessageContext> 
 								"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 								"Id");
 
-				// System.out.println("dispatch:011");
-
+			
 				sig.sign(signContext);
 
 				// !!!
 				// проверка
 				// включать для проверки
 
-				/*
-				 * Node securityNode = soapHeader.getFirstChild();
-				 * 
-				 * if(securityNode==null){ logger.info("handleMessage:07_1");
-				 * throw new Exception(
-				 * "This service requires <wsse:Security>, which is missing!!!"
-				 * ); }
-				 * 
-				 * NodeList securityNodeChilds = securityNode.getChildNodes();
-				 * 
-				 * Node signatureNode1 = null;
-				 * 
-				 * for (int i = 0; i<securityNodeChilds.getLength(); i++) {
-				 * 
-				 * logger.info("handleMessage:07_2:"+securityNodeChilds.item(i).
-				 * getLocalName());
-				 * 
-				 * if(securityNodeChilds.item(i).getLocalName()!=null&&
-				 * securityNodeChilds
-				 * .item(i).getLocalName().equals("Signature")){ signatureNode1
-				 * = securityNodeChilds.item(i); } }
-				 * 
-				 * logger.info("handleMessage:07_3");
-				 * 
-				 * //signature
-				 * 
-				 * if(signatureNode1==null){ logger.info("handleMessage:08");
-				 * throw new Exception(
-				 * "This service requires <dsig:Signature>, which is missing!!!"
-				 * ); }
-				 * 
-				 * 
-				 * 
-				 * logger.info("handleMessage:09:"+signatureNode1.getNodeName());
-				 * 
-				 * 
-				 * DOMValidateContext valContext1 = new
-				 * DOMValidateContext(publicKey, signatureNode1);
-				 * 
-				 * valContext1.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
-				 * 
-				 * valContext1.setIdAttributeNS(soapHeader,
-				 * "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
-				 * , "Id"); valContext1.setIdAttributeNS(soapBody,
-				 * "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
-				 * , "Id");
-				 * 
-				 * 
-				 * javax.xml.crypto.dsig.XMLSignature signature1 =
-				 * fac.unmarshalXMLSignature(valContext1);
-				 * 
-				 * boolean result1 = signature1.validate(valContext1);
-				 * 
-				 * logger.info("010+:"+result1);
-				 */
+				
 				}
 			}
 
 		} catch (Exception e) {
-			logger.error("handleMessage:error:" + e);
+			LOGGER.error("handleMessage:error:", e);
 			throw new ProtocolException(e);
-			// throw new GeneralFailure("");
 		}
 		return true;
 	}

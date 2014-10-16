@@ -16,7 +16,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +36,13 @@ import ru.spb.iac.cud.context.ContextIDPUtilManager;
 
 public class KeyStoreKeyManager implements TrustKeyManager {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(KeyStoreKeyManager.class);
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	private final Map<String, SecretKey> keys = new HashMap();
+	
 
 	private final Map<String, Object> options = new HashMap();
 
@@ -67,29 +67,29 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	public PrivateKey getSigningKey() throws TrustKeyConfigurationException,
 			TrustKeyProcessingException {
 		try {
-			loggerslf4j.info("getSigningKey:01");
+			LOGGERSLF4J.debug("getSigningKey:01");
 
 			initKeyStore();
 
-			// loggerslf4j.info("getSigningKey:02");
+			 
 
 			if(this.privateKey==null){
 				this.privateKey=(PrivateKey) this.ks.getKey(this.signingAlias,
 						this.signingKeyPass);
 			}
-			return this.privateKey/*(PrivateKey) this.ks.getKey(this.signingAlias,
-					this.signingKeyPass)*/;
+			return this.privateKey/*(Privat/eKey) this.k/s./getKey(this.signi/ngAlias,
+					thi/s.signing/Key/Pass)*/;
 
 		} catch (KeyStoreException e) {
-			throw logger.keyStoreConfigurationError(e);
+			throw LOGGER.keyStoreConfigurationError(e);
 		} catch (NoSuchAlgorithmException e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		} catch (UnrecoverableKeyException e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		} catch (GeneralSecurityException e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		} catch (IOException e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		}
 
 	}
@@ -99,21 +99,21 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 			TrustKeyProcessingException {
 		try {
 			//PrivateKey privateKey = null;
-			loggerslf4j.info("getSigningKeyPair:01");
+			LOGGERSLF4J.debug("getSigningKeyPair:01");
 
 			initKeyStore();
 
-			// loggerslf4j.info("getSigningKeyPair:02+");
+			 
 
 			if(this.privateKey==null) {
 				this.privateKey = getSigningKey();
 			}
-			// PublicKey publicKey = KeyStoreUtil.getPublicKey(this.ks,
-			// this.signingAlias, this.signingKeyPass);
+			// Publi/cKey publ/icKey /= KeySto/reUtil.getPub/licKey(this.ks,
+			// this/.sign/ingAlias, this/.signingKeyPass/);
 
 			if (this.publicKey == null) {
-				// loggerslf4j.info("getSigningKeyPair:03:"+this.signingAlias);
-				// loggerslf4j.info("getSigningKeyPair:04:"+this.ks);
+				 
+				 
 
 				Certificate cert = this.ks.getCertificate(this.signingAlias);
 
@@ -121,15 +121,15 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 
 			}
 
-			// loggerslf4j.info("getSigningKeyPair:03");
+			 
 
 			return new KeyPair(publicKey, this.privateKey);
 		} catch (KeyStoreException e) {
-			throw logger.keyStoreConfigurationError(e);
+			throw LOGGER.keyStoreConfigurationError(e);
 		} catch (GeneralSecurityException e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		} catch (IOException e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		}
 
 	}
@@ -140,8 +140,7 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	public Certificate getCertificate(String alias)
 			throws TrustKeyConfigurationException, TrustKeyProcessingException {
 
-		loggerslf4j.info("getCertificate:01");
-		// throw new TrustKeyConfigurationException("getCertificate not used!");
+		LOGGERSLF4J.debug("getCertificate:01");
 		return null;
 
 	}
@@ -149,7 +148,7 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	// не используется
 	public PublicKey getPublicKey(String alias)
 			throws TrustKeyConfigurationException, TrustKeyProcessingException {
-		loggerslf4j.info("getPublicKey:01");
+		LOGGERSLF4J.debug("getPublicKey:01");
 		throw new TrustKeyConfigurationException("getPublicKey not used!");
 
 	}
@@ -159,44 +158,44 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 			throws TrustKeyConfigurationException, TrustKeyProcessingException {
 		PublicKey publicKey = null;
 		try {
-			loggerslf4j.info("getValidatingKey:01:" + domain);
+			LOGGERSLF4J.debug("getValidatingKey:01:" + domain);
 
 			X509Certificate cert_user = null;
 			try {
 
 				cert_user = (new ContextIDPUtilManager()).system_cert(domain);
 
-				// loggerslf4j.info("getValidatingKey:03:"+cert_user);
+				 
 
 				if (cert_user != null) {
 					publicKey = cert_user.getPublicKey();
 				}
 
 			} catch (Exception e) {
-				loggerslf4j.error("getValidatingKey:04:error" + e);
+				LOGGERSLF4J.error("getValidatingKey:04:error", e);
 			}
 
-			// loggerslf4j.info("getValidatingKey:03");
+			 
 
 		} catch (Exception e) {
-			throw logger.keyStoreProcessingError(e);
+			throw LOGGER.keyStoreProcessingError(e);
 		}
 		return publicKey;
 	}
 
 	private void initKeyStore() throws GeneralSecurityException, IOException {
 
-		loggerslf4j.info("initKeyStore:01");
+		LOGGERSLF4J.debug("initKeyStore:01");
 
 		if (this.ks == null) {
-			// loggerslf4j.info("initKeyStore:02");
-			logger.keyStoreSetup();
+			 
+			LOGGER.keyStoreSetup();
 			setUpKeyStore();
 		}
-		// loggerslf4j.info("initKeyStore:03");
+		 
 
 		if (this.ks == null)
-			throw logger.keyStoreNullStore();
+			throw LOGGER.keyStoreNullStore();
 	}
 
 	public void setAuthProperties(List<AuthPropertyType> authList)
@@ -212,7 +211,7 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 
 		String keypass = (String) this.authPropsMap.get("SigningKeyPass");
 		if ((keypass == null) || (keypass.length() == 0))
-			throw logger.keyStoreNullSigningKeyPass();
+			throw LOGGER.keyStoreNullSigningKeyPass();
 		this.signingKeyPass = keypass.toCharArray();
 	}
 
@@ -226,7 +225,7 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	public SecretKey getEncryptionKey(String domain,
 			String encryptionAlgorithm, int keyLength)
 			throws TrustKeyConfigurationException, TrustKeyProcessingException {
-		loggerslf4j.info("getEncryptionKey:01");
+		LOGGERSLF4J.debug("getEncryptionKey:01");
 		throw new TrustKeyConfigurationException("getEncryptionKey not used!");
 
 	}
@@ -240,36 +239,12 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 	}
 
 	private void setUpKeyStore() throws GeneralSecurityException, IOException {
-		loggerslf4j.info("setUpKeyStore:01");
+		LOGGERSLF4J.debug("setUpKeyStore:01");
 
 		this.ks = loadKeyStore();
 	}
 
-	private InputStream getKeyStoreInputStream(String keyStore) {
-		InputStream is = null;
-		try {
-			File file = new File(keyStore);
-			is = new FileInputStream(file);
-		} catch (Exception e) {
-			URL url = null;
-			try {
-				url = new URL(keyStore);
-				is = url.openStream();
-			} catch (Exception ex) {
-				// url = SecurityActions.loadResource(getClass(), keyStore);
-				if (url != null)
-					try {
-						is = url.openStream();
-					} catch (IOException e1) {
-					}
-			}
-		}
-
-		if (is == null)
-			throw logger.keyStoreNotLocated(keyStore);
-		return is;
-	}
-
+	
 	public KeyStore loadKeyStore() throws IOException {
 
 		String keystoreType = "HDImageStore";
@@ -289,8 +264,7 @@ public class KeyStoreKeyManager implements TrustKeyManager {
 
 		} catch (Exception ex) {
 
-			ex.printStackTrace(System.out);
-
+		
 			throw new IOException(ex);
 
 		} finally {

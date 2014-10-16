@@ -39,8 +39,6 @@ import javax.naming.InitialContext;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
-
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletResponse;
@@ -62,11 +60,10 @@ public class CparManager {
      * Экспортируемая сущности 
      * для отображения
      */
-	//private BaseItem usrBean;             !!! Проверить !!!
-	
+		
 	private String dellMessage;
 	 
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -97,14 +94,13 @@ public class CparManager {
 			  Component.getInstance("cparListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    cparListCached!=null){
-		 	//	log.info("getAuditList:02:"+orgListCached.size());
-			    	this.auditList=cparListCached;
+		 		    	this.auditList=cparListCached;
 			}else{
 				log.info("getAuditList:03");
 		    	invokeLocal("list", firstRow, numberOfRows, null);
@@ -112,12 +108,12 @@ public class CparManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecCpar = (ArrayList<String>)
+		 	List<String>  selRecCpar = (ArrayList<String>)
 					  Component.getInstance("selRecCpar",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecCpar!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecCpar.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					 it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -136,7 +132,7 @@ public class CparManager {
 			 String orderQuery=null;
 			 log.info("hostsManager:invokeLocal");
 			 
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 CparStateHolder orgStateHolder = (CparStateHolder)
@@ -169,7 +165,7 @@ public class CparManager {
 				 }
              log.info("invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
+			 } else if("count".equals(type)){
 				 log.info("IHReposList:count:01");
 				 auditCount = (Long)entityManager.createQuery(
 						 "select count(o) " +
@@ -177,7 +173,7 @@ public class CparManager {
 		                .getSingleResult();
 				 
                log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
@@ -198,33 +194,11 @@ public class CparManager {
 	  log.info("forView:modelType:"+modelType);
 	  if(sessionId!=null /*&& usrBean==null*/){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
-			if(modelType.equals("cparDataModel")){
-				//service=ServiceReestr.Repos;
-			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
+			
 		 SettingsKnlT ar = searchBean(sessionId);
 		 Contexts.getEventContext().set("cparBean", ar);
 	  }
@@ -238,7 +212,7 @@ public class CparManager {
 		if(cparListCached!=null){
 			for(SettingsKnlT it : cparListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -254,35 +228,9 @@ public class CparManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+	  
    }
-   /*
-   public void addCpar(){
-	   log.info("cparManager:addOrg:01");
-	   
-	   SettingsKnlT cparBeanCrt = (SettingsKnlT)
-				  Component.getInstance("cparBeanCrt",ScopeType.CONVERSATION);
-	   
-	   if(cparBeanCrt==null){
-		   return;
-	   }
-	 
-	   try {
-		  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
-		   
-		  cparBeanCrt.setCreator(au.getIdUser());
-		  cparBeanCrt.setCreated(new Date());
-	      entityManager.persist(cparBeanCrt);
-	    	
-	      
-	      entityManager.flush();
-	      entityManager.refresh(cparBeanCrt);
-	    
-	    }catch (Exception e) {
-	       log.error("cparManager:addCpar:ERROR:"+e);
-	    }
-	   
-   }*/
+  
    
    public void updCpar(){
 	   
@@ -301,19 +249,14 @@ public class CparManager {
 	   }
 	
 	   try {
-		//  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
-		   
+			   
 		  SettingsKnlT aam = entityManager.find(SettingsKnlT.class, new Long(sessionId));
 		  
 		  aam.setValueParam(cparBean.getValueParam());
 				  
-		//  aam.setModificator(au.getIdUser());
-		//  aam.setModified(new Date());
-		  
 		  entityManager.flush();
 	      entityManager.refresh(aam);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
 	      Contexts.getEventContext().set("cparBean", aam);
 	    	  
 	      audit(ResourcesMap.CONF_PARAM, ActionsMap.UPDATE); 
@@ -322,29 +265,7 @@ public class CparManager {
            log.error("cparManager:updSrm:ERROR:"+e);
          }
    }
- /*  
-   public void delCpar(){
-	 try{
-		log.info("cparManager:delCpar:01");  
-		
-		SettingsKnlT cparBean = (SettingsKnlT)
-				  Component.getInstance("cparBean",ScopeType.CONVERSATION);
-		// <h:inputHidden value="#{cparBean.idArm}"/>
-		
-		if(cparBean==null){
-			return;
-		}
-		 
-		log.info("cparManager:delCpar:IdCpar:"+cparBean.getIdSrv());
-		
-		SettingsKnlT aom = entityManager.find(SettingsKnlT.class, cparBean.getIdSrv());
-		  
-		entityManager.remove(aom);
-		
-	 }catch(Exception e){
-		 log.error("cparManager:delCpar:error:"+e); 
-	 }
-    }*/
+ 
  
     public void forViewUpdDel() {
 	   try{
@@ -360,21 +281,7 @@ public class CparManager {
 		   log.error("forViewUpdDel:Error:"+e);
 	   }
     } 
-   /*
-    public void forViewDelMessage() {
-		  String sessionId = FacesContext.getCurrentInstance().getExternalContext()
-				.getRequestParameterMap()
-				.get("sessionId");
-		  log.info("forViewDel:sessionId:"+sessionId);
-		  if(sessionId!=null){
-			   SettingsKnlT aa = entityManager.find(SettingsKnlT.class, new Long(sessionId));
-			    if((aa.getAcAppPages()!=null&&!aa.getAcAppPages().isEmpty()) ||
-				(aa.getAcRoles()!=null&&!aa.getAcRoles().isEmpty())){
-				dellMessage="У консоли есть порождённые записи! При удалении они будут удалены!";
-			 }
-			 Contexts.getEventContext().set("cparBean", aa);
-		 }	
-    }*/
+  
   
     public SettingsKnlT getSetting(String codeParam){
     	
@@ -429,19 +336,7 @@ public class CparManager {
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			 
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("nameParam"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("valueParam"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("servName"));
@@ -458,8 +353,8 @@ public class CparManager {
 	   if(auditItemsListContext==null){
 		   CparContext ac= new CparContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
@@ -472,8 +367,8 @@ public class CparManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecCpar = (ArrayList<String>)
+	   //  for/View(/); //!!!
+	    List<String>  selRecCpar = (ArrayList<String>)
 				  Component.getInstance("selRecCpar",ScopeType.SESSION);
 	    
 	    if(selRecCpar==null){
@@ -481,9 +376,9 @@ public class CparManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	    // AcApplication aa = searchBean(sessionId);
+	    
 	    SettingsKnlT aa = new SettingsKnlT();
-  	    // в getAuditList : else{it.setSelected(false);}
+  	    
 	    
 	    if(aa!=null){
 	     if(selRecCpar.contains(sessionId)){
@@ -530,11 +425,11 @@ public class CparManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("reposManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -543,7 +438,7 @@ public class CparManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
+	  
 	   	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -553,12 +448,12 @@ public class CparManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		  log.info("cparManager:evaluteForListFooter!!!");
 	   		      evaluteForListFooter=true;
 	    	}
@@ -568,7 +463,7 @@ public class CparManager {
    
    public Boolean getEvaluteForBean() {
 		
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForBean==null){
 		   		evaluteForBean=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -580,8 +475,8 @@ public class CparManager {
 			             .get("sessionId");
 			    log.info("cparManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("cparManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -591,12 +486,4 @@ public class CparManager {
 
 
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/
+

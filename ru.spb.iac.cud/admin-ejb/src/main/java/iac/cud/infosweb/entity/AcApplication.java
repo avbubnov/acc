@@ -44,31 +44,11 @@ public class AcApplication extends BaseItem implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date created;
 
-//	@Temporal(TemporalType.TIMESTAMP)
-//	private Date modified;
-/*
-	@ManyToOne
-	@JoinColumn(name="CREATOR", insertable=false, updatable=false)
-	private AcUser crtUser;
-	*/
-	
-//	@ManyToOne
-//	@JoinColumn(name="MODIFICATOR", insertable=false, updatable=false)
-//	private AcUser updUser;
-
 	@Column(name="CREATOR")
 	private Long creator;
 
 	private String links;
 	 
-//	@Column(name="MODIFICATOR")
-//	private Long modificator;
-	
-  /*@OneToMany(mappedBy="acApplication2", fetch=FetchType.EAGER, cascade={CascadeType.REMOVE})
-	private List<AcAppPage> acAppPages;
-	
-	@OneToMany(mappedBy="acApplication2", fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
-	private List<AcRole> acRoles;*/
 
 	@OneToMany(mappedBy="acApplication2", cascade={CascadeType.REMOVE})
 	private List<AcAppPage> acAppPages;
@@ -76,17 +56,8 @@ public class AcApplication extends BaseItem implements Serializable {
 	@OneToMany(mappedBy="acApplication2", cascade=CascadeType.REMOVE)
 	private List<AcRole> acRoles;
 	
-	/*@Column(name="UP_APP_SYSTEM")
-	private Long idAppSys;*/
-	
 	@Transient
 	private List<AcRole> rolList;
-	
-	/*@Transient
-	private String crtUserName;
-	    
-	@Transient
-	private String updUserName;*/
 	
 	@OneToMany(mappedBy="acIsBssT", cascade=CascadeType.REMOVE)
 	private List<AcSubsystemCertBssT> acSubsystemCertBssTs;
@@ -111,24 +82,7 @@ public class AcApplication extends BaseItem implements Serializable {
 	} 
 
     public List<AcRole> getRolList() {
-    	//System.out.println("AcApplication:getRolList:01");
-    	/* if(this.rolList==null){
-		 this.rolList=new ArrayList<AcRole>();
-		 System.out.println("AcApplication:getRolList:02");
-		for(AcAppPage res: this.acAppPages){
-			
-			System.out.println("AcApplication:getRolList:03");
-			for (AcLinkRoleAppPagePrmssn role_res :res.getAcLinkRoleAppPagePrmssns()){
-				System.out.println("AcApplication:getRolList:04");
-				
-				if(!this.rolList.contains(role_res.getAcRole())){
-					System.out.println("AcApplication:getRolList:05");
-					this.rolList.add(role_res.getAcRole());
-				}
-			}
-		 }
-      }*/
-	 return this.rolList;
+    	 return this.rolList;
 	}
 	public void setRolList(List<AcRole> rolList) {
 		this.rolList=rolList;
@@ -169,28 +123,6 @@ public class AcApplication extends BaseItem implements Serializable {
 		this.created = created;
 	}
 
-	/*	public Date getModified() {
-		return this.modified;
-	}
-	public void setModified(Date modified) {
-		this.modified = modified;
-	}*/
-	
-/*	
-	public AcUser getCrtUser() {
-		return this.crtUser;
-	}
-	public void setCrtUser(AcUser crtUser) {
-		this.crtUser = crtUser;
-	}
-	*/
-	
-	/*public AcUser getUpdUser() {
-		return this.updUser;
-	}
-	public void setUpdUser(AcUser updUser) {
-		this.updUser = updUser;
-	}*/
 	
 	public Long getCreator() {
 		return this.creator;
@@ -199,13 +131,6 @@ public class AcApplication extends BaseItem implements Serializable {
 		this.creator = creator;
 	}
 
-	/*public Long getModificator() {
-		return this.modificator;
-	}
-	public void setModificator(Long modificator) {
-		this.modificator = modificator;
-	}*/
-	
 	
 	public List<AcAppPage> getAcAppPages() {
 		return this.acAppPages;
@@ -221,36 +146,7 @@ public class AcApplication extends BaseItem implements Serializable {
 		this.acRoles = acRoles;
 	}
 	
-	/*public Long getIdAppSys() {
-		return this.idAppSys;
-	}
-	public void setIdAppSys(Long idAppSys) {
-		this.idAppSys = idAppSys;
-	}*/
 	
-	/*public String getCrtUserName() {
-		if(this.crtUserName==null){
-			if(this.crtUser!=null){
-			  this.crtUserName = this.crtUser.getFio();
-			}
-		}
-		return this.crtUserName;
-	}
-	public void setCrtUserName(String crtUserName) {
-		this.crtUserName = crtUserName;
-	}
-	
-	public String getUpdUserName() {
-		if(this.updUserName==null){
-			if(this.updUser!=null){
-			  this.updUserName = this.updUser.getFio();
-			}
-		}
-		return this.updUserName;
-	}
-	public void setUpdUserName(String updUserName) {
-		this.updUserName = updUserName;
-	}*/
 	
 	public List<AcSubsystemCertBssT> getAcSubsystemCertBssTs() {
 		return this.acSubsystemCertBssTs;
@@ -290,20 +186,4 @@ public class AcApplication extends BaseItem implements Serializable {
 		this.links = links;
 	}
 
-	
-	//интересный код, пока не используется
-	/*public AcSubsystemCertBssT addAcSubsystemCertBssT(AcSubsystemCertBssT acSubsystemCertBssT) {
-		getAcSubsystemCertBssTs().add(acSubsystemCertBssT);
-		acSubsystemCertBssT.setAcIsBssT(this);
-
-		return acSubsystemCertBssT;
-	}
-
-	public AcSubsystemCertBssT removeAcSubsystemCertBssT(AcSubsystemCertBssT acSubsystemCertBssT) {
-		getAcSubsystemCertBssTs().remove(acSubsystemCertBssT);
-		acSubsystemCertBssT.setAcIsBssT(null);
-
-		return acSubsystemCertBssT;
-	}
-	*/
 }

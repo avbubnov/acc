@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +25,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.faces.application.FacesMessage;
@@ -95,6 +96,9 @@ import org.w3c.dom.NodeList;
 
 import ru.CryptoPro.JCPxml.xmldsig.JCPXMLDSigInit;
 import ru.spb.iac.crypto.export.Crypto15Init;
+import ru.spb.iac.cud.uarm.ejb.audit.ActionsMap;
+import ru.spb.iac.cud.uarm.ejb.audit.AuditExportData;
+import ru.spb.iac.cud.uarm.ejb.audit.ResourcesMap;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT;
 import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 import ru.spb.iac.cud.uarm.ejb.entity.AcUsersKnlT.UserItem;
@@ -133,7 +137,10 @@ public class AuthEJB {
 	@PersistenceContext(unitName = "CUDUserConsolePU")
     private EntityManager entityManager;
 	
-	final static Logger logger = LoggerFactory
+	@EJB(beanName = "CUDUserConsole-ejb.jar#AuditExportData")
+	private AuditExportData auditExportData;
+	
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(AuthEJB.class);
 	
     public AuthEJB() {
@@ -142,8 +149,8 @@ public class AuthEJB {
 
     public AcUsersKnlT login(String login, String password) {
 
-    	logger.info("login:01");
-    	logger.info("login:02:"+login);
+    	LOGGER.debug("login:01");
+    	LOGGER.debug("login:02:"+login);
        
        AcUsersKnlT result = null;
        
@@ -156,15 +163,15 @@ public class AuthEJB {
     			  		       .setParameter("password", password)
     			  .getResultList();
     	  
-    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
+    	  LOGGER.debug("UserRegEJB:save:03:"+app_user_list.size());
     	  
     	  if(!app_user_list.isEmpty()){
     		  result = app_user_list.get(0);
-    		  logger.info("AuthEJB:login:04:"+result.getLogin());
+    		  LOGGER.debug("AuthEJB:login:04:"+result.getLogin());
     	  }
     	   
         }catch(Exception e){
-    	   logger.error("AuthEJB:login:error:"+e);
+    	   LOGGER.error("AuthEJB:login:error:"+e);
         }
        
        return result;
@@ -180,28 +187,20 @@ public class AuthEJB {
   		String signingAlias="cudvm_export";
   		 
      	try{
-     		logger.info("cudAuth:01+");
+     		LOGGER.debug("cudAuth:01+");
     	 
      	 HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
      	 HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
       	
      	 
-     	 //String destinat ion = "http://10.128.66.140:8080/cudidp/";
+     	 //"http://10.128.66.140:8080/cudidp/";
      	 String destination = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/cudidp/loginEncrypt";
      
      	 String assertionConsumerServiceURL = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/public.xhtml";
      	 
-     	logger.info("authenticator:cudAuth:01_:"+request.getContextPath());
+     	LOGGER.debug("authenticator:cudAuth:01_:"+request.getContextPath());
      	 
-     	 /*
-     //  String backUrl = "https://cudvm/infoscud/back.jsp";
-       String backUrl = "http://cudvm/infoscud/public.seam";
-  	 String destination = "http://cudvm/CudServicesWeb/AccessServicesWebGeneral";
-  	// String destination = "http://cudvm/CudServicesWeb/AccessServicesWebLogin";
-  	 String pswitch = "false";
-  	 
-       response.sendRedirect(destination+"?switch="+pswitch+"&backUrl="+backUrl);
-    */
+     
      
      if(publicKey==null) {	
      	KeyStore ks  = KeyStore.getInstance("HDImageStore", "JCP");
@@ -212,30 +211,25 @@ public class AuthEJB {
   	publicKey = ks.getCertificate("cudvm_export").getPublicKey();
   	
      }
-  	// logger.info("test1:02:"+privateKey.getAlgorithm());
+  	 
   	  
      	Document samlDocument = get_saml_assertion_from_xml(assertionConsumerServiceURL,typeAuth, privateKey, publicKey);
      	 
       Node nextSibling = getNextSiblingOfIssuer(samlDocument);
   	 
-  	 String samlMessage = PostBindingUtil.base64Encode(DocumentUtil.getDocumentAsString(samlDocument));
-  	 String samlMessage2 = Base64.encodeBytes(DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
-  	
-  	 
-  	// logger.info("test1:03_1:"+samlMessage);
-  	// logger.info("test1:03_2:"+samlMessage2);
+   	 
   	 
   	  Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
   	  
-  	//  logger.info("test1:03_3");
+  	 
   	  
   	   XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
 
-  	//   logger.info("test1:03_4");
+  	 
   	 //используетс€ когда подписываетс€ какой-то узел в документе
   	  //извдекаетс€ этот узел, создаЄтс€ пустой документ, в него помещаетс€ этот узел
   	  // и через propagateIDAttributeSetup() из узла, который надо подписать в новый перенос€тс€ id  
-  	 //   propagateIDAttributeSetup(samlDocument, samlDocument.getDocumentElement());
+  	 //   propa/gateIDAttribute/Setup(samlDocu/ment, samlDocument.getDocumentElement());
   	 	
   	    List<Transform> transformList = new ArrayList<Transform>();
   		Transform transform = fac.newTransform(Transform.ENVELOPED, (XMLStructure) null);
@@ -262,9 +256,6 @@ public class AuthEJB {
   			KeyValue kv = kif.newKeyValue(publicKey);
   			KeyInfo ki = kif.newKeyInfo(Collections.singletonList(kv));
   			
-  			//X509Data x509d = kif.newX509Data(Collections.singletonList((X509Certificate) cert));
-  			//KeyInfo ki = kif.newKeyInfo(Collections.singletonList(x509d));
-  		
   				
   			
   	  	    javax.xml.crypto.dsig.XMLSignature sig = fac.newXMLSignature(si, ki);
@@ -277,7 +268,6 @@ public class AuthEJB {
   	  	    //nextSibling - перед ним будет вставлена подпись
   	  	    //nextSibling дл€ <saml:Issuer> - это <samlp:NameIDPolicy>
   	  	    //и Signature будет между <saml:Issuer> и <samlp:NameIDPolicy>
-  			//DOMSignContext signContext = new DOMSignContext(privateKey, newDoc.getDocumentElement()); 
   			DOMSignContext signContext = new DOMSignContext(privateKey, samlDocument.getDocumentElement(), nextSibling); 
   			
   			signContext.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
@@ -286,73 +276,66 @@ public class AuthEJB {
   			//место ответственное за факт по€влени€ Pre-digested input в логе
   		
   		// вместо этого используетс€ configureIdAttribute(samlDocument);	
-  		//	signContext.setIdAttributeNS(body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-  		//	signContext.setIdAttributeNS(header, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
   		
   		
-  			 
-  		//	 logger.info("test1:04");
   			    
   	    sig.sign(signContext);
   	
   	 
-  	 //   logger.info("test1:05:"+DocumentUtil.asString(samlDocument));
+  	  
   	    
   	      
   	 byte[] responseBytes = DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8");
 
-  	// String samlResponse = PostBindingUtil.base64Encode(new String(responseBytes));
-
   	 String samlRequest=Base64.encodeBytes(new String(responseBytes).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
   	 
-  	// logger.info("test1:06:"+samlRequest);
+  	 
      
      	 
   	 sendPost(samlRequest, destination, response);
   	 
-  	// logger.info("test1:07");
+  	 
   	 
      	}catch(Exception e){
-     		logger.error("authenticator:cudAuth:error:"+e);
-     		// e.printStackTrace(System.out);
-     	  throw e;
+     		LOGGER.error("authenticator:cudAuth:error:"+e);
+      	  throw e;
      	}
       }
     
     public void cudAuthOBO() throws Exception{
  	   try{
  		   
- 		  logger.info("authenticator:cudAuthOBO:01");
+ 		  LOGGER.debug("authenticator:cudAuthOBO:01");
  		   
  		   String tokenID = FacesContext.getCurrentInstance().getExternalContext()
  		           .getRequestParameterMap()
  		           .get("tokenID"); 
  		   
- 		  logger.info("authenticator:cudAuthOBO:02:"+tokenID);
+ 		  LOGGER.debug("authenticator:cudAuthOBO:02:"+tokenID);
  		   
  		   STSOBOServiceClient soboc = new STSOBOServiceClient();
  		   
  		   this.assertionOBO = soboc.sign_verify_soap_transform_2sign(tokenID);
 
- 		  logger.info("authenticator:cudAuthOBO:03");
+ 		  LOGGER.debug("authenticator:cudAuthOBO:03");
  		   
  		   
  	   }catch(Exception e){
- 		 //  log.error("authenticator:cudAuthOBO:error:"+e);
+ 		  
  	   }
  	   
     }
     
     public String localLogout(){
     	
-    	logger.info("localLogout:01");
+    	LOGGER.debug("localLogout:01");
         
     		  
        try{
      	   
     	   HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(true); 
            
-    	   logger.info("localLogout:02_5_2:"+ hs.getId());
+    	   LOGGER.debug("localLogout:02_5_2:"+ hs.getId());
   	     
     	   Long userID =(Long)hs.getAttribute(CUDUserConsoleConstants.authUserID);
            AcUsersKnlT.UserItem currentUser = (UserItem) hs.getAttribute(CUDUserConsoleConstants.authUserItem);
@@ -360,9 +343,8 @@ public class AuthEJB {
            
            if(userID!=null){
      	   
-        	   logger.info("localLogout:02_2:"+currentUser.getLogin());
+        	   LOGGER.debug("localLogout:02_2:"+currentUser.getLogin());
  		 	   
-        	   //  FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
         	   hs.invalidate();
         	   
         	   //!!!
@@ -372,14 +354,14 @@ public class AuthEJB {
 		       //Cannot create a session after the response has been committed
         	   HttpSession hs2 = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(true); 
                
-        	   logger.info("localLogout:02_5_2:"+ hs2.getId());
+        	   LOGGER.debug("localLogout:02_5_2:"+ hs2.getId());
           
         	   cudLogout(currentUser.getLogin());
  		    	
            }
      	   
         }catch(Exception e){
-        	logger.error("localLogoutError:"+e);
+        	LOGGER.error("localLogoutError:"+e);
         }
         
         return "loggedOut";
@@ -391,30 +373,21 @@ public class AuthEJB {
 			String signingAlias="cudvm_export";
 			 
 	   	try{
-	   		logger.info("authenticator:cudLogout:01");
+	   		LOGGER.debug("authenticator:cudLogout:01");
 	  	 
 	   	 HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
 	   	 HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 	    	
 	   	 
-	   	 //String destinat ion = "http://10.128.66.140:8080/cudidp/";
+	   	 // "http://10.128.66.140:8080/cudidp/";
 	   	 String destination = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/cudidp/logout";
 	   
 	   	 String logoutBackUrl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/uarm/";
 	   	 
-	   	logger.info("authenticator:cudLogout:02:"+destination);
-	   	logger.info("authenticator:cudLogout:03:"+logoutBackUrl);
+	   	LOGGER.debug("authenticator:cudLogout:02:"+destination);
+	   	LOGGER.debug("authenticator:cudLogout:03:"+logoutBackUrl);
 	   	
-	   	 /*
-	   //  String backUrl = "https://cudvm/infoscud/back.jsp";
-	     String backUrl = "http://cudvm/infoscud/public.seam";
-		 String destination = "http://cudvm/CudServicesWeb/AccessServicesWebGeneral";
-		// String destination = "http://cudvm/CudServicesWeb/AccessServicesWebLogin";
-		 String pswitch = "false";
-		 
-	     response.sendRedirect(destination+"?switch="+pswitch+"&backUrl="+backUrl);
-	  */
-	   
+	    
 	    if(publicKey==null) {		
 	   	KeyStore ks  = KeyStore.getInstance("HDImageStore", "JCP");
 		ks.load(null, null);
@@ -424,28 +397,24 @@ public class AuthEJB {
 		 publicKey = ks.getCertificate("cudvm_export").getPublicKey();
 	    }
 	    
-		// logger.info("test1:02:"+privateKey.getAlgorithm());
+		 
 		  
 	   	Document samlDocument = get_saml_logout_from_xml(logoutBackUrl, login);
 	   	
-	   	logger.info("authenticator:cudLogout:04:"+DocumentUtil.asString(samlDocument));
+	   	LOGGER.debug("authenticator:cudLogout:04:"+DocumentUtil.asString(samlDocument));
 	   	
 	    Node nextSibling = getNextSiblingOfIssuer(samlDocument);
 		 
-		 String samlMessage = PostBindingUtil.base64Encode(DocumentUtil.getDocumentAsString(samlDocument));
-		 String samlMessage2 = Base64.encodeBytes(DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
-		
+	 
 		 
-		// logger.info("test1:03_1:"+samlMessage);
-		// logger.info("test1:03_2:"+samlMessage2);
 		 
 		  Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
 		  
-		//  logger.info("test1:03_3");
+		 
 		  
 		   XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
 
-		//   logger.info("test1:03_4");
+		 
 		 //используетс€ когда подписываетс€ какой-то узел в документе
 		  //извдекаетс€ этот узел, создаЄтс€ пустой документ, в него помещаетс€ этот узел
 		  // и через propagateIDAttributeSetup() из узла, который надо подписать в новый перенос€тс€ id  
@@ -476,10 +445,6 @@ public class AuthEJB {
 				KeyValue kv = kif.newKeyValue(publicKey);
 				KeyInfo ki = kif.newKeyInfo(Collections.singletonList(kv));
 				
-				//X509Data x509d = kif.newX509Data(Collections.singletonList((X509Certificate) cert));
-				//KeyInfo ki = kif.newKeyInfo(Collections.singletonList(x509d));
-			
-					
 				
 		  	    javax.xml.crypto.dsig.XMLSignature sig = fac.newXMLSignature(si, ki);
 	//!!!
@@ -491,7 +456,6 @@ public class AuthEJB {
 		  	    //nextSibling - перед ним будет вставлена подпись
 		  	    //nextSibling дл€ <saml:Issuer> - это <samlp:NameIDPolicy>
 		  	    //и Signature будет между <saml:Issuer> и <samlp:NameIDPolicy>
-				//DOMSignContext signContext = new DOMSignContext(privateKey, newDoc.getDocumentElement()); 
 				DOMSignContext signContext = new DOMSignContext(privateKey, samlDocument.getDocumentElement(), nextSibling); 
 				
 				signContext.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
@@ -500,39 +464,31 @@ public class AuthEJB {
 				//место ответственное за факт по€влени€ Pre-digested input в логе
 			
 			// вместо этого используетс€ configureIdAttribute(samlDocument);	
-			//	signContext.setIdAttributeNS(body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-			//	signContext.setIdAttributeNS(header, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
 			
-			
-				 
-			//	 logger.info("test1:04");
 				    
 		    sig.sign(signContext);
 		
-		    logger.info("authenticator:cudLogout:05:"+DocumentUtil.asString(samlDocument));
-		 //   logger.info("test1:05:"+DocumentUtil.asString(samlDocument));
+		    LOGGER.debug("authenticator:cudLogout:05:"+DocumentUtil.asString(samlDocument));
+		  
 		    
 		      
 		 byte[] responseBytes = DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8");
 
-		// String samlResponse = PostBindingUtil.base64Encode(new String(responseBytes));
-
 		 String samlRequest=Base64.encodeBytes(new String(responseBytes).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
 		 
-		// logger.info("test1:06:"+samlRequest);
+		 
 	   
-		 logger.info("authenticator:cudLogout:06");
+		 LOGGER.debug("authenticator:cudLogout:06");
 		 
 		 sendPost(samlRequest, destination, response);
 		 
-		 logger.info("authenticator:cudLogout:07");
+		 LOGGER.debug("authenticator:cudLogout:07");
 		 
-		// logger.info("test1:07");
+		 
 		 
 	   	}catch(Exception e){
-	   		logger.error("authenticator:cudLogout:error:"+e);
-	   		// e.printStackTrace(System.out);
-	   	  throw e;
+	   		LOGGER.error("authenticator:cudLogout:error:"+e);
+	    	  throw e;
 	   	}
 	    }
     
@@ -542,25 +498,24 @@ public class AuthEJB {
 		 InputStream samlAssertionInputStream = null;	
 			try{
 			
-			 logger.info("get_saml_assertion_from_xml:01");
+			 LOGGER.debug("get_saml_assertion_from_xml:01");
 			 
-			  //samlAssertionInputStream = new FileInputStream("/home/jboss/jboss/data/saml/uarm_saml_request_post.xml");
 			  samlAssertionInputStream = new FileInputStream( Configuration.getSamlRequestLoginUarm());
 			  
-			 //  logger.info("get_saml_assertion_from_xml:01_2+");
+			  
 			   
 		        SAMLParser samlParser = new SAMLParser();
 		        
-		       // logger.info("get_saml_assertion_from_xml:01_3");
+		        
 		        
 		        Object parsedObject = samlParser.parse(samlAssertionInputStream);
 
-		      //  logger.info("get_saml_assertion_from_xml:01_4");
+		       
 		        
 		        // cast the parsed object to the expected type, in this case AssertionType
 		        AuthnRequestType authn = (AuthnRequestType) parsedObject;
 		        
-		      //  logger.info("get_saml_assertion_from_xml:01_5+:"+new URI(assertionConsumerServiceURL));
+		       
 		        
 		        //!!! важна€ установка
 		        authn.setAssertionConsumerServiceURL(new URI(assertionConsumerServiceURL));
@@ -579,22 +534,21 @@ public class AuthEJB {
 		        }
 		        
 		        //external passive auth
-		        String SAMLdestination = getSAMLDestination(privateKeyClient, publicKeyCUD);
+		        String samlDestination = getSAMLDestination(privateKeyClient, publicKeyCUD);
 		        
-		        authn.setDestination(URI.create(SAMLdestination));		        
+		        authn.setDestination(URI.create(samlDestination));		        
 		        
 		        SAML2Request  sr = new SAML2Request();
 		        
-		       Document doc_authn = sr.convert(authn);
+		       Document docAuthn = sr.convert(authn);
 		     
 		      
-		       result = doc_authn;
+		       result = docAuthn;
 		        
-		     //  logger.info("get_saml_assertion_from_xml:01_2:"+DocumentUtil.asString(doc_authn));
+		      
 			  		      
 		  }catch(Exception e3){
-				 logger.error("get_saml_assertion_from_xml:error:"+e3);
-				 e3.printStackTrace(System.out);
+				 LOGGER.error("get_saml_assertion_from_xml:error:"+e3);
 		  }finally{
 			  try{
 				  if(samlAssertionInputStream!=null){
@@ -614,34 +568,33 @@ public class AuthEJB {
 		
 			try{
 			
-			 logger.info("get_saml_logout_from_xml:01:"+login);
+			 LOGGER.debug("get_saml_logout_from_xml:01:"+login);
 			 
-			  // samlAssertionInputStream = new FileInputStream("/home/jboss/jboss/data/saml/saml_request_logout_post.xml");
 			   samlAssertionInputStream = new FileInputStream(Configuration.getSamlRequestLogout());
 			   
 					   
-			 //  logger.info("get_saml_assertion_from_xml:01_2+");
+			  
 			   
 		        SAMLParser samlParser = new SAMLParser();
 		        
-		       // logger.info("get_saml_assertion_from_xml:01_3");
+		        
 		        
 		        Object parsedObject = samlParser.parse(samlAssertionInputStream);
 
-		      //  logger.info("get_saml_assertion_from_xml:01_4");
+		       
 		        
 		        // cast the parsed object to the expected type, in this case AssertionType
 		          
 		        LogoutRequestType logout = (LogoutRequestType) parsedObject;
 		        
-		      //  logger.info("get_saml_assertion_from_xml:01_5+:"+new URI(assertionConsumerServiceURL));
+		       
 		        
 		        
 		        //external passive auth
-		        String SAMLdestination = logout.getDestination().toString()+
+		        String samlDestination = logout.getDestination().toString()+
 		        		                 "?logoutBackUrl="+URLEncoder.encode(logoutBackUrl, "utf-8");
 		        
-		        logout.setDestination(URI.create(SAMLdestination));		        
+		        logout.setDestination(URI.create(samlDestination));		        
 		        
 		        NameIDType nameID = new NameIDType();
 		        	
@@ -652,17 +605,16 @@ public class AuthEJB {
 		        
 		        SAML2Request  sr = new SAML2Request();
 		        
-		       Document doc_authn = sr.convert(logout);
+		       Document docAuthn = sr.convert(logout);
 		     
 		      
-		       result = doc_authn;
+		       result = docAuthn;
 		        
-		       logger.info("get_saml_assertion_from_xml:01_2:"+DocumentUtil.asString(doc_authn));
+		       LOGGER.debug("get_saml_assertion_from_xml:01_2:"+DocumentUtil.asString(docAuthn));
 			  		      
 		  }catch(Exception e3){
-				 logger.error("get_saml_logout_from_xml:error:"+e3);
-				 e3.printStackTrace(System.out);
-		  }finally{
+				 LOGGER.error("get_saml_logout_from_xml:error:"+e3);
+			  }finally{
 			  try{
 				  if(samlAssertionInputStream!=null){
 					  samlAssertionInputStream.close();
@@ -679,15 +631,9 @@ public class AuthEJB {
 		
         String result = null;   
 		try{
-			logger.info("getSAMLDestination:01");
+			LOGGER.debug("getSAMLDestination:01");
  
 			String login_key = "login";
-	        String password_key = "password";
-	       /* String login_encrypt_key = "login_encrypt";
-	        String password_encrypt_key = "password_encrypt";
-	        String secret_key_key = "secret_key";
-	        String initialization_vector_key = "initialization_vector";*/
-	       String login_encrypt_key = "elogin";
 	        String password_encrypt_key = "epassword";
 	        String secret_key_key = "skey";
 	        String initialization_vector_key = "ivector";
@@ -695,30 +641,27 @@ public class AuthEJB {
 	        String password = "les";
 	    	
 	        String passwordEncryptBase64 = null;
-	        String loginEncryptBase64 = null;
 	        String secretKeyBase64 = null;
 			String ivBase64 = null;
 			
 			final int encrypt_data_length = 4;
 			  
-	        //String password_hash = HashPassword.generateStorngPasswordHash(password);
 	        String[] encrypt_data = login_password_encrypt(null, password, privateKeyClient, publicKeyCUD);
 	        
 	        if(encrypt_data!=null&&encrypt_data.length==encrypt_data_length){
 	            passwordEncryptBase64 = encrypt_data[0];
-	           // loginEncryptBase64 = encrypt_data[1];
+	            
 	            secretKeyBase64 = encrypt_data[2];
 	            ivBase64 = encrypt_data[3];
 	        }
 	        
-	       // result="?"+login_encrypt_key+"="+URLEncoder.encode(loginEncryptBase64, "UTF-8")+
-	     	result="?"+login_key+"="+URLEncoder.encode(login, "UTF-8")+
+	      	result="?"+login_key+"="+URLEncoder.encode(login, "UTF-8")+
 	        	   "&"+password_encrypt_key+"="+URLEncoder.encode(passwordEncryptBase64, "UTF-8")+
 	        	   "&"+secret_key_key+"="+URLEncoder.encode(secretKeyBase64, "UTF-8")+
 	        	   "&"+initialization_vector_key+"="+URLEncoder.encode(ivBase64, "UTF-8");
 	        		
 	   }catch(Exception e){
-			logger.error("getSAMLDestination:error:"+e);
+			LOGGER.error("getSAMLDestination:error:"+e);
 		}
 		return result;
 	}
@@ -772,43 +715,30 @@ public class AuthEJB {
 		  result[2]=secretKeyBase64;
 		  result[3]=ivBase64;
 		  
-		  logger.info("passwordEncryptBase64:"+passwordEncryptBase64);
-		  logger.info("loginEncryptBase64:"+loginEncryptBase64);
-		  logger.info("secretKeyBase64:"+secretKeyBase64);
-		  logger.info("ivBase64:"+ivBase64);
+		  LOGGER.debug("passwordEncryptBase64:"+passwordEncryptBase64);
+		  LOGGER.debug("loginEncryptBase64:"+loginEncryptBase64);
+		  LOGGER.debug("secretKeyBase64:"+secretKeyBase64);
+		  LOGGER.debug("ivBase64:"+ivBase64);
 	       
 		  
-		//расшифровка
-		/*  
-		  PrivateKey responderPrivateKey = privateKeyClient;
-		  Cipher unwrapCipher = Cipher.getInstance(CIPHER_ALG_TRANSPORT);
-		  unwrapCipher.init(Cipher.UNWRAP_MODE, responderPrivateKey);
-		  SecretKey clientSecretKey = (SecretKey) unwrapCipher.unwrap(wrappedSecretKey, null, Cipher.SECRET_KEY);
-		  
-		  cipher = Cipher.getInstance(CIPHER_ALG);
-		  cipher.init(Cipher.DECRYPT_MODE, clientSecretKey, new IvParameterSpec(iv), null);
-		  final byte[] decryptedtext = cipher
-		            .doFinal(encryptedtext, 0, encryptedtext.length);
-		  
-		  logger.info("decryptedtext:"+new String(decryptedtext, "utf-8"));
-		  */
+		
 		  
 		}catch(Exception e){
-			logger.error("error:"+e);
+			LOGGER.error("error:"+e);
 		}
 		return result;
 	}
  
    public static Node getNextSiblingOfIssuer(Document doc) {
      
-		//  logger.info("getNextSiblingOfIssuer:01");
+		 
 				  
 		    NodeList nl = doc.getElementsByTagNameNS(JBossSAMLURIConstants.ASSERTION_NSURI.get(), JBossSAMLConstants.ISSUER.get());
 		   // "urn:oasis:names:tc:SAML:2.0:assertion", "Issuer"
 	        if (nl.getLength() > 0) {
 	            Node issuer = nl.item(0);
 
-	          //  logger.info("getNextSiblingOfIssuer:02:"+issuer.getNextSibling().getLocalName());
+	           
 	            return issuer.getNextSibling();
 	        }
 	        return null;
@@ -831,39 +761,13 @@ public class AuthEJB {
    public void sendPost(String samlMessage, String destination, HttpServletResponse response) throws Exception {
        
    	try{
-   		logger.info("Authenticator:sendPost:01");
-   	// logger.info("sendPost:01");
+   		LOGGER.debug("Authenticator:sendPost:01");
+   	 
    	 
    	String key = GeneralConstants.SAML_REQUEST_KEY ;
-   	/*String login_key = "login";
-       String password_key = "password";
-       String password_hash_key = "password_hash";
-       String login_encrypt_key = "login_encrypt";
-       String password_encrypt_key = "password_encrypt";
-       String secret_key_key = "secret_key";
-       String initialization_vector_key = "initialization_vector";
-       String login = "les";
-       String password = "les";
-   	
-       String passwordEncryptBase64 = null;
-       String loginEncryptBase64 = null;
-       String secretKeyBase64 = null;
-		String ivBase64 = null;
-		
-		final int encrypt_data_length = 4;
-		  
-       //String password_hash = HashPassword.generateStorngPasswordHash(password);
-       String[] encrypt_data = login_password_encrypt(login, password, privateKeyClient, publicKeyCUD);
-       
-       if(encrypt_data!=null&&encrypt_data.length==encrypt_data_length){
-           passwordEncryptBase64 = encrypt_data[0];
-           loginEncryptBase64 = encrypt_data[1];
-           secretKeyBase64 = encrypt_data[2];
-           ivBase64 = encrypt_data[3];
-       }
-       */
+   
        if (destination == null) {
-    	   logger.info("Authenticator:sendPost:Destination is null");
+    	   LOGGER.debug("Authenticator:sendPost:Destination is null");
            throw new Exception("Authenticator:sendPost:Destination is null");
        }
        
@@ -883,17 +787,7 @@ public class AuthEJB {
        builder.append("<FORM METHOD=\"POST\" ACTION=\"" + destination + "\">");
        builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + key + "\"" + " VALUE=\"" + samlMessage + "\"/>");
       
-      /* if(encrypt_data!=null&&encrypt_data.length==encrypt_data_length){
-       
-        // builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + login_key + "\"" + " VALUE=\"" + login + "\"/>");
-        // builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + password_key + "\"" + " VALUE=\"" + password + "\"/>");
-      
-         builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + login_encrypt_key + "\"" + " VALUE=\"" + loginEncryptBase64 + "\"/>");
-         builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + password_encrypt_key + "\"" + " VALUE=\"" + passwordEncryptBase64 + "\"/>");
-         builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + secret_key_key + "\"" + " VALUE=\"" + secretKeyBase64 + "\"/>");
-         builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + initialization_vector_key + "\"" + " VALUE=\"" + ivBase64 + "\"/>");
-       }*/
-    
+   
        
        builder.append("<NOSCRIPT>");
        builder.append("<P>JavaScript is disabled. We strongly recommend to enable it. Click the button below to continue.</P>");
@@ -904,33 +798,21 @@ public class AuthEJB {
        
        String str = builder.toString();
       
-       logger.info("Authenticator:sendPost:02:"+str);
        
-     //  logger.info("test1:02:"+str);
        
-       /*
-       ServletOutputStream outputStream = response.getOutputStream();
-
-        // we need to re-configure the content length, because Tomcat may have written some content.
-       response.resetBuffer();
-       response.setContentLength(str.length());
-       
-       outputStream.println(str);
-       outputStream.close();
-       */
+      
        
        out.println(str);
 	    out.close();
 	    
-	    logger.info("Authenticator:sendPost:03");
+	    LOGGER.debug("Authenticator:sendPost:03");
 	    
-     //  logger.info("sendPost:05");
+      
        
    	}catch(Exception e){
-   		logger.error("Authenticator:sendPost:error:"+e);
-   		logger.error("sendPost:error:"+e);
-   		e.printStackTrace(System.out);
-   	}
+   		LOGGER.error("Authenticator:sendPost:error:"+e);
+   		LOGGER.error("sendPost:error:"+e);
+    	}
    }
    
    private static void common(HttpServletResponse response) {
@@ -946,26 +828,21 @@ public class AuthEJB {
    public boolean authenticate()
    {
 	   
-	   logger.info("authenticator:authenticate:01");
+	   LOGGER.debug("authenticator:authenticate:01");
 	   
-	   String tokenID=null;
 	   String authType=null;
 	   
 	   char[] signingKeyPass="Access_Control".toCharArray();
 		 String signingAlias="cudvm_export";
 		 
 	   try{
-		/* Context ctx=new InitialContext();
-		  CUDAuthManagerLocal aml=(CUDAuthManagerLocal)ctx.lookup("cudAuthModule.CUDAuthManager.local");
-		  AuthItem ai =aml.authCompleteItem(linksMap.getAppCode(), credentials.getUsername(), credentials.getPassword());
-		 */ 
-		   
+			   
 		   
 		  String pSAMLResponse = FacesContext.getCurrentInstance().getExternalContext()
            .getRequestParameterMap()
            .get("SAMLResponse"); 
 		  
-		 // logger.info("authenticator:authenticate:01_1:"+pSAMLResponse);
+		  
 		 
 		  if(publicKey==null) {	
 		    KeyStore ks  = KeyStore.getInstance("HDImageStore", "JCP");
@@ -1003,14 +880,14 @@ public class AuthEJB {
 
 			}
 			
-			logger.info("authenticator:authenticate:01_2");
+			LOGGER.debug("authenticator:authenticate:01_2");
 			
 			//проверка сигнатуры Assertion
-			boolean ass_valid = ass_valid(samlDocument, publicKey);
+			boolean assValid = assValid(samlDocument, publicKey);
 			
-			logger.info("authenticator:authenticate:01_3:"+ass_valid);
+			LOGGER.debug("authenticator:authenticate:01_3:"+assValid);
 			
-			if(ass_valid==false){
+			if(assValid==false){
 	    		  throw new Exception("Signature Assertion is not valid!!!");
 	    	 }
 			
@@ -1020,7 +897,7 @@ public class AuthEJB {
 		   	  
 	    	 XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
 	        	
-	    	 logger.info("test1:01_1");
+	    	 LOGGER.debug("test1:01_1");
 	    	 
 	    	 configureIdAttribute(samlDocument);
 	    	 
@@ -1035,29 +912,24 @@ public class AuthEJB {
 	    		 
 	    	 Node signatureNode1 = nl.item(0);
 	    		 
-	    	 logger.info("SignValidateSOAPHandler:handleMessage:07_3");
+	    	 LOGGER.debug("SignValidateSOAPHandler:handleMessage:07_3");
 	    	 
 	         //signature
 	    	 
 	    	 if(signatureNode1==null){
-	    		 logger.info("SignValidateSOAPHandler:handleMessage:08");
+	    		 LOGGER.debug("SignValidateSOAPHandler:handleMessage:08");
 	    	        throw new Exception("This service requires <dsig:Signature>, which is missing!!!");
 	    	 }
 
-	    	 logger.info("SignValidateSOAPHandler:handleMessage:09:"+signatureNode1.getNodeName());
+	    	 LOGGER.debug("SignValidateSOAPHandler:handleMessage:09:"+signatureNode1.getNodeName());
 	     
 	         DOMValidateContext valContext1 = new DOMValidateContext(publicKey, signatureNode1);
-	        
-	     //   valContext1.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
-	       	 
-	    	//valContext1.setIdAttributeNS(header, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-	    	//valContext1.setIdAttributeNS(body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-	      
+	       
 	    	 javax.xml.crypto.dsig.XMLSignature signature1 = fac.unmarshalXMLSignature(valContext1);
 	         
 	    	  boolean result1 = signature1.validate(valContext1);
 	    			 
-	    	  logger.info("SignValidateSOAPHandler:010+:"+result1);
+	    	  LOGGER.debug("SignValidateSOAPHandler:010+:"+result1);
 			
 	    	  if(result1==false){
 	    		  throw new Exception("Signature is not valid!!!");
@@ -1066,12 +938,12 @@ public class AuthEJB {
 			//разбор пришедшего токена
 	    	boolean  expiredAssertion = AssertionUtil.hasExpired(ass);
 			
-	    	 logger.info("expiredAssertion:"+expiredAssertion);
+	    	 LOGGER.debug("expiredAssertion:"+expiredAssertion);
 	    	 
-	    	// logger.info("Authenticator:authenticate:01:"+(SimpleTypeBindings.marshalDateTime(new GregorianCalendar(TimeZone.getTimeZone("UTC")))));
-			// logger.info("Authenticator:authenticate:02:"+(SimpleTypeBindings.marshalDateTime(new GregorianCalendar())));
-			 logger.info("Authenticator:authenticate:03:"+(new Date()));
-			 logger.info("Authenticator:authenticate:04:"+(TimeZone.getDefault()));
+	    	 
+			 
+			 LOGGER.debug("Authenticator:authenticate:03:"+(new Date()));
+			 LOGGER.debug("Authenticator:authenticate:04:"+(TimeZone.getDefault()));
 	    	 
 	    	if(expiredAssertion){
 	    		  throw new Exception("expiredAssertion!!!");
@@ -1079,11 +951,8 @@ public class AuthEJB {
 	    	
 	    	
 	    	 SubjectType subject = ass.getSubject();
-	            /*
-	             * JAXBElement<NameIDType> jnameID = (JAXBElement<NameIDType>) subject.getContent().get(0); NameIDType nameID =
-	             * jnameID.getValue();
-	             */
-	            if (subject == null)
+	          
+	    	 if (subject == null)
 	                throw new Exception("Subject in the assertion");
 
 	            STSubType subType = subject.getSubType();
@@ -1096,7 +965,7 @@ public class AuthEJB {
 
 	            final String userName = nameID.getValue();
 	            
-	            logger.info("userName:"+userName);
+	            LOGGER.debug("userName:"+userName);
 	            
 	            
 	            List<String> roles = new ArrayList<String>();
@@ -1111,7 +980,7 @@ public class AuthEJB {
 	                }
 	            }
 
-	            logger.info("Authenticator:70");
+	            LOGGER.debug("Authenticator:70");
 	    	
 	            if(ass.getStatements()!=null){
 	            	
@@ -1128,7 +997,7 @@ public class AuthEJB {
                 				  if(ast.getAuthnContext().getSequence().getClassRef()!=null){
                 					  
                 					 URI authTypeURI = ast.getAuthnContext().getSequence().getClassRef().getValue();
-                					 logger.info("Authenticator:71:"+authTypeURI);
+                					 LOGGER.debug("Authenticator:71:"+authTypeURI);
                 					 
                 					 if(authTypeURI!=null){
                 						 authType = authTypeURI.toString();
@@ -1145,110 +1014,25 @@ public class AuthEJB {
 	              }
 	            	  
 	            }
-	    /*	
-		  String pTokenID = FacesContext.getCurrentInstance().getExternalContext()
-		             .getRequestParameterMap()
-		             .get("tokenID"); 
-		  
-		  String success = FacesContext.getCurrentInstance().getExternalContext()
-		             .getRequestParameterMap()
-		             .get("success"); 
-		  
-		  String welcome_form = FacesContext.getCurrentInstance().getExternalContext()
-		             .getRequestParameterMap()
-		             .get("welcome_form");
-		  
-		  log.info("authenticator:authenticate:pTokenID:"+pTokenID); 
-		  log.info("authenticator:authenticate:success:"+success);
-		  log.info("authenticator:authenticate:welcome_form:"+welcome_form);
-		  
-		  
-		  if(welcome_form==null && (success==null||success.equals("false"))){
-			  FacesMessages.instance().add("ѕользователь не идентифицирован!");
-			  return false;
-		  }
-		  
-		  AccessServiceClient asc = (AccessServiceClient)Component.getInstance("asClient",ScopeType.EVENT);
-		  
-		  //if(pTokenID==null){
-		  if(welcome_form!=null){ //через логин-пароль
-		    try{
-		    	
-		    	if((credentials.getUsername()==null||credentials.getUsername().trim().equals(""))||
-		    		(credentials.getPassword()==null||credentials.getPassword().trim().equals(""))){
-		    		 FacesMessages.instance().add("ѕол€ логин и пароль об€зательны!");
-					  return false;
-		    	}
-		    	
-			   tokenID = asc.authenticate_login(credentials.getUsername(), credentials.getPassword());
-		    }catch(InvalidCredentials e1){
-			   log.info("authenticator:authenticate:02");
-			   FacesMessages.instance().add("ѕользователь не идентифицирован!");
-			   return false;
-	         }
-		  }else{//через сертификат 
-			   //pTokenID должен быть, так здесь мы только при условии success=true
-			  tokenID = pTokenID;
-		  }
-		  */
-		  //List<Role> roleList = asc.authorize(tokenID);
+	    
 		
 	  //консоль пользовател€ дл€ всех          
-	   /*         
-		  if(roles.isEmpty()){
-		 // if(roleList.isEmpty()){
-			  logger.info("authenticator:authenticate:03");
-			  FacesContext.getCurrentInstance().addMessage(null, 
-	        			new FacesMessage("Ќет прав доступа к системе!"));
-	          FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-	       
-			  return false;
-		  }
-		  */
+	  
 		  
-		 /*
-		  List<String> roleStList = new ArrayList<String>();
-		  List<String> rolesInfoList = new ArrayList<String>();
-		  for(Role rl :roleList){
-			  roleStList.add(rl.getIdRole());
-			  rolesInfoList.add(rl.getName());
-		  }*/
-		  List<String> roleStList = roles;
-		  List<String> rolesInfoList = roles;
-				  
-		  
-		 
 		  
 		  String fio = null, org =null, tel = null, email = null, 
-				 login = null, orgIOGVCode=null, uid = null;
-		  /*
-		  List<Attribute> attribList = asc.attrib(tokenID);
-		  
-		  for(Attribute at :attribList){
-			  if(at.getName().equals("fio")){
-				  fio=at.getValue();
-			  }else if(at.getName().equals("org")){
-				  org=at.getValue();
-			  }else if(at.getName().equals("tel")){
-				  tel=at.getValue();
-			  }else if(at.getName().equals("email")){
-				  email=at.getValue();
-			  }else if(at.getName().equals("login")){
-				  login=at.getValue();
-			  }else if(at.getName().equals("orgIOGVCode")){
-				  orgIOGVCode=at.getValue();
-			  }
-		  }*/
+				 login = null,  uid = null;
+		
 		  
 		  fio = userAttrib.get("USER_FIO");
 		  org = userAttrib.get("ORG_NAME");
 		  tel = userAttrib.get("USER_PHONE");
 		  email = userAttrib.get("USER_EMAIL");
 		  login = userAttrib.get("USER_LOGIN");
-		  orgIOGVCode = userAttrib.get("ORG_CODE_IOGV");	
+		  //orgIOGVCode "ORG_CODE_IOGV"	
 		  uid = userAttrib.get("USER_UID");
 		  
-		  logger.info("Authenticator:71:"+fio);
+		  LOGGER.debug("Authenticator:71:"+fio);
 		  
 		  AcUsersKnlT.UserItem currentUser = null;
 		  AcUsersKnlT userDataItem = new AcUsersKnlT();
@@ -1281,16 +1065,16 @@ public class AuthEJB {
           
 		  //дл€ отправки аудита по окончанию сессии
 		  try{
-		    //session.setAttribute("auditExportToken", tokenID);
-		    //session.setAttribute("auditExportLogin", login);
-		    session.setAttribute("auditExportUid", uid);
+		     session.setAttribute("auditExportUid", uid);
 		    }catch(Exception e){
-		    	logger.error("authenticator:authenticate:session.setAttribute:Error:"+e);
+		    	LOGGER.error("authenticator:authenticate:session.setAttribute:Error:"+e);
 		   	}
 	
+		  audit(ResourcesMap.USER, ActionsMap.LOGIN_UARM);
+		  
 		  return true;
 	   }catch(Exception e){
-		 logger.error("authenticator:authenticate:Error+:"+e);
+		 LOGGER.error("authenticator:authenticate:Error+:"+e);
       	 FacesContext.getCurrentInstance().addMessage(null, 
       			new FacesMessage("ќшибка доступа!"));
          FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
@@ -1306,15 +1090,11 @@ public class AuthEJB {
 		 
 			try{
 	
-				 logger.info("get_saml_assertion_from_xml:01");
+				 LOGGER.debug("get_saml_assertion_from_xml:01");
 			 
 			 
 			 dataStream = PostBindingUtil.base64DecodeAsStream(pSAMLResponse);
 			
-			 
-			 //  InputStream samlAssertionInputStream = new FileInputStream("saml_response.out");
-
-			 //  logger.info("get_saml_assertion_from_xml:01_2");
 			   
 		        SAMLParser samlParser = new SAMLParser();
 
@@ -1323,18 +1103,16 @@ public class AuthEJB {
 		        // cast the parsed object to the expected type, in this case AssertionType
 		        ResponseType authn = (ResponseType) parsedObject;
 
-		       // SAML2Request  sr = new SAML2Request();
 		        SAML2Response sr = new SAML2Response();
 		        
-		       Document doc_authn = sr.convert(authn);
+		       Document docAuthn = sr.convert(authn);
 		        
-		       result = doc_authn;
+		       result = docAuthn;
 		        
-		      // logger.info("get_saml_assertion_from_xml:01_3:"+DocumentUtil.asString(doc_authn));
+		       
 			  		      
 		  }catch(Exception e3){
-				 logger.error("get_saml_assertion_from_xml:error:"+e3);
-				 e3.printStackTrace(System.out);
+				 LOGGER.error("get_saml_assertion_from_xml:error:"+e3);
 		  }finally{
 			  try{
 				  if(dataStream!=null){
@@ -1348,26 +1126,24 @@ public class AuthEJB {
 		}
    
    
-   private AssertionType/*Document*/ decrypt(Document doc, PrivateKey privateKey){
-		// Document result = null;
+   private AssertionType decrypt(Document doc, PrivateKey privateKey){
+		
 		 AssertionType result = null;
 		 try{
 			 
-			 logger.info("decrypt:01");
+			 LOGGER.debug("decrypt:01");
 			 
 			 Element enc = DocumentUtil.getElement(doc, new QName(JBossSAMLConstants.ENCRYPTED_ASSERTION.get()));
 		        if (enc == null){
 		        	 throw new Exception("Cannot find ENCRYPTED_ASSERTION element");
 		        }
-		        String oldID = enc.getAttribute(JBossSAMLConstants.ID.get());
 		        Document newDoc = DocumentUtil.createDocument();
 		        Node importedNode = newDoc.importNode(enc, true);
 		        newDoc.appendChild(importedNode);
 
-		      //  Element decryptedDocumentElement = GOSTXMLEncryptionUtil.decryptElementInDocument(newDoc, privateKey);
 		        Element decryptedDocumentElement = decryptElementInDocument(newDoc, privateKey);
 			        
-		        //logger.info("decrypt:02:"+DocumentUtil.asString(decryptedDocumentElement.getOwnerDocument()));
+		         
 		        
 		        SAMLParser parser = new SAMLParser();
 
@@ -1376,32 +1152,26 @@ public class AuthEJB {
 
 		        result=assertion;
 		        
-		        Document ass_doc = AssertionUtil.asDocument(assertion);
-		        
-		      //  logger.info("Authenticator:decrypt:03:"+DocumentUtil.asString(ass_doc));
-		        
-		  	 
-			// logger.info("decrypt:0100");
+		     	 
+			 
 		 }catch(Exception e3){
-			 logger.error("decrypt:error:"+e3);
-			 e3.printStackTrace(System.out);
-	     }
+			 LOGGER.error("decrypt:error:"+e3);
+		   }
 		return result;
 	 }
    
    public static Element decryptElementInDocument(Document documentWithEncryptedElement, PrivateKey privateKey)
            throws Exception {
 	  
-	  logger.info("decryptElementInDocument:01");
+	  LOGGER.debug("decryptElementInDocument:01");
 		
 	  
 	  org.apache.xml.security.Init.init();
 	  
 	  if(!JCPXMLDSigInit.isInitialized()) {
-		logger.info("GostXMLEncryptionUtil:static:02+");
-	  //  JCPXMLDSigInit.init();
-		 Crypto15Init.fileInit();
-	    logger.info("GostXMLEncryptionUtil:static:03");
+		LOGGER.debug("GostXMLEncryptionUtil:static:02+");
+	 	 Crypto15Init.fileInit();
+	    LOGGER.debug("GostXMLEncryptionUtil:static:03");
 	  }
 	  
        if (documentWithEncryptedElement == null)
@@ -1409,18 +1179,18 @@ public class AuthEJB {
 
        // Look for encrypted data element
        Element documentRoot = documentWithEncryptedElement.getDocumentElement();
-     //  Element encDataElement = getNextElementNode(documentRoot.getFirstChild());
+    
        Element encDataElement =  (Element) documentRoot.getFirstChild();
        if (encDataElement == null)
            throw new Exception("No element representing the encrypted data found");
 
-     //  logger.info("decryptElementInDocument:01:"+encDataElement.getLocalName());
+      
        
        // Look at siblings for the key
        Element encKeyElement = getNextElementNode(encDataElement.getNextSibling());
        if (encKeyElement == null) {
        	
-       	//logger.info("decryptElementInDocument:01+");
+       	 
            // Search the enc data element for enc key
            NodeList nodeList = encDataElement.getElementsByTagNameNS(XMLENC_NS, ENCRYPTED_KEY_LOCALNAME);
 
@@ -1430,20 +1200,19 @@ public class AuthEJB {
            encKeyElement = (Element) nodeList.item(0);
        }
 
-      // logger.info("decryptElementInDocument:02:"+encKeyElement.getLocalName());
+       
        
        XMLCipher cipher;
        EncryptedData encryptedData;
        EncryptedKey encryptedKey;
        try {
-       //	logger.info("decryptElementInDocument:03");
        	
            cipher = XMLCipher.getInstance();
            cipher.init(XMLCipher.DECRYPT_MODE, null);
            encryptedData = cipher.loadEncryptedData(documentWithEncryptedElement, encDataElement);
            encryptedKey = cipher.loadEncryptedKey(documentWithEncryptedElement, encKeyElement);
      
-          // logger.info("decryptElementInDocument:04");
+           
            
        } catch (XMLEncryptionException e1) {
        	throw new Exception(e1);
@@ -1453,7 +1222,6 @@ public class AuthEJB {
 
        if (encryptedData != null && encryptedKey != null) {
        	
-       //	logger.info("decryptElementInDocument:05");
        	
            try {
                String encAlgoURL = encryptedData.getEncryptionMethod().getAlgorithm();
@@ -1468,18 +1236,17 @@ public class AuthEJB {
            	throw new Exception(e);
            }
        }
-     //  logger.info("decryptElementInDocument:06");
+      
        
        Element decryptedRoot = decryptedDoc.getDocumentElement();
        //<saml:EncryptedAssertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"><saml:Assertion... 
        
-      // logger.info("decryptElementInDocument:07:"+DocumentUtil.asString(decryptedRoot.getOwnerDocument()));
        
-       //Element dataElement = getNextElementNode(decryptedRoot.getFirstChild());
-       Element dataElement = (Element)decryptedRoot.getFirstChild();
+       
+        Element dataElement = (Element)decryptedRoot.getFirstChild();
        //<saml:Assertion...
        
-     //  logger.info("decryptElementInDocument:08:"+dataElement.getLocalName());
+      
        
        if (dataElement == null)
        	throw new Exception("Data Element after encryption is null");
@@ -1492,18 +1259,18 @@ public class AuthEJB {
    }
    
    private static Element getNextElementNode(Node node) {
-		//  logger.info("getNextElementNode:01");
+		 
 	        while (node != null) {
-	        	// logger.info("getNextElementNode:02");
+	        	 
 	            if (Node.ELEMENT_NODE == node.getNodeType()){
-	            	//logger.info("getNextElementNode:03");
+	            	 
 	                return (Element) node;}
 	            node = node.getNextSibling();
 	        }
 	        return null;
 	    }
    
-   private boolean ass_valid(Document signedDoc, PublicKey publicKey){
+   private boolean assValid(Document signedDoc, PublicKey publicKey){
 		 
 		 boolean result = false;
 		 try{
@@ -1519,14 +1286,14 @@ public class AuthEJB {
 		        result = samlSignature.validate(doc, publicKey);
 		        
 		 }catch(Exception e){
-			 logger.error("Authenticator:ass_valid:error:"+e);
+			 LOGGER.error("Authenticator:assValid:error:"+e);
 		 }
 		 return result;
 	 }
    
    private List<String> getRoles(AttributeStatementType attributeStatement, Map<String, String> userAttrib) throws Exception {
        
-		 logger.info("Authenticator:getRoles:01");
+		 LOGGER.debug("Authenticator:getRoles:01");
 		 
 		 List<String> roles = new ArrayList<String>();
 
@@ -1534,7 +1301,7 @@ public class AuthEJB {
        // PLFED-140: which of the attribute statements represent roles?
        List<String> roleKeys = new ArrayList<String>();
 
-       //String roleKey = "Role";
+       
        String roleKey = "USER_ROLES";
        roleKeys.addAll(StringUtil.tokenize(roleKey));
         
@@ -1542,7 +1309,7 @@ public class AuthEJB {
        for (ASTChoiceType obj : attList) {
            AttributeType attr = obj.getAttribute();
            
-          // logger.info("Authenticator:getRoles:02:"+attr.getName());
+           
            
            if (!roleKeys.contains(attr.getName())){
               //аттрибут
@@ -1551,7 +1318,7 @@ public class AuthEJB {
                    for (Object attrValue : attributeValues) {
                   	 
                   	 if (attrValue instanceof String) {
-                      	// logger.info("Authenticator:getRoles:03:"+(String) attrValue);
+                      	 
                            userAttrib.put(attr.getName(), (String) attrValue);
                        } else
                            throw new Exception(attrValue.toString());
@@ -1563,10 +1330,10 @@ public class AuthEJB {
            if (attributeValues != null) {
                for (Object attrValue : attributeValues) {
               	 
-              	// logger.info("Authenticator:getRoles:04");
+              	 
               	 
                    if (attrValue instanceof String) {
-                  	// logger.info("Authenticator:getRoles:05:"+(String) attrValue);
+                  	 
                        roles.add((String) attrValue);
                    } else
                        throw new Exception(attrValue.toString());
@@ -1576,4 +1343,14 @@ public class AuthEJB {
        }
        return roles;
    }
+   
+   public void audit(ResourcesMap resourcesMap, ActionsMap actionsMap){
+	   try{
+		  
+		   auditExportData.addFunc(resourcesMap.getCode()+":"+actionsMap.getCode());
+		   
+	   }catch(Exception e){
+		   LOGGER.error("UserManagerEJB:audit:error:"+e);
+	   }
+ }
 }

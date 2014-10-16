@@ -42,7 +42,7 @@ public class ApplicationResultServiceImpl implements ApplicationResultService {
 
 	public static final String NS = "http://application.services.cud.iac.spb.ru/";
 
-	Logger logger = LoggerFactory.getLogger(ApplicationResultServiceImpl.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ApplicationResultServiceImpl.class);
 
 	@Resource(name = "wsContext")
 	private WebServiceContext wsContext;
@@ -76,8 +76,8 @@ public class ApplicationResultServiceImpl implements ApplicationResultService {
 			// Long
 			// сейчас же мы кладём в сессиию ид пользователя из текстового поля
 			// запроса
-			// Long idUser =
-			// (Long)request.getSession().getAttribute("user_id_principal");
+			// Long id/User =
+			// (Long)r/equest.getSess/ion().getAttri/bu/te("user_id_principal");
 
 			if (request.getSession().getAttribute("user_id_principal") != null
 					&& !request.getSession().getAttribute("user_id_principal")
@@ -87,7 +87,7 @@ public class ApplicationResultServiceImpl implements ApplicationResultService {
 				idUser = new Long((String) request.getSession().getAttribute(
 						"user_id_principal"));
 
-				// logger.info("getIDUser:"+idUser);
+				 
 
 			} else {
 				// анаоним

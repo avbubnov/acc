@@ -27,7 +27,7 @@ import ru.spb.iac.cud.items.UserAttributes;
 
 public class ContextAdminManager {
 
-	Logger logger = LoggerFactory.getLogger(ContextAdminManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ContextAdminManager.class);
 
 	static Context ctx;
 	AdminManagerLocal aml = null;
@@ -37,25 +37,11 @@ public class ContextAdminManager {
 			ctx = new InitialContext();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("error",e);
 		}
 	}
 
-	/*
-	 * public static void initContext(String jboss_jndi_port){ try{
-	 * logger.info("initContext:jboss_jndi_port:"+jboss_jndi_port);
-	 * 
-	 * jboss_jndi_port=(jboss_jndi_port!=null?jboss_jndi_port:"1099");
-	 * 
-	 * Properties env = new Properties();
-	 * env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-	 * "org.jnp.interfaces.NamingContextFactory");
-	 * env.setProperty(Context.URL_PKG_PREFIXES, "org.jboss.naming");
-	 * env.setProperty(Context.PROVIDER_URL, "localhost:"+jboss_jndi_port); ctx
-	 * = new InitialContext(env);
-	 * 
-	 * }catch(Exception e){ logger.error("ainitContext:error:"+e); } }
-	 */
+	
 
 	public ContextAdminManager() {
 		try {
@@ -63,14 +49,14 @@ public class ContextAdminManager {
 					.lookup("java:global/AuthServices/EisAdminManager!ru.spb.iac.cud.core.eis.AdminManagerLocal");
 
 		} catch (Exception e) {
-			logger.error("ContextAdminManager:error:" + e);
+			LOGGER.error("ContextAdminManager:error:", e);
 		}
 	}
 
 	public void access(String codeSystem, List<String> uidsUsers,
 			String modeExec, List<String> codesRoles, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
-		logger.info("access");
+		LOGGER.debug("access");
 
 		aml.access(codeSystem, uidsUsers, modeExec, codesRoles, idUserAuth,
 				IPAddress);
@@ -79,7 +65,7 @@ public class ContextAdminManager {
 	public void access_groups(String codeSystem, List<String> uidsUsers,
 			String modeExec, List<String> codesGroups, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
-		logger.info("access_groups");
+		LOGGER.debug("access_groups");
 
 		aml.access_groups(codeSystem, uidsUsers, modeExec, codesGroups,
 				idUserAuth, IPAddress);
@@ -87,7 +73,7 @@ public class ContextAdminManager {
 
 	public void cert_change(String codeSystem, String newCert, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
-		logger.info("cert_change");
+		LOGGER.debug("cert_change");
 
 		aml.cert_change(codeSystem, newCert, idUserAuth, IPAddress);
 	}

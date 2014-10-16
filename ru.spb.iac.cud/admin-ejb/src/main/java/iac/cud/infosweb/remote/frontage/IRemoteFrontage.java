@@ -1,6 +1,6 @@
 package iac.cud.infosweb.remote.frontage;
 
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -12,6 +12,9 @@ import javax.ejb.TransactionAttributeType;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import iac.cud.infosweb.dataitems.BaseParamItem;
 import iac.cud.infosweb.local.service.IHLocal;
 import iac.cud.infosweb.local.service.ReestrItem;
@@ -21,6 +24,8 @@ public class IRemoteFrontage implements IRemoteFrontageLocal {
 
 	private Context ctx = null;
 
+	final static Logger LOGGER = LoggerFactory.getLogger(IRemoteFrontage.class);
+	
 	@PostConstruct
 	public void init() {
 		try {
@@ -28,6 +33,7 @@ public class IRemoteFrontage implements IRemoteFrontageLocal {
 				ctx = new InitialContext();
 			}
 		} catch (Exception e) {
+			LOGGER.error("init:error:"+e);
 		}
 	}
 
@@ -38,17 +44,16 @@ public class IRemoteFrontage implements IRemoteFrontageLocal {
 				ctx.close();
 			}
 		} catch (Exception e) {
+			LOGGER.error("init:error:"+e);
 		}
 	}
 
 	public BaseParamItem run(BaseParamItem paramMap) throws Exception {
 
-		BaseParamItem jpi = new BaseParamItem();
-		String service = null;
-
+		
 		String gtype = (String) paramMap.get("gtype");
 
-		System.out.println("IRemoteFrontage:run:gtype:" + gtype);
+		LOGGER.debug("IRemoteFrontage:run:gtype:" + gtype);
 
 		String url = ReestrItem.getUrl(gtype);
 

@@ -84,8 +84,7 @@ public class CUDSAML20AssertionTokenProvider extends
 		// generate an id for the new assertion.
 		// <saml:Assertion ID="..."
 		String assertionID = IDGenerator.create("ID_");
-		// String assertionID = "333";
-
+		
 		AssertionType assertionType = SAMLAssertionFactory.createAssertion(
 				assertionID, issuerID, issueInstant, conditions, subject,
 				statements);

@@ -1,7 +1,7 @@
 package iac.grn.infosweb.context.mc.cpar;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +29,8 @@ public class CparStateHolder {
 	
 	   @Logger private Log log;
 	
-       private HashMap<String, String> sortOrders = new HashMap<String, String>();
-       private HashMap<String, String> columnFilterValues = new HashMap<String, String>();
+       private Map<String, String> sortOrders = new HashMap<String, String>();
+       private Map<String, String> columnFilterValues = new HashMap<String, String>();
       
        private List <String> auditFieldListSelect = new ArrayList<String>();
        
@@ -38,11 +38,7 @@ public class CparStateHolder {
        public void create() {
     	   log.info("datatableStateHolder:create");
     	
-    	 /*  auditFieldListSelect.add("extendedTimestamp");
-   		   auditFieldListSelect.add("objectName");
-		   auditFieldListSelect.add("osUser");
-		   auditFieldListSelect.add("osHost");
-		   auditFieldListSelect.add("sessionId");*/
+    	
    		   
         }
        
@@ -52,15 +48,15 @@ public class CparStateHolder {
        public void setAuditFieldListSelect(List <String> auditFieldListSelect) {
     	   this.auditFieldListSelect=auditFieldListSelect;
        }
-       public HashMap<String, String> getColumnFilterValues() {
-    	//   log.info("getColumnFilterValues:01");
+       public Map<String, String> getColumnFilterValues() {
+    	 
            return columnFilterValues;
        }
        public void setColumnFilterValues(HashMap<String, String> columnFilterValues) {
-    	//   log.info("setColumnFilterValues:02"); 
+    	  
     	   this.columnFilterValues = columnFilterValues;
        }
-       public HashMap<String, String> getSortOrders() {
+       public Map<String, String> getSortOrders() {
                return sortOrders;
        }
        public void setSortOrders(HashMap<String, String> sortOrders) {
@@ -69,13 +65,10 @@ public class CparStateHolder {
        public void clearFilters(){
     	   log.info("clearFilters:01");
     	   if(columnFilterValues!=null){
-          	//	log.info("clearFilters:02");
-          		for(Iterator<Map.Entry<String, String>> it = columnFilterValues.entrySet().iterator(); it.hasNext();)
+          			for(Iterator<Map.Entry<String, String>> it = columnFilterValues.entrySet().iterator(); it.hasNext();)
     			{
     			      Map.Entry<String, String> me = it.next();
-    			    //  System.out.print("me.getKey:"+me.getKey());
-    	     		//  log.info("; me.getValue:"+me.getValue());
-    	     		  if(me.getValue()==null||me.getValue().isEmpty()){
+    			  	  if(me.getValue()==null||me.getValue().isEmpty()){
     	     			  log.info("Ahtung!!!");
     	     			  it.remove();
     	     		   }

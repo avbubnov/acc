@@ -15,7 +15,7 @@ import java.util.GregorianCalendar;
 
 public class CUDLifetime extends Lifetime {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
 	private final LifetimeType delegate;
@@ -45,7 +45,7 @@ public class CUDLifetime extends Lifetime {
 		try {
 			this.factory = XMLTimeUtil.newDatatypeFactory();
 		} catch (DatatypeConfigurationException dce) {
-			throw logger.wsTrustUnableToGetDataTypeFactory(dce);
+			throw LOGGER.wsTrustUnableToGetDataTypeFactory(dce);
 		}
 
 		// normalize the parameters (convert to UTC).
@@ -81,12 +81,12 @@ public class CUDLifetime extends Lifetime {
 		super(lifetime);
 
 		if (lifetime == null)
-			throw logger.nullArgumentError("LifetimeType");
+			throw LOGGER.nullArgumentError("LifetimeType");
 
 		try {
 			this.factory = XMLTimeUtil.newDatatypeFactory();
 		} catch (DatatypeConfigurationException dce) {
-			throw logger.wsTrustUnableToGetDataTypeFactory(dce);
+			throw LOGGER.wsTrustUnableToGetDataTypeFactory(dce);
 		}
 		this.delegate = lifetime;
 

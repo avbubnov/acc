@@ -40,8 +40,7 @@ public class ServicesLogKnlT  extends BaseItem implements Serializable {
 	@Column(name="RESULT_VALUE")
 	private String resultValue;
 
-	//bi-directional many-to-one association to ServicesBssT
-    @ManyToOne
+	 @ManyToOne
 	@JoinColumn(name="UP_SERVICES")
 	private ServicesBssT servicesBssT;
 

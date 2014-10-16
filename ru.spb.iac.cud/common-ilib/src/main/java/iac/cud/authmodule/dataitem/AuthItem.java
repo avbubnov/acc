@@ -1,7 +1,7 @@
 package iac.cud.authmodule.dataitem;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.io.Serializable;
 
 /**
@@ -14,7 +14,7 @@ public class AuthItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long idUser;
-	private HashMap<String, PageItem> pageList = new HashMap<String, PageItem>();
+	private Map<String, PageItem> pageList = new HashMap<String, PageItem>();
 
 	/**
 	 * ид пользователя
@@ -34,11 +34,11 @@ public class AuthItem implements Serializable {
 	 * 
 	 * @return карта доступных пользователю ресурсов, если есть, иначе - empty
 	 */
-	public HashMap<String, PageItem> getPageList() {
+	public Map<String, PageItem> getPageList() {
 		return this.pageList;
 	}
 
-	public void setPageList(HashMap<String, PageItem> pageList) {
+	public void setPageList(Map<String, PageItem> pageList) {
 		this.pageList = pageList;
 	}
 }

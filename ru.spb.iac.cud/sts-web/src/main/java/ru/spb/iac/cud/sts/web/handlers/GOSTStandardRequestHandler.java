@@ -84,10 +84,10 @@ import java.util.List;
 
 public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(GOSTStandardRequestHandler.class);
 
 	private static long KEY_SIZE = 128;
@@ -119,9 +119,9 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 	public RequestSecurityTokenResponse issue(RequestSecurityToken request,
 			Principal callerPrincipal) throws WSTrustException {
 
-		// logger.info("issue:01");
+		 
 
-		logger.trace("Issuing token for principal " + callerPrincipal);
+		LOGGER.trace("Issuing token for principal " + callerPrincipal);
 
 		// SecurityTokenProvider provider = null;
 
@@ -133,13 +133,13 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 		if (appliesTo != null) {
 			String serviceName = WSTrustUtil.parseAppliesTo(appliesTo);
 
-			// logger.info("issue:02:"+serviceName);
+			 
 
 			if (serviceName != null) {
 				String tokenTypeFromServiceName = configuration
 						.getTokenTypeForService(serviceName);
 
-				// logger.info("issue:03:"+tokenTypeFromServiceName);
+				 
 
 				if (request.getTokenType() == null
 						&& tokenTypeFromServiceName != null)
@@ -164,7 +164,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 				 * TruststoreAlias="cudvm_export"/> </ServiceProviders>
 				 */
 
-				// logger.info("issue:04:"+providerCertificate);
+				 
 
 				if (providerCertificate != null) {
 					providerPublicKey = providerCertificate.getPublicKey();
@@ -182,7 +182,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 			}
 		}
 
-		// logger.info("issue:05");
+		 
 		// if applies-to is not available or if no provider was found for the
 		// service, use the token type.
 		/*
@@ -205,7 +205,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 				&& this.configuration.getIssuedTokenTimeout() != 0) {
 			// if no lifetime has been specified, use the configured timeout
 			// value.
-			logger.stsTokenTimeoutNotSpecified();
+			LOGGER.stsTokenTimeoutNotSpecified();
 			// request.setLifetime(WSTrustUtil.createDefaultLifetime(this.configuration.getIssuedTokenTimeout()));
 			request.setLifetime(CUDWSTrustUtil
 					.createDefaultLifetime(this.configuration
@@ -224,12 +224,12 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 			if (processor != null)
 				requestContext.setClaimedAttributes(processor.processClaims(
 						claims, callerPrincipal));
-			else if (logger.isDebugEnabled())
-				logger.debug("Claims have been specified in the request but no processor was found for dialect "
+			else if (LOGGER.isDebugEnabled())
+				LOGGER.debug("Claims have been specified in the request but no processor was found for dialect "
 						+ claims.getDialect());
 		}
 
-		// logger.info("issue:06");
+		 
 
 		// get the OnBehalfOf principal, if one has been specified.
 		if (request.getOnBehalfOf() != null) {
@@ -237,21 +237,21 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 					.getOnBehalfOfPrincipal(request.getOnBehalfOf());
 			requestContext.setOnBehalfOfPrincipal(onBehalfOfPrincipal);
 
-			// logger.info("issue:07+:"+((Principal)onBehalfOfPrincipal).getName());
-			// logger.info("issue:07_1:"+onBehalfOfPrincipal.getClass());
+			 
+			 
 		}
 
 		// get the key type and size from the request, setting default values if
 		// not specified.
 		URI keyType = request.getKeyType();
 		if (keyType == null) {
-			logger.debug("No key type could be found in the request. Using the default BEARER type.");
+			LOGGER.debug("No key type could be found in the request. Using the default BEARER type.");
 			keyType = URI.create(WSTrustConstants.KEY_TYPE_BEARER);
 			request.setKeyType(keyType);
 		}
 		long keySize = request.getKeySize();
 		if (keySize == 0) {
-			logger.debug("No key size could be found in the request. Using the default size. ("
+			LOGGER.debug("No key size could be found in the request. Using the default size. ("
 					+ KEY_SIZE + ")");
 			keySize = KEY_SIZE;
 			request.setKeySize(keySize);
@@ -297,7 +297,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 							WSTrustUtil.P_SHA1(clientSecret, serverSecret,
 									(int) keySize / 8)).getBytes();
 				} catch (Exception e) {
-					throw logger.wsTrustCombinedSecretKeyError(e);
+					throw LOGGER.wsTrustCombinedSecretKeyError(e);
 				}
 				requestContext.setProofTokenInfo(WSTrustUtil.createKeyInfo(
 						combinedSecret, providerPublicKey, keyWrapAlgo,
@@ -346,7 +346,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 									keyValue = SignatureUtil
 											.getRSAKeyValue(child);
 								} catch (ParsingException e) {
-									throw logger.stsError(e);
+									throw LOGGER.stsError(e);
 								}
 							}
 							if (keyValue == null && child == null) {
@@ -360,7 +360,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 										keyValue = SignatureUtil
 												.getDSAKeyValue(child);
 									} catch (ParsingException e) {
-										throw logger.stsError(e);
+										throw LOGGER.stsError(e);
 									}
 								}
 								value = keyValue;
@@ -372,11 +372,11 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 					} else if (value instanceof KeyInfoType) {
 						requestContext.setProofTokenInfo((KeyInfoType) value);
 					} else
-						throw new WSTrustException(logger.unsupportedType(value
+						throw new WSTrustException(LOGGER.unsupportedType(value
 								.toString()));
 				}
 			} else
-				throw logger.wsTrustClientPublicKeyError();
+				throw LOGGER.wsTrustClientPublicKeyError();
 		}
 
 		// issue the security token using the constructed context.
@@ -388,12 +388,12 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 			sts.issueToken(requestContext);
 			// provider.issueToken(requestContext);
 		} catch (ProcessingException e) {
-			throw logger.stsError(e);
+			throw LOGGER.stsError(e);
 		}
 
 		if (requestContext.getSecurityToken() == null)
 			throw new WSTrustException(
-					logger.nullValueError("Token issued by STS"));
+					LOGGER.nullValueError("Token issued by STS"));
 
 		// construct the ws-trust security token response.
 		RequestedSecurityTokenType requestedSecurityToken = new RequestedSecurityTokenType();
@@ -401,7 +401,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 		SecurityToken contextSecurityToken = requestContext.getSecurityToken();
 		if (contextSecurityToken == null)
 			throw new WSTrustException(
-					logger.nullValueError("Security Token from context"));
+					LOGGER.nullValueError("Security Token from context"));
 
 		requestedSecurityToken.add(contextSecurityToken.getTokenValue());
 
@@ -447,19 +447,19 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 		// issued by this STS and hasn't been
 		// tempered.
 
-		// logger.info("renew:01:"+callerPrincipal);
+		 
 
-		logger.trace("Validating token for renew request "
+		LOGGER.trace("Validating token for renew request "
 				+ request.getContext());
 
 		if (request.getRenewTargetElement() == null)
-			throw new WSTrustException(logger.nullValueError("renew target"));
+			throw new WSTrustException(LOGGER.nullValueError("renew target"));
 
 		Node securityToken = request.getRenewTargetElement().getFirstChild();
 		if (securityToken == null)
-			throw new WSTrustException(logger.nullValueError("security token"));
+			throw new WSTrustException(LOGGER.nullValueError("security token"));
 
-		// logger.info("renew:02:"+DocumentUtil.asString(securityToken.getOwnerDocument()));
+		 
 
 		/*
 		 * try{ Transformer transformer =
@@ -499,14 +499,14 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 				if (!GOSTXMLSignatureUtil.validate(tokenDocument,
 						keyPair.getPublic()))
 
-					throw new WSTrustException(logger.signatureInvalidError(
+					throw new WSTrustException(LOGGER.signatureInvalidError(
 							"Validation failure during renewal", null));
 			} catch (Exception e) {
-				throw new WSTrustException(logger.signatureInvalidError(
+				throw new WSTrustException(LOGGER.signatureInvalidError(
 						"Validation failure during renewal:", e));
 			}
 		} else {
-			logger.stsSecurityTokenSignatureNotVerified();
+			LOGGER.stsSecurityTokenSignatureNotVerified();
 		}
 
 		// set default values where needed.
@@ -514,7 +514,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 				&& this.configuration.getIssuedTokenTimeout() != 0) {
 			// if no lifetime has been specified, use the configured timeout
 			// value.
-			logger.stsTokenTimeoutNotSpecified();
+			LOGGER.stsTokenTimeoutNotSpecified();
 			// request.setLifetime(WSTrustUtil.createDefaultLifetime(this.configuration.getIssuedTokenTimeout()));
 			request.setLifetime(CUDWSTrustUtil
 					.createDefaultLifetime(this.configuration
@@ -553,7 +553,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 		SecurityToken contextSecurityToken = context.getSecurityToken();
 		if (contextSecurityToken == null)
 			throw new WSTrustException(
-					logger.nullValueError("Security Token from context"));
+					LOGGER.nullValueError("Security Token from context"));
 		requestedSecurityToken.add(contextSecurityToken.getTokenValue());
 
 		RequestSecurityTokenResponse response = new RequestSecurityTokenResponse();
@@ -583,11 +583,11 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 	public RequestSecurityTokenResponse validate(RequestSecurityToken request,
 			Principal callerPrincipal) throws WSTrustException {
 
-		logger.trace("Started validation for request " + request.getContext());
+		LOGGER.trace("Started validation for request " + request.getContext());
 
 		if (request.getValidateTargetElement() == null)
 			throw new WSTrustException(
-					logger.nullValueError("request does not have a validate target. Unable to validate token"));
+					LOGGER.nullValueError("request does not have a validate target. Unable to validate token"));
 
 		if (request.getTokenType() == null)
 			request.setTokenType(URI.create(WSTrustConstants.STATUS_TYPE));
@@ -595,7 +595,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 		Node securityToken = request.getValidateTargetElement().getFirstChild();
 		if (securityToken == null)
 			throw new WSTrustException(
-					logger.nullValueError("security token:Unable to validate token"));
+					LOGGER.nullValueError("security token:Unable to validate token"));
 
 		setupIDAttribute(securityToken);
 
@@ -615,9 +615,9 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 				&& this.configuration.getSTSKeyPair() != null) {
 			KeyPair keyPair = this.configuration.getSTSKeyPair();
 			try {
-				if (logger.isTraceEnabled()) {
+				if (LOGGER.isTraceEnabled()) {
 					try {
-						logger.trace("Going to validate signature for: "
+						LOGGER.trace("Going to validate signature for: "
 								+ DocumentUtil.getNodeAsString(securityToken));
 					} catch (Exception e) {
 					}
@@ -647,13 +647,13 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 						+ e.getMessage());
 			}
 		} else {
-			logger.stsSecurityTokenSignatureNotVerified();
+			LOGGER.stsSecurityTokenSignatureNotVerified();
 		}
 
 		// if the signature is valid, then let the provider perform any
 		// additional validation checks.
 		if (status == null) {
-			logger.trace("Delegating token validation to token provider. Token NS: "
+			LOGGER.trace("Delegating token validation to token provider. Token NS: "
 					+ securityToken.getNamespaceURI()
 					+ " ::LocalName: "
 					+ securityToken.getLocalName());
@@ -666,7 +666,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 				sts.validateToken(context);
 				// provider.validateToken(context);
 			} catch (ProcessingException e) {
-				throw logger.stsError(e);
+				throw LOGGER.stsError(e);
 			}
 			status = context.getStatus();
 		}
@@ -695,13 +695,13 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 		// check if request contains all required elements.
 		if (request.getCancelTargetElement() == null)
 			throw new WSTrustException(
-					logger.nullValueError("request does not have a cancel target. Unable to cancel token"));
+					LOGGER.nullValueError("request does not have a cancel target. Unable to cancel token"));
 
 		// obtain the token provider that will handle the request.
 		Node securityToken = request.getCancelTargetElement().getFirstChild();
 		if (securityToken == null)
 			throw new WSTrustException(
-					logger.nullValueError("security token. Unable to cancel token"));
+					LOGGER.nullValueError("security token. Unable to cancel token"));
 
 		/*
 		 * SecurityTokenProvider provider =
@@ -732,7 +732,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 			sts.cancelToken(context);
 			// provider.cancelToken(context);
 		} catch (ProcessingException e) {
-			throw logger.stsError(e);
+			throw LOGGER.stsError(e);
 		}
 
 		// if no exception has been raised, the token has been successfully
@@ -747,7 +747,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 	public Document postProcess(Document rstrDocument,
 			RequestSecurityToken request) throws WSTrustException {
 
-		// logger.info("postProcess:01");
+		 
 
 		if (WSTrustConstants.ISSUE_REQUEST.equals(request.getRequestType()
 				.toString())
@@ -759,19 +759,16 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 			if (this.configuration.signIssuedToken()
 					&& this.configuration.getSTSKeyPair() != null) {
 				KeyPair keyPair = this.configuration.getSTSKeyPair();
-				URI signatureURI = request.getSignatureAlgorithm();
-				String signatureMethod = signatureURI != null ? signatureURI
-						.toString() : SignatureMethod.RSA_SHA1;
 				try {
 					Node rst = rstrDocument.getElementsByTagNameNS(
 							WSTrustConstants.BASE_NAMESPACE,
 							"RequestedSecurityToken").item(0);
 					Element tokenElement = (Element) rst.getFirstChild();
 
-					logger.trace("NamespaceURI of element to be signed: "
+					LOGGER.trace("NamespaceURI of element to be signed: "
 							+ tokenElement.getNamespaceURI());
 
-					logger.info("postProcess:02" + tokenElement.getLocalName());
+					LOGGER.debug("postProcess:02" + tokenElement.getLocalName());
 
 					// Is there a certificate?
 					X509Certificate x509Certificate = null;
@@ -792,7 +789,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 					 * this.certificateAlias; }
 					 */
 
-					// logger.info("postProcess:03:"+this.configuration.getSigningCertificateAlias());
+					 
 
 					if (signingCertificateAlias != null) {
 						// вернёт null
@@ -805,7 +802,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 								.getCertificate(signingCertificateAlias);
 					}
 
-					// logger.info("postProcess:04:"+x509Certificate);
+					 
 
 					// Set the CanonicalizationMethod if any
 					// XMLSignatureUtil.setCanonicalizationMethodType(configuration.getXMLDSigCanonicalizationMethod());
@@ -813,7 +810,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 							.setCanonicalizationMethodType(this.configuration
 									.getXMLDSigCanonicalizationMethod());
 					// http://www.w3.org/2001/10/xml-exc-c14n#WithComments
-					// logger.info("postProcess:01:"+this.configuration.getXMLDSigCanonicalizationMethod());
+					 
 
 					String set_digestMethod = "http://www.w3.org/2001/04/xmldsig-more#gostr3411";
 					String set_signatureMethod = "http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411";
@@ -828,14 +825,14 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 							set_signatureMethod,
 							setupIDAttribute(tokenElement), x509Certificate);
 
-					// if (logger.isTraceEnabled()) {
+					// if (LOGGER.isTraceEnabled()) {
 					try {
 						/*
 						 * Document tokenDocument =
 						 * DocumentUtil.createDocument();
 						 * tokenDocument.appendChild
 						 * (tokenDocument.importNode(tokenElement, true));
-						 * logger.trace("valid=" +
+						 * LOGGER.trace("valid=" +
 						 * XMLSignatureUtil.validate(tokenDocument,
 						 * keyPair.getPublic()));
 						 */
@@ -857,7 +854,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 								tokenElement_ver,
 								tokenDocument.getDocumentElement());
 
-						// logger.info("valid=" +
+						// LOGGER.debug("valid=" +
 						// GOSTXMLSignatureUtil.validate(tokenDocument,
 						// keyPair.getPublic()));
 
@@ -865,7 +862,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 					}
 					// }
 				} catch (Exception e) {
-					throw new WSTrustException(logger.signatureError(e));
+					throw new WSTrustException(LOGGER.signatureError(e));
 				}
 			}
 
@@ -877,14 +874,14 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 					String serviceName = WSTrustUtil.parseAppliesTo(request
 							.getAppliesTo());
 
-					logger.trace("Locating public key for " + serviceName);
+					LOGGER.trace("Locating public key for " + serviceName);
 
 					if (serviceName != null)
 						providerPublicKey = this.configuration
 								.getServiceProviderPublicKey(serviceName);
 				}
 				if (providerPublicKey == null) {
-					logger.stsSecurityTokenShouldBeEncrypted();
+					LOGGER.stsSecurityTokenShouldBeEncrypted();
 				} else {
 					// generate the secret key.
 					long keySize = request.getKeySize();
@@ -907,7 +904,7 @@ public class GOSTStandardRequestHandler implements WSTrustRequestHandler {
 
 					} catch (ProcessingException e) {
 						throw new WSTrustException(
-								logger.encryptProcessError(e));
+								LOGGER.encryptProcessError(e));
 					}
 				}
 			}

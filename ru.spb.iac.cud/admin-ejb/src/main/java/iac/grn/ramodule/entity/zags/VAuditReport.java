@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import java.util.Date;
 
-//@Name("vAuditReportBeanZags")
+
 public class VAuditReport implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -92,19 +92,10 @@ public class VAuditReport implements Serializable {
 
 	private String module;
 	
-	//@Create
-	public void create() {
-		 System.out.println("!vAuditZagsReportBean:create!");
-	/*	 try{
-			   throw new NullPointerException();
-		   }catch(Exception e){
-			  e.printStackTrace(System.out);
-		   }*/
-	}
+	
 	
     public VAuditReport() {
-    	 System.out.println("vAuditZagsReportBean:VAuditReport");
-    }
+     }
 
     public Long getAction() {
     	

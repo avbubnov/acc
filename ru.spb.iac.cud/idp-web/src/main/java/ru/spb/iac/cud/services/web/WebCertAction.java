@@ -65,18 +65,14 @@ import ru.CryptoPro.JCP.tools.Decoder;
 
 public class WebCertAction extends HttpServlet {
 
-	final static Logger logger = LoggerFactory.getLogger(WebCertAction.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(WebCertAction.class);
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String STR_CMS_OID_SIGNED = "1.2.840.113549.1.7.2";
 	public static final String DIGEST_OID = JCP.GOST_DIGEST_OID;
 
-	private static StringBuffer out = new StringBuffer("");
-	private static StringBuffer out1 = new StringBuffer("");
-
-	private static String alias = "certificate";
-	private static String alias_root = "уцспбгуп«спбиац».crt";
+private static String alias_root = "уцспбгуп«спбиац».crt";
 
 	private String root_sn = null;
 
@@ -101,10 +97,10 @@ public class WebCertAction extends HttpServlet {
 				throw new Exception("cert_store_url is not set!!!");
 			}
 
-			// logger.info("cert_store_url:"+cert_store_url);
+			 
 
 		} catch (Exception e) {
-			logger.error("error:" + e);
+			LOGGER.error("error:", e);
 		}
 	}
 
@@ -118,7 +114,7 @@ public class WebCertAction extends HttpServlet {
 		String repeatLoginUrl = null;
 		int revokedCertificate = 0;
 
-		String login_user = null;
+		String loginUser = null;
 
 		try {
 
@@ -131,11 +127,11 @@ public class WebCertAction extends HttpServlet {
 
 				String certSN = validate(signatureValue);
 
-				logger.info("service:certSN:" + certSN);
+				LOGGER.debug("service:certSN:" + certSN);
 
 				if (certSN != null) {
 
-					login_user = (new ContextAccessWebManager())
+					loginUser = (new ContextAccessWebManager())
 							.authenticate_cert_sn(certSN,
 									getIPAddress(request),
 									getCodeSystem(request));
@@ -144,19 +140,19 @@ public class WebCertAction extends HttpServlet {
 
 					HttpSession hs = request.getSession();
 
-					hs.setAttribute("login_user", login_user);
+					hs.setAttribute("login_user", loginUser);
 
 				}
 			}
 		} catch (InvalidCredentials e1) {
-			logger.error("error1:" + e1.getMessage());
+			LOGGER.error("error1:" + e1.getMessage());
 		} catch (GeneralFailure e2) {
-			logger.error("error2:" + e2.getMessage());
+			LOGGER.error("error2:" + e2.getMessage());
 		} catch (RevokedCertificate e3) {
 			revokedCertificate = 1;
-			logger.error("error3:" + e3.getMessage());
+			LOGGER.error("error3:" + e3.getMessage());
 		} catch (Exception e4) {
-			logger.error("error4:" + e4.getMessage());
+			LOGGER.error("error4:" + e4.getMessage());
 		}
 
 		if (success.equals("true")) {
@@ -188,12 +184,7 @@ public class WebCertAction extends HttpServlet {
 		}
 	}
 
-	private static void common(String destination, HttpServletResponse response) {
-		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Pragma", "no-cache");
-		response.setHeader("Cache-Control", "no-cache, no-store");
-	}
-
+	
 	private String getIPAddress(HttpServletRequest request) {
 
 		String ipAddress = request.getRemoteAddr();
@@ -209,11 +200,11 @@ public class WebCertAction extends HttpServlet {
 			final byte[] enc = decoder.decodeBuffer(new ByteArrayInputStream(
 					message.getBytes()));
 
-			logger.info("validate:04");
+			LOGGER.debug("validate:04");
 
 			return CMSVerify(enc, null, "12345".getBytes());
 		} catch (Exception e) {
-			logger.error("validate:error:" + e);
+			LOGGER.error("validate:error:", e);
 		}
 		return null;
 
@@ -223,10 +214,8 @@ public class WebCertAction extends HttpServlet {
 			throws Exception {
 		// clear buffers fo logs
 
-		// logger.info("CMSVerify:001");
+		 
 
-		out = new StringBuffer("");
-		out1 = new StringBuffer("");
 		final Asn1BerDecodeBuffer asnBuf = new Asn1BerDecodeBuffer(buffer);
 
 		final ContentInfo all = new ContentInfo();
@@ -236,13 +225,8 @@ public class WebCertAction extends HttpServlet {
 		if (!new OID(STR_CMS_OID_SIGNED).eq(all.contentType.value))
 			throw new Exception("Not supported");
 		final SignedData cms = (SignedData) all.content;
-		final byte[] text;
-		if (cms.encapContentInfo.eContent != null)
-			text = cms.encapContentInfo.eContent.value;
-		else if (data != null)
-			text = data;
-		else
-			throw new Exception("No content for verify");
+		
+		
 		OID digestOid = null;
 		final DigestAlgorithmIdentifier digestAlgorithmIdentifier = new DigestAlgorithmIdentifier(
 				new OID(DIGEST_OID).value);
@@ -256,12 +240,11 @@ public class WebCertAction extends HttpServlet {
 		}
 		if (digestOid == null)
 			throw new Exception("Unknown digest");
-		final OID eContTypeOID = new OID(
-				cms.encapContentInfo.eContentType.value);
+		
 
 		if (cms.certificates != null) {
 
-			// logger.info("CMSVerify:02");
+			 
 
 			// Проверка на вложенных сертификатах
 			for (int i = 0; i < cms.certificates.elements.length; i++) {
@@ -273,11 +256,11 @@ public class WebCertAction extends HttpServlet {
 				final X509Certificate cert = (X509Certificate) cf
 						.generateCertificate(encBuf.getInputStream());
 
-				// logger.info("CMSVerify:03:"+cert.toString());
-				// logger.info("CMSVerify:03:SubjectDN:"+cert.getSubjectDN());
-				// logger.info("CMSVerify:03:"+cert.getSerialNumber());
-				// logger.info("CMSVerify:03:cert_sn:"+dec_to_hex(cert.getSerialNumber()));
-				// logger.info("CMSVerify:03:root_sn:"+root_sn());
+				 
+				 
+				 
+				 
+				 
 
 				if (root_sn() != null
 						&& !root_sn()
@@ -310,9 +293,9 @@ public class WebCertAction extends HttpServlet {
 			Enumeration aliases = keyStore.aliases();
 			while (aliases.hasMoreElements()) {
 				String alias = (String) aliases.nextElement();
-				// logger.info("Current alias: " + alias);
+				 
 				if (keyStore.isCertificateEntry(alias)) {
-					// logger.info(
+					// LOGGER.debug(
 					// ((X509Certificate)keyStore.getCertificate(alias)).getSubjectDN()
 					// );
 				}
@@ -322,7 +305,7 @@ public class WebCertAction extends HttpServlet {
 			Certificate crt = pcert;
 			// Certificate crt = keyStore.getCertificate(alias);
 
-			// logger.info("cert:"+tr.toString());
+			 
 
 			final Certificate[] certs = new Certificate[2];
 			certs[0] = crt;
@@ -379,7 +362,7 @@ public class WebCertAction extends HttpServlet {
 			// keyStore.store(new FileOutputStream(file), STORE_PASS);
 
 		} catch (Exception e) {
-			logger.error("error:" + e);
+			LOGGER.error("error:", e);
 		}
 
 		return result;
@@ -392,7 +375,7 @@ public class WebCertAction extends HttpServlet {
 		try {
 			result = bi.toString(16);
 		} catch (NumberFormatException e) {
-			logger.error("Error! tried to parse an invalid number format");
+			LOGGER.error("Error! tried to parse an invalid number format");
 		}
 		return result;
 	}
@@ -402,7 +385,7 @@ public class WebCertAction extends HttpServlet {
 
 		if (root_sn == null) {
 
-			// logger.info("root_sn:01");
+			 
 
 			try {
 
@@ -419,8 +402,7 @@ public class WebCertAction extends HttpServlet {
 				root_sn = dec_to_hex(tr.getSerialNumber());
 
 			} catch (Exception e) {
-				logger.error("root_sn:error:" + e);
-				// e.printStackTrace(System.out);
+				LOGGER.error("root_sn:error:", e);
 			}
 		}
 
@@ -433,12 +415,12 @@ public class WebCertAction extends HttpServlet {
 		// для метода важно, что в ExtFilter при
 		// if(...||requestURI.endsWith(cert_to_auth)...)
 		// идёт установка
-		// request2.getSessionInternal().setNote(GeneralConstants.SAML_REQUEST_KEY,
-		// request.getParameter(SAMLMessageKey))
-		// и request.getSession().setAttribute("incoming_http_method",
-		// request.getParameter(HTTPMethodKey))
+		// request2/.getSessionInternal/()/.setNote(GeneralConstants.SAML_REQUEST_KEY/,
+		// request/.getParameter/(SAMLMessageKey))
+		// и request.getSession()/.setAttribute/("incoming_http_method",
+		// request/.getParameter(HTTPMethodKey))
 
-		logger.info("getCodeSystem:031");
+		LOGGER.debug("getCodeSystem:031");
 		String result = null;
 
 		try {
@@ -452,11 +434,7 @@ public class WebCertAction extends HttpServlet {
 
 			if (samlRequestMessage != null) {
 
-				// IDPWebRequestUtil webRequestUtil = new
-				// IDPWebRequestUtil(request, null, null);
-				// SAMLDocumentHolder samlDocumentHolder =
-				// webRequestUtil.getSAMLDocumentHolder(samlRequestMessage);
-
+				
 				boolean begin_req_method = "GET".equals((String) request
 						.getSession().getAttribute("incoming_http_method"));
 
@@ -466,13 +444,11 @@ public class WebCertAction extends HttpServlet {
 				if (samlDocumentHolder != null) {
 
 					if (samlDocumentHolder.getSamlObject() != null) {
-						// RequestAbstractType requestAbstractType =
-						// (RequestAbstractType)samlDocumentHolder.getSamlObject();
 						AuthnRequestType requestAbstractType = (AuthnRequestType) samlDocumentHolder
 								.getSamlObject();
 						result = requestAbstractType.getIssuer().getValue();
 
-						logger.info("getCodeSystem:032:" + result);
+						LOGGER.debug("getCodeSystem:032:" + result);
 
 					}
 				}
@@ -480,8 +456,7 @@ public class WebCertAction extends HttpServlet {
 			}
 
 		} catch (Exception e) {
-			logger.error("getCodeSystem:error:" + e);
-			// e.printStackTrace(System.out);
+			LOGGER.error("getCodeSystem:error:", e);
 		}
 
 		return result;
@@ -489,7 +464,7 @@ public class WebCertAction extends HttpServlet {
 
 	public SAMLDocumentHolder getSAMLDocumentHolder(String samlMessage,
 			boolean redirectProfile) throws Exception {
-		logger.info("getSAMLDocumentHolder:01:" + redirectProfile);
+		LOGGER.debug("getSAMLDocumentHolder:01:" + redirectProfile);
 
 		InputStream is = null;
 		SAML2Request saml2Request = new SAML2Request();
@@ -501,7 +476,7 @@ public class WebCertAction extends HttpServlet {
 				is = new ByteArrayInputStream(samlBytes);
 			}
 		} catch (Exception rte) {
-			logger.error("getSAMLDocumentHolder:error:" + rte);
+			LOGGER.error("getSAMLDocumentHolder:error:" + rte);
 			throw rte;
 		}
 

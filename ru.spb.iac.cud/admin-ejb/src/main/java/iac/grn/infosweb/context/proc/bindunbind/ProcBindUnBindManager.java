@@ -41,17 +41,13 @@ public class ProcBindUnBindManager {
 
 	@Logger private Log log;
 	
-	//private static final String proc_binding_unbind_exec_file=System.getProperty("jboss.server.config.url")+"proc_binding_unbind_exec.properties";
 	private static final String proc_binding_unbind_exec_file=System.getProperty("jboss.server.config.dir")+"/"+"proc_binding_unbind_exec.properties";
 
-	//private static final String proc_binding_unbind_info_file=System.getProperty("jboss.server.config.url")+"proc_binding_unbind_info.properties";
 	private static final String proc_binding_unbind_info_file=System.getProperty("jboss.server.config.dir")+"/"+"proc_binding_unbind_info.properties";
 		
 	private Date startDate;
 	
 	private Long period=1L;
-	
-	//private Long periodUpd=1L;
 	
 	private ProcBUBItem procBUBBean;
 	
@@ -71,12 +67,7 @@ public class ProcBindUnBindManager {
 		this.period=period;
 	}
 	
-	/*public Long getPeriodUpd(){
-		return this.periodUpd;
-	}
-	public void setPeriodUpd(Long periodUpd){
-		this.periodUpd=periodUpd;
-	}*/
+	
 	
 	@Factory
 	public ProcBUBItem getProcBUBBean(){
@@ -104,7 +95,7 @@ public class ProcBindUnBindManager {
 	public void initProcBUBBean(){
 		 log.info("procBindUnBindManager:initProcBUBBean:01");
 		 
-		 String start_date=null, period=null, status=null;
+		 String startDate=null, period=null, status=null;
 		 Properties properties = new Properties();
 		 String path = proc_binding_unbind_exec_file;
 		 InputStream is = null;
@@ -116,36 +107,34 @@ public class ProcBindUnBindManager {
 		
 		 procBUBBean= new ProcBUBItem();
 		 
-		 if(remoteAudit!=null && remoteAudit.equals("procInfo")){
+		 if(remoteAudit!=null && "procInfo".equals(remoteAudit)){
 			 // кнопка "обновить" задействована для обновления и Center, и Bottom панелей 
 		     // чтобы отобразить изменения, если кто другой запустил/остановил процесс
-			 //	return;
+			 
 		
 		 }
 		 
-		 if(remoteAudit!=null && remoteAudit.equals("procCrt")){
-			// this.confLCBean.setActive(false);
+		 if(remoteAudit!=null && "procCrt".equals(remoteAudit)){
 			 procBUBBean.setStatus("passive");
 			 return;
 		 }
-		 if(remoteAudit!=null && remoteAudit.equals("procDel")){
-			// this.confLCBean.setActive(true);
+		 if(remoteAudit!=null && "procDel".equals(remoteAudit)){
 			 procBUBBean.setStatus("active");
 			 return;
 		 }
-		 if(remoteAudit!=null && remoteAudit.equals("procPause")){
+		 if(remoteAudit!=null && "procPause".equals(remoteAudit)){
 			 procBUBBean.setStatus("active");
 			 return;
 		 }
-		 if(remoteAudit!=null && remoteAudit.equals("procRun")){
+		 if(remoteAudit!=null && "procRun".equals(remoteAudit)){
 			 procBUBBean.setStatus("pause");
 			 return;
 		 }
 		 
 		 try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		    // URL url = new URL(path);
-		    // File f=new File(url.toURI());
+		    
+		    
 		     
 		     File f=new File(path); 
 		     
@@ -153,17 +142,17 @@ public class ProcBindUnBindManager {
 		    	 
 		    	 properties.load(is=new FileInputStream(f));
 		    	 
-		    	 start_date=properties.getProperty("start_date");
+		    	 startDate=properties.getProperty("start_date");
 		    	 period=properties.getProperty("period");
 		    	 status=properties.getProperty("status");
 		    	 
-		    	log.info("procBindUnBindManager:initProcBUBBean:start_date:"+start_date);
+		    	log.info("procBindUnBindManager:initProcBUBBean:start_date:"+startDate);
 		    	 log.info("procBindUnBindManager:initProcBUBBean:period:"+period);
 		    	 log.info("procBindUnBindManager:initProcBUBBean:status:"+status);
 		    	 
-		    	 if(start_date!=null&&period!=null&&status!=null){
+		    	 if(startDate!=null&&period!=null&&status!=null){
 		    		 if(status.equals("active")||status.equals("pause")){
-		    			 procBUBBean.setStartDate(df.parse(start_date));
+		    			 procBUBBean.setStartDate(df.parse(startDate));
 		    			 procBUBBean.setPeriod(new Long(period));
 		    		   }
 		    		 procBUBBean.setStatus(status);
@@ -187,15 +176,15 @@ public class ProcBindUnBindManager {
 	public void initProcBUBInfoBean(){
 		 log.info("procBindUnBindManager:initProcBUBInfoBean:01");
 		 
-		 String exec_date=null, exec_hit=null, conf_date=null, conf_period=null;
+		 String execDate=null, execHit=null;
 		 Properties properties = new Properties();
 		 String path = proc_binding_unbind_info_file;
 		 InputStream is = null;
 		 
 		 try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
-		    // URL url = new URL(path);
-		    // File f=new File(url.toURI());
+		    
+		    
 		     
 		     File f=new File(path); 
 		     
@@ -205,21 +194,15 @@ public class ProcBindUnBindManager {
 		    	 
 		    	 properties.load(is=new FileInputStream(f));
 		    	 
-		    	 exec_date=properties.getProperty("exec_date");
-		    	 exec_hit=properties.getProperty("exec_hit");
-		    	/* conf_date=properties.getProperty("conf_date");
-		    	 conf_period=properties.getProperty("conf_period");*/
+		    	 execDate=properties.getProperty("exec_date");
+		    	 execHit=properties.getProperty("exec_hit");
 		    	 
-		    	 log.info("procBindUnBindManager:initProcBUBInfoBean:exec_date:"+exec_date);
-		    	 log.info("procBindUnBindManager:initProcBUBInfoBean:exec_hit:"+exec_hit);
-		    	 /*log.info("procBindUnBindManager:initProcBUBInfoBean:conf_date:"+conf_date);
-		    	 log.info("procBindUnBindManager:initProcBUBInfoBean:conf_period:"+conf_period);*/
+		    	 log.info("procBindUnBindManager:initProcBUBInfoBean:exec_date:"+execDate);
+		    	 log.info("procBindUnBindManager:initProcBUBInfoBean:exec_hit:"+execHit);
 		    	 
-		    	 procBUBInfoBean.setExecDate(exec_date != null ? df.parse(exec_date) : null);
-		    	 procBUBInfoBean.setExecHit(exec_hit != null ? (exec_hit.equals("true") ? "Запущен" : "Сбой") : null);
-		    	/* procBUBInfoBean.setConfDate(conf_date != null ? df.parse(conf_date) : null);
-		    	 procBUBInfoBean.setConfPeriod(conf_period != null ? new Long(conf_period) : null);*/
-		    	 
+		    	 procBUBInfoBean.setExecDate(execDate != null ? df.parse(execDate) : null);
+		    	 procBUBInfoBean.setExecHit(execHit != null ? ("true".equals(execHit) ? "Запущен" : "Сбой") : null);
+		       	 
 		     }
 		  }catch (Exception e) {
 				log.error("procBindUnBindManager:initProcBUBInfoBean:error:"+e);
@@ -235,9 +218,7 @@ public class ProcBindUnBindManager {
 	}
 	public synchronized void procCrt(){
 		  log.info("procBindUnBindManager:procCrt:01");
-		/*  log.info("procBindUnBindManager:procCrt:startDate:"+startDate);
-		  log.info("procBindUnBindManager:procCrt:period:"+period);*/
-		  
+			  
 		  Properties properties = new Properties();
 		  String path = proc_binding_unbind_exec_file;
 		  OutputStream os = null;
@@ -249,8 +230,8 @@ public class ProcBindUnBindManager {
 		   
 		  try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		    // URL url = new URL(path);
-		    // File f=new File(url.toURI());
+		    
+		    
 		 	
 		     File f=new File(path); 
 		     
@@ -260,8 +241,8 @@ public class ProcBindUnBindManager {
 		       
 		       properties.store(os=new FileOutputStream(f), null);
 		       
-		     //  IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-    		  // obj.startTask(this.startDate,this.period);
+		     
+    		  
     		 
 		       Context ctx = new InitialContext(); 
 	 	    	 
@@ -299,9 +280,7 @@ public class ProcBindUnBindManager {
  		
 		try {
 		   Context ctx = new InitialContext();
-		   /*IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-   		   obj.stopTask();*/
-   		   
+		   
    		   BaseParamItem bpi = new BaseParamItem();
    		   
    		   bpi.put("gactiontype", ServiceReestrAction.PROCESS_STOP.name());
@@ -311,13 +290,13 @@ public class ProcBindUnBindManager {
    		   Properties properties = new Properties();
    		   String path = proc_binding_unbind_exec_file;
    		  
-   		   //URL url = new URL(path);
-	      // File f=new File(url.toURI());
+   		   
+	      
 	       
    		    File f=new File(path); 
    		
-	      // boolean bfd = f.delete();
-	      // log.info("procBindUnBindManager:procDel:bfd:"+bfd);
+	      
+	       
 	       
 	       properties.load(is=new FileInputStream(f));
 	       properties.setProperty("status", "passive");
@@ -352,12 +331,10 @@ public class ProcBindUnBindManager {
 		InputStream is = null;
  		OutputStream os = null;
  		DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
- 		String start_date=null, period=null;
+ 		String startDate=null, period=null;
 		try {
 		   Context ctx = new InitialContext();
-		 /*  IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-   		   obj.stopTask();*/
-   		   
+		   
    		   BaseParamItem bpi = new BaseParamItem();
 	       bpi.put("gactiontype", ServiceReestrAction.PROCESS_STOP.name());
 	       ((IHLocal)ctx.lookup(ServiceReestr.BindingUnBind)).run(bpi);
@@ -367,26 +344,26 @@ public class ProcBindUnBindManager {
    		   Properties properties = new Properties();
    		   String path = proc_binding_unbind_exec_file;
    		  
-   		  // URL url = new URL(path);
-	     //  File f=new File(url.toURI());
+   		  
+	     
 	       
 	       File f=new File(path); 
 	       
 	       if(f.exists()) {
-	      // boolean bfd = f.delete();
-	      // log.info("procBindUnBindManager:procDel:bfd:"+bfd);
+	      
+	       
 	       
 	          properties.load(is=new FileInputStream(f));
 	       
 	          period=properties.getProperty("period");
-	          start_date=properties.getProperty("start_date");
+	          startDate=properties.getProperty("start_date");
 	      
-	         if(period==null || start_date==null){
+	         if(period==null || startDate==null){
 			    log.info("procBindUnBindManager:procRun:02");
 			    return;
 		      }
 	 	
-	          this.startDate=df.parse(start_date);
+	          this.startDate=df.parse(startDate);
 	          this.period=new Long(period);
 	     
 	          properties.setProperty("status", "pause");
@@ -422,33 +399,28 @@ public class ProcBindUnBindManager {
 		  Properties properties = new Properties();
 		  String path = proc_binding_unbind_exec_file;
 		  OutputStream os = null;
-		  InputStream is = null;
-		  String start_date=null, period=null;
-		/*  if(this.period==null || this.startDate==null){
-			  log.info("procBindUnBindManager:procCrt:02");
-			  return;
-		  }*/
-		   
+		  String startDate=null, period=null;
+			   
 		  try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		    // URL url = new URL(path);
-		    // File f=new File(url.toURI());
+		    
+		    
 		     
 		     File f=new File(path); 
 		     
 		     if(f.exists()) {
 		    	 
-		       properties.load(is=new FileInputStream(f));
+		       properties.load(new FileInputStream(f));
 		       
 		       period=properties.getProperty("period");
-		       start_date=properties.getProperty("start_date");
+		       startDate=properties.getProperty("start_date");
 		     
-		       if(period==null || start_date==null){
+		       if(period==null || startDate==null){
 				  log.info("procBindUnBindManager:procRun:02");
 				  return;
 			   }
 		 	 
-		       this.startDate=df.parse(start_date);
+		       this.startDate=df.parse(startDate);
 		       this.period=new Long(period);
 		       
 		       
@@ -456,10 +428,7 @@ public class ProcBindUnBindManager {
 		       properties.store(os=new FileOutputStream(f), null);
 		       
 		       Context ctx = new InitialContext();
-		      /* IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-    		   obj.startTask(df.parse(start_date), new Long(period));
-    		   */
-		       
+		        
     		   BaseParamItem bpi = new BaseParamItem();
      	       bpi.put("gactiontype", ServiceReestrAction.PROCESS_START.name());
      	       
@@ -487,56 +456,7 @@ public class ProcBindUnBindManager {
 			 }
 		 }
 	}
-	/*
-	public synchronized void procUpd(){
-		  log.info("procBindUnBindManager:procUpd:01");
-		  log.info("procBindUnBindManager:procUpd:period:"+period);
-		  
-		  Properties properties = new Properties();
-		  String path = System.getProperty("jboss.server.config.url")+"conf_logcontr_exec.properties";
-		  OutputStream os = null;
-		  InputStream is = null;
-		  DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		  
-		  if(this.periodUpd==null){
-			  log.info("procBindUnBindManager:procUpd:02");
-			  return;
-		  }
-		   
-		  try {
-			 URL url = new URL(path);
-		     File f=new File(url.toURI());
-		 	// if(f.exists()) { 
-		     properties.load(is=new FileInputStream(f));
-		     
-		     this.startDate=df.parse(properties.getProperty("start_date"));
-		     
-		     properties.setProperty("period", this.periodUpd.toString());
-		     properties.store(os=new FileOutputStream(f), null);
-		       
-		     log.info("procBindUnBindManager:procUpd:03");
-  	  
-  	  	     forView("procUpd");
-  		   //  }
-		  }catch (Exception e) {
-				log.error("procBindUnBindManager:procUpd:error:"+e);
-		  }finally{
-			 try {
-				if(os!=null){
-					 os.close();
-				}
-			 } catch (Exception e) {
-				log.error("procBindUnBindManager:procUpd:os:error:"+e);
-			 }
-			 try {
-				  if(is!=null){
-				    is.close();
-				   }
-			} catch (Exception e) {
-				log.error("procBindUnBindManager:procUpd:finally:is:error:"+e);
-			}
-		 }
-	}*/
+	
 	
 	private void forView(String type){
 	   try {
@@ -546,10 +466,9 @@ public class ProcBindUnBindManager {
 		  if(type.equals("procCrt")){
 		    this.procBUBBean.setPeriod(this.period);
 		    this.procBUBBean.setStartDate(this.startDate);
-		 //   this.confLCBean.setActive(true);
+		 
 		    procBUBBean.setStatus("active");
 		  }else if (type.equals("procDel")){ 
-		//	this.confLCBean.setActive(false);
 			  procBUBBean.setStatus("passive");
 		  }else if (type.equals("procPause")){
 			this.procBUBBean.setPeriod(this.period);
@@ -560,12 +479,7 @@ public class ProcBindUnBindManager {
 			this.procBUBBean.setStartDate(this.startDate);
 			procBUBBean.setStatus("active");
 		  }
-		  /*else if (type.equals("procUpd")){ 
-			this.confLCBean.setPeriod(this.periodUpd);
-			this.confLCBean.setStartDate(this.startDate);
-			this.confLCBean.setActive(true);
-		  }*/
-		  
+			  
 		  Contexts.getEventContext().set("procBUBBean", this.procBUBBean);
 		  
 	   }catch (Exception e) {

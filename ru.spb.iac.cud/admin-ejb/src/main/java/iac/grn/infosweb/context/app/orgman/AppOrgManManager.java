@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +23,8 @@ import org.jboss.seam.faces.FacesMessages;
 
 
 
+
+
 import iac.cud.infosweb.dataitems.AppOrgManItem;
 import iac.cud.infosweb.dataitems.BaseItem;
 import iac.cud.infosweb.dataitems.UserItem;
@@ -32,6 +34,8 @@ import iac.cud.infosweb.entity.AcUser;
 import iac.cud.infosweb.entity.GroupUsersKnlT;
 import iac.cud.infosweb.entity.LinkAdminUserSys;
 import iac.grn.infosweb.context.mc.arm.ArmManager;
+import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.table.BaseDataModel;
 import iac.grn.infosweb.session.table.BaseManager;
 import iac.grn.serviceitems.BaseTableItem;
@@ -54,10 +58,10 @@ public class AppOrgManManager extends BaseManager{
 			 
 			 AppOrgManStateHolder appOrgManStateHolder = (AppOrgManStateHolder)
 					  Component.getInstance("appOrgManStateHolder",ScopeType.SESSION);
-			 HashMap<String, String> filterMap = appOrgManStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = appOrgManStateHolder.getColumnFilterValues();
 			 String st=null;
 			  
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 Set<Map.Entry<String, String>> set = appOrgManStateHolder.getSortOrders().entrySet();
@@ -74,22 +78,21 @@ public class AppOrgManManager extends BaseManager{
                  log.info("invokeLocal:list:orderQuery:"+orderQuery);
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
+    	    		 Set<Map.Entry<String, String>> setFilter = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilter) {
     	            	  log.info("me.getKey+:"+me.getKey());
     	            	  log.info("me.getValue:"+me.getValue());
     	   		      
-    	   		     if(me.getKey().equals("t1_crt_date")){  
-    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	   		     if("t1_crt_date".equals(me.getKey())){  
+    	        	   
     	        	   //делаем фильтр на начало  
     	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
     	    	   
-    	   		     }else if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	   		     }else if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
     	    	    	 
     	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	    	    	 
     	    	     }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
     	        		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	        	  }
@@ -178,25 +181,25 @@ public class AppOrgManManager extends BaseManager{
                for(Object[] objectArray :lo){
             	   try{
             	     ui= new AppOrgManItem(
-            	    		 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-            				 (objectArray[3]!=null?objectArray[3].toString():""),
-            				 (objectArray[4]!=null?objectArray[4].toString():""),
-            				 (objectArray[5]!=null?objectArray[5].toString():""),
-            				 (objectArray[6]!=null?objectArray[6].toString():""),
+            	    		objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+            				objectArray[3]!=null?objectArray[3].toString():"",
+            				objectArray[4]!=null?objectArray[4].toString():"",
+            				objectArray[5]!=null?objectArray[5].toString():"",
+            				objectArray[6]!=null?objectArray[6].toString():"",
             				 
             			 
-	            			 (objectArray[7]!=null?objectArray[7].toString():""),
+	            			objectArray[7]!=null?objectArray[7].toString():"",
 	            			 
-	            			 (objectArray[8]!=null?new Long(objectArray[8].toString()):null),
+	            			objectArray[8]!=null?new Long(objectArray[8].toString()):null,
 	            			 
-	            			 (objectArray[9]!=null?objectArray[9].toString():""),
-	            			 (objectArray[10]!=null?objectArray[10].toString():""),
-	            			 (objectArray[11]!=null?objectArray[11].toString():""),
+	            			objectArray[9]!=null?objectArray[9].toString():"",
+	            			objectArray[10]!=null?objectArray[10].toString():"",
+	            			objectArray[11]!=null?objectArray[11].toString():"",
 	            			 
-	            			 (objectArray[12]!=null?objectArray[12].toString():""), 
-	            			 (objectArray[13]!=null?Integer.parseInt(objectArray[13].toString()):1)
+	            			objectArray[12]!=null?objectArray[12].toString():"", 
+	            			objectArray[13]!=null?Integer.parseInt(objectArray[13].toString()):1
             	    		 );
             	     auditList.add(ui);
             	   }catch(Exception e1){
@@ -206,27 +209,19 @@ public class AppOrgManManager extends BaseManager{
                
              log.info("invokeLocal:list:02");
              
-			 } else if(type.equals("count")){
+			 } else if("count".equals(type)){
 				 log.info("IHReposList:count:01");
 				 
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
+    	    		 Set<Map.Entry<String, String>> setFilter = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilter) {
     	            	  log.info("me.getKey+:"+me.getKey());
     	            	  log.info("me.getValue:"+me.getValue());
     	   		    
-    	            	  /*
-    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
-    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	        	//   }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
-    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	        	 //  }
-    	            	 */ 
+    	            	
     	            	  
-    	              if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	              if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
      	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	              }else{
     	            	 st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
@@ -236,12 +231,7 @@ public class AppOrgManManager extends BaseManager{
     	              }
     	    	   }
 				 
-				/* 
-				 auditCount = (Long)entityManager.createQuery(
-						 "select count(au) " +
-				         "from AcUser au "+
-				         (st!=null ? " where "+st :""))
-		                .getSingleResult();*/
+			
 				 
 				
 				 auditCount = ((java.math.BigDecimal)entityManager.createNativeQuery(
@@ -310,7 +300,7 @@ public class AppOrgManManager extends BaseManager{
                  
                  
                log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
@@ -406,24 +396,24 @@ public class AppOrgManManager extends BaseManager{
 	        		   log.info("AppOrgManManager:getUserItem:login:"+objectArray[1].toString());
 	        		   
 	        		   ui= new AppOrgManItem(
-	        				   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-	            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-	            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-	            				 (objectArray[3]!=null?objectArray[3].toString():""),
-	            				 (objectArray[4]!=null?objectArray[4].toString():""),
-	            				 (objectArray[5]!=null?objectArray[5].toString():""),
-	            				 (objectArray[6]!=null?objectArray[6].toString():""),
+	        				  objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+	            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+	            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+	            				objectArray[3]!=null?objectArray[3].toString():"",
+	            				objectArray[4]!=null?objectArray[4].toString():"",
+	            				objectArray[5]!=null?objectArray[5].toString():"",
+	            				objectArray[6]!=null?objectArray[6].toString():"",
 	            				 
-	            				 (objectArray[7]!=null?objectArray[7].toString():""),
+	            				objectArray[7]!=null?objectArray[7].toString():"",
 		            			 
-		            			 (objectArray[8]!=null?new Long(objectArray[8].toString()):null),
+		            			objectArray[8]!=null?new Long(objectArray[8].toString()):null,
 		            			 
-		            			 (objectArray[9]!=null?objectArray[9].toString():""),
-		            			 (objectArray[10]!=null?objectArray[10].toString():""),
-		            			 (objectArray[11]!=null?objectArray[11].toString():""),
+		            			objectArray[9]!=null?objectArray[9].toString():"",
+		            			objectArray[10]!=null?objectArray[10].toString():"",
+		            			objectArray[11]!=null?objectArray[11].toString():"",
 		            			 
-		            			 (objectArray[12]!=null?objectArray[12].toString():""),
-		            			 (objectArray[13]!=null?Integer.parseInt(objectArray[13].toString()):1)
+		            			objectArray[12]!=null?objectArray[12].toString():"",
+		            			objectArray[13]!=null?Integer.parseInt(objectArray[13].toString()):1
 	            			   );
 	        	     return ui;
 	        	   }catch(Exception e1){
@@ -515,6 +505,8 @@ public class AppOrgManManager extends BaseManager{
 		     
 		     Contexts.getEventContext().set("contextBeanView", ui);
 		     
+		     audit(ResourcesMap.APP_ORG_MAN, ActionsMap.EXECUTE); 
+		     
 		   }catch(Exception e){
 			   log.error("AppOrgManManager:createOrgMan:error:"+e);
 		   }
@@ -542,6 +534,8 @@ public class AppOrgManManager extends BaseManager{
              AppOrgManItem ui = getUserItem(new Long(sessionId)); 
 		     
 		     Contexts.getEventContext().set("contextBeanView", ui);
+		    
+		     audit(ResourcesMap.APP_ORG_MAN, ActionsMap.REJECT); 
 		     
 		   }catch(Exception e){
 			   log.error("AppOrgManManager:reject:error:"+e);
@@ -656,7 +650,7 @@ public class AppOrgManManager extends BaseManager{
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("idApp"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("created"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
-			  // auditItemsListSelect.add(ac.getAuditItemsMap().get("usrFio"));
+			  
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
 		   }
 	       return this.auditItemsListSelect;
@@ -668,9 +662,9 @@ public class AppOrgManManager extends BaseManager{
 	   log.info("AppOrgManManager:getAuditItemsListContext");
 	   if(auditItemsListContext==null){
 		   AppOrgManContext ac= new AppOrgManContext();
-		  // auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		  
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 		   
 	   }
@@ -681,22 +675,9 @@ public class AppOrgManManager extends BaseManager{
 	  
 	  if(headerItemsListContext==null){
 		   AppOrgManContext ac= new AppOrgManContext();
-		//   headerItemsListContext = new ArrayList<BaseTableItem>();
 		   headerItemsListContext=ac.getHeaderItemsList();
 		   
-		/*   
-		   AppAccessItem ui = (AppAccessItem)
-					  Component.getInstance("contextBeanView",ScopeType.EVENT); 
-		   
-		   log.info("AppAccessManager:getHeaderItemsListContext:01");
-		   
-		   if(ui!=null){
-			   log.info("AppAccessManager:getHeaderItemsListContext:ui.getStatus():"+ui.getStatus());
-			   if(ui.getStatus()!=2){
-				   log.info("AppAccessManager:getHeaderItemsListContext:03:"+headerItemsListContext.get(2).getItems().g);
-				   headerItemsListContext.get(2).getItems().remove("rejectReason");
-			   }
-		   }*/
+		
 		   
 	   }
 	
@@ -712,7 +693,7 @@ public class AppOrgManManager extends BaseManager{
 	 	
 	 		headerItemsListContext=new ArrayList<HeaderTableItem>();
 	 				
-	 	    //List<String> idsList = Arrays.asList(ids);
+	 	    
 	 	
 	 	     List<String> idsList =  Arrays.asList(ids.split(","));
 	 	   

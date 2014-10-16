@@ -25,28 +25,17 @@ public class ContextIDPAccessManager {
 	static Context ctx;
 	IDPAccessManagerLocal iml = null;
 
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(ContextIDPAccessManager.class);
 
-	/*
-	 * static{ try{
-	 * 
-	 * Properties env = new Properties();
-	 * env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-	 * "org.jnp.interfaces.NamingContextFactory");
-	 * env.setProperty(Context.URL_PKG_PREFIXES, "org.jboss.naming");
-	 * env.setProperty(Context.PROVIDER_URL, "localhost:1099"); ctx = new
-	 * InitialContext(env);
-	 * 
-	 * }catch(Exception e){ logger.error("error:"+e); } }
-	 */
+	
 	public static void initContext(String jboss_jndi_port) {
 		try {
-			logger.info("initContext:jboss_jndi_port:" + jboss_jndi_port);
+			LOGGER.debug("initContext:jboss_jndi_port:" + jboss_jndi_port);
 			ctx = new InitialContext();
 
 		} catch (Exception e) {
-			logger.error("initContext::error:" + e);
+			LOGGER.error("initContext::error:", e);
 		}
 	}
 
@@ -57,7 +46,7 @@ public class ContextIDPAccessManager {
 					.lookup("java:global/AuthServices/IDPAccessManager!ru.spb.iac.cud.idp.core.access.IDPAccessManagerLocal");
 
 		} catch (Exception e) {
-			logger.error("error:" + e);
+			LOGGER.error("error:", e);
 		}
 	}
 

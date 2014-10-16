@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,12 +28,6 @@ public class IHArchiveBase {
 
 		String gactiontype = (String) paramMap.get("gactiontype");
 
-		System.out.println("IHArchiveBase:run:gactiontype:" + gactiontype);
-
-		/*
-		 * if(gactiontype.equals(ServiceReestrAction.TO_ARCHIVE.name())){
-		 * jpi=to_archive(paramMap); }
-		 */
 		if (gactiontype.equals(ServiceReestrAction.PROCESS_START.name())) {
 			jpi = process_start(paramMap);
 		} else if (gactiontype.equals(ServiceReestrAction.PROCESS_STOP.name())) {

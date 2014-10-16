@@ -25,20 +25,20 @@ import javax.xml.namespace.QName;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 
 public class GOSTXMLEncryptionUtil {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(GOSTXMLEncryptionUtil.class);
 
 	static {
-		// loggerslf4j.info("static:01");
+		 
 
-		// loggerslf4j.info("static:01_1:"+org.apache.xml.security.Init.isInitialized());
+		 
 
 		org.apache.xml.security.Init.init();
 
@@ -46,7 +46,7 @@ public class GOSTXMLEncryptionUtil {
 			// JCPXMLDSigInit.init();
 			Crypto15Init.fileInit();
 		}
-		// loggerslf4j.info("static:02");
+		 
 	}
 
 	public static final String CIPHER_DATA_LOCALNAME = "CipherData";
@@ -66,14 +66,11 @@ public class GOSTXMLEncryptionUtil {
 
 	private static class EncryptionAlgorithm {
 		EncryptionAlgorithm(String jceName, String xmlSecName, int size) {
-			this.jceName = jceName;
 			this.xmlSecName = xmlSecName;
 			this.size = size;
 		}
 
-		@SuppressWarnings("unused")
-		public String jceName;
-
+	
 		public String xmlSecName;
 
 		public int size;
@@ -102,7 +99,7 @@ public class GOSTXMLEncryptionUtil {
 	public static String getEncryptionURL(String certAlgo) {
 		EncryptionAlgorithm ea = algorithms.get(certAlgo);
 		if (ea == null)
-			throw logger.encryptUnknownAlgoError(certAlgo);
+			throw LOGGER.encryptUnknownAlgoError(certAlgo);
 		return ea.xmlSecName;
 	}
 
@@ -115,7 +112,7 @@ public class GOSTXMLEncryptionUtil {
 	public static int getEncryptionKeySize(String certAlgo) {
 		EncryptionAlgorithm ea = algorithms.get(certAlgo);
 		if (ea == null)
-			throw logger.encryptUnknownAlgoError(certAlgo);
+			throw LOGGER.encryptUnknownAlgoError(certAlgo);
 		return ea.size;
 	}
 
@@ -145,8 +142,7 @@ public class GOSTXMLEncryptionUtil {
 			SecretKey keyToBeEncrypted, PublicKey keyUsedToEncryptSecretKey,
 			int keySize) throws ProcessingException {
 		XMLCipher keyCipher = null;
-		String pubKeyAlg = keyUsedToEncryptSecretKey.getAlgorithm();
-
+		
 		try {
 			// String keyWrapAlgo = getXMLEncryptionURLForKeyUnwrap(pubKeyAlg,
 			// keySize);
@@ -157,7 +153,7 @@ public class GOSTXMLEncryptionUtil {
 			keyCipher.init(XMLCipher.WRAP_MODE, keyUsedToEncryptSecretKey);
 			return keyCipher.encryptKey(document, keyToBeEncrypted);
 		} catch (XMLEncryptionException e) {
-			throw logger.processingError(e);
+			throw LOGGER.processingError(e);
 		}
 	}
 
@@ -182,18 +178,19 @@ public class GOSTXMLEncryptionUtil {
 			QName wrappingElementQName, boolean addEncryptedKeyInKeyInfo)
 			throws ProcessingException {
 		if (elementQName == null)
-			throw logger.nullArgumentError("elementQName");
+			throw LOGGER.nullArgumentError("elementQName");
 		if (document == null)
-			throw logger.nullArgumentError("document");
+			throw LOGGER.nullArgumentError("document");
 		String wrappingElementPrefix = wrappingElementQName.getPrefix();
-		if (wrappingElementPrefix == null || wrappingElementPrefix == "")
-			throw logger.wrongTypeError("Wrapping element prefix invalid");
+		//if (wrappingElementPrefix == null || wrappingElementPrefix == "")
+		if (wrappingElementPrefix == null || wrappingElementPrefix.equals(""))
+			throw LOGGER.wrongTypeError("Wrapping element prefix invalid");
 
 		Element documentElement = DocumentUtil.getElement(document,
 				elementQName);
 
 		if (documentElement == null)
-			throw logger.domMissingDocElementError(elementQName.toString());
+			throw LOGGER.domMissingDocElementError(elementQName.toString());
 
 		XMLCipher cipher = null;
 		EncryptedKey encryptedKey = encryptKey(document, secretKey, publicKey,
@@ -208,14 +205,14 @@ public class GOSTXMLEncryptionUtil {
 			cipher = XMLCipher.getInstance(encryptionAlgorithm);
 			cipher.init(XMLCipher.ENCRYPT_MODE, secretKey);
 		} catch (XMLEncryptionException e1) {
-			throw logger.processingError(e1);
+			throw LOGGER.processingError(e1);
 		}
 
 		Document encryptedDoc;
 		try {
 			encryptedDoc = cipher.doFinal(document, documentElement);
 		} catch (Exception e) {
-			throw logger.processingError(e);
+			throw LOGGER.processingError(e);
 		}
 
 		// The EncryptedKey element is added
@@ -228,7 +225,8 @@ public class GOSTXMLEncryptionUtil {
 		Element wrappingElement = encryptedDoc.createElementNS(
 				wrappingElementQName.getNamespaceURI(), wrappingElementName);
 
-		if (wrappingElementPrefix == null || wrappingElementPrefix == "") {
+		//if (wrappingElementPrefix == null || wrappingElementPrefix == "") {
+		if (wrappingElementPrefix == null || wrappingElementPrefix.equals(""))	{
 			wrappingElementName = wrappingElementQName.getLocalPart();
 		}
 		wrappingElement.setAttributeNS(XMLNS, "xmlns:" + wrappingElementPrefix,
@@ -238,7 +236,7 @@ public class GOSTXMLEncryptionUtil {
 		NodeList cipherElements = encryptedDoc.getElementsByTagNameNS(
 				XMLENC_NS, "EncryptedData");
 		if (cipherElements == null || cipherElements.getLength() == 0)
-			throw logger.domMissingElementError("xenc:EncryptedData");
+			throw LOGGER.domMissingElementError("xenc:EncryptedData");
 		Element encryptedDataElement = (Element) cipherElements.item(0);
 
 		Node parentOfEncNode = encryptedDataElement.getParentNode();
@@ -257,7 +255,7 @@ public class GOSTXMLEncryptionUtil {
 			NodeList nodeList = encryptedDoc.getElementsByTagNameNS(XMLENC_NS,
 					CIPHER_DATA_LOCALNAME);
 			if (nodeList == null || nodeList.getLength() == 0)
-				throw logger.domMissingElementError("xenc:CipherData");
+				throw LOGGER.domMissingElementError("xenc:CipherData");
 			Element cipherDataElement = (Element) nodeList.item(0);
 			Node cipherParent = cipherDataElement.getParentNode();
 			cipherParent.insertBefore(sigElement, cipherDataElement);
@@ -322,9 +320,9 @@ public class GOSTXMLEncryptionUtil {
 			PublicKey publicKey, SecretKey secretKey, int keySize)
 			throws ProcessingException {
 		if (element == null)
-			throw logger.nullArgumentError("element");
+			throw LOGGER.nullArgumentError("element");
 		if (document == null)
-			throw logger.nullArgumentError("document");
+			throw LOGGER.nullArgumentError("document");
 
 		XMLCipher cipher = null;
 		EncryptedKey encryptedKey = encryptKey(document, secretKey, publicKey,
@@ -337,14 +335,14 @@ public class GOSTXMLEncryptionUtil {
 			cipher = XMLCipher.getInstance(encryptionAlgorithm);
 			cipher.init(XMLCipher.ENCRYPT_MODE, secretKey);
 		} catch (XMLEncryptionException e1) {
-			throw logger.processingError(e1);
+			throw LOGGER.processingError(e1);
 		}
 
 		Document encryptedDoc;
 		try {
 			encryptedDoc = cipher.doFinal(document, element);
 		} catch (Exception e) {
-			throw logger.processingError(e);
+			throw LOGGER.processingError(e);
 		}
 
 		// The EncryptedKey element is added
@@ -360,7 +358,7 @@ public class GOSTXMLEncryptionUtil {
 		NodeList nodeList = encryptedDoc.getElementsByTagNameNS(XMLENC_NS,
 				CIPHER_DATA_LOCALNAME);
 		if (nodeList == null || nodeList.getLength() == 0)
-			throw logger.domMissingElementError("xenc:CipherData");
+			throw LOGGER.domMissingElementError("xenc:CipherData");
 		Element cipherDataElement = (Element) nodeList.item(0);
 		Node cipherParent = cipherDataElement.getParentNode();
 		cipherParent.insertBefore(sigElement, cipherDataElement);
@@ -393,8 +391,9 @@ public class GOSTXMLEncryptionUtil {
 			QName wrappingElementQName, boolean addEncryptedKeyInKeyInfo)
 			throws ProcessingException, ConfigurationException {
 		String wrappingElementPrefix = wrappingElementQName.getPrefix();
-		if (wrappingElementPrefix == null || wrappingElementPrefix == "")
-			throw logger.wrongTypeError("Wrapping element prefix invalid");
+		//if (wrappingElementPrefix == null || wrappingElementPrefix == "")
+		if (wrappingElementPrefix == null || wrappingElementPrefix.equals(""))
+			throw LOGGER.wrongTypeError("Wrapping element prefix invalid");
 
 		XMLCipher cipher = null;
 		EncryptedKey encryptedKey = encryptKey(document, secretKey, publicKey,
@@ -407,7 +406,7 @@ public class GOSTXMLEncryptionUtil {
 			cipher = XMLCipher.getInstance(encryptionAlgorithm);
 			cipher.init(XMLCipher.ENCRYPT_MODE, secretKey);
 		} catch (XMLEncryptionException e1) {
-			throw logger.configurationError(e1);
+			throw LOGGER.configurationError(e1);
 		}
 
 		Document encryptedDoc;
@@ -415,7 +414,7 @@ public class GOSTXMLEncryptionUtil {
 			encryptedDoc = cipher.doFinal(document,
 					document.getDocumentElement());
 		} catch (Exception e) {
-			throw logger.processingError(e);
+			throw LOGGER.processingError(e);
 		}
 
 		// The EncryptedKey element is added
@@ -428,7 +427,8 @@ public class GOSTXMLEncryptionUtil {
 		Element wrappingElement = encryptedDoc.createElementNS(
 				wrappingElementQName.getNamespaceURI(), wrappingElementName);
 
-		if (wrappingElementPrefix == null || wrappingElementPrefix == "") {
+		//if (wrappingElementPrefix == null || wrappingElementPrefix == "") {
+		if (wrappingElementPrefix == null || wrappingElementPrefix.equals("")){
 			wrappingElementName = wrappingElementQName.getLocalPart();
 		}
 		wrappingElement.setAttributeNS(XMLNS, "xmlns:" + wrappingElementPrefix,
@@ -451,7 +451,7 @@ public class GOSTXMLEncryptionUtil {
 			NodeList nodeList = encryptedDocRootElement.getElementsByTagNameNS(
 					XMLENC_NS, CIPHER_DATA_LOCALNAME);
 			if (nodeList == null || nodeList.getLength() == 0)
-				throw logger.domMissingElementError("xenc:CipherData");
+				throw LOGGER.domMissingElementError("xenc:CipherData");
 
 			Element cipherDataElement = (Element) nodeList.item(0);
 			encryptedDocRootElement.insertBefore(sigElement, cipherDataElement);
@@ -478,7 +478,7 @@ public class GOSTXMLEncryptionUtil {
 			Document documentWithEncryptedElement, PrivateKey privateKey)
 			throws ProcessingException {
 		if (documentWithEncryptedElement == null)
-			throw logger.nullArgumentError("Input document is null");
+			throw LOGGER.nullArgumentError("Input document is null");
 
 		// Look for encrypted data element
 		Element documentRoot = documentWithEncryptedElement
@@ -486,7 +486,7 @@ public class GOSTXMLEncryptionUtil {
 		Element encDataElement = getNextElementNode(documentRoot
 				.getFirstChild());
 		if (encDataElement == null)
-			throw logger
+			throw LOGGER
 					.domMissingElementError("No element representing the encrypted data found");
 
 		// Look at siblings for the key
@@ -498,7 +498,7 @@ public class GOSTXMLEncryptionUtil {
 					XMLENC_NS, ENCRYPTED_KEY_LOCALNAME);
 
 			if (nodeList == null || nodeList.getLength() == 0)
-				throw logger
+				throw LOGGER
 						.nullValueError("Encrypted Key not found in the enc data");
 
 			encKeyElement = (Element) nodeList.item(0);
@@ -515,7 +515,7 @@ public class GOSTXMLEncryptionUtil {
 			encryptedKey = cipher.loadEncryptedKey(
 					documentWithEncryptedElement, encKeyElement);
 		} catch (XMLEncryptionException e1) {
-			throw logger.processingError(e1);
+			throw LOGGER.processingError(e1);
 		}
 
 		Document decryptedDoc = null;
@@ -534,14 +534,14 @@ public class GOSTXMLEncryptionUtil {
 				decryptedDoc = cipher.doFinal(documentWithEncryptedElement,
 						encDataElement);
 			} catch (Exception e) {
-				throw logger.processingError(e);
+				throw LOGGER.processingError(e);
 			}
 		}
 
 		Element decryptedRoot = decryptedDoc.getDocumentElement();
 		Element dataElement = getNextElementNode(decryptedRoot.getFirstChild());
 		if (dataElement == null)
-			throw logger
+			throw LOGGER
 					.nullValueError("Data Element after encryption is null");
 
 		decryptedRoot.removeChild(dataElement);
@@ -550,32 +550,7 @@ public class GOSTXMLEncryptionUtil {
 		return decryptedDoc.getDocumentElement();
 	}
 
-	/**
-	 * From the secret key, get the W3C XML Encryption URL
-	 * 
-	 * @param publicKeyAlgo
-	 * @param keySize
-	 * @return
-	 */
-	private static String getXMLEncryptionURLForKeyUnwrap(String publicKeyAlgo,
-			int keySize) {
-		if ("AES".equals(publicKeyAlgo)) {
-			switch (keySize) {
-			case 192:
-				return XMLCipher.AES_192_KeyWrap;
-			case 256:
-				return XMLCipher.AES_256_KeyWrap;
-			default:
-				return XMLCipher.AES_128_KeyWrap;
-			}
-		}
-		if (publicKeyAlgo.contains("RSA"))
-			return XMLCipher.RSA_v1dot5;
-		if (publicKeyAlgo.contains("DES"))
-			return XMLCipher.TRIPLEDES_KeyWrap;
-		throw logger.unsupportedType("unsupported publicKey Algo:"
-				+ publicKeyAlgo);
-	}
+
 
 	/**
 	 * From the secret key, get the W3C XML Encryption URL
@@ -599,7 +574,7 @@ public class GOSTXMLEncryptionUtil {
 			return XMLCipher.RSA_v1dot5;
 		if (algo.contains("DES"))
 			return XMLCipher.TRIPLEDES_KeyWrap;
-		throw logger
+		throw LOGGER
 				.unsupportedType("Secret Key with unsupported algo:" + algo);
 	}
 

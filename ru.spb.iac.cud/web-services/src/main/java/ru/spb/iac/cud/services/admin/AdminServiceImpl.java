@@ -46,7 +46,7 @@ public class AdminServiceImpl implements AdminService {
 
 	public static final String NS = "http://admin.services.cud.iac.spb.ru/";
 
-	Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(AdminServiceImpl.class);
 
 	@javax.annotation.Resource(name = "wsContext")
 	private WebServiceContext wsContext;
@@ -56,7 +56,7 @@ public class AdminServiceImpl implements AdminService {
 			@WebParam(name = "roles", targetNamespace = NS) List<Role> roles,
 			@WebParam(name = "modeExec", targetNamespace = NS) String modeExec)
 			throws GeneralFailure {
-		logger.info("sync_roles");
+		LOGGER.debug("sync_roles");
 		(new ContextSyncManager()).sync_roles(getIDSystem(), roles, modeExec,
 				getIDUser(), getIPAddress());
 	}
@@ -67,7 +67,7 @@ public class AdminServiceImpl implements AdminService {
 			@WebParam(name = "codesRoles", targetNamespace = NS) List<String> codesRoles,
 			@WebParam(name = "modeExec", targetNamespace = NS) String modeExec)
 			throws GeneralFailure {
-		// return
+		LOGGER.debug("access_roles");
 		(new ContextAdminManager()).access(getIDSystem(), uidsUsers, modeExec,
 				codesRoles, getIDUser(), getIPAddress());
 	}
@@ -76,6 +76,9 @@ public class AdminServiceImpl implements AdminService {
 	public void cert_change_sys(
 			@WebParam(name = "newCert", targetNamespace = NS) String newCert)
 			throws GeneralFailure {
+		
+		LOGGER.debug("cert_change_sys");
+		
 		(new ContextAdminManager()).cert_change(getIDSystem(), newCert,
 				getIDUser(), getIPAddress());
 	}
@@ -85,7 +88,7 @@ public class AdminServiceImpl implements AdminService {
 			@WebParam(name = "functions", targetNamespace = NS) List<Function> functions,
 			@WebParam(name = "modeExec", targetNamespace = NS) String modeExec)
 			throws GeneralFailure {
-		logger.info("sync_functions");
+		LOGGER.debug("sync_functions");
 		(new ContextSyncManager()).sync_functions(getIDSystem(), functions,
 				modeExec, getIDUser(), getIPAddress());
 	}
@@ -95,7 +98,7 @@ public class AdminServiceImpl implements AdminService {
 			@WebParam(name = "groups", targetNamespace = NS) List<Group> groups,
 			@WebParam(name = "modeExec", targetNamespace = NS) String modeExec)
 			throws GeneralFailure {
-		logger.info("sync_groups");
+		LOGGER.debug("sync_groups");
 		(new ContextSyncManager()).sync_groups(getIDSystem(), groups, modeExec,
 				getIDUser(), getIPAddress());
 	}
@@ -106,7 +109,7 @@ public class AdminServiceImpl implements AdminService {
 			@WebParam(name = "codesRoles", targetNamespace = NS) List<String> codesRoles,
 			@WebParam(name = "modeExec", targetNamespace = NS) String modeExec)
 			throws GeneralFailure {
-		logger.info("sync_groups_roles");
+		LOGGER.debug("sync_groups_roles");
 		(new ContextSyncManager()).sync_groups_roles(getIDSystem(),
 				codesGroups, codesRoles, modeExec, getIDUser(), getIPAddress());
 	}
@@ -164,7 +167,7 @@ public class AdminServiceImpl implements AdminService {
 		String idSystem = (String) request.getSession().getAttribute(
 				"cud_sts_principal");
 
-		logger.info("getIDSystem:" + idSystem);
+		LOGGER.debug("getIDSystem:" + idSystem);
 
 		return idSystem;
 	}
@@ -187,8 +190,8 @@ public class AdminServiceImpl implements AdminService {
 			// Long
 			// сейчас же мы кладём в сессиию ид пользователя из текстового поля
 			// запроса
-			// Long idUser =
-			// (Long)request.getSession().getAttribute("user_id_principal");
+			// Long idUs/er =
+			// (Long)req/uest.getSe/ssion(/).getAtt/ribute/("user_id_principal");
 
 			if (request.getSession().getAttribute("user_id_principal") != null
 					&& !request.getSession().getAttribute("user_id_principal")
@@ -198,7 +201,7 @@ public class AdminServiceImpl implements AdminService {
 				idUser = new Long((String) request.getSession().getAttribute(
 						"user_id_principal"));
 
-				// logger.info("getIDUser:"+idUser);
+				 
 
 			} else {
 				// анаоним

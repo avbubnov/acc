@@ -30,26 +30,26 @@ public class IDPUtilManager implements IDPUtilManagerLocal,
 	@PersistenceContext(unitName = "AuthServices")
 	EntityManager em;
 
-	Logger logger = LoggerFactory.getLogger(IDPUtilManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(IDPUtilManager.class);
 
 	/**
 	 * предоставление сертификата системы по коду системы
 	 */
 	public X509Certificate system_cert(String domain_name) throws Exception {
 
-		X509Certificate user_cert = null;
-		String cert_data = null;
+		X509Certificate userCertX = null;
+		String certDataX = null;
 		try {
 
 			// domain_name - это код системы или код подсистемы
 			// берётся напрямую из issuer
 
-			logger.info("system_cert:01:" + domain_name);
+			LOGGER.debug("system_cert:01:" + domain_name);
 
 			// ищем код в системах
 			if (domain_name.startsWith(CUDConstants.armPrefix)) {
 
-				cert_data = (String) em
+				certDataX = (String) em
 						.createNativeQuery(
 								"select to_char(T1.CERT_DATE) "
 										+ "from AC_IS_BSS_T t1 "
@@ -58,7 +58,7 @@ public class IDPUtilManager implements IDPUtilManagerLocal,
 
 			} else if (domain_name.startsWith(CUDConstants.subArmPrefix)) {
 				// подсистемы
-				cert_data = (String) em
+				certDataX = (String) em
 						.createNativeQuery(
 								"select to_char(T1.CERT_DATE) "
 										+ "from AC_SUBSYSTEM_CERT_BSS_T t1 "
@@ -68,7 +68,7 @@ public class IDPUtilManager implements IDPUtilManagerLocal,
 			} else if (domain_name.startsWith(CUDConstants.groupArmPrefix)) {
 				// группы систем
 
-				cert_data = (String) em
+				certDataX = (String) em
 						.createNativeQuery(
 								"select to_char(T1.CERT_DATA) "
 										+ "from GROUP_SYSTEMS_KNL_T t1 "
@@ -77,30 +77,30 @@ public class IDPUtilManager implements IDPUtilManagerLocal,
 
 			}
 
-			// logger.info("system_cert:01:"+cert_data);
+			 
 
-			if (cert_data != null) {
+			if (certDataX != null) {
 
-				byte[] cert_byte = Base64.decode(cert_data);
+				byte[] certByteX = Base64.decode(certDataX);
 
-				CertificateFactory user_cf = CertificateFactory
+				CertificateFactory userCf = CertificateFactory
 						.getInstance("X.509");
-				user_cert = (X509Certificate) user_cf
-						.generateCertificate(new ByteArrayInputStream(cert_byte));
+				userCertX = (X509Certificate) userCf
+						.generateCertificate(new ByteArrayInputStream(certByteX));
 
 			}
 
-			// logger.info("system_cert:01:result:"+user_cert);
+			 
 
 		} catch (Exception e) {
-			logger.error("system_cert:error:" + e);
+			LOGGER.error("system_cert:error:", e);
 		}
 
 		// если result = null, то будет выброшено исключение
-		// в KeyStoreKeyManager.getValidatingKey() -
-		// throw logger.keyStoreMissingDomainAlias(domain);
+		// в KeySto/reKeyManager.getVali/datingKey() -
+		// throw log/ger.keyS/toreMissingDomainAlias(domain);
 
-		return user_cert;
+		return  userCertX  ;
 	}
 
 }

@@ -6,7 +6,7 @@ import iac.grn.infosweb.session.table.BaseDataModel;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import org.richfaces.model.ExtendedFilterField;
 import org.richfaces.model.FilterField;
 import org.richfaces.model.Modifiable;
 import org.richfaces.model.SortField2;
-//import org.ajax4jsf.model.DataComponentState;
+ 
 
 @Name("appUserModifyDataModel")
 public class AppUserModifyDataModel extends BaseDataModel<BaseItem, Long>  {
@@ -53,7 +53,7 @@ public class AppUserModifyDataModel extends BaseDataModel<BaseItem, Long>  {
 	@Override
 	public Long getId(BaseItem object) {
 		// TODO Auto-generated method stub
-		//log.info("AppUserModifyDataModel:getId:"+object.getBaseId());
+		 
 		return object.getBaseId();
 	}
 

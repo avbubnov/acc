@@ -26,7 +26,7 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import org.jboss.security.SimplePrincipal;
 import org.slf4j.Logger;
-//import org.jboss.ws.annotation.EndpointConfig;
+ 
 import org.slf4j.LoggerFactory;
 
 @WebService(targetNamespace = ApplicationServiceImpl.NS)
@@ -36,7 +36,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 	public static final String NS = "http://application.services.cud.iac.spb.ru/";
 
-	Logger logger = LoggerFactory.getLogger(ApplicationServiceImpl.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
 	@Resource(name = "wsContext")
 	private WebServiceContext wsContext;
@@ -47,7 +47,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 			@WebParam(name = "attributes", targetNamespace = NS) List<AppAttribute> attributes)
 			throws GeneralFailure {
 
-		logger.info("system_registration");
+		LOGGER.debug("system_registration");
 		return (new ContextApplicationManager()).system_registration(
 				attributes, getIDUser(), getIPAddress());
 	}
@@ -58,7 +58,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 			@WebParam(name = "attributes", targetNamespace = NS) List<AppAttribute> attributes)
 			throws GeneralFailure {
 
-		logger.info("user_registration");
+		LOGGER.debug("user_registration");
 
 		return (new ContextApplicationManager()).user_registration(attributes,
 				getIDUser(), getIPAddress());
@@ -77,7 +77,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		// 2) ADD
 		// 3) REMOVE
 
-		logger.info("access_roles");
+		LOGGER.debug("access_roles");
 
 		return (new ContextApplicationManager())
 				.access_roles(modeExec, uidUser, getIDSystem(), codesRoles,
@@ -97,7 +97,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		// 2) ADD
 		// 3) REMOVE
 
-		logger.info("access_groups");
+		LOGGER.debug("access_groups");
 
 		return (new ContextApplicationManager()).access_groups(modeExec,
 				uidUser, getIDSystem(), codesGroups, getIDUser(),
@@ -108,10 +108,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 	@WebResult(targetNamespace = NS)
 	public AppAccept block(
 			@WebParam(name = "modeExec", targetNamespace = NS) String modeExec,
-			/*
-			 * @WebParam(name = "loginUser", targetNamespace = NS) String
-			 * loginUser,
-			 */
+			
 			@WebParam(name = "uidUser", targetNamespace = NS) String uidUser,
 			@WebParam(name = "blockUser", targetNamespace = NS) String blockReason)
 			throws GeneralFailure {
@@ -120,7 +117,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		// 1) BLOCK
 		// 2) UNBLOCK
 
-		logger.info("block");
+		LOGGER.debug("block");
 
 		return (new ContextApplicationManager()).block(modeExec, uidUser,
 				blockReason, getIDUser(), getIPAddress());
@@ -132,7 +129,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 			@WebParam(name = "attributes", targetNamespace = NS) List<AppAttribute> attributes)
 			throws GeneralFailure {
 
-		logger.info("system_modification");
+		LOGGER.debug("system_modification");
 
 		return (new ContextApplicationManager()).system_modification(
 				getIDSystem(), attributes, getIDUser(), getIPAddress());
@@ -145,7 +142,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 			@WebParam(name = "attributes", targetNamespace = NS) List<AppAttribute> attributes)
 			throws GeneralFailure {
 
-		logger.info("user_modification");
+		LOGGER.debug("user_modification");
 
 		return (new ContextApplicationManager()).user_modification(uidUser,
 				attributes, getIDUser(), getIPAddress());
@@ -204,8 +201,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 			// Long
 			// сейчас же мы кладём в сессиию ид пользователя из текстового поля
 			// запроса
-			// Long idUser =
-			// (Long)request.getSession().getAttribute("user_id_principal");
+			// Long id/U/ser =
+			// (Long)re/quest.getSession()./getAttri/bute("user_id_principal");
 
 			if (request.getSession().getAttribute("user_id_principal") != null
 					&& !request.getSession().getAttribute("user_id_principal")
@@ -215,7 +212,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 				idUser = new Long((String) request.getSession().getAttribute(
 						"user_id_principal"));
 
-				// logger.info("getIDUser:"+idUser);
+				 
 
 			} else {
 				// анаоним
@@ -236,7 +233,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		String idSystem = (String) request.getSession().getAttribute(
 				"cud_sts_principal");
 
-		logger.info("getIDSystem:" + idSystem);
+		LOGGER.debug("getIDSystem:" + idSystem);
 
 		return idSystem;
 	}

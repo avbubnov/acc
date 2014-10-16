@@ -8,7 +8,6 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 
@@ -46,6 +45,9 @@ import javax.xml.namespace.QName;
 
 import org.jboss.seam.faces.FacesMessages;
 
+import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.export.AuditExportData;
+import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.navig.LinksMap;
 
 import java.io.BufferedReader;
@@ -108,6 +110,7 @@ import org.picketlink.identity.federation.saml.v2.protocol.LogoutRequestType;
 import org.picketlink.identity.federation.saml.v2.protocol.RequestAbstractType;
 import org.picketlink.identity.federation.saml.v2.protocol.ResponseType;
 import org.picketlink.identity.federation.web.util.PostBindingUtil;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -121,9 +124,6 @@ import ru.spb.iac.cud.exceptions.InvalidCredentials;
 import ru.spb.iac.cud.items.Attribute;
 import ru.spb.iac.cud.items.Role;
 
-
-/*import org.picketlink.identity.federation.saml.v2.assertion.AttributeType;
-import org.picketlink.identity.seam.federation.SeamSamlPrincipal;*/
 
 
 import iac.cud.authmodule.session.AutzManagerLocal;
@@ -143,9 +143,9 @@ public class Authenticator
 	
 	private static final String auth_type_x509 = "urn:oasis:names:tc:SAML:2.0:ac:classes:X509";
 	
-    @Logger private Log log;
-
-    //@In Identity identity;
+   
+    final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
+    
     /**
      * Импортируемые сведения с данными пользователя для прохождения 
      * аутентификации 
@@ -200,15 +200,13 @@ public class Authenticator
     private static PrivateKey privateKey = null;
     
     
-   // public boolean access(){
-    public boolean access(String pageCode) throws Exception{
+     public boolean access(String pageCode) throws Exception{
     	try{
     		AuthItem ai=(AuthItem)Component.getInstance("authItem", ScopeType.SESSION);
     		return ai.getPageList().containsKey(pageCode);
     	}catch(Exception e){
-    	 log.error("authenticator:access:error:"+e);
-    		// e.printStackTrace(System.out);
-    	  throw e;
+    	 LOGGER.error("authenticator:access:error:"+e);
+     	  throw e;
     	}
      }
     /**
@@ -218,13 +216,11 @@ public class Authenticator
      * @return предоставить доступ/отказать
      * @throws Exception
      */
+    
     public boolean access_(String pageCode) throws Exception{
     	
     	try{
-  //  	 log.info("authenticator:access:pageCode:"+pageCode);
-  //  	 log.info("authenticator:access:acApplication:"+linksMap.getAppCode());
-  //  	 log.info("authenticator:access:idUser:"+currentUser.getIdUser());
-    	 List<AcRole> alist = entityManager.createQuery(
+     	 List<AcRole> alist = entityManager.createQuery(
                  "select ar " +
                  "from AcUser au, AcRole ar, AcLinkUserToRoleToRaion aur, " +
                  "AcLinkRoleAppPagePrmssn arp, AcAppPage ap where " +
@@ -240,34 +236,28 @@ public class Authenticator
                  .setParameter("idUser", currentUser.getIdUser())
                  .getResultList();
   
-    //	 log.info("authenticator:access:isEmpty:"+alist.isEmpty());
      	 if(alist.isEmpty()){
      		return false;
      	 }
     	}catch(Exception e){
-    		 log.error("authenticator:access:error"+e);
-    		// e.printStackTrace(System.out);
+    		 LOGGER.error("authenticator:access:error"+e);
     		 throw e;
     	}
     	return true;
     }
    public boolean accessPerm(String pageCode, String permCode) throws Exception{
-	//   log.info("authenticator:accessPerm:01:pageCode:"+pageCode);
-	//   log.info("authenticator:accessPerm:01:permCode:"+permCode);
+	 
+	 
 	  try{
    		AuthItem ai=(AuthItem)Component.getInstance("authItem",ScopeType.SESSION);
    		PageItem pi = ai.getPageList().get(pageCode);
    		if(pi==null){
    			return false;
    		}
-   	 /*   for(String st: pi.getPermList()){
-   	       log.info("authenticator:accessPerm:st"+st);
-   	    }*/
    		return pi.getPermList().contains(permCode);
    	  }catch(Exception e){
-   	  log.error("authenticator:accessPerm:error"+e);
-   		// e.printStackTrace(System.out);
-   	  throw e;
+   	  LOGGER.error("authenticator:accessPerm:error"+e);
+   	 	  throw e;
    	 }
     }
     /**
@@ -281,11 +271,7 @@ public class Authenticator
    public boolean accessPerm_(String pageCode, String permCode) throws Exception{
     	
     	try{
-    //	 log.info("authenticator:accessPerm:pageCode:"+pageCode);
-    //	 log.info("authenticator:accessPerm:permCode:"+permCode);
-    // 	 log.info("authenticator:accessPerm:acApplication:"+linksMap.getAppCode());
-    //	 log.info("authenticator:accessPerm:idUser:"+currentUser.getIdUser());
-    	 List<AcRole> alist = entityManager.createQuery(
+     	 List<AcRole> alist = entityManager.createQuery(
                  "select ar " +
                  "from AcUser au, AcRole ar, AcLinkUserToRoleToRaion aur, " +
                  "AcLinkRoleAppPagePrmssn arp, AcAppPage ap, AcPermissionsList aperm where " +
@@ -304,13 +290,11 @@ public class Authenticator
                  .setParameter("idUser", currentUser.getIdUser())
                  .getResultList();
   
-  //  	 log.info("authenticator:accessPerm:isEmpty:"+alist.isEmpty());
      	 if(alist.isEmpty()){
      		return false;
      	 }
     	}catch(Exception e){
-    		 log.error("authenticator:access:error"+e);
-    		// e.printStackTrace(System.out);
+    		 LOGGER.error("authenticator:access:error"+e);
     		 throw e;
     	}
     	return true;
@@ -318,33 +302,29 @@ public class Authenticator
    public boolean authenticate()
    {
 	   
-	   log.info("authenticator:authenticate:01");
+	   LOGGER.debug("authenticator:authenticate:01");
 	   
 	   char[] signingKeyPass="Access_Control".toCharArray();
 		 String signingAlias="cudvm_export";
 		 
 	   try{
-		/* Context ctx=new InitialContext();
-		  CUDAuthManagerLocal aml=(CUDAuthManagerLocal)ctx.lookup("cudAuthModule.CUDAuthManager.local");
-		  AuthItem ai =aml.authCompleteItem(linksMap.getAppCode(), credentials.getUsername(), credentials.getPassword());
-		 */ 
 		   
 		   if(this.flagOBO){
 			   //были в OBO
 			   
 			   if(this.assertionOBO==null){
-				   log.info("authenticator:authenticate:02");
+				   LOGGER.debug("authenticator:authenticate:02");
 				    return false;
 			   }
 		   }
 		  
-		   log.info("authenticator:authenticate:02_2");
+		   LOGGER.debug("authenticator:authenticate:02_2");
 		   
 		  String pSAMLResponse = FacesContext.getCurrentInstance().getExternalContext()
            .getRequestParameterMap()
            .get("SAMLResponse"); 
 		  
-		 // System.out.println("authenticator:authenticate:01_1:"+pSAMLResponse);
+		  
 		  
 		  if(publicKey==null) {
 		    KeyStore ks  = KeyStore.getInstance("HDImageStore", "JCP");
@@ -358,7 +338,7 @@ public class Authenticator
 			Document  samlDocument;
 			AssertionType ass;
 			
-			log.info("authenticator:authenticate:02_3");
+			LOGGER.debug("authenticator:authenticate:02_3");
 			
 			if(this.assertionOBO==null) {
 				//обычная аутентификация
@@ -372,22 +352,22 @@ public class Authenticator
 				//декодируем лишь для извлечения assertion
 				ass = decrypt(samlDocument, privateKey);
 				
-				System.out.println("authenticator:authenticate:01_2");
+				LOGGER.debug("authenticator:authenticate:01_2");
 				
-				Document ass_doc = AssertionUtil.asDocument(ass);
+				Document assDoc = AssertionUtil.asDocument(ass);
 				
 				//проверка сигнатуры Assertion
-				boolean ass_valid = ass_valid(ass_doc.getDocumentElement(), publicKey);
+				boolean assValid = assValid(assDoc.getDocumentElement(), publicKey);
 				
-				System.out.println("authenticator:authenticate:01_3:"+ass_valid);
+				LOGGER.debug("authenticator:authenticate:01_3:"+assValid);
 				
-				if(ass_valid==false){
+				if(assValid==false){
 		    		  throw new Exception("Signature Assertion is not valid!!!");
 		    	 }
 				
 			}else{
 				
-				log.info("authenticator:authenticate:02_4");
+				LOGGER.debug("authenticator:authenticate:02_4");
 				
 				//аутентификация OBO
 				
@@ -401,14 +381,14 @@ public class Authenticator
 			    		DocumentUtil.getNodeAsStream(samlDocument)));
 
 			
-			    System.out.println("authenticator:authenticate:01_2_1");
+			    LOGGER.debug("authenticator:authenticate:01_2_1");
 				
 				//проверка сигнатуры Assertion
-				boolean ass_valid = ass_valid(samlDocument.getDocumentElement(), publicKey);
+				boolean assValid = assValid(samlDocument.getDocumentElement(), publicKey);
 				
-				System.out.println("authenticator:authenticate:01_3_1:"+ass_valid);
+				LOGGER.debug("authenticator:authenticate:01_3_1:"+assValid);
 				
-				if(ass_valid==false){
+				if(assValid==false){
 		    		  throw new Exception("Signature Assertion is not valid!!!");
 		    	 }
 			}
@@ -423,14 +403,12 @@ public class Authenticator
 		   	  
 	    	 XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
 	        	
-	    	 System.out.println("test1:01_1");
+	    	 LOGGER.debug("test1:01_1");
 	    	 
 	    	 configureIdAttribute(samlDocument);
 	    	 
 	    	 
-	    	// propagateIDAttributeSetup(samlDocument.getDocumentElement(), samlDocument.getDocumentElement());
-
-	         NodeList nl = samlDocument.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+	       NodeList nl = samlDocument.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 	         if (nl == null || nl.getLength() == 0) {
 	        	 throw new Exception("Cannot find Signature element");
 	         }
@@ -438,29 +416,25 @@ public class Authenticator
 	    		 
 	    	 Node signatureNode1 = nl.item(0);
 	    		 
-	    	 System.out.println("SignValidateSOAPHandler:handleMessage:07_3");
+	    	 LOGGER.debug("SignValidateSOAPHandler:handleMessage:07_3");
 	    	 
 	         //signature
 	    	 
 	    	 if(signatureNode1==null){
-	    		 System.out.println("SignValidateSOAPHandler:handleMessage:08");
+	    		 LOGGER.debug("SignValidateSOAPHandler:handleMessage:08");
 	    	        throw new Exception("This service requires <dsig:Signature>, which is missing!!!");
 	    	 }
 
-	    	 System.out.println("SignValidateSOAPHandler:handleMessage:09:"+signatureNode1.getNodeName());
+	    	 LOGGER.debug("SignValidateSOAPHandler:handleMessage:09:"+signatureNode1.getNodeName());
 	     
 	         DOMValidateContext valContext1 = new DOMValidateContext(publicKey, signatureNode1);
 	        
-	     //   valContext1.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
-	       	 
-	    	//valContext1.setIdAttributeNS(header, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-	    	//valContext1.setIdAttributeNS(body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-	      
+	        
 	    	 javax.xml.crypto.dsig.XMLSignature signature1 = fac.unmarshalXMLSignature(valContext1);
 	         
 	    	  boolean result1 = signature1.validate(valContext1);
 	    			 
-	    	  System.out.println("SignValidateSOAPHandler:010+:"+result1);
+	    	  LOGGER.debug("SignValidateSOAPHandler:010+:"+result1);
 			
 	    	  if(result1==false){
 	    		  throw new Exception("Signature is not valid!!!");
@@ -471,24 +445,16 @@ public class Authenticator
 			//разбор пришедшего токена
 	    	boolean  expiredAssertion = AssertionUtil.hasExpired(ass);
 			
-	    	 System.out.println("expiredAssertion:"+expiredAssertion);
-	    	/* 
-	    	 System.out.println("Authenticator:authenticate:01:"+(SimpleTypeBindings.marshalDateTime(new GregorianCalendar(TimeZone.getTimeZone("UTC")))));
-			 System.out.println("Authenticator:authenticate:02:"+(SimpleTypeBindings.marshalDateTime(new GregorianCalendar())));
-			 System.out.println("Authenticator:authenticate:03:"+(new Date()));
-			 System.out.println("Authenticator:authenticate:04:"+(TimeZone.getDefault()));
-	    	*/
-	    	if(expiredAssertion){
+	    	 LOGGER.debug("expiredAssertion:"+expiredAssertion);
+	    
+	    	 if(expiredAssertion){
 	    		  throw new Exception("expiredAssertion!!!");
 	    	  }
 	    	
 	    	
 	    	 SubjectType subject = ass.getSubject();
-	            /*
-	             * JAXBElement<NameIDType> jnameID = (JAXBElement<NameIDType>) subject.getContent().get(0); NameIDType nameID =
-	             * jnameID.getValue();
-	             */
-	            if (subject == null)
+	          
+	    	 if (subject == null)
 	                throw new Exception("Subject in the assertion");
 
 	            STSubType subType = subject.getSubType();
@@ -501,7 +467,7 @@ public class Authenticator
 
 	            final String userName = nameID.getValue();
 	            
-	            System.out.println("userName:"+userName);
+	            LOGGER.debug("userName:"+userName);
 	            
 	            
 	            List<String> roles = new ArrayList<String>();
@@ -516,82 +482,28 @@ public class Authenticator
 	                }
 	            }
 
-	            System.out.println("Authenticator:70");
+	            LOGGER.debug("Authenticator:70");
 	    	
 	          
-	            
-	    /*	
-		  String pTokenID = FacesContext.getCurrentInstance().getExternalContext()
-		             .getRequestParameterMap()
-		             .get("tokenID"); 
-		  
-		  String success = FacesContext.getCurrentInstance().getExternalContext()
-		             .getRequestParameterMap()
-		             .get("success"); 
-		  
-		  String welcome_form = FacesContext.getCurrentInstance().getExternalContext()
-		             .getRequestParameterMap()
-		             .get("welcome_form");
-		  
-		  log.info("authenticator:authenticate:pTokenID:"+pTokenID); 
-		  log.info("authenticator:authenticate:success:"+success);
-		  log.info("authenticator:authenticate:welcome_form:"+welcome_form);
-		  
-		  
-		  if(welcome_form==null && (success==null||success.equals("false"))){
-			  FacesMessages.instance().add("Пользователь не идентифицирован!");
-			  return false;
-		  }
-		  
-		  AccessServiceClient asc = (AccessServiceClient)Component.getInstance("asClient",ScopeType.EVENT);
-		  
-		  //if(pTokenID==null){
-		  if(welcome_form!=null){ //через логин-пароль
-		    try{
-		    	
-		    	if((credentials.getUsername()==null||credentials.getUsername().trim().equals(""))||
-		    		(credentials.getPassword()==null||credentials.getPassword().trim().equals(""))){
-		    		 FacesMessages.instance().add("Поля логин и пароль обязательны!");
-					  return false;
-		    	}
-		    	
-			   tokenID = asc.authenticate_login(credentials.getUsername(), credentials.getPassword());
-		    }catch(InvalidCredentials e1){
-			   log.info("authenticator:authenticate:02");
-			   FacesMessages.instance().add("Пользователь не идентифицирован!");
-			   return false;
-	         }
-		  }else{//через сертификат 
-			   //pTokenID должен быть, так здесь мы только при условии success=true
-			  tokenID = pTokenID;
-		  }
-		  */
-		  //List<Role> roleList = asc.authorize(tokenID);
+	
+		
 		  
 		  if(roles.isEmpty()){
-		 // if(roleList.isEmpty()){
-			  log.info("authenticator:authenticate:03");
+			  LOGGER.debug("authenticator:authenticate:03");
 			  FacesMessages.instance().add("Нет прав доступа к системе!");
 			  return false;
 		  }
-		 /*
-		  List<String> roleStList = new ArrayList<String>();
-		  List<String> rolesInfoList = new ArrayList<String>();
-		  for(Role rl :roleList){
-			  roleStList.add(rl.getIdRole());
-			  rolesInfoList.add(rl.getName());
-		  }*/
+		
 		  List<String> roleStList = roles;
 		  List<String> rolesInfoList = roles;
 				  
 		  Context ctx=new InitialContext();
-		 // AutzManagerLocal aml=(AutzManagerLocal)ctx.lookup("cudAuthModule.AutzManager.local");
 		  AutzManagerLocal aml=(AutzManagerLocal)ctx.lookup("java:global/CUDAuthModule/AutzManager!iac.cud.authmodule.session.AutzManagerLocal");
 		  
 		  AuthItem ai =aml.getAccessComplete(linksMap.getAppCode(), roleStList);
 		 
 		  if(ai==null){
-			  log.info("authenticator:authenticate:04");
+			  LOGGER.debug("authenticator:authenticate:04");
 			  FacesMessages.instance().add("Ошибка доступа!");
 			  return false;
 		  }
@@ -601,25 +513,7 @@ public class Authenticator
 		  
 		  String fio = null, org =null, tel = null, email = null, 
 				 login = null, orgIOGVCode=null, uid = null;
-		  String base64TokenID = null;
-		  /*
-		  List<Attribute> attribList = asc.attrib(tokenID);
-		  
-		  for(Attribute at :attribList){
-			  if(at.getName().equals("fio")){
-				  fio=at.getValue();
-			  }else if(at.getName().equals("org")){
-				  org=at.getValue();
-			  }else if(at.getName().equals("tel")){
-				  tel=at.getValue();
-			  }else if(at.getName().equals("email")){
-				  email=at.getValue();
-			  }else if(at.getName().equals("login")){
-				  login=at.getValue();
-			  }else if(at.getName().equals("orgIOGVCode")){
-				  orgIOGVCode=at.getValue();
-			  }
-		  }*/
+		 
 		  
 		  fio = userAttrib.get("USER_FIO");
 		  org = userAttrib.get("ORG_NAME");
@@ -628,50 +522,17 @@ public class Authenticator
 		  login = userAttrib.get("USER_LOGIN");
 		  orgIOGVCode = userAttrib.get("ORG_CODE_IOGV");	
 		  uid = userAttrib.get("USER_UID");
-		  base64TokenID = userAttrib.get("TOKEN_ID");
+		 // base64TokenID "TOKEN_ID"
 		  
-		  System.out.println("Authenticator:71:"+fio);
+		  LOGGER.debug("Authenticator:71:"+fio);
 		  
 		  //проверка чисто для информации
 		  //закомментирована для скорости работы
-		  /*
-		  if(base64TokenID!=null){
-		  
-			  System.out.println("Authenticator:72:"+base64TokenID);
-			  
-			  byte[] byteTokenID = Base64.decode(base64TokenID);
-	          
-			  String tokenID = new String (byteTokenID, "UTF-8");
-			  
-			  System.out.println("Authenticator:73:"+tokenID);
-			  
-			  String[] arrTokenID = tokenID.split("_");
-			  
-			  if(arrTokenID==null||arrTokenID.length!=4){
-				 //UserAuthToken is not valid!!!
-				  
-			  }else{
-			  
-			  
-				  StringBuilder sb = new StringBuilder();
-				  
-				  sb.append(arrTokenID[0]+"_"+arrTokenID[1]+"_"+arrTokenID[2]);
-				  
-				  byte[] sigValue = Base64.decode(arrTokenID[3]);
-				  
-				  boolean tokenIDValidateResult = GOSTSignatureUtil.validate(sb.toString().getBytes("UTF-8"), sigValue, publicKey);
-				  
-				  System.out.println("Authenticator:74:"+tokenIDValidateResult);
-				  
-				  System.out.println("Authenticator:75:"+new Date(Long.parseLong(arrTokenID[1])));
-			  
-			  }
-		  }*/
+		 
 		  //--------------------------------------------------
 		  
 		  AcUser currentUser = new AcUser();
 		  
-		 // currentUser.setTokenID(tokenID);
 		  
 		  currentUser.setFio(fio);
 		  currentUser.setOrgName(org);
@@ -683,9 +544,7 @@ public class Authenticator
 		  
 		  currentUser.setRolesInfoList(rolesInfoList);
 		  
-		  /*if(accessPerm("0052","1")){
-			  currentUser.setIsSysAdmin(1L);
-		  }*/
+		 
 		  //переделали
 		  //т.к. при прошлом подходе через 0052(невидимом ресурсе)
 		  //нельзя давать изменять роль сис админа в консоли
@@ -697,17 +556,9 @@ public class Authenticator
 		  
 		  //временная мера
 		  //в дальнейшем перейти на проверку наличия у пользователя определённой супер роли
-		  /*Long idUser = (Long) entityManager
-				  .createQuery("select au.idUser from AcUser au " +
-				  		        "where au.login= :login")
-				  .setParameter("login", login)		        
-                  .getSingleResult();
-				  ;
-		  currentUser.setIdUser(idUser);
-		  */
+		  
 		  currentUser.setIdUser(new Long(uid));
 		  
-		  //currentUser.setTokenID(pTokenID)
 		  
 		  //ограничение администрирования по ИС
 		  //всегда нельзя ограничивать сис админ ИС
@@ -720,7 +571,7 @@ public class Authenticator
 			  
 			  if(allowedSys!=null){
 				  
-			    log.info("authenticator:authenticate:05");
+			    LOGGER.debug("authenticator:authenticate:05");
 				
 			    currentUser.setAllowedSys(allowedSys);
 			    
@@ -744,7 +595,7 @@ public class Authenticator
 				  
 				  if(allowedReestr!=null&&!allowedReestr.isEmpty()){
 					  
-				    log.info("authenticator:authenticate:05_1:"+allowedReestr);
+				    LOGGER.debug("authenticator:authenticate:05_1:"+allowedReestr);
 					
 				    currentUser.setAllowedReestr(allowedReestr);
 				    
@@ -764,26 +615,24 @@ public class Authenticator
 		  //для отправки аудита по окончанию сессии
 		  try{
 		    HttpSession session = (HttpSession)  FacesContext.getCurrentInstance().getExternalContext().getSession(false);
-		    //session.setAttribute("auditExportToken", tokenID);
-		    //session.setAttribute("auditExportLogin", login);
 		    session.setAttribute("auditExportUid", uid);
 		    }catch(Exception e){
-		    	 log.error("authenticator:authenticate:session.setAttribute:Error:"+e);
+		    	 LOGGER.error("authenticator:authenticate:session.setAttribute:Error:"+e);
 		   	}
 	
+		  audit(ResourcesMap.USER, ActionsMap.LOGIN_ADM);
+		  
 		  return true;
 	   }catch(Exception e){
-		 log.error("authenticator:authenticate:Error+:"+e);
+		 LOGGER.error("authenticator:authenticate:Error+:"+e);
 		 
-		 e.printStackTrace(System.out);
-		 
-      	 FacesMessages.instance().add("Ошибка доступа!");
+	 	 FacesMessages.instance().add("Ошибка доступа!");
          return false;
 	   }
 	}
    
    public void test(){
-	   log.info("authenticator:test:!!!");
+	   LOGGER.debug("authenticator:test:!!!");
    }
    
    public void cudAuth() throws Exception{
@@ -792,28 +641,21 @@ public class Authenticator
 		String signingAlias="cudvm_export";
 		 
    	try{
-   	 log.info("authenticator:cudAuth:01");
-  	 
+   	 LOGGER.debug("authenticator:cudAuth:01_new");
+   	 
+     LOGGER.debug("authenticator:cudAuth:01_logger");
+   	
    	 HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
    	 HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
     	
    	 
-   	 //String destinat ion = "http://10.128.66.140:8080/cudidp/";
    	 String destination = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/cudidp/loginEncrypt";
    
    	 String assertionConsumerServiceURL = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/infoscud/public.seam";
    	 
-   	 log.info("authenticator:cudAuth:01+:"+request.getContextPath());
+   	 LOGGER.debug("authenticator:cudAuth:01+:"+request.getContextPath());
    	 
-   	 /*
-   //  String backUrl = "https://cudvm/infoscud/back.jsp";
-     String backUrl = "http://cudvm/infoscud/public.seam";
-	 String destination = "http://cudvm/CudServicesWeb/AccessServicesWebGeneral";
-	// String destination = "http://cudvm/CudServicesWeb/AccessServicesWebLogin";
-	 String pswitch = "false";
-	 
-     response.sendRedirect(destination+"?switch="+pswitch+"&backUrl="+backUrl);
-  */
+   	
    
    	 if(publicKey==null) {	
    	KeyStore ks  = KeyStore.getInstance("HDImageStore", "JCP");
@@ -823,30 +665,26 @@ public class Authenticator
 
 	 publicKey = ks.getCertificate("cudvm_export").getPublicKey();
    	 }
-	// System.out.println("test1:02:"+privateKey.getAlgorithm());
+	 
 	  
    	Document samlDocument = get_saml_assertion_from_xml(assertionConsumerServiceURL, privateKey, publicKey);
    	 
     Node nextSibling = getNextSiblingOfIssuer(samlDocument);
 	 
-	 String samlMessage = PostBindingUtil.base64Encode(DocumentUtil.getDocumentAsString(samlDocument));
-	 String samlMessage2 = Base64.encodeBytes(DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
-	
 	 
-	// System.out.println("test1:03_1:"+samlMessage);
-	// System.out.println("test1:03_2:"+samlMessage2);
+	 
 	 
 	  Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
 	  
-	//  System.out.println("test1:03_3");
+	 
 	  
 	   XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
 
-	//   System.out.println("test1:03_4");
+	 
 	 //используется когда подписывается какой-то узел в документе
 	  //извдекается этот узел, создаётся пустой документ, в него помещается этот узел
-	  // и через propagateIDAttributeSetup() из узла, который надо подписать в новый переносятся id  
-	 //   propagateIDAttributeSetup(samlDocument, samlDocument.getDocumentElement());
+	  // и через propagateIDAttributeSetup из узла, который надо подписать в новый переносятся id  
+	 //   propaga/teIDAttributeSetup/
 	 	
 	    List<Transform> transformList = new ArrayList<Transform>();
 		Transform transform = fac.newTransform(Transform.ENVELOPED, (XMLStructure) null);
@@ -873,10 +711,7 @@ public class Authenticator
 			KeyValue kv = kif.newKeyValue(publicKey);
 			KeyInfo ki = kif.newKeyInfo(Collections.singletonList(kv));
 			
-			//X509Data x509d = kif.newX509Data(Collections.singletonList((X509Certificate) cert));
-			//KeyInfo ki = kif.newKeyInfo(Collections.singletonList(x509d));
-		
-				
+					
 			
 	  	    javax.xml.crypto.dsig.XMLSignature sig = fac.newXMLSignature(si, ki);
 //!!!
@@ -888,7 +723,6 @@ public class Authenticator
 	  	    //nextSibling - перед ним будет вставлена подпись
 	  	    //nextSibling для <saml:Issuer> - это <samlp:NameIDPolicy>
 	  	    //и Signature будет между <saml:Issuer> и <samlp:NameIDPolicy>
-			//DOMSignContext signContext = new DOMSignContext(privateKey, newDoc.getDocumentElement()); 
 			DOMSignContext signContext = new DOMSignContext(privateKey, samlDocument.getDocumentElement(), nextSibling); 
 			
 			signContext.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
@@ -896,37 +730,31 @@ public class Authenticator
 			//фиксация аттрибута id в подписываемом элементе
 			//место ответственное за факт появления Pre-digested input в логе
 		
-		// вместо этого используется configureIdAttribute(samlDocument);	
-		//	signContext.setIdAttributeNS(body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-		//	signContext.setIdAttributeNS(header, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
+		// вместо этого используется configureIdAttribute	
 		
 		
-			 
-		//	 System.out.println("test1:04");
 			    
 	    sig.sign(signContext);
 	
 	 
-	 //   System.out.println("test1:05:"+DocumentUtil.asString(samlDocument));
+	  
 	    
 	      
 	 byte[] responseBytes = DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8");
 
-	// String samlResponse = PostBindingUtil.base64Encode(new String(responseBytes));
-
+	
 	 String samlRequest=Base64.encodeBytes(new String(responseBytes).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
 	 
-	// System.out.println("test1:06:"+samlRequest);
+	 
    
    	 
 	 sendPost(samlRequest, destination, response);
 	 
-	// System.out.println("test1:07");
+	 
 	 
    	}catch(Exception e){
-   	 log.error("authenticator:cudAuth:error:"+e);
-   		// e.printStackTrace(System.out);
-   	  throw e;
+   	 LOGGER.error("authenticator:cudAuth:error:"+e);
+    	  throw e;
    	}
     }
  
@@ -936,29 +764,20 @@ public class Authenticator
 			String signingAlias="cudvm_export";
 			 
 	   	try{
-	   	 log.info("authenticator:cudLogout:01");
+	   	 LOGGER.debug("authenticator:cudLogout:01");
 	  	 
 	   	 HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
 	   	 HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 	    	
 	   	 
-	   	 //String destinat ion = "http://10.128.66.140:8080/cudidp/";
 	   	 String destination = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/cudidp/logout";
 	   
 	   	 String logoutBackUrl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/infoscud/";
 	   	 
-	   	 log.info("authenticator:cudLogout:02:"+destination);
-	   	 log.info("authenticator:cudLogout:03:"+logoutBackUrl);
+	   	 LOGGER.debug("authenticator:cudLogout:02:"+destination);
+	   	 LOGGER.debug("authenticator:cudLogout:03:"+logoutBackUrl);
 	   	
-	   	 /*
-	   //  String backUrl = "https://cudvm/infoscud/back.jsp";
-	     String backUrl = "http://cudvm/infoscud/public.seam";
-		 String destination = "http://cudvm/CudServicesWeb/AccessServicesWebGeneral";
-		// String destination = "http://cudvm/CudServicesWeb/AccessServicesWebLogin";
-		 String pswitch = "false";
-		 
-	     response.sendRedirect(destination+"?switch="+pswitch+"&backUrl="+backUrl);
-	  */
+	 
 	   
 	   	 if(publicKey==null) { 	
 	   	KeyStore ks  = KeyStore.getInstance("HDImageStore", "JCP");
@@ -969,32 +788,27 @@ public class Authenticator
 		 publicKey = ks.getCertificate("cudvm_export").getPublicKey();
 		
 	   	 }
-		// System.out.println("test1:02:"+privateKey.getAlgorithm());
+		 
 		  
 	   	Document samlDocument = get_saml_logout_from_xml(logoutBackUrl, login);
 	   	
-	   	log.info("authenticator:cudLogout:04:"+DocumentUtil.asString(samlDocument));
+	   	LOGGER.debug("authenticator:cudLogout:04:"+DocumentUtil.asString(samlDocument));
 	   	
 	    Node nextSibling = getNextSiblingOfIssuer(samlDocument);
 		 
-		 String samlMessage = PostBindingUtil.base64Encode(DocumentUtil.getDocumentAsString(samlDocument));
-		 String samlMessage2 = Base64.encodeBytes(DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
-		
-		 
-		// System.out.println("test1:03_1:"+samlMessage);
-		// System.out.println("test1:03_2:"+samlMessage2);
+			 
 		 
 		  Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
 		  
-		//  System.out.println("test1:03_3");
+		 
 		  
 		   XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
 
-		//   System.out.println("test1:03_4");
+		 
 		 //используется когда подписывается какой-то узел в документе
 		  //извдекается этот узел, создаётся пустой документ, в него помещается этот узел
-		  // и через propagateIDAttributeSetup() из узла, который надо подписать в новый переносятся id  
-		 //   propagateIDAttributeSetup(samlDocument, samlDocument.getDocumentElement());
+		  // и через propagateIDAttributeSetupиз узла, который надо подписать в новый переносятся id  
+		 //   /propagateIDAttributeSetup
 		 	
 		    List<Transform> transformList = new ArrayList<Transform>();
 			Transform transform = fac.newTransform(Transform.ENVELOPED, (XMLStructure) null);
@@ -1021,10 +835,7 @@ public class Authenticator
 				KeyValue kv = kif.newKeyValue(publicKey);
 				KeyInfo ki = kif.newKeyInfo(Collections.singletonList(kv));
 				
-				//X509Data x509d = kif.newX509Data(Collections.singletonList((X509Certificate) cert));
-				//KeyInfo ki = kif.newKeyInfo(Collections.singletonList(x509d));
-			
-					
+						
 				
 		  	    javax.xml.crypto.dsig.XMLSignature sig = fac.newXMLSignature(si, ki);
 	//!!!
@@ -1036,7 +847,6 @@ public class Authenticator
 		  	    //nextSibling - перед ним будет вставлена подпись
 		  	    //nextSibling для <saml:Issuer> - это <samlp:NameIDPolicy>
 		  	    //и Signature будет между <saml:Issuer> и <samlp:NameIDPolicy>
-				//DOMSignContext signContext = new DOMSignContext(privateKey, newDoc.getDocumentElement()); 
 				DOMSignContext signContext = new DOMSignContext(privateKey, samlDocument.getDocumentElement(), nextSibling); 
 				
 				signContext.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
@@ -1044,44 +854,36 @@ public class Authenticator
 				//фиксация аттрибута id в подписываемом элементе
 				//место ответственное за факт появления Pre-digested input в логе
 			
-			// вместо этого используется configureIdAttribute(samlDocument);	
-			//	signContext.setIdAttributeNS(body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
-			//	signContext.setIdAttributeNS(header, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
+			// вместо этого используется configureIdAttribute	
 			
-			
-				 
-			//	 System.out.println("test1:04");
 				    
 		    sig.sign(signContext);
 		
-		    log.info("authenticator:cudLogout:05:"+DocumentUtil.asString(samlDocument));
-		 //   System.out.println("test1:05:"+DocumentUtil.asString(samlDocument));
+		    LOGGER.debug("authenticator:cudLogout:05:"+DocumentUtil.asString(samlDocument));
+		  
 		    
 		      
 		 byte[] responseBytes = DocumentUtil.getDocumentAsString(samlDocument).getBytes("UTF-8");
 
-		// String samlResponse = PostBindingUtil.base64Encode(new String(responseBytes));
-
 		 String samlRequest=Base64.encodeBytes(new String(responseBytes).getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
 		 
-		// System.out.println("test1:06:"+samlRequest);
+		 
 	   
-		 log.info("authenticator:cudLogout:06");
+		 LOGGER.debug("authenticator:cudLogout:06");
 		 
 		 sendPost(samlRequest, destination, response);
 		 
-		 log.info("authenticator:cudLogout:07");
+		 LOGGER.debug("authenticator:cudLogout:07");
 		 
-		// System.out.println("test1:07");
+		 
 		 
 	   	}catch(Exception e){
-	   	 log.error("authenticator:cudLogout:error:"+e);
-	   		// e.printStackTrace(System.out);
+	   	 LOGGER.error("authenticator:cudLogout:error:"+e);
 	   	  throw e;
 	   	}
 	    }
    
-   public void/*boolean*/ cudAuthOBO() throws Exception{
+   public void cudAuthOBO() throws Exception{
 	   try{
 		   
 		   // this.resultAuthOBO :
@@ -1089,7 +891,7 @@ public class Authenticator
 		   // -1 - tokenID от логин/пароль
 		   // 0 - ошибка при выполнении
 		   
-		   log.info("authenticator:cudAuthOBO:01");
+		   LOGGER.debug("authenticator:cudAuthOBO:01");
 		   
 		   this.flagOBO = true;
 		   
@@ -1097,7 +899,7 @@ public class Authenticator
 		           .getRequestParameterMap()
 		           .get("tokenID"); 
 		   
-		   log.info("authenticator:cudAuthOBO:02:"+base64TokenID);
+		   LOGGER.debug("authenticator:cudAuthOBO:02:"+base64TokenID);
 		   
 		   
 		   if(base64TokenID!=null){
@@ -1109,7 +911,6 @@ public class Authenticator
 				  String[] arrTokenID = tokenID.split("_");
 				  
 				  if(arrTokenID==null||arrTokenID.length!=4){
-					 //UserAuthToken is not valid!!!
 					  
 				  }else{
 				  
@@ -1118,19 +919,19 @@ public class Authenticator
 					  
 					  sb.append(arrTokenID[0]+"_"+arrTokenID[1]+"_"+arrTokenID[2]);
 					
-					  log.info("authenticator:cudAuthOBO:03:"+sb.toString());
+					  LOGGER.debug("authenticator:cudAuthOBO:03:"+sb.toString());
 					  
 					  //вообще надо проверять, но пока закомментированно
-					 // byte[] sigValue = Base64.decode(arrTokenID[3]);
-					 // boolean tokenIDValidateResult = GOSTSignatureUtil.validate(sb.toString().getBytes("UTF-8"), sigValue, publicKey);
-					 // System.out.println("Authenticator:74:"+tokenIDValidateResult);
+					 // byte[] /sigValue = Base64/.decode(arrTokenID[3]/);
+					 // boolean/ tokenIDValidateResult = /GOSTSignatureUtil/.validate(sb.toString().getBytes("UTF-8"), sigValue, publicKey);
+					  
 					  
 					/*
-					  Date expired = new Date(
-								Long.parseLong(arrTokenID[1]));
-                      if (new Date(System.currentTimeMillis())
-						.after(expired)) {
-                    	  FacesMessages.instance().add("Токен просрочен!");
+					  Date /expired = new /Date(
+								Long/.parseLong(arrTokenID[1]));
+                      if (new /Date(System.currentTimeMillis())
+						/.after(expired)) {
+                    	  FacesMessages/.instance()./add("Токен просрочен!");
 					   }  */
 					  
 					  if(auth_type_x509.equals(arrTokenID[2])){
@@ -1141,7 +942,7 @@ public class Authenticator
 						   
 					      this.assertionOBO = soboc.sign_verify_soap_transform_2sign(base64TokenID);
 
-					      log.info("authenticator:cudAuthOBO:04");
+					      LOGGER.debug("authenticator:cudAuthOBO:04");
 					      
 					  }else{
 						  this.resultAuthOBO = -1;
@@ -1150,7 +951,7 @@ public class Authenticator
 				  }
 			  }
 		   
-		   log.info("authenticator:cudAuthOBO:05:"+resultAuthOBO);
+		   LOGGER.debug("authenticator:cudAuthOBO:05:"+resultAuthOBO);
 		  
 		   //!!! обязательно
 		   //иначе если сначала ошибочная аутентификация,
@@ -1159,34 +960,13 @@ public class Authenticator
 		   credentials.setUsername("123");
 		   credentials.setPassword("123");
 		  
-		   /*
-		   Identity identity = (Identity)Component.getInstance("org.jboss.seam.security.identity");
-		   identity.login();
-		  
-		    log.info("authenticator:cudAuthOBO:06:"+identity.isLoggedIn());
 		
-		    return identity.isLoggedIn();
-		  */
 		   
-		   /*
-		   HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
-		   HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		    	  
-		   if(identity.isLoggedIn()){
-			   
-			  response.sendRedirect(request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+
-					   "/main.xhtml");
-		   }else{
-			   response.sendRedirect(request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+
-					   "/welcome.xhtml");
-		   }*/
 		   
 		  
 		   
 	   }catch(Exception e){
-		   log.error("authenticator:cudAuthOBO:error:"+e);
-		   
-		 //  return false;
+		   LOGGER.error("authenticator:cudAuthOBO:error:"+e);
 	   }
 	   
    }
@@ -1196,48 +976,46 @@ public class Authenticator
 		 InputStream samlAssertionInputStream = null;	
 			try{
 			
-			 System.out.println("get_saml_assertion_from_xml:01");
+			 LOGGER.debug("get_saml_assertion_from_xml:01");
 			 
-			 //  samlAssertionInputStream = new FileInputStream("/home/jboss/jboss/data/saml/saml_request_post.xml");
 			   samlAssertionInputStream = new FileInputStream(Configuration.getSamlRequestLogin());
 				  
 			   
-			 //  System.out.println("get_saml_assertion_from_xml:01_2+");
+			  
 			   
 		        SAMLParser samlParser = new SAMLParser();
 		        
-		       // System.out.println("get_saml_assertion_from_xml:01_3");
+		        
 		        
 		        Object parsedObject = samlParser.parse(samlAssertionInputStream);
 
-		      //  System.out.println("get_saml_assertion_from_xml:01_4");
+		       
 		        
 		        // cast the parsed object to the expected type, in this case AssertionType
 		        AuthnRequestType authn = (AuthnRequestType) parsedObject;
 		        
-		      //  System.out.println("get_saml_assertion_from_xml:01_5+:"+new URI(assertionConsumerServiceURL));
+		       
 		        
 		        //!!! важная установка
 		        authn.setAssertionConsumerServiceURL(new URI(assertionConsumerServiceURL));
 		        
 		        
 		        //external passive auth
-		        String SAMLdestination = getSAMLDestination(privateKeyClient, publicKeyCUD);
+		        String samlDestination = getSAMLDestination(privateKeyClient, publicKeyCUD);
 		        
-		        authn.setDestination(URI.create(SAMLdestination));		        
+		        authn.setDestination(URI.create(samlDestination));		        
 		        
 		        SAML2Request  sr = new SAML2Request();
 		        
-		       Document doc_authn = sr.convert(authn);
+		       Document docAuthn = sr.convert(authn);
 		     
 		      
-		       result = doc_authn;
+		       result = docAuthn;
 		        
-		     //  System.out.println("get_saml_assertion_from_xml:01_2:"+DocumentUtil.asString(doc_authn));
+		      
 			  		      
 		  }catch(Exception e3){
-				 System.out.println("get_saml_assertion_from_xml:error:"+e3);
-				 e3.printStackTrace(System.out);
+				 LOGGER.error("get_saml_assertion_from_xml:error:"+e3);
 		  }finally{
 			  try{
 				  if(samlAssertionInputStream!=null){
@@ -1257,35 +1035,25 @@ public class Authenticator
 		
 			try{
 			
-			 System.out.println("get_saml_logout_from_xml:01");
+			 LOGGER.debug("get_saml_logout_from_xml:01");
 			 
-			  // samlAssertionInputStream = new FileInputStream("/home/jboss/jboss/data/saml/saml_request_logout_post.xml");
 			   samlAssertionInputStream = new FileInputStream(Configuration.getSamlRequestLogout());
 
-			   
-			   
-			 //  System.out.println("get_saml_assertion_from_xml:01_2+");
-			   
-		        SAMLParser samlParser = new SAMLParser();
+		       SAMLParser samlParser = new SAMLParser();
 		        
-		       // System.out.println("get_saml_assertion_from_xml:01_3");
+		        
 		        
 		        Object parsedObject = samlParser.parse(samlAssertionInputStream);
 
-		      //  System.out.println("get_saml_assertion_from_xml:01_4");
-		        
-		        // cast the parsed object to the expected type, in this case AssertionType
-		          
+		       
+		           
 		        LogoutRequestType logout = (LogoutRequestType) parsedObject;
 		        
-		      //  System.out.println("get_saml_assertion_from_xml:01_5+:"+new URI(assertionConsumerServiceURL));
-		        
-		        
-		        //external passive auth
-		        String SAMLdestination = logout.getDestination().toString()+
+		       
+		        String samlDestination = logout.getDestination().toString()+
 		        		                 "?logoutBackUrl="+URLEncoder.encode(logoutBackUrl, "utf-8");
 		        
-		        logout.setDestination(URI.create(SAMLdestination));		        
+		        logout.setDestination(URI.create(samlDestination));		        
 		        
 		        NameIDType nameID = new NameIDType();
 		        	
@@ -1296,16 +1064,15 @@ public class Authenticator
 		        
 		        SAML2Request  sr = new SAML2Request();
 		        
-		       Document doc_authn = sr.convert(logout);
+		       Document docAuthn = sr.convert(logout);
 		     
 		      
-		       result = doc_authn;
+		       result = docAuthn;
 		        
-		     //  System.out.println("get_saml_assertion_from_xml:01_2:"+DocumentUtil.asString(doc_authn));
+		      
 			  		      
 		  }catch(Exception e3){
-				 System.out.println("get_saml_logout_from_xml:error:"+e3);
-				 e3.printStackTrace(System.out);
+				 LOGGER.error("get_saml_logout_from_xml:error:"+e3);
 		  }finally{
 			  try{
 				  if(samlAssertionInputStream!=null){
@@ -1320,14 +1087,14 @@ public class Authenticator
    
    public static Node getNextSiblingOfIssuer(Document doc) {
        
-		//  System.out.println("getNextSiblingOfIssuer:01");
+		 
 				  
 		    NodeList nl = doc.getElementsByTagNameNS(JBossSAMLURIConstants.ASSERTION_NSURI.get(), JBossSAMLConstants.ISSUER.get());
 		   // "urn:oasis:names:tc:SAML:2.0:assertion", "Issuer"
 	        if (nl.getLength() > 0) {
 	            Node issuer = nl.item(0);
 
-	          //  System.out.println("getNextSiblingOfIssuer:02:"+issuer.getNextSibling().getLocalName());
+	           
 	            return issuer.getNextSibling();
 	        }
 	        return null;
@@ -1350,13 +1117,13 @@ public class Authenticator
     
    public boolean authenticate_work()
     {
-	   log.info("authenticator:authenticate_work:01");
+	   LOGGER.debug("authenticator:authenticate_work:01");
 	   try{
 		  Context ctx=new InitialContext();
 		  CUDAuthManagerLocal aml=(CUDAuthManagerLocal)ctx.lookup("cudAuthModule.CUDAuthManager.local");
 		  AuthItem ai =aml.authCompleteItem(linksMap.getAppCode(), credentials.getUsername(), credentials.getPassword());
 		  if(ai==null){
-			  log.info("authenticator:authenticate_work:02");
+			  LOGGER.debug("authenticator:authenticate_work:02");
 			  FacesMessages.instance().add("Ошибка доступа!");
 			  return false;
 		  }
@@ -1367,61 +1134,27 @@ public class Authenticator
 		  if(accessPerm("0052","1")){
 			  user.setIsSysAdmin(1L);
 		  }
-		 /* 
-		  entityManager.createQuery(
-	               "select o from AcRole o where " +
-	               "o.sign ")
-	               .setParameter("login", credentials.getUsername())
-	               .setParameter("password", credentials.getPassword())
-	               .getSingleResult();*/
+		
 		  
 		  Contexts.getSessionContext().set("currentUser", user);
 		  return true;
 	   }catch(Exception e){
-		 log.error("authenticator:authenticate_work:Error:"+e);
+		 LOGGER.error("authenticator:authenticate_work:Error:"+e);
        	 FacesMessages.instance().add("Ошибка доступа!");
          return false;
 	   }
 	}
- /*  
-   public boolean authenticate_after_sso(String login, String password)
-   {
-	   log.info("authenticator:authenticate:01");
-	   try{
-		  Context ctx=new InitialContext();
-		  AuthManagerLocal aml=(AuthManagerLocal)ctx.lookup("authModule.AuthManager.local");
-		  AuthItem ai =aml.authCompleteItem(linksMap.getAppCode(), login, password);
-		  if(ai==null){
-			  log.info("authenticator:authenticate:02");
-			  FacesMessages.instance().add("Ошибка доступа!");
-			  return false;
-		  }
-		  AcUser user = entityManager.find(AcUser.class, ai.getIdUser());
-		  Contexts.getSessionContext().set("authItem", ai);
-		  Contexts.getSessionContext().set("currentUser", user);
-		  return true;
-	   }catch(Exception e){
-		 log.error("authenticator:authenticate:Error:"+e);
-      	 FacesMessages.instance().add("Ошибка доступа!");
-        return false;
-	   }
-	}*/
+
  /**
    * Проведение аутентификации пользователя при входе в систему
    * @return предоставить доступ/отказать
    */
     public boolean authenticate_()
     {
-      /*  log.info("authenticating {0}", credentials.getUsername());
-        if ("admin".equals(credentials.getUsername()))
-        {
-            identity.addRole("admin");
-            return true;
-        }
-        return false;*/
+    
     	 try
          {
-     	   log.info("auth_01");
+     	   LOGGER.debug("auth_01");
      	   AcUser user = (AcUser) entityManager.createQuery(
                "select au from AcUser au where " +
                "au.login = :login and au.password = :password and " +
@@ -1429,84 +1162,26 @@ public class Authenticator
                .setParameter("login", credentials.getUsername())
                .setParameter("password", credentials.getPassword())
                .getSingleResult();
-     	//   user.setShortOrgName(user.getIdOrg().getFullName());
      
-     	//  identity.
-
       Contexts.getSessionContext().set("currentUser", user);
        
-   /*   if(user.getLinksUserToRolesCollection2()!=null && user.getLinksUserToRolesCollection2().size()!=0){
-     	
-     	 Contexts.getSessionContext().set("roleUser", user.getLinksUserToRolesCollection2().get(0).getIdRole().getRoleTitle());
-       }else{
-     	
-      	 FacesMessages.instance().add("У пользователя нет ни одной роли!");
-       	 return false;
-      }*/
-            return true;
-         }
-         catch (NoResultException ex)
-         {
-         	log.error("auth_NoResultException");
+             return true;
+         }catch (NoResultException ex) {
+         	LOGGER.error("auth_NoResultException");
         	FacesMessages.instance().add("Не правильный логин или пароль!!!");
             return false;
-         }
-         catch (Exception e)
-         {
-         	log.error("auth_Exception:"+e);
+         } catch (Exception e) {
+         	LOGGER.error("auth_Exception:"+e);
          	 FacesMessages.instance().add("Ошибка доступа!");
             return false;
          }
 
     }
     
- /*   @In Identity identity;
-  
-    public boolean internalAuthenticate(Principal principal, List<String> roles)
-    {
-    	System.out.println("!!!authenticate!!!");
-    	
-    	
-    	
-    	
-        if ((principal instanceof SeamSamlPrincipal))
-        {
-          SeamSamlPrincipal samlPrincipal = (SeamSamlPrincipal)principal;
-          
-          
-          
-          
-          System.out.println("!!!authenticate:login:"+samlPrincipal.getName());
-             
-          
-          authenticate_after_sso(samlPrincipal.getName(), "111");
-          
-          if (samlPrincipal.getName().equals("employee"))
-          {
-            return Boolean.valueOf(false);
-          }
-
-          for (AttributeType attribute : samlPrincipal.getAttributes())
-          {
-            if (attribute.getName().equals("role"))
-            {
-              List value = attribute.getAttributeValue();
-              if ((value != null) && (value.size() > 0))
-              {
-                roles.add((String)value.get(0));
-              }
-            }
-          }
-
-          return Boolean.valueOf(true);
-        }
-
-        return Boolean.valueOf(true);
-     }*/
     
     public String localLogout(){
     	
-       log.info("localLogout:01");
+       LOGGER.debug("localLogout:01");
        
        
       try{
@@ -1515,30 +1190,20 @@ public class Authenticator
     	   
 		    	   Identity.instance().logout();
 		  	 
-		 	       log.info("localLogout:02_2:"+currentUser.getLogin());
+		 	       LOGGER.debug("localLogout:02_2:"+currentUser.getLogin());
 		 	   
 		    	   cudLogout(currentUser.getLogin());
 		    	   
-		    	  // HttpSession hs = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
-		    	   //hs.invalidate();
-		    	   
-		    	  /* HttpServletResponse hresp = (HttpServletResponse) 
-		    			   FacesContext.getCurrentInstance().getExternalContext().getResponse();
-		    	   hresp.sendRedirect("http://localhost:8080/infoscud/test2.seam");
-		    	   */
-		    	   
-		    	 
+		    	   	 
 		    	  
 		    	  // пока закомментировал, ещё не решил, будет ли такой  logout.
-		    	 //  AccessServiceClient asc = (AccessServiceClient)Component.getInstance("asClient",ScopeType.EVENT);
-		     	 //  asc.logout(currentUser.getTokenID());
-		     	  
-		    	   log.info("localLogout:03");
+		    		  
+		    	   LOGGER.debug("localLogout:03");
     	   
     	   }
     	   
        }catch(Exception e){
-    	   log.error("localLogoutError:"+e);
+    	   LOGGER.error("localLogoutError:"+e);
        }
        
        return "loggedOut";
@@ -1547,39 +1212,13 @@ public class Authenticator
     public void sendPost(String samlMessage, String destination, HttpServletResponse response) throws Exception {
        
     	try{
-    	log.info("Authenticator:sendPost:01");
-    	// System.out.println("sendPost:01");
+    	LOGGER.debug("Authenticator:sendPost:01");
+    	 
     	 
     	String key = GeneralConstants.SAML_REQUEST_KEY ;
-    	/*String login_key = "login";
-        String password_key = "password";
-        String password_hash_key = "password_hash";
-        String login_encrypt_key = "login_encrypt";
-        String password_encrypt_key = "password_encrypt";
-        String secret_key_key = "secret_key";
-        String initialization_vector_key = "initialization_vector";
-        String login = "les";
-        String password = "les";
     	
-        String passwordEncryptBase64 = null;
-        String loginEncryptBase64 = null;
-        String secretKeyBase64 = null;
-		String ivBase64 = null;
-		
-		final int encrypt_data_length = 4;
-		  
-        //String password_hash = HashPassword.generateStorngPasswordHash(password);
-        String[] encrypt_data = login_password_encrypt(login, password, privateKeyClient, publicKeyCUD);
-        
-        if(encrypt_data!=null&&encrypt_data.length==encrypt_data_length){
-            passwordEncryptBase64 = encrypt_data[0];
-            loginEncryptBase64 = encrypt_data[1];
-            secretKeyBase64 = encrypt_data[2];
-            ivBase64 = encrypt_data[3];
-        }
-        */
         if (destination == null) {
-        	log.error("Authenticator:sendPost:Destination is null");
+        	LOGGER.error("Authenticator:sendPost:Destination is null");
             throw new Exception("Authenticator:sendPost:Destination is null");
         }
         
@@ -1599,16 +1238,7 @@ public class Authenticator
         builder.append("<FORM METHOD=\"POST\" ACTION=\"" + destination + "\">");
         builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + key + "\"" + " VALUE=\"" + samlMessage + "\"/>");
        
-       /* if(encrypt_data!=null&&encrypt_data.length==encrypt_data_length){
-        
-         // builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + login_key + "\"" + " VALUE=\"" + login + "\"/>");
-         // builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + password_key + "\"" + " VALUE=\"" + password + "\"/>");
-       
-          builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + login_encrypt_key + "\"" + " VALUE=\"" + loginEncryptBase64 + "\"/>");
-          builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + password_encrypt_key + "\"" + " VALUE=\"" + passwordEncryptBase64 + "\"/>");
-          builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + secret_key_key + "\"" + " VALUE=\"" + secretKeyBase64 + "\"/>");
-          builder.append("<INPUT TYPE=\"HIDDEN\" NAME=\"" + initialization_vector_key + "\"" + " VALUE=\"" + ivBase64 + "\"/>");
-        }*/
+     
      
         
         builder.append("<NOSCRIPT>");
@@ -1620,33 +1250,19 @@ public class Authenticator
         
         String str = builder.toString();
        
-        log.info("Authenticator:sendPost:02:"+str);
         
-      //  System.out.println("test1:02:"+str);
-        
-        /*
-        ServletOutputStream outputStream = response.getOutputStream();
-
-         // we need to re-configure the content length, because Tomcat may have written some content.
-        response.resetBuffer();
-        response.setContentLength(str.length());
-        
-        outputStream.println(str);
-        outputStream.close();
-        */
+      
         
         out.println(str);
 	    out.close();
 	    
-	    log.info("Authenticator:sendPost:03");
+	    LOGGER.debug("Authenticator:sendPost:03");
 	    
-      //  System.out.println("sendPost:05");
+       
         
     	}catch(Exception e){
-    		log.error("Authenticator:sendPost:error:"+e);
-    		System.out.println("sendPost:error:"+e);
-    		e.printStackTrace(System.out);
-    	}
+    		LOGGER.error("Authenticator:sendPost:error:"+e);
+        	}
     }
 
     private static void common(HttpServletResponse response) {
@@ -1704,29 +1320,17 @@ public class Authenticator
 		  result[2]=secretKeyBase64;
 		  result[3]=ivBase64;
 		  
-		  System.out.println("passwordEncryptBase64:"+passwordEncryptBase64);
-		  System.out.println("loginEncryptBase64:"+loginEncryptBase64);
-		  System.out.println("secretKeyBase64:"+secretKeyBase64);
-		  System.out.println("ivBase64:"+ivBase64);
+		  LOGGER.debug("passwordEncryptBase64:"+passwordEncryptBase64);
+		  LOGGER.debug("loginEncryptBase64:"+loginEncryptBase64);
+		  LOGGER.debug("secretKeyBase64:"+secretKeyBase64);
+		  LOGGER.debug("ivBase64:"+ivBase64);
 	       
 		  
 		//расшифровка
-		/*  
-		  PrivateKey responderPrivateKey = privateKeyClient;
-		  Cipher unwrapCipher = Cipher.getInstance(CIPHER_ALG_TRANSPORT);
-		  unwrapCipher.init(Cipher.UNWRAP_MODE, responderPrivateKey);
-		  SecretKey clientSecretKey = (SecretKey) unwrapCipher.unwrap(wrappedSecretKey, null, Cipher.SECRET_KEY);
-		  
-		  cipher = Cipher.getInstance(CIPHER_ALG);
-		  cipher.init(Cipher.DECRYPT_MODE, clientSecretKey, new IvParameterSpec(iv), null);
-		  final byte[] decryptedtext = cipher
-		            .doFinal(encryptedtext, 0, encryptedtext.length);
-		  
-		  System.out.println("decryptedtext:"+new String(decryptedtext, "utf-8"));
-		  */
+		
 		  
 		}catch(Exception e){
-			System.out.println("error:"+e);
+			LOGGER.error("error:"+e);
 		}
 		return result;
 	}
@@ -1734,34 +1338,26 @@ public class Authenticator
 		
         String result = null;   
 		try{
-			System.out.println("getSAMLDestination:01");
+			LOGGER.debug("getSAMLDestination:01");
  
 			String login_key = "login";
-	        String password_key = "password";
-	       /* String login_encrypt_key = "login_encrypt";
-	        String password_encrypt_key = "password_encrypt";
-	        String secret_key_key = "secret_key";
-	        String initialization_vector_key = "initialization_vector";*/
-	       String login_encrypt_key = "elogin";
-	        String password_encrypt_key = "epassword";
+	         String password_encrypt_key = "epassword";
 	        String secret_key_key = "skey";
 	        String initialization_vector_key = "ivector";
 	        String login = "les";
 	        String password = "les";
 	    	
 	        String passwordEncryptBase64 = null;
-	        String loginEncryptBase64 = null;
-	        String secretKeyBase64 = null;
+	       String secretKeyBase64 = null;
 			String ivBase64 = null;
 			
 			final int encrypt_data_length = 4;
 			  
-	        //String password_hash = HashPassword.generateStorngPasswordHash(password);
 	        String[] encrypt_data = login_password_encrypt(null, password, privateKeyClient, publicKeyCUD);
 	        
 	        if(encrypt_data!=null&&encrypt_data.length==encrypt_data_length){
 	            passwordEncryptBase64 = encrypt_data[0];
-	           // loginEncryptBase64 = encrypt_data[1];
+	            
 	            secretKeyBase64 = encrypt_data[2];
 	            ivBase64 = encrypt_data[3];
 	        }
@@ -1771,35 +1367,32 @@ public class Authenticator
 	        	   "&"+secret_key_key+"="+URLEncoder.encode(secretKeyBase64, "UTF-8")+
 	        	   "&"+initialization_vector_key+"="+URLEncoder.encode(ivBase64, "UTF-8");
 	       		
-	    	//result="?tokenId="
+	    	//resu/lt=/"?tokenId="
 	     	//	+ "MV8xNDEyNjY5MzcyMDg4X3VybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphYzpjbGFzc2VzOnBhc3N3b3JkX3NnR21Gemt5T1JJOXd4TjY2Ynl2aGMvTFBpNlRpL0tWblo1NmVsVG9LbmljV2RWQUxEU0dqbUNWSUxFdmtDV0FXcm8xV0xlaDd1ZkR0MmE0RWlVbmVBPT0=";
 	   
 		}catch(Exception e){
-			System.out.println("getSAMLDestination:error:"+e);
+			LOGGER.error("getSAMLDestination:error:"+e);
 		}
 		return result;
 	}
     
-	 private AssertionType/*Document*/ decrypt(Document doc, PrivateKey privateKey){
-		// Document result = null;
+	 private AssertionType decrypt(Document doc, PrivateKey privateKey){
 		 AssertionType result = null;
 		 try{
 			 
-			 System.out.println("decrypt:01");
+			 LOGGER.debug("decrypt:01");
 			 
 			 Element enc = DocumentUtil.getElement(doc, new QName(JBossSAMLConstants.ENCRYPTED_ASSERTION.get()));
 		        if (enc == null){
 		        	 throw new Exception("Cannot find ENCRYPTED_ASSERTION element");
 		        }
-		        String oldID = enc.getAttribute(JBossSAMLConstants.ID.get());
-		        Document newDoc = DocumentUtil.createDocument();
+		       Document newDoc = DocumentUtil.createDocument();
 		        Node importedNode = newDoc.importNode(enc, true);
 		        newDoc.appendChild(importedNode);
 
-		      //  Element decryptedDocumentElement = GOSTXMLEncryptionUtil.decryptElementInDocument(newDoc, privateKey);
 		        Element decryptedDocumentElement = decryptElementInDocument(newDoc, privateKey);
 			        
-		       //System.out.println("decrypt:02:"+DocumentUtil.asString(decryptedDocumentElement.getOwnerDocument()));
+		        
 		        
 		        SAMLParser parser = new SAMLParser();
 
@@ -1808,15 +1401,14 @@ public class Authenticator
 
 		        result=assertion;
 		        
-		        Document ass_doc = AssertionUtil.asDocument(assertion);
+		        Document assDoc = AssertionUtil.asDocument(assertion);
 		        
-		       System.out.println("Authenticator:decrypt:03:"+DocumentUtil.asString(ass_doc));
+		       LOGGER.debug("Authenticator:decrypt:03:"+DocumentUtil.asString(assDoc));
 		        
 		  	 
-			// System.out.println("decrypt:0100");
+			 
 		 }catch(Exception e3){
-			 System.out.println("decrypt:error:"+e3);
-			 e3.printStackTrace(System.out);
+			 LOGGER.error("decrypt:error:"+e3);
 	     }
 		return result;
 	 }
@@ -1825,16 +1417,16 @@ public class Authenticator
 	 public static Element decryptElementInDocument(Document documentWithEncryptedElement, PrivateKey privateKey)
 	            throws Exception {
 		  
-		  System.out.println("decryptElementInDocument:01");
+		  LOGGER.debug("decryptElementInDocument:01");
 			
 		  
 		  org.apache.xml.security.Init.init();
 		  
 		  if(!JCPXMLDSigInit.isInitialized()) {
-			System.out.println("GostXMLEncryptionUtil:static:02+");
-		  //  JCPXMLDSigInit.init();
+			LOGGER.debug("GostXMLEncryptionUtil:static:02+");
+		  //  JCPX/MLDSigInit/.init(/);
 			 Crypto15Init.fileInit();
-		    System.out.println("GostXMLEncryptionUtil:static:03");
+		    LOGGER.debug("GostXMLEncryptionUtil:static:03");
 		  }
 		  
 	        if (documentWithEncryptedElement == null)
@@ -1842,18 +1434,17 @@ public class Authenticator
 
 	        // Look for encrypted data element
 	        Element documentRoot = documentWithEncryptedElement.getDocumentElement();
-	      //  Element encDataElement = getNextElementNode(documentRoot.getFirstChild());
 	        Element encDataElement =  (Element) documentRoot.getFirstChild();
 	        if (encDataElement == null)
 	            throw new Exception("No element representing the encrypted data found");
 
-	      //  System.out.println("decryptElementInDocument:01:"+encDataElement.getLocalName());
+	       
 	        
 	        // Look at siblings for the key
 	        Element encKeyElement = getNextElementNode(encDataElement.getNextSibling());
 	        if (encKeyElement == null) {
 	        	
-	        	//System.out.println("decryptElementInDocument:01+");
+	        	 
 	            // Search the enc data element for enc key
 	            NodeList nodeList = encDataElement.getElementsByTagNameNS(XMLENC_NS, ENCRYPTED_KEY_LOCALNAME);
 
@@ -1863,20 +1454,19 @@ public class Authenticator
 	            encKeyElement = (Element) nodeList.item(0);
 	        }
 
-	       // System.out.println("decryptElementInDocument:02:"+encKeyElement.getLocalName());
+	        
 	        
 	        XMLCipher cipher;
 	        EncryptedData encryptedData;
 	        EncryptedKey encryptedKey;
 	        try {
-	        //	System.out.println("decryptElementInDocument:03");
-	        	
+	         	
 	            cipher = XMLCipher.getInstance();
 	            cipher.init(XMLCipher.DECRYPT_MODE, null);
 	            encryptedData = cipher.loadEncryptedData(documentWithEncryptedElement, encDataElement);
 	            encryptedKey = cipher.loadEncryptedKey(documentWithEncryptedElement, encKeyElement);
 	      
-	           // System.out.println("decryptElementInDocument:04");
+	            
 	            
 	        } catch (XMLEncryptionException e1) {
 	        	throw new Exception(e1);
@@ -1885,8 +1475,6 @@ public class Authenticator
 	        Document decryptedDoc = null;
 
 	        if (encryptedData != null && encryptedKey != null) {
-	        	
-	        //	System.out.println("decryptElementInDocument:05");
 	        	
 	            try {
 	                String encAlgoURL = encryptedData.getEncryptionMethod().getAlgorithm();
@@ -1901,18 +1489,17 @@ public class Authenticator
 	            	throw new Exception(e);
 	            }
 	        }
-	      //  System.out.println("decryptElementInDocument:06");
+	       
 	        
 	        Element decryptedRoot = decryptedDoc.getDocumentElement();
 	        //<saml:EncryptedAssertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"><saml:Assertion... 
 	        
-	       // System.out.println("decryptElementInDocument:07:"+DocumentUtil.asString(decryptedRoot.getOwnerDocument()));
 	        
-	        //Element dataElement = getNextElementNode(decryptedRoot.getFirstChild());
+	        
 	        Element dataElement = (Element)decryptedRoot.getFirstChild();
 	        //<saml:Assertion...
 	        
-	      //  System.out.println("decryptElementInDocument:08:"+dataElement.getLocalName());
+	       
 	        
 	        if (dataElement == null)
 	        	throw new Exception("Data Element after encryption is null");
@@ -1925,18 +1512,18 @@ public class Authenticator
 	    }
 	 
 	 private static Element getNextElementNode(Node node) {
-		//  System.out.println("getNextElementNode:01");
+		 
 	        while (node != null) {
-	        	// System.out.println("getNextElementNode:02");
+	        	 
 	            if (Node.ELEMENT_NODE == node.getNodeType()){
-	            	//System.out.println("getNextElementNode:03");
+	            	 
 	                return (Element) node;}
 	            node = node.getNextSibling();
 	        }
 	        return null;
 	    }
 	
-	 private boolean ass_valid(Element signedDoc, PublicKey publicKey){
+	 private boolean assValid(Element signedDoc, PublicKey publicKey){
 		 
 		 boolean result = false;
 		 try{
@@ -1946,13 +1533,13 @@ public class Authenticator
 			
 				
 			    Document doc = DocumentUtil.createDocument();
-		        Node n = doc.importNode( signedDoc/*.getDocumentElement()*/, true);
+		        Node n = doc.importNode( signedDoc, true);
 		        doc.appendChild(n);
 
 		        result = samlSignature.validate(doc, publicKey);
 		        
 		 }catch(Exception e){
-			 System.out.println("Authenticator:ass_valid:error:"+e);
+			 LOGGER.error("Authenticator:assValid:error:"+e);
 		 }
 		 return result;
 	 }
@@ -1964,42 +1551,35 @@ public class Authenticator
 		 
 			try{
 	
-				 System.out.println("get_saml_assertion_from_xml:01");
+				 LOGGER.debug("get_saml_assertion_from_xml:01");
 			 
 			 
 			 dataStream = PostBindingUtil.base64DecodeAsStream(pSAMLResponse);
 			
-			 
-			 //  InputStream samlAssertionInputStream = new FileInputStream("saml_response.out");
-
-			 //  System.out.println("get_saml_assertion_from_xml:01_2");
-			   
-		        SAMLParser samlParser = new SAMLParser();
+			     SAMLParser samlParser = new SAMLParser();
 
 		        Object parsedObject = samlParser.parse(dataStream);
 
 		        // cast the parsed object to the expected type, in this case AssertionType
 		        ResponseType authn = (ResponseType) parsedObject;
 
-		       // SAML2Request  sr = new SAML2Request();
-		        SAML2Response sr = new SAML2Response();
+		         SAML2Response sr = new SAML2Response();
 		        
-		       Document doc_authn = sr.convert(authn);
+		       Document docAuthn = sr.convert(authn);
 		        
-		       result = doc_authn;
+		       result = docAuthn;
 		        
-		      // System.out.println("get_saml_assertion_from_xml:01_3:"+DocumentUtil.asString(doc_authn));
+		       
 			  		      
 		  }catch(Exception e3){
-				 System.out.println("get_saml_assertion_from_xml:error:"+e3);
-				 e3.printStackTrace(System.out);
+				 LOGGER.error("get_saml_assertion_from_xml:error:"+e3);
 		  }finally{
 			  try{
 				  if(dataStream!=null){
 					  dataStream.close();
 				  }
 			  }catch(Exception e){
-				  
+				  LOGGER.error("get_saml_assertion_from_xml:dataStream.close:error:"+e);
 			  }
 		  }
 			return result;
@@ -2007,7 +1587,7 @@ public class Authenticator
 	 
 	 private List<String> getRoles(AttributeStatementType attributeStatement, Map<String, String> userAttrib) throws Exception {
         
-		 System.out.println("Authenticator:getRoles:01");
+		 LOGGER.debug("Authenticator:getRoles:01");
 		 
 		 List<String> roles = new ArrayList<String>();
 
@@ -2015,7 +1595,7 @@ public class Authenticator
          // PLFED-140: which of the attribute statements represent roles?
          List<String> roleKeys = new ArrayList<String>();
 
-         //String roleKey = "Role";
+         
          String roleKey = "USER_ROLES";
          roleKeys.addAll(StringUtil.tokenize(roleKey));
           
@@ -2023,7 +1603,7 @@ public class Authenticator
          for (ASTChoiceType obj : attList) {
              AttributeType attr = obj.getAttribute();
              
-            // System.out.println("Authenticator:getRoles:02:"+attr.getName());
+             
              
              if (!roleKeys.contains(attr.getName())){
                 //аттрибут
@@ -2032,7 +1612,7 @@ public class Authenticator
                      for (Object attrValue : attributeValues) {
                     	 
                     	 if (attrValue instanceof String) {
-                        	// System.out.println("Authenticator:getRoles:03:"+(String) attrValue);
+                        	 
                              userAttrib.put(attr.getName(), (String) attrValue);
                          } else
                              throw new Exception(attrValue.toString());
@@ -2044,10 +1624,10 @@ public class Authenticator
              if (attributeValues != null) {
                  for (Object attrValue : attributeValues) {
                 	 
-                	// System.out.println("Authenticator:getRoles:04");
+                	 
                 	 
                      if (attrValue instanceof String) {
-                    	// System.out.println("Authenticator:getRoles:05:"+(String) attrValue);
+                    	 
                          roles.add((String) attrValue);
                      } else
                          throw new Exception(attrValue.toString());
@@ -2061,7 +1641,7 @@ public class Authenticator
 	 
 	 public List<Long> allowedSys(Long idUser) throws Exception{
 	    	
-		    log.info("authenticator:allowedSys:01");
+		    LOGGER.debug("authenticator:allowedSys:01");
 		 
 		    List<Long> result = null;
 		    
@@ -2083,16 +1663,14 @@ public class Authenticator
 	      	 		 
 	     	  }
 	    	}catch(Exception e){
-	    		 log.error("authenticator:allowedSys:error"+e);
-	    		// e.printStackTrace(System.out);
-	    		// throw e;
+	    		 LOGGER.error("authenticator:allowedSys:error"+e);
 	    	}
 	    	return result;
 	    }
 	 
 	 public List<String> allowedReestr(Long idUser) throws Exception{
 	    	
-		    log.info("authenticator:allowedReestr:01");
+		    LOGGER.debug("authenticator:allowedReestr:01");
 		 
 		    List<String> result = null;
 		    
@@ -2108,9 +1686,7 @@ public class Authenticator
 			           .setParameter("idUser", idUser)
 			           .getResultList();
 	  	}catch(Exception e){
-	    		 log.error("authenticator:allowedReestr:error"+e);
-	    		// e.printStackTrace(System.out);
-	    		// throw e;
+	    		 LOGGER.error("authenticator:allowedReestr:error"+e);
 	    	}
 	    	return result;
 	    }
@@ -2123,7 +1699,7 @@ public class Authenticator
 	}
 	public boolean isAccOrgManager(Long idUser) throws Exception{
 	    	
-		    log.info("authenticator:isAccOrgManager:01");
+		    LOGGER.debug("authenticator:isAccOrgManager:01");
 		 
 		    boolean result = false;
 		    
@@ -2138,25 +1714,22 @@ public class Authenticator
 	    			result = true;
 	    		}
 	    		
-	    		log.info("authenticator:isAccOrgManager:02:"+result);
+	    		LOGGER.debug("authenticator:isAccOrgManager:02:"+result);
 	    		 
 	  	}catch(Exception e){
-	    		 log.error("authenticator:isAccOrgManager:error"+e);
-	    		// e.printStackTrace(System.out);
-	    		// throw e;
+	    		 LOGGER.error("authenticator:isAccOrgManager:error"+e);
 	    	}
 	    	return result;
 	    }
 	
+	 public void audit(ResourcesMap resourcesMap, ActionsMap actionsMap){
+		   try{
+			   AuditExportData auditExportData = (AuditExportData)Component.getInstance("auditExportData",ScopeType.SESSION);
+			   auditExportData.addFunc(resourcesMap.getCode()+":"+actionsMap.getCode());
+			   
+		   }catch(Exception e){
+			   LOGGER.error("Authenticator:audit:error:"+e);
+		   }
+	  }
 	 
-/*
- select AR.ROLE_TITLE, AUR.ID_RAION, ARD.ID_PERM   
-from ac_users au, ac_roles ar, 
-       AC_LINK_USER_TO_ROLE_TO_RAIONS aur, AC_LINK_ROLE_APP_DOMEN_PRMSSNS ard,
-       AC_APP_DOMAINS ad
-where AU.ID_USER=4 and AUR.ID_ROLE= AR.ID_ROLE 
-    and AUR.ID_USER=AU.ID_USER and ARD.ID_ROLE=AR.ID_ROLE
-     and ARD.ID_DOMEN=AD.ID_DOMEN and AD.PAGE_CODE='003'
-     and AD.APP_CODE=24
- */
 }

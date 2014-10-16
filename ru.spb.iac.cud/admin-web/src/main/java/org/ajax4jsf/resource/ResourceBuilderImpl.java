@@ -37,7 +37,7 @@ import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -356,8 +356,6 @@ public class ResourceBuilderImpl extends InternetResourceBuilder {
 	}
 
 	public Object getResourceDataForKey(String key) {
-		
-		System.out.println("ResourceBuilderImpl:getResourceDataForKey:key:"+key);
 		
 		Object data = null;
 		String dataString = null;

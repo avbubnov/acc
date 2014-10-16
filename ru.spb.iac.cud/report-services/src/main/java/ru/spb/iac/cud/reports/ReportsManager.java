@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -37,37 +37,33 @@ import net.sf.jasperreports.engine.JRParameter;
 public class ReportsManager implements ReportsManagerLocal,
 		ReportsManagerRemote {
 
-	private static String reestr_path = System
-			.getProperty("jboss.server.config.dir")
-			+ "/"
-			+ "crl_reestr.properties";
-
+	
 	private static final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
 
-	final static Logger logger = LoggerFactory.getLogger(ReportsManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ReportsManager.class);
 
 	public ReportsManager() {
 	}
 
 	public int create_report(BaseParamItem paramMap) throws Exception {
 
-		logger.info("create_report:01");
+		LOGGER.debug("create_report:01");
 
 		final String reportCodeFinal = (String) paramMap.get("reportCode");
-		;
+		
 
 		try {
 
 			if (TaskProcessor.getControls().containsKey(reportCodeFinal)) {
-				logger.info("create_report:return");
+				LOGGER.debug("create_report:return");
 				return 0;
 			}
 
 			Date reportDate1 = (Date) paramMap.get("reportDate1");
 			Date reportDate2 = (Date) paramMap.get("reportDate2");
 
-			logger.info("create_report:02:" + reportDate1);
+			LOGGER.debug("create_report:02:" + reportDate1);
 
 			DateFormat df = new SimpleDateFormat("dd.MM.yy ");
 
@@ -113,7 +109,7 @@ public class ReportsManager implements ReportsManagerLocal,
 
 			TaskProcessor.getControls().put(reportCodeFinal, "1");
 
-			ScheduledFuture shf = scheduler.schedule(new Runnable() {
+			scheduler.schedule(new Runnable() {
 
 				public void run() {
 
@@ -124,7 +120,7 @@ public class ReportsManager implements ReportsManagerLocal,
 						caf.create_report();
 
 					} catch (Exception e) {
-						logger.error("create_report:error:" + e);
+						LOGGER.error("create_report:error:", e);
 					} finally {
 						TaskProcessor.getControls().remove(reportCodeFinal);
 
@@ -132,7 +128,7 @@ public class ReportsManager implements ReportsManagerLocal,
 				}
 			}, 0, TimeUnit.MILLISECONDS);
 
-			logger.info("create_report:02");
+			LOGGER.debug("create_report:02");
 
 			return 1;
 
@@ -140,7 +136,7 @@ public class ReportsManager implements ReportsManagerLocal,
 
 			TaskProcessor.getControls().remove(reportCodeFinal);
 
-			logger.error("create_report:error_2:" + e);
+			LOGGER.error("create_report:error_2:", e);
 
 			return -1;
 		}
@@ -152,13 +148,13 @@ public class ReportsManager implements ReportsManagerLocal,
 		ReportDownloadItem result = null;
 
 		try {
-			logger.info("download_report:01");
+			LOGGER.debug("download_report:01");
 
 			if (TaskProcessor.getControls().containsKey(reportCode)) {
 
 				// формирование ещё не завершено
 
-				logger.info("download_report:return");
+				LOGGER.debug("download_report:return");
 				result = new ReportDownloadItem();
 				result.setFlagExec(-1);
 				return result;
@@ -168,7 +164,7 @@ public class ReportsManager implements ReportsManagerLocal,
 			result = caf.download_report(reportType);
 
 		} catch (Exception e) {
-			logger.error("download_report:error:" + e);
+			LOGGER.error("download_report:error:", e);
 
 			if (result == null) {
 				// техническая ошибка

@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import mypackage.Configuration;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+ 
+ 
 
 
 
@@ -20,7 +20,7 @@ import mypackage.Configuration;
  */
 public class StartupServlet extends HttpServlet {
 
-	final static Logger logger = LoggerFactory.getLogger(StartupServlet.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(StartupServlet.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -69,7 +69,7 @@ public class StartupServlet extends HttpServlet {
 			Configuration.setStsService(stsService);
 			
 		} catch (Exception e) {
-			logger.error("init:error:" + e);
+			LOGGER.error("init:error:", e);
 		}
 	}
 

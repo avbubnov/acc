@@ -33,19 +33,19 @@ import java.security.PublicKey;
 public class GOSTSAML2EncryptionHandler extends
 		GOSTSAML2SignatureGenerationHandler {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(GOSTSAML2EncryptionHandler.class);
 
 	@Override
 	public void handleRequestType(SAML2HandlerRequest request,
 			SAML2HandlerResponse response) throws ProcessingException {
 
-		loggerslf4j.info("handleRequestType:01");
+		LOGGERSLF4J.debug("handleRequestType:01");
 
 		HttpSession session = BaseSAML2Handler.getHttpSession(request);
 		 
 		 
-	  // if(Configuration.isEncryptRequired()){
+	  // if(/Configuration/.isEncryptRequired/())/{
 	   if(session!=null&&session.getAttribute("login_encrypt")!=null){
 		//запрос на зашифрованный ответ	   
 		//session=null при logout
@@ -53,7 +53,7 @@ public class GOSTSAML2EncryptionHandler extends
 		if (supportsRequest(request) && isEncryptionEnabled()) {
 			Document samlResponseDocument = response.getResultingDocument();
 
-			// loggerslf4j.info("handleRequestType:02:"+DocumentUtil.asString(samlResponseDocument));
+			 
 
 			if (samlResponseDocument == null) {
 				throwResponseDocumentOrAssertionNotFound();
@@ -67,8 +67,7 @@ public class GOSTSAML2EncryptionHandler extends
 						JBossSAMLConstants.ENCRYPTED_ASSERTION.get(),
 						samlNSPrefix);
 
-				byte[] secret = WSTrustUtil.createRandomSecret(128 / 8);
-				// SecretKey secretKey = new SecretKeySpec(secret,
+				// SecretKey /secretKey = new S/ecretKeySpec(/secret,
 				// getAlgorithm());
 
 				SecretKey secretKey = KeyGenerator.getInstance("GOST28147")
@@ -77,11 +76,11 @@ public class GOSTSAML2EncryptionHandler extends
 				// encrypt the Assertion element and replace it with a
 				// EncryptedAssertion element.
 				/*
-				 * XMLEncryptionUtil.encryptElement(new
+				 * XMLEncryptionUtil/.encryptElement(new
 				 * QName(JBossSAMLURIConstants.ASSERTION_NSURI.get(),
-				 * JBossSAMLConstants.ASSERTION.get(), samlNSPrefix),
-				 * samlResponseDocument, getSenderPublicKey(request), secretKey,
-				 * getKeySize(), encryptedAssertionElementQName, true);
+				 * JBossSAMLConstants.ASSERTION.get(), /samlNSPrefix),
+				 * samlResponseDocument, /getSenderPublicKey(request), secretKey,
+				 * getKeySize(), /encryptedAssertionElementQName, true);
 				 */
 
 				GOSTXMLEncryptionUtil.encryptElement(new QName(
@@ -91,19 +90,19 @@ public class GOSTSAML2EncryptionHandler extends
 						secretKey, getKeySize(),
 						encryptedAssertionElementQName, true);
 
-				// loggerslf4j.info("handleRequestType:03:"+DocumentUtil.asString(samlResponseDocument));
+				 
 
 			} catch (Exception e) {
 
-				loggerslf4j.error("handleRequestType:error:" + e);
+				LOGGERSLF4J.error("handleRequestType:error:", e);
 				throw logger.processingError(e);
 			}
 		}
             //!!!
 		    //обязательно здесь закомментировать
-		    //иначе super - это GOSTSAML2SignatureGenerationHandler
+		    //иначе super - это /GOSTSAML2SignatureGenerationHandler
 		    //и подписывается второй раз
-			//super.handleRequestType(request, response);
+			//super/.handleRequestType/(request, response);
 		}
 	}
 
@@ -168,22 +167,13 @@ public class GOSTSAML2EncryptionHandler extends
 		return Integer.valueOf(keySize);
 	}
 
-	private String getAlgorithm() {
-		String algorithm = (String) handlerConfig
-				.getParameter(GeneralConstants.SAML_ENC_ALGORITHM);
-
-		if (algorithm == null) {
-			algorithm = "AES";
-		}
-
-		return algorithm;
-	}
+	
 
 	private PublicKey getSenderPublicKey(SAML2HandlerRequest request) {
 		PublicKey publicKey = (PublicKey) request.getOptions().get(
 				GeneralConstants.SENDER_PUBLIC_KEY);
 
-		// loggerslf4j.info("getSenderPublicKey:01:"+publicKey);
+		 
 
 		if (publicKey == null) {
 			throw logger.nullArgumentError("Sender Public Key");

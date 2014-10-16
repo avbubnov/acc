@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,8 +36,8 @@ import org.jboss.seam.contexts.Contexts;
 import iac.cud.infosweb.local.service.ServiceReestr;
 import iac.grn.infosweb.context.proc.TaskProcessor;
 
-//import org.jboss.seam.annotations.Logger;
-//import org.jboss.seam.log.Log;
+ 
+ 
 import org.apache.log4j.Logger;
 
 @Stateless
@@ -52,8 +52,6 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 
 	private Logger log = Logger.getLogger(IHBindingNoAct.class);
 
-	// private static final String
-	// proc_binding_noact_info_file=System.getProperty("jboss.server.config.url")+"proc_binding_noact_info.properties";
 	private static final String proc_binding_noact_info_file = System
 			.getProperty("jboss.server.config.dir")
 			+ "/"
@@ -91,7 +89,6 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 			while (trans < currentTime) {
 				batch++;
 				trans += period * 24 * 60 * 60 * 1000;
-				// trans+=period*1000;
 				if (batch % 100 == 0) {
 					log.info("IHBindingNoAct:process_start:batch:" + batch);
 				}
@@ -106,31 +103,22 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 
 			public void run() {
 
-				// String path =
-				// System.getProperty("jboss.server.config.url")+"conf_loaddata_exec.properties";
-
+		
 				try {
 
 					log.info("IHBindingNoAct:process_start:run");
 
-					// synchronized(this){
-
+			
 					Calendar cln = Calendar.getInstance();
 
 					int day = cln.get(Calendar.DAY_OF_MONTH);
 
 					log.info("IHBindingNoAct:process_start:run:day:" + day);
 
-					// if(day==1){
-					// _LaunchAuditSysArchiveRepeatTask lct = new
-					// _LaunchAuditSysArchiveRepeatTask();
-					// lct.content();
 					process_start_content();
-					// }
-
-					// }
+			
 				} catch (Exception e) {
-					log.error("IHBindingNoAct:process_start:run:error:" + e);
+					log.error("IHBindingNoAct:process_start:run:error:", e);
 				} finally {
 					try {
 
@@ -142,14 +130,13 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 			}
 		}, start, period * 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS);
 
-		// Contexts.getApplicationContext().set("bindingNoActScheduled", shf);
-
+	
 		if (TaskProcessor.getControls().containsKey("bindingNoActScheduled")) {
 			try {
 				TaskProcessor.getControls().get("bindingNoActScheduled")
 						.cancel(false);
 			} catch (Exception e) {
-				log.info("IHBindingNoAct:process_start:error:" + e);
+				log.info("IHBindingNoAct:process_start:error:", e);
 			}
 		}
 		TaskProcessor.getControls().put("bindingNoActScheduled", shf);
@@ -164,9 +151,7 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 		log.info("IHBindingNoActa:process_stop:01");
 
 		try {
-			// ScheduledFuture shf = (ScheduledFuture)
-			// Contexts.getApplicationContext().get("bindingNoActScheduled");
-
+		
 			ScheduledFuture shf = TaskProcessor.getControls().get(
 					"bindingNoActScheduled");
 
@@ -176,7 +161,7 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 				shf.cancel(false);
 			}
 		} catch (Exception e) {
-			log.error("IHBindingNoAct:process_stop:error:" + e);
+			log.error("IHBindingNoAct:process_stop:error:", e);
 			throw e;
 		}
 
@@ -190,12 +175,11 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 		log.info("IHBindingNoAct:task_run:01");
 
 		try {
-			// Long archiveParamValue=(Long)paramMap.get("archiveParamValue");
-
+		
 			process_start_content();
 
 		} catch (Exception e) {
-			log.error("IHBindingNoAct:task_run:error:" + e);
+			log.error("IHBindingNoAct:task_run:error:", e);
 			throw e;
 		}
 		return jpi;
@@ -243,9 +227,8 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 					.executeUpdate();
 
 			utx.commit();
-			// jpi.put("list", JiList) ;
 		} catch (Exception e) {
-			log.error("IHBindingNoAct:process_start_content:error" + e);
+			log.error("IHBindingNoAct:process_start_content:error", e);
 
 			utx.rollback();
 
@@ -262,9 +245,7 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 						+ hit);
 
 				DateFormat df = new SimpleDateFormat("dd.MM.yy HH:mm:ss");
-				// URL url = new URL(proc_binding_noact_info_file);
-				// File f=new File(url.toURI());
-
+		
 				File f = new File(proc_binding_noact_info_file);
 
 				Properties properties = new Properties();
@@ -276,7 +257,7 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 				properties.store(os = new FileOutputStream(f), null);
 
 			} catch (Exception e) {
-				log.error("IHBindingNoAct:process_start_content:error:2:" + e);
+				log.error("IHBindingNoAct:process_start_content:error:2:", e);
 			} finally {
 				try {
 					if (os != null) {
@@ -287,26 +268,6 @@ public class IHBindingNoAct extends IHBindingBase implements IHLocal {
 			}
 		}
 	}
-	/*
-	 * private static Long calendar() { // System.out.println("calendar:01");
-	 * 
-	 * Long currentTime=System.currentTimeMillis();
-	 * 
-	 * // 4.40 в jboss - это в реальном времени 5.40
-	 * 
-	 * Calendar cln = Calendar.getInstance(); cln.set(Calendar.HOUR_OF_DAY, 5);
-	 * cln.set(Calendar.MINUTE, 40); cln.set(Calendar.SECOND, 0);
-	 * cln.set(Calendar.MILLISECOND, 0);
-	 * 
-	 * Long trans = cln.getTimeInMillis();
-	 * 
-	 * Long start = trans-currentTime;
-	 * 
-	 * if(start<=0){ start=start+24*60*60*1000; }
-	 * 
-	 * System.out.println("IHBindingNoAct:calendar:start:"+start);
-	 * 
-	 * return start; //return 5000L; }
-	 */
+	
 
 }

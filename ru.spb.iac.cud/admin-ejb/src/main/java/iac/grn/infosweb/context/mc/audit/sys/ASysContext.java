@@ -6,23 +6,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class ASysContext {
 
-    private HashMap<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
+    private Map<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
 	
-	public HashMap <String, BaseTableItem> getAuditItemsMap() {
+	public Map <String, BaseTableItem> getAuditItemsMap() {
         return this.auditItemsMap;
     }
-	/*private TreeMap<String, BaseTableItem> auditItemsMap=new TreeMap<String, BaseTableItem>();
 	
-	public TreeMap <String, BaseTableItem> getAuditItemsMap() {
-        return this.auditItemsMap;
-    }*/
 	
 	public List <BaseTableItem> getAuditItemsCollection() {
 		
@@ -56,13 +53,7 @@ public class ASysContext {
 		auditItemsMap.put("ipAddress",new BaseTableItem("IP-адрес", "...", "ipAddress", "IP_ADDRESS", "IP_ADDRESS", 5));
 		auditItemsMap.put("userFio",new BaseTableItem("Пользователь", "...", "userFio", "fio", "fio", 6));
 		
-	/*	auditItemsMap.put("dateAction",new BaseTableItem("Дата и время обращения", "...", "dateAction", 1));
-		auditItemsMap.put("servName",new BaseTableItem("Сервис", "...", "servName", "servicesBssT.full", 2));
-		auditItemsMap.put("inputParam",new BaseTableItem("Входные параметры", "...", "inputParam",  3));
-	    auditItemsMap.put("resultValue",new BaseTableItem("Результат", "...", "resultValue", 4));
-		auditItemsMap.put("ipAddress",new BaseTableItem("IP-адрес", "...", "ipAddress", 5));
-		auditItemsMap.put("userFio",new BaseTableItem("Пользователь", "...", "userFio", 6));*/
-
+	
 		
 	}
 }

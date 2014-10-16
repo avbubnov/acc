@@ -4,22 +4,26 @@ import org.jboss.seam.annotations.Name;
 
 
 	import org.jboss.seam.ScopeType;
-	import org.jboss.seam.annotations.In;
-	import org.jboss.seam.annotations.Logger;
-	import org.jboss.seam.contexts.Contexts;
-	import org.jboss.seam.log.Log;
-	import iac.cud.infosweb.dataitems.BaseItem;
-	import iac.cud.infosweb.entity.AcUser;
-import iac.grn.infosweb.context.app.access.AppAccessContext;
-	import iac.grn.infosweb.session.audit.export.ActionsMap;
-	import iac.grn.infosweb.session.audit.export.AuditExportData;
-	import iac.grn.infosweb.session.audit.export.ResourcesMap;
-	import iac.grn.infosweb.session.navig.LinksMap;
-	import java.util.*;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.log.Log;
+
+import iac.cud.infosweb.dataitems.BaseItem;
+import iac.cud.infosweb.entity.AcUser;
+import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.export.AuditExportData;
+import iac.grn.infosweb.session.audit.export.ResourcesMap;
+import iac.grn.infosweb.session.navig.LinksMap;
+
+import java.util.*;
 
 	import org.jboss.seam.Component;
-	import javax.faces.context.FacesContext;
-	import javax.persistence.EntityManager;
+import org.slf4j.LoggerFactory;
+
+import javax.faces.context.FacesContext;
+import javax.persistence.EntityManager;
+
 import iac.grn.serviceitems.BaseTableItem;
 import iac.grn.serviceitems.HeaderTableItem;
 
@@ -39,10 +43,11 @@ import iac.grn.serviceitems.HeaderTableItem;
 		@Logger 
 		protected Log log;
 		
+		
 	    @In 
 	    protected EntityManager entityManager;
 		 
-		protected List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+		protected List<BaseItem> auditList; 
 		
 		protected Long auditCount;
 		
@@ -78,11 +83,11 @@ import iac.grn.serviceitems.HeaderTableItem;
 				  Component.getInstance("contextListCached",ScopeType.SESSION);
 		  if(auditList==null){
 			  log.info("baseManager:getAuditList:01");
-			 	if((remoteAudit.equals("rowSelectFact")||
-				    remoteAudit.equals("selRecAllFact")||
-				    remoteAudit.equals("clRecAllFact")||
-				    remoteAudit.equals("clSelOneFact")||
-				    remoteAudit.equals("onSelColSaveFact"))&&
+			 	if(("rowSelectFact".equals(remoteAudit)||
+				    "selRecAllFact".equals(remoteAudit)||
+				    "clRecAllFact".equals(remoteAudit)||
+				    "clSelOneFact".equals(remoteAudit)||
+				    "onSelColSaveFact".equals(remoteAudit))&&
 				    contextListCached!=null){
 			 		log.info("baseManager:getAuditList:02:"+contextListCached.size());
 				    	this.auditList=contextListCached;
@@ -98,7 +103,7 @@ import iac.grn.serviceitems.HeaderTableItem;
 			 	if(this.auditList!=null && contextSelRec!=null) {
 			 		 for(BaseItem it:this.auditList){
 					   if(contextSelRec.contains(it.getBaseId().toString())){
-						// log.info("invoke:Selected!!!");
+						 
 						 it.setSelected(true);
 					   }else{
 						 it.setSelected(false);
@@ -126,81 +131,17 @@ import iac.grn.serviceitems.HeaderTableItem;
 			        .getRequestParameterMap()
 			        .get("sessionId");
 		  log.info("baseManager:forView:sessionId:"+sessionId);
-		   if(sessionId!=null /*&& usrBean==null*/){
+		   if(sessionId!=null ){
 			  
-			//  invoke("bean", 0, 0, sessionId, service);
-			//  Contexts.getEventContext().set("logContrBean", logContrBean);
-		
-			 /* 
-		 	 List<AcUser> usrListCached = (List<AcUser>)
-					  Component.getInstance("usrListCached",ScopeType.SESSION);
-			  if(usrListCached!=null){
-				 for(AcUser it : usrListCached){
-					 
-					 log.info("forView_inside_for");
-					 
-					 if(it.getBaseId().toString().equals(sessionId)){
-						 log.info("forView_Achtung!!!");
-						// this.usrBean=it;
-						// Contexts.getEventContext().set("usrBean", usrBean);
-						 Contexts.getEventContext().set("usrBean", it);
-						 return;
-					 }
-				 }
-			 }*/
+	
 			 
-			//UserItem au = (UserItem)searchBean(sessionId);
-			 BaseItem au = searchBean(sessionId);
+				 BaseItem au = searchBean(sessionId);
 			 
-			/* Long appCode = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode();
-				
-	    	 
-		     List<AcRole> rlist = entityManager.createQuery(
-		    			"select ar from AcRole ar, AcLinkUserToRoleToRaion alur " +
-		    	 		"where alur.acRole = ar and alur.pk.acUser = :acUser " +
-		    	 		"and ar.acApplication= :acApplication ")
-		    	 		// .setParameter("acUser", au.getIdUser())
-		    	 		 .setParameter("acUser", new Long(sessionId))
-		    	 		 .setParameter("acApplication", appCode)
-		    	 		 .getResultList();
+	
 		    	
-		    	// log.info("forView:rlist.size:"+rlist.size());
-		    	 
-		    	if(!rlist.isEmpty()){
-		    		log.info("forView:setCudRole");
-		    		au.setIsCudRole(1L);
-		    		
-		    		for(AcRole ar :rlist){
-		    			
-		    			if (ar.getSign().equals("role:urn:sys_admin_cud")){
-		    				au.setIsSysAdmin(1L);
-		    				break;
-		    			}
-		    			
-		    		}
-		    		
-		    }*/
-		    	
-	     /*    try{
-	        	String[] fio = au.getFio().trim().split("\\s+");
-		    	
-		    	for(int i=0; i<3; i++ ){
-					 
-					 if(i<fio.length){
-						 this.fioArray[i]=fio[i];
-					 }
-					 
-				 }
-		      	
-		     }catch(Exception e){
-		    	  System.out.println("BindManager:forView:split:Error:"+e);
-		     }*/
+	
 	 
 		     Contexts.getEventContext().set("contextBeanView", au);
-			 //Contexts.getEventContext().set("usrBean", au);
-		     
-		  //   AcUser uzp = entityManager.find(AcUser.class, new Long(sessionId));
-		   //  Contexts.getEventContext().set("bindBeanViewUzp", uzp);
 		  }
 	   }
 	   
@@ -212,7 +153,7 @@ import iac.grn.serviceitems.HeaderTableItem;
 			if(contextListCached!=null){
 				for(BaseItem it : contextListCached){
 					 
-				// log.info("searchBean_inside_for");
+				 
 				  if(it.getBaseId().toString().equals(sessionId)){
 						 log.info("searchBean_Achtung!!!");
 						 return it;
@@ -229,7 +170,7 @@ import iac.grn.serviceitems.HeaderTableItem;
 		   invokeLocal("count",0,0,null);
 		  
 		   return auditCount;
-		  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+		  
 	   }
 	   
 	   public void add(){
@@ -272,7 +213,7 @@ import iac.grn.serviceitems.HeaderTableItem;
 		    String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
 			        .getRequestParameterMap()
 			        .get("sessionId");
-		  //  log.info("selectRecord:sessionId="+sessionId);
+		   
 		    
 		   //  forView(); //!!!
 		    ArrayList<String> contextSelRec = (ArrayList<String>)
@@ -280,31 +221,31 @@ import iac.grn.serviceitems.HeaderTableItem;
 		    
 		    if(contextSelRec==null){
 		    	contextSelRec = new ArrayList<String>();
-		      // log.info("selectRecord:01");
+		       
 		    }
 		    
-		   // AcUser au = searchBean(sessionId);
-		  //  UserItem au = new UserItem();
+		   
+		  
 		    
 		    BaseItem au = new BaseItem();
 		    
-		  // в getAuditList : else{it.setSelected(false);}
+		 
 		    
 		    if(au!=null){ 
 		     if(contextSelRec.contains(sessionId)){
 		    	 contextSelRec.remove(sessionId);
 		    	au.setSelected(false);
-		    	//log.info("selectRecord:02");
+		    	 
 		     }else{
 		    	 contextSelRec.add(sessionId);
 		    	au.setSelected(true);
-		    	//log.info("selectRecord:03");
+		    	 
 		    }
 		    Contexts.getSessionContext().set("contextSelRec", contextSelRec);	
 		    
 	       // !!! переделано через getIsSelect()
 		   // в centerCenterUnit.xhtml contextBeanView.selected  заменено на appSystemManager.isSelect
-		   // Contexts.getEventContext().set("contextBeanView", au);
+		   
 		    }
 	   }
 	   
@@ -376,11 +317,11 @@ import iac.grn.serviceitems.HeaderTableItem;
 	     	
 	    	if(remoteAudit!=null&&
 	    	 
-	    	   !remoteAudit.equals("OpenCrtFact")&&	
-	    	   !remoteAudit.equals("OpenUpdFact")&&
-	    	   !remoteAudit.equals("OpenDelFact")&&
-	   	       !remoteAudit.equals("onSelColFact")&&
-	   	       !remoteAudit.equals("refreshPdFact")&&
+	    	   !"OpenCrtFact".equals(remoteAudit)&&	
+	    	   !"OpenUpdFact".equals(remoteAudit)&&
+	    	   !"OpenDelFact".equals(remoteAudit)&&
+	   	       !"onSelColFact".equals(remoteAudit)&&
+	   	       !"refreshPdFact".equals(remoteAudit)&&
 	   	       !remoteAudit.equals("OpenCommentFact")
 	   	    ){
 	    		log.info("BaseManager:evaluteForList!!!");
@@ -391,7 +332,7 @@ import iac.grn.serviceitems.HeaderTableItem;
 	   }
 	   public Boolean getEvaluteForListFooter() {
 			
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForListFooter==null){
 		   		evaluteForListFooter=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -401,12 +342,12 @@ import iac.grn.serviceitems.HeaderTableItem;
 		     
 		    	if(getEvaluteForList()&&
 		    	   //new-1-	
-		    	   !remoteAudit.equals("protBeanWord")&&	
+		    	   !"protBeanWord".equals(remoteAudit)&&	
 		    	   //new-2-	
-		   	       !remoteAudit.equals("selRecAllFact")&&
-		   	       !remoteAudit.equals("clRecAllFact")&&
-		   	      // !remoteAudit.equals("clSelOneFact")&&
-		   	       !remoteAudit.equals("onSelColSaveFact")){
+		   	       !"selRecAllFact".equals(remoteAudit)&&
+		   	       !"clRecAllFact".equals(remoteAudit)&&
+		   	      // !remoteAudit equals "clSelOneFact"
+		   	       !"onSelColSaveFact".equals(remoteAudit)){
 		    		log.info("BaseManager:evaluteForListFooter!!!");
 		   		    evaluteForListFooter=true;
 		    	}
@@ -416,7 +357,7 @@ import iac.grn.serviceitems.HeaderTableItem;
 	   
 	   public Boolean getEvaluteForBean() {
 			
-			  // 	log.info("reposManager:evaluteForListFooter:01");
+			  
 			   	if(evaluteForBean==null){
 			   		evaluteForBean=false;
 			    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -428,8 +369,8 @@ import iac.grn.serviceitems.HeaderTableItem;
 				             .get("sessionId");
 				    log.info("BaseManager:evaluteForBean:sessionId:"+sessionId);
 			    	if(sessionId!=null && remoteAudit!=null &&
-			    	   (remoteAudit.equals("rowSelectFact")||	
-			    	    remoteAudit.equals("UpdFact")||
+			    	   ("rowSelectFact".equals(remoteAudit)||	
+			    	    "UpdFact".equals(remoteAudit)||
 			    	    remoteAudit.equals("CommentFact"))){
 			    	      log.info("BaseManager:evaluteForBean!!!");
 			   		      evaluteForBean=true;

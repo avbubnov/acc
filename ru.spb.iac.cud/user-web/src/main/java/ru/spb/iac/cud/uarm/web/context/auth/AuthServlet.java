@@ -33,7 +33,7 @@ import test.ejb.HomeBean;
 public class AuthServlet extends HttpServlet {
  
 
-   final static Logger logger = LoggerFactory.getLogger(AuthServlet.class);
+   final static Logger LOGGER = LoggerFactory.getLogger(AuthServlet.class);
 	
    private static final long serialVersionUID = 1L;
  
@@ -46,7 +46,7 @@ public class AuthServlet extends HttpServlet {
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
-		logger.info("AuthServlet:service:01");
+		LOGGER.debug("AuthServlet:service:01");
 		boolean success = false;
 		String email = null;
 				
@@ -55,7 +55,7 @@ public class AuthServlet extends HttpServlet {
 		if(success){
 			//!!!
 			HttpSession hs = (HttpSession) request.getSession(true); 
-			logger.info("AuthServlet:service:03:"+hs.getId());
+			LOGGER.debug("AuthServlet:service:03:"+hs.getId());
 			hs.setAttribute(CUDUserConsoleConstants.userEmailReg, email);
 		
 			response.sendRedirect(request.getContextPath()+"/context/registr/reg_user_step2.xhtml");

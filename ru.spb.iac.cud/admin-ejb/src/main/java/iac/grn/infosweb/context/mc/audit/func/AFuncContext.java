@@ -6,23 +6,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class AFuncContext {
 
-    private HashMap<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
+    private Map<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
 	
-	public HashMap <String, BaseTableItem> getAuditItemsMap() {
+	public Map<String, BaseTableItem> getAuditItemsMap() {
         return this.auditItemsMap;
     }
-	/*private TreeMap<String, BaseTableItem> auditItemsMap=new TreeMap<String, BaseTableItem>();
 	
-	public TreeMap <String, BaseTableItem> getAuditItemsMap() {
-        return this.auditItemsMap;
-    }*/
 	
 	public List <BaseTableItem> getAuditItemsCollection() {
 		
@@ -49,7 +46,7 @@ public class AFuncContext {
 	
 	public AFuncContext(){
 		
-		// важно field.itemFiltField или field.itemSortField
+		// важно field.ite/mFiltField или field.itemS/ortField
 		
 		auditItemsMap.put("dateAction",new BaseTableItem("Дата и время действия", "...", "dateActionValue", "act_dat", "act_dat_value", 1));
 	    auditItemsMap.put("userName",new BaseTableItem("Пользователь", "...", "userName", "usr_fio", "usr_fio", 2));

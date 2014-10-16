@@ -5,8 +5,8 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <property name="context-root" value="idp-web"/>
         <property name="java-output-path" value="/idp-web/target/classes"/>
         <property name="component.exclusion.patterns" value="WEB-INF/lib/*.jar"/>
+        <property name="context-root" value="CudIDPPro"/>
     </wb-module>
 </project-modules>

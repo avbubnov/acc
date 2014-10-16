@@ -19,7 +19,7 @@ import mypackage.Configuration;
  */
 @WebServiceClient(name = "ClassifierZip", 
                   wsdlLocation = "NONE",
-                  /*wsdlLocation = "http://192.168.2.173:80/WSclassif/ClassifierZip?wsdl",*/
+                  /*"http://192.168.2.173:80/WSclassif/ClassifierZip?wsdl",*/
                   targetNamespace = "http://ws.iac.spb.ru/ClassifierZip") 
 public class ClassifierZip_Service extends Service {
 
@@ -30,7 +30,7 @@ public class ClassifierZip_Service extends Service {
     static {
         URL url = null;
         try {
-           // url = new URL("http://192.168.2.173:80/WSclassif/ClassifierZip?wsdl");
+           // "http://192.168.2.173:80/WSclassif/ClassifierZip?wsdl"
             url = new URL(Configuration.getClassifService());
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(ClassifierZip_Service.class.getName())
@@ -52,24 +52,15 @@ public class ClassifierZip_Service extends Service {
         super(WSDL_LOCATION, SERVICE);
     }
     
-    //This constructor requires JAX-WS API 2.2. You will need to endorse the 2.2
-    //API jar or re-run wsdl2java with "-frontend jaxws21" to generate JAX-WS 2.1
-    //compliant code instead.
-    public ClassifierZip_Service(WebServiceFeature ... features) {
+      public ClassifierZip_Service(WebServiceFeature ... features) {
         super(WSDL_LOCATION, SERVICE, features);
     }
 
-    //This constructor requires JAX-WS API 2.2. You will need to endorse the 2.2
-    //API jar or re-run wsdl2java with "-frontend jaxws21" to generate JAX-WS 2.1
-    //compliant code instead.
-    public ClassifierZip_Service(URL wsdlLocation, WebServiceFeature ... features) {
+     public ClassifierZip_Service(URL wsdlLocation, WebServiceFeature ... features) {
         super(wsdlLocation, SERVICE, features);
     }
 
-    //This constructor requires JAX-WS API 2.2. You will need to endorse the 2.2
-    //API jar or re-run wsdl2java with "-frontend jaxws21" to generate JAX-WS 2.1
-    //compliant code instead.
-    public ClassifierZip_Service(URL wsdlLocation, QName serviceName, WebServiceFeature ... features) {
+     public ClassifierZip_Service(URL wsdlLocation, QName serviceName, WebServiceFeature ... features) {
         super(wsdlLocation, serviceName, features);
     }
 

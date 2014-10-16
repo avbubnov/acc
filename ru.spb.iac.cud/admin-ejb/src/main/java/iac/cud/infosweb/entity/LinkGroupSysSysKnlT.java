@@ -23,12 +23,10 @@ public class LinkGroupSysSysKnlT implements Serializable {
 
 	private Long creator;
 
-	//bi-directional many-to-one association to AcIsBssT
 	@ManyToOne
 	@JoinColumn(name="UP_SYSTEMS", insertable=false,updatable=false)
 	private AcApplication acIsBssT;
 
-	//bi-directional many-to-one association to GroupSystemsKnlT
 	@ManyToOne
 	@JoinColumn(name="UP_GROUP_SYSTEMS", insertable=false,updatable=false)
 	private GroupSystemsKnlT groupSystemsKnlT;

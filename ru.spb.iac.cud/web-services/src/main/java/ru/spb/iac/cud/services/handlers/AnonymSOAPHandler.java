@@ -45,7 +45,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.apache.xml.security.transforms.Transforms;
 import org.picketlink.common.util.Base64;
-//import org.jboss.ws.core.soap.SOAPElementImpl;
+ 
 import org.picketlink.identity.federation.core.saml.v2.factories.SAMLAssertionFactory;
 import org.picketlink.identity.federation.core.saml.v2.util.AssertionUtil;
 import org.picketlink.identity.federation.core.saml.v2.util.DocumentUtil;
@@ -65,7 +65,7 @@ import ru.spb.iac.cud.sign.GOSTSignatureUtil;
 
 public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
-	Logger logger = LoggerFactory.getLogger(AnonymSOAPHandler.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(AnonymSOAPHandler.class);
 
     private static PublicKey publicKey = null;
 	
@@ -83,7 +83,7 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	public boolean handleMessage(SOAPMessageContext mc) {
 
-		logger.info("handleMessage:01:"
+		LOGGER.debug("handleMessage:01:"
 				+ mc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY));
 
 		String user_id = null;
@@ -99,13 +99,12 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			// sm.writeTo(System.out);
 
 			SOAPHeader soapHeader = sm.getSOAPHeader();
-			SOAPBody soapBody = sm.getSOAPBody();
-
+			
 			// запрос
 			if (Boolean.FALSE.equals(mc
 					.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY))) {
 
-				// logger.error("handleMessage:02");
+				 
 
 				NodeList usernameTokenList = soapHeader.getElementsByTagNameNS(
 						"*", "UsernameToken");
@@ -117,8 +116,8 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					// некототрые операции могут вызываться анонимно
 					// этот обработчик используется для аудита и завки напрямую
 					// от пользователя
-					// throw new
-					// GeneralFailure("This service requires UsernameToken with Id ApplicantToken_1, which is missing!!!");
+					// thr/ow new
+					// Gen/eralFai/lure("This service requires UsernameToken with Id ApplicantToken_1, which is missing!!!");
 
 				} else {
 
@@ -129,7 +128,7 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						Element el = (Element) usernameTokenList.item(0);
 						String el_id = el.getAttribute("wsu:Id");
 
-						// logger.error("handleMessage:04:"+el_id);
+						 
 
 						if ("UserAuthTokenId".equals(el_id)) {
 							// правильно -
@@ -148,7 +147,7 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (base64TokenId != null) {
 
-								logger.info("AppSOAPHandler:handleMessage:02:"
+								LOGGER.debug("AppSOAPHandler:handleMessage:02:"
 										+ base64TokenId);
 
 								byte[] byteTokenID = Base64
@@ -157,7 +156,7 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								String tokenID = new String(byteTokenID,
 										"UTF-8");
 
-								logger.info("AppSOAPHandler:handleMessage:03:"
+								LOGGER.debug("AppSOAPHandler:handleMessage:03:"
 										+ tokenID);
 
 								String[] arrTokenID = tokenID.split("_");
@@ -188,16 +187,16 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 												sb.toString().getBytes("UTF-8"),
 												sigValue, publicKey);
 
-								logger.info("handleMessage:04:"
+								LOGGER.debug("handleMessage:04:"
 										+ tokenIDValidateResult);
 
 								user_id = arrTokenID[0].toString();
 								Date expired = new Date(
 										Long.parseLong(arrTokenID[1]));
 
-								logger.info("handleMessage:05:" + user_id);
+								LOGGER.debug("handleMessage:05:" + user_id);
 
-								logger.info("handleMessage:06:" + expired);
+								LOGGER.debug("handleMessage:06:" + expired);
 
 								if (!tokenIDValidateResult) {
 									throw new Exception(
@@ -216,7 +215,7 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								throw new Exception("UserAuthToken is empty!!!");
 							}
 
-							// logger.info("handleMessage:06:"+user_login);
+							 
 
 							// решили определять пользователей извне ЦУД по их
 							// ИД, а не логинам
@@ -226,7 +225,7 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 							// и поэтому вызов authenticate_login_obo уже не
 							// нужен
 							// idUser = (new
-							// ContextAccessSTSManager()).authenticate_login_obo(user_login,
+							// ContextAc/cessSTSManager()).auth/enticate_logi/n_obo(user_login,
 							// AuthMode.HTTP_REDIRECT, getIPAddress(req));
 
 							// это заявитель
@@ -234,8 +233,8 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 									user_id/* idUser */);
 
 						}/*
-						 * else{ throw new Exception(
-						 * "This service requires UserAuthTokenId, which is missing!!!"
+						 * els/e{ throw new Exce/ption(
+						 * "This ser/vice requ/ires UserAuthTokenId, which is missing!!!"
 						 * ); }
 						 */
 						// !!!ещё подумать -
@@ -245,16 +244,12 @@ public class AnonymSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			}
 
 		} catch (Exception e) {
-			// logger.error("handleMessage:error:"+e);
+			 
 			throw new ProtocolException(e);
 		}
 		return true;
 	}
 
-	private String getIPAddress(HttpServletRequest request) {
-
-		String ipAddress = request.getRemoteAddr();
-		return ipAddress;
-	}
+	
 
 }

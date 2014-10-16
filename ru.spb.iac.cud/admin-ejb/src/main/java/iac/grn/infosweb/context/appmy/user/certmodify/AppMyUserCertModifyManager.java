@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,10 +65,10 @@ public class AppMyUserCertModifyManager extends BaseManager{
 			 
 			 AppMyUserCertModifyStateHolder appMyUserCertModifyStateHolder = (AppMyUserCertModifyStateHolder)
 					  Component.getInstance("appMyUserCertModifyStateHolder",ScopeType.SESSION);
-			 HashMap<String, String> filterMap = appMyUserCertModifyStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = appMyUserCertModifyStateHolder.getColumnFilterValues();
 			 String st=null;
 			  
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 Set<Map.Entry<String, String>> set = appMyUserCertModifyStateHolder.getSortOrders().entrySet();
@@ -85,17 +85,17 @@ public class AppMyUserCertModifyManager extends BaseManager{
                  log.info("invokeLocal:list:orderQuery:"+orderQuery);
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
+    	    		 Set<Map.Entry<String, String>> setFilter = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilter) {
     	            	  log.info("me.getKey+:"+me.getKey());
     	            	  log.info("me.getValue:"+me.getValue());
     	   		      
-    	   		     if(me.getKey().equals("t1_crt_date")){  
-    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	   		     if("t1_crt_date".equals(me.getKey())){  
+    	        	   
     	        	   //делаем фильтр на начало  
     	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
     	    	   
-    	   		     }else if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	   		     }else if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
     	    	    	 
     	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	    	    	 
@@ -202,30 +202,30 @@ public class AppMyUserCertModifyManager extends BaseManager{
             		   
 
                 	     ui= new AppUserCertModifyItem(
-            	    		 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-            				 (objectArray[3]!=null?objectArray[3].toString():""),
-            				 (objectArray[4]!=null?objectArray[4].toString():""),
-            				 (objectArray[5]!=null?objectArray[5].toString():""),
-            				 (objectArray[6]!=null?objectArray[6].toString():""),
+            	    		objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+            				objectArray[3]!=null?objectArray[3].toString():"",
+            				objectArray[4]!=null?objectArray[4].toString():"",
+            				objectArray[5]!=null?objectArray[5].toString():"",
+            				objectArray[6]!=null?objectArray[6].toString():"",
             				 
-            				 (""),
-	            			 (""),
-	            			 (""),
-	            			 (""),
-	            			 (""),
+            				 "",
+	            			 "",
+	            			 "",
+	            			 "",
+	            			 "",
 	            			 
-	            			 (objectArray[7]!=null?objectArray[7].toString():""),
-	            			 (objectArray[8]!=null?new Long(objectArray[8].toString()):null),
-	            			 (objectArray[9]!=null?objectArray[9].toString():""),
-	            			 (objectArray[10]!=null?objectArray[10].toString():""),
-	            			 (objectArray[11]!=null?objectArray[11].toString():""),
-	            			 (objectArray[12]!=null?objectArray[12].toString():""),
-	            			 (objectArray[13]!=null?objectArray[13].toString():""),
-	            			 (objectArray[14]!=null?objectArray[14].toString():""),
-	            			 (objectArray[15]!=null?objectArray[15].toString():""),
-	            			 (objectArray[16]!=null?objectArray[16].toString():""),
+	            			objectArray[7]!=null?objectArray[7].toString():"",
+	            			objectArray[8]!=null?new Long(objectArray[8].toString()):null,
+	            			objectArray[9]!=null?objectArray[9].toString():"",
+	            			objectArray[10]!=null?objectArray[10].toString():"",
+	            			objectArray[11]!=null?objectArray[11].toString():"",
+	            			objectArray[12]!=null?objectArray[12].toString():"",
+	            			objectArray[13]!=null?objectArray[13].toString():"",
+	            			objectArray[14]!=null?objectArray[14].toString():"",
+	            			objectArray[15]!=null?objectArray[15].toString():"",
+	            			objectArray[16]!=null?objectArray[16].toString():"",
 	            			 
 	            			 //modeExec
                 	    	 1);
@@ -238,27 +238,19 @@ public class AppMyUserCertModifyManager extends BaseManager{
                
              log.info("invokeLocal:list:02");
              
-			 } else if(type.equals("count")){
+			 } else if("count".equals(type)){
 				 log.info("IHReposList:count:01");
 				 
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
+    	    		 Set<Map.Entry<String, String>> setFilter = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilter) {
     	            	  log.info("me.getKey+:"+me.getKey());
     	            	  log.info("me.getValue:"+me.getValue());
     	   		    
-    	            	  /*
-    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
-    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	        	//   }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
-    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	        	 //  }
-    	            	 */ 
+    	            	
     	            	  
-    	              if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	              if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
      	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	              }else{
     	            	 st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
@@ -268,12 +260,7 @@ public class AppMyUserCertModifyManager extends BaseManager{
     	              }
     	    	   }
 				 
-				/* 
-				 auditCount = (Long)entityManager.createQuery(
-						 "select count(au) " +
-				         "from AcUser au "+
-				         (st!=null ? " where "+st :""))
-		                .getSingleResult();*/
+				
 				 
 				
 				 auditCount = ((java.math.BigDecimal)entityManager.createNativeQuery(
@@ -349,7 +336,7 @@ public class AppMyUserCertModifyManager extends BaseManager{
                  
                  
                log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
@@ -470,29 +457,28 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	        			   
 	        			  log.info("AppMyUserCertModifyManager:getUserItem:02:"+sb.length());
 		        		  
-	        			  byte[] cert_byte = Base64.decode(sb.getBytes(1L, (int)sb.length()));
+	        			  byte[] certByteX = Base64.decode(sb.getBytes(1L, (int)sb.length()));
 	        			  
-	        			  log.info("AppMyUserCertModifyManager:getUserItem:03:"+cert_byte.length);
+	        			  log.info("AppMyUserCertModifyManager:getUserItem:03:"+certByteX.length);
 	        			  
-	        			  CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
-	        	          X509Certificate user_cert = (X509Certificate)
-	        	        		   user_cf.generateCertificate(new ByteArrayInputStream(cert_byte));
-	        	        //  X509Certificate user_cert = (X509Certificate)
-	        	        //		   user_cf.generateCertificate(sb.getBinaryStream());
+	        			  CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+	        	          X509Certificate userCertX = (X509Certificate)
+	        	        		   userCf.generateCertificate(new ByteArrayInputStream(certByteX));
+	        	        //  X509Certificate userCertX = (X509Certificate)
+	        	        
 	        		   
 	        	        
-	        	           serial = dec_to_hex(user_cert.getSerialNumber());
+	        	           serial = dec_to_hex(userCertX.getSerialNumber());
 	        	           
-	        	           certDate = df.format(user_cert.getNotAfter());
+	        	           certDate = df.format(userCertX.getNotAfter());
 	        	           
-	        	           String subject = user_cert.getSubjectDN().getName();
+	        	           String subject = userCertX.getSubjectDN().getName();
 	        	    	   
 	        	    	   log.info("AppMyUserCertModifyManager:getUserItem::"+subject);
 	        	    	   
 	        	    	   LdapName ldapDN = new LdapName(subject);
 	        			   
 	        			   for(Rdn rdn: ldapDN.getRdns()) {
-	        				  //  System.out.println(rdn.getType() + " -> " + rdn.getValue());
 	        				    
 	        				    if("CN".equals(rdn.getType())){
 	        				    	userFio = (String)rdn.getValue();
@@ -506,38 +492,37 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	        		   }
 	        		   
 	        		   ui= new AppUserCertModifyItem(
-	            	    		 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-	            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-	            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-	            				 (objectArray[3]!=null?objectArray[3].toString():""),
-	            				 (objectArray[4]!=null?objectArray[4].toString():""),
-	            				 (objectArray[5]!=null?objectArray[5].toString():""),
-	            				 (objectArray[6]!=null?objectArray[6].toString():""),
+	            	    		objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+	            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+	            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+	            				objectArray[3]!=null?objectArray[3].toString():"",
+	            				objectArray[4]!=null?objectArray[4].toString():"",
+	            				objectArray[5]!=null?objectArray[5].toString():"",
+	            				objectArray[6]!=null?objectArray[6].toString():"",
 	            				 
-	            				 (serial!=null?serial:""),
-		            			 (certDate!=null?certDate:""),
-		            			 (orgName!=null?orgName:""),
-		            			 (depName!=null?depName:""),
-		            			 (userFio!=null?userFio:""),
+	            				 serial!=null?serial:"",
+		            			 certDate!=null?certDate:"",
+		            			 orgName!=null?orgName:"",
+		            			 depName!=null?depName:"",
+		            			 userFio!=null?userFio:"",
 		            			 
-		            			 (objectArray[8]!=null?objectArray[8].toString():""),
-		            			 (objectArray[9]!=null?new Long(objectArray[9].toString()):null),
-		            			 (objectArray[10]!=null?objectArray[10].toString():""),
-		            			 (objectArray[11]!=null?objectArray[11].toString():""),
-		            			 (objectArray[12]!=null?objectArray[12].toString():""),
-		            			 (objectArray[13]!=null?objectArray[13].toString():""),
-		            			 (objectArray[14]!=null?objectArray[14].toString():""),
-		            			 (objectArray[15]!=null?objectArray[15].toString():""),
-		            			 (objectArray[16]!=null?objectArray[16].toString():""),
-		            			 (objectArray[17]!=null?objectArray[17].toString():""),
-		            			 (objectArray[18]!=null?Integer.parseInt(objectArray[18].toString()):1));
+		            			objectArray[8]!=null?objectArray[8].toString():"",
+		            			objectArray[9]!=null?new Long(objectArray[9].toString()):null,
+		            			objectArray[10]!=null?objectArray[10].toString():"",
+		            			objectArray[11]!=null?objectArray[11].toString():"",
+		            			objectArray[12]!=null?objectArray[12].toString():"",
+		            			objectArray[13]!=null?objectArray[13].toString():"",
+		            			objectArray[14]!=null?objectArray[14].toString():"",
+		            			objectArray[15]!=null?objectArray[15].toString():"",
+		            			objectArray[16]!=null?objectArray[16].toString():"",
+		            			objectArray[17]!=null?objectArray[17].toString():"",
+		            			objectArray[18]!=null?Integer.parseInt(objectArray[18].toString()):1);
 	        		   
 	        		   
 	        	     return ui;
 	        	   }catch(Exception e1){
 	        		   log.error("getUserItem:for:error:"+e1);
-	        		   e1.printStackTrace(System.out);
-	        	   }
+	           	   }
 	           }  
 		   }catch(Exception e){
 			   log.error("getUserItem:error:"+e);
@@ -580,8 +565,7 @@ public class AppMyUserCertModifyManager extends BaseManager{
 			   DateFormat df = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
 
 	           String serial = null;
-	           String certDate = null;
-			   String userFio = null;
+	           String userFio = null;
 			   String depName = null;
 			   String orgName = null;
     		   
@@ -592,31 +576,29 @@ public class AppMyUserCertModifyManager extends BaseManager{
     			   
     			  log.info("AppMyUserCertModifyManager:createArm:02:"+modeExec);
         		  
-    			  byte[] cert_byte = Base64.decode(sb.getBytes(1L, (int)sb.length()));
+    			  byte[] certByteX = Base64.decode(sb.getBytes(1L, (int)sb.length()));
     			  
     			  log.info("AppMyUserCertModifyManager:createArm:03");
     			  
-    			  CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
-    	          X509Certificate user_cert = (X509Certificate)
-    	        		   user_cf.generateCertificate(new ByteArrayInputStream(cert_byte));
+    			  CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+    	          X509Certificate userCertX = (X509Certificate)
+    	        		   userCf.generateCertificate(new ByteArrayInputStream(certByteX));
     	        
-    	           serial = dec_to_hex(user_cert.getSerialNumber());
+    	           serial = dec_to_hex(userCertX.getSerialNumber());
     	           
     	           /* if(certNumExistCrt(serial)){
 	        	   log.info("UsrManager:saveUserCertificate:01_1:return;");
 	        	   return false;
 	           }*/
     	           
-    	           certDate = df.format(user_cert.getNotAfter());
     	           
-    	           String subject = user_cert.getSubjectDN().getName();
+    	           String subject = userCertX.getSubjectDN().getName();
     	    	   
     	    	   log.info("AppMyUserCertModifyManager:createArm:03:"+subject);
     	    	   
     			   LdapName ldapDN = new LdapName(subject);
     			   
     			   for(Rdn rdn: ldapDN.getRdns()) {
-    				  //  System.out.println(rdn.getType() + " -> " + rdn.getValue());
     				    
     				    if("CN".equals(rdn.getType())){
     				    	userFio = (String)rdn.getValue();
@@ -634,10 +616,10 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	    			   AcUsersCertBssT userCert = new AcUsersCertBssT();
 	    	    	   
 	    	    	   userCert.setCertNum(serial);
-	    	    	   userCert.setCertDate(df.format(user_cert.getNotAfter()));
+	    	    	   userCert.setCertDate(df.format(userCertX.getNotAfter()));
 	    	    	   
 	    	    	   //!!!
-	    	    	   //сохраняем именно не user_cert.getEncoded(),
+	    	    	   //сохраняем именно не userCertX.getEncoded(),
 	    	    	   //а x509Cert.getBytes
 	    	    	   userCert.setCertValue(sb.getBytes(1L, (int)sb.length()));
 	    	    	   
@@ -760,69 +742,9 @@ public class AppMyUserCertModifyManager extends BaseManager{
 			 /* 
 			  //как вариант
 			  //для него нужен бин JournAppUserCertaddBssT
-        	 BaseItem au = super.searchBean(sessionId);
+        	 BaseItem /au = /super/.searchBean(sessionId/)
         	 
-        	try{
-        		
-        		JournAppUserCertaddBssT jac = entityManager.find(
-        				JournAppUserCertaddBssT.class, 
-                        new Long(sessionId));
-        		
-        		if(jac.getCertValue() !=null){
-        		
-		        		DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
-		        		
-		     		    String serial = null;
-		 	            String certDate = null;
-		 			    String userFio = null;
-		 			    String depName = null;
-		 			    String orgName = null;
-		     		   
-		     		   
-		     			   //cert_value
-		     			  
-		     			  log.info("AppUserCertModifyManager:forView:02");
-			        	
-		     			  byte[] cert_byte = Base64.decode(jac.getCertValue());
-		     			 
-		     			  CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
-		     	          X509Certificate user_cert = (X509Certificate)
-		     	        		   user_cf.generateCertificate(new ByteArrayInputStream(cert_byte));
-		     		   
-		     	        
-		     	           serial = dec_to_hex(user_cert.getSerialNumber());
-		     	           
-		     	           certDate = df.format(user_cert.getNotAfter());
-		     	           
-		     	           String subject = user_cert.getSubjectDN().getName();
-		     	    	   
-		     	    	   log.info("AppUserCertModifyManager:forView:03:"+subject);
-		     	    	   
-		     			   LdapName ldapDN = new LdapName(subject);
-		     			   
-		     			   for(Rdn rdn: ldapDN.getRdns()) {
-		     				  //  System.out.println(rdn.getType() + " -> " + rdn.getValue());
-		     				    
-		     				    if("CN".equals(rdn.getType())){
-		     				    	userFio = (String)rdn.getValue();
-		     				    }else if("OU".equals(rdn.getType())){
-		     				    	depName = (String)rdn.getValue();
-		     				    }else if("O".equals(rdn.getType())){
-		     				    	orgName = (String)rdn.getValue();
-		     				    }
-		     				    
-		     				}
-		     			
-		        		((AppUserCertModifyItem)au).setCertNum(serial);
-		        		((AppUserCertModifyItem)au).setCertDate(certDate);
-		        		((AppUserCertModifyItem)au).setCertOrgName(orgName);
-		        		((AppUserCertModifyItem)au).setCertDepName(depName);
-		        		((AppUserCertModifyItem)au).setCertUserFio(userFio);
-        		
-        	  }
-        	}catch(Exception e){
-        		log.info("AppUserCertModifyManager:forView:04:error"+e);
-        	}*/
+        	*/
 			 
         	 
         	 
@@ -909,7 +831,7 @@ public class AppMyUserCertModifyManager extends BaseManager{
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("idApp"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("created"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
-			  // auditItemsListSelect.add(ac.getAuditItemsMap().get("usrFio"));
+			  
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
 		   }
 	       return this.auditItemsListSelect;
@@ -921,9 +843,9 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	   log.info("AppMyUserCertModifyManager:getAuditItemsListContext");
 	   if(auditItemsListContext==null){
 		   AppMyUserCertModifyContext ac= new AppMyUserCertModifyContext();
-		  // auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		  
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 		   
 	   }
@@ -934,22 +856,9 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	  
 	  if(headerItemsListContext==null){
 		   AppMyUserCertModifyContext ac= new AppMyUserCertModifyContext();
-		//   headerItemsListContext = new ArrayList<BaseTableItem>();
 		   headerItemsListContext=ac.getHeaderItemsList();
 		   
-		/*   
-		   AppUserItem ui = (AppUserItem)
-					  Component.getInstance("contextBeanView",ScopeType.EVENT); 
-		   
-		   log.info("AppUserManager:getHeaderItemsListContext:01");
-		   
-		   if(ui!=null){
-			   log.info("AppUserManager:getHeaderItemsListContext:ui.getStatus():"+ui.getStatus());
-			   if(ui.getStatus()!=2){
-				   log.info("AppUserManager:getHeaderItemsListContext:03:"+headerItemsListContext.get(2).getItems().g);
-				   headerItemsListContext.get(2).getItems().remove("rejectReason");
-			   }
-		   }*/
+		
 		   
 	   }
 	  
@@ -966,7 +875,7 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	 	
 	 		headerItemsListContext=new ArrayList<HeaderTableItem>();
 	 				
-	 	    //List<String> idsList = Arrays.asList(ids);
+	 	    
 	 	
 	 	     List<String> idsList =  Arrays.asList(ids.split(","));
 	 	   
@@ -993,7 +902,7 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	 	
 	 		headerItemsListContextCREATE=new ArrayList<HeaderTableItem>();
 	 				
-	 	    //List<String> idsList = Arrays.asList(ids);
+	 	    
 	 	
 	 	     List<String> idsList =  Arrays.asList(ids.split(","));
 	 	   
@@ -1010,18 +919,18 @@ public class AppMyUserCertModifyManager extends BaseManager{
 	 	}
 	   return this.headerItemsListContextCREATE;
 }
-  private static String dec_to_hex(BigInteger bi) {
+  private String dec_to_hex(BigInteger bi) {
 		
 		String result = null;
 		
 		try
 		{
 		 result = bi.toString(16);
-	     System.out.println("num_convert:num:"+result);
+		 
 		}
 		catch (NumberFormatException e)
 		{
-		     System.out.println("Error! tried to parse an invalid number format");
+			log.error("Error! tried to parse an invalid number format");
 		}
 		 return result;
 		}

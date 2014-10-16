@@ -108,7 +108,33 @@
     		<artifactId>crypto-15export</artifactId>
     		<version>0.0.1-SNAPSHOT</version>
     	</dependency>
-    	
+      <dependency>
+    		<groupId>ru.crypto</groupId>
+    		<artifactId>XMLDSigRI</artifactId>
+    		<version>2.0</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>ru.cryptopro</groupId>
+    		<artifactId>JCPxml</artifactId>
+    		<version>1.0.53</version>
+    	</dependency>
+    	    	
+    <dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-api</artifactId>
+  		<version>1.6.1</version>
+  	</dependency>
+    <dependency>
+  		<groupId>ch.qos.logback</groupId>
+  		<artifactId>logback-core</artifactId>
+  		<version>1.1.2</version>
+  	</dependency>
+  	 <dependency>
+  		<groupId>ch.qos.logback</groupId>
+  		<artifactId>logback-classic</artifactId>
+  		<version>1.1.2</version>
+  	</dependency>
+  		
 	<!--dependency>
 <groupId>ru.CryptoPro.ssl</groupId>
 <artifactId>SSL</artifactId>
@@ -117,8 +143,9 @@
 <systemPath>C:\Program Files\Java\jdk1.7.0_45\jre\cpSSL.jar</systemPath>
 </dependency-->
 
+
    <dependency>
-     <groupId>ru.CryptoPro.ssl</groupId>
+     <groupId>ru.cryptopro.ssl</groupId>
      <artifactId>SSL</artifactId>
      <version>1.0.53</version>
    </dependency>

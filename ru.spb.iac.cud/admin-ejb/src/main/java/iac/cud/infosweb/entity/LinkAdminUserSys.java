@@ -22,12 +22,10 @@ public class LinkAdminUserSys implements Serializable {
 
 	private Long creator;
 
-	//bi-directional many-to-one association to AcIsBssT
 	@ManyToOne
 	@JoinColumn(name="UP_SYS", insertable=false, updatable=false)
 	private AcApplication acIsBssT;
 
-	//bi-directional many-to-one association to AcUsersKnlT
 	@ManyToOne
 	@JoinColumn(name="UP_USER", insertable=false, updatable=false)
 	private AcUser acUsersKnlT;

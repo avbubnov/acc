@@ -34,7 +34,7 @@ import ru.spb.iac.cud.sts.core.auth.util.GOSTAssertionUtil;
 
 public class CUDSAML2STSLoginModule extends CUDSAML2STSCommonLoginModule {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDSAML2STSLoginModule.class);
 
 	protected boolean localValidation(Element assertionElement)
@@ -44,7 +44,7 @@ public class CUDSAML2STSLoginModule extends CUDSAML2STSCommonLoginModule {
 			return true;
 
 		try {
-			loggerslf4j.info("localValidation:01:"
+			LOGGERSLF4J.debug("localValidation:01:"
 					+ localValidationSecurityDomain);
 
 			Context ctx = new InitialContext();
@@ -54,15 +54,15 @@ public class CUDSAML2STSLoginModule extends CUDSAML2STSCommonLoginModule {
 			JBossJSSESecurityDomain sd = (JBossJSSESecurityDomain) ctx
 					.lookup(jsseLookupString);
 
-			loggerslf4j.info("localValidation:02:" + sd);
+			LOGGERSLF4J.debug("localValidation:02:" + sd);
 
 			String securityDomain = sd.getSecurityDomain();
 
-			loggerslf4j.info("localValidation:03:" + securityDomain);
+			LOGGERSLF4J.debug("localValidation:03:" + securityDomain);
 
 			KeyStore ts = sd.getTrustStore();
 
-			loggerslf4j.info("localValidation:04:" + ts);
+			LOGGERSLF4J.debug("localValidation:04:" + ts);
 
 			if (ts == null) {
 				throw logger
@@ -71,7 +71,7 @@ public class CUDSAML2STSLoginModule extends CUDSAML2STSCommonLoginModule {
 
 			String alias = sd.getServerAlias();
 
-			loggerslf4j.info("localValidation:05:" + alias);
+			LOGGERSLF4J.debug("localValidation:05:" + alias);
 
 			if (alias == null) {
 				throw logger

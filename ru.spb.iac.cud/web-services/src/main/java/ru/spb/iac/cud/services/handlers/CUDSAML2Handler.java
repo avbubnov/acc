@@ -135,8 +135,8 @@ public class CUDSAML2Handler extends AbstractSAML2Handler {
 		try {
 			Element wsse = getSecurityHeaderElement(document);
 			// !!!
-			// wsse.setAttributeNS(soapHeader.getNamespaceURI(),
-			// soapHeader.getPrefix() + ":mustUnderstand", "1");
+			// ws/se.setAt/tributeNS(soa/pHeader.ge/tNamespaceURI(),
+			// soap/Header.getP/refix() + ":mustU/nderstand", "1");
 
 			wsse.setAttributeNS(
 					"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
@@ -144,12 +144,12 @@ public class CUDSAML2Handler extends AbstractSAML2Handler {
 
 			// закомментировать
 			/*
-			 * if (assertion != null) { // add the assertion as a child of the
+			 *if/ (assertion != null) { // add the assertion as a child of the
 			 * wsse header // check if the assertion element comes from the same
-			 * document, otherwise import the node if (document !=
-			 * assertion.getOwnerDocument()) {
-			 * wsse.appendChild(document.importNode(assertion, true)); } else {
-			 * wsse.appendChild(assertion); } }
+			 * docu/ment, otherwise import the node if (document !=
+			 * asse/rtion.getOwnerDocument()) {
+			 * wsse.app/endChild(document.importNode(assertion, true)); } else {
+			 * wsse.a/ppendChild(assertion); } }
 			 */
 			soapHeader.insertBefore(wsse, soapHeader.getFirstChild());
 		} catch (Exception e) {

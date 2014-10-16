@@ -18,7 +18,7 @@ import javax.persistence.EntityManager;
  *
  */
 @Name("supportMail")
-public class SupportMail implements Runnable {//implements OrgManagerInterface{
+public class SupportMail implements Runnable {
 	
 	@Logger private Log log;
 	
@@ -59,26 +59,21 @@ public class SupportMail implements Runnable {//implements OrgManagerInterface{
 	}
 	
 	
-	public void send(/*String help_fio, String help_mail, String help_text*/) {
-		//((IssBean)Component.getInstance("issBean")).setSprtqstRendered(false);
+	public void send() {
+		
 	    try {
 	       log.info("supportMail:send:01");
 	       
-	    /*   helpFio=help_fio;
-	       helpMail=help_mail;
-	       helpText=help_text;*/
-	       
+	 
 	       renderer.render("/services/support/mail.xhtml");
 	       
 	       log.info("supportMail:send:02");
-	   	//  FacesMessages.instance().addToControl("info", "Письмо отправлено!");
+	 
 	  	   
 	    } 
 	   catch (Exception e) {
 		   log.error("supportMail:send:ERROR="+e);
-		   e.printStackTrace(System.out);
-		//   FacesMessages.instance().addToControl("info_mail", "Письмо не отправлено!");
-	     }
+			     }
 	}
    public String getHelpFio(){
 	   return this.helpFio;

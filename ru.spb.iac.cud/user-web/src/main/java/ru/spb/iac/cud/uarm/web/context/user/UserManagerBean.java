@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 @RequestScoped
 public class UserManagerBean implements Serializable {
  
-	final static Logger logger = LoggerFactory.getLogger(UserManagerBean.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserManagerBean.class);
 	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserManagerEJB")
 	private UserManagerEJB userManagerEJB;
@@ -107,18 +107,16 @@ public class UserManagerBean implements Serializable {
 		
 		if(this.user==null){
 			
-			//String userID =(String) FacesContext.getCurrentInstance().getExternalContext().getFlash().get("userID");
-      
+			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 			
          	
 			this.user =userManagerEJB.getUserItem(authUserID);
          	
-			//this.user =(AcUsersKnlT) FacesContext.getCurrentInstance().getExternalContext().getFlash().get("userData");
-		   
+			
 			if(this.user!=null){
-			  logger.info("UserManagerBean:getUser:01:"+this.user.getLogin());
+			  LOGGER.debug("UserManagerBean:getUser:01:"+this.user.getLogin());
 			}
 			
 		}
@@ -138,14 +136,14 @@ public class UserManagerBean implements Serializable {
 		HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 		Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 		
-		logger.info("UserManagerBean:getListArm:01:"+authUserID);
+		LOGGER.debug("UserManagerBean:getListArm:01:"+authUserID);
 		
 		if(this.listArm==null){
 			this.listArm =userManagerEJB.getUserRoles(authUserID);
 		}
 		
 		if(this.listArm!=null){
-			logger.info("UserManagerBean:getListArm:01:"+this.listArm.size());
+			LOGGER.debug("UserManagerBean:getListArm:01:"+this.listArm.size());
 		}
 		
 		return listArm;
@@ -157,7 +155,7 @@ public class UserManagerBean implements Serializable {
 
 	public List<AcIsBssT> getListArmFull() {
 		
-		logger.info("UserManagerBean:getListArmFull:01");
+		LOGGER.debug("UserManagerBean:getListArmFull:01");
 		
 		
 		String requestType = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
@@ -165,16 +163,15 @@ public class UserManagerBean implements Serializable {
 		String onArmSelectOpen = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 			     .get("onArmSelectOpen");
 		
-		logger.info("UserManagerBean:getListArmFull:01_1:"+requestType);
-		logger.info("UserManagerBean:getListArmFull:01_2:"+onArmSelectOpen);
+		LOGGER.debug("UserManagerBean:getListArmFull:01_1:"+requestType);
+		LOGGER.debug("UserManagerBean:getListArmFull:01_2:"+onArmSelectOpen);
 		
 		if(this.listArmFull==null){
-		//	this.listArmFull =userManagerEJB.getFullArmRoles();
-			this.listArmFull =userManagerEJB.getArmList();
+				this.listArmFull =userManagerEJB.getArmList();
 		}
 		
 		if(this.listArmFull!=null){
-			logger.info("UserManagerBean:getListArmFull:02:"+this.listArmFull.size());
+			LOGGER.debug("UserManagerBean:getListArmFull:02:"+this.listArmFull.size());
 		}
 		
 		return listArmFull;
@@ -186,14 +183,14 @@ public class UserManagerBean implements Serializable {
 
 	public List<JournAppAccessBssT> getListAppAccess() {
 		
-	    logger.info("UserManagerBean:getListAppAccess:01");
+	    LOGGER.debug("UserManagerBean:getListAppAccess:01");
 		
 		if(listAppAccess==null){
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 			
-			logger.info("UserManagerBean:getListAppAccess:02:"+authUserID);
+			LOGGER.debug("UserManagerBean:getListAppAccess:02:"+authUserID);
 		
 			this.listAppAccess =userManagerEJB.getAppAccessList(authUserID);
 		}
@@ -207,14 +204,14 @@ public class UserManagerBean implements Serializable {
 
     public List<JournAppAccessBssT> getListAppAccessGroups() {
 		
-	    logger.info("UserManagerBean:getListAppAccessGroups:01");
+	    LOGGER.debug("UserManagerBean:getListAppAccessGroups:01");
 		
 		if(listAppAccessGroups==null){
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 			
-			logger.info("UserManagerBean:getListAppAccessGroups:02:"+authUserID);
+			LOGGER.debug("UserManagerBean:getListAppAccessGroups:02:"+authUserID);
 		
 			this.listAppAccessGroups =userManagerEJB.getAppAccessGroupsList(authUserID);
 		}
@@ -233,7 +230,7 @@ public class UserManagerBean implements Serializable {
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 					     .get("idArm");
 			
-			logger.info("UserManagerBean:getListRolesFromArm:01:"+pidArm);
+			LOGGER.debug("UserManagerBean:getListRolesFromArm:01:"+pidArm);
 			
 			listRolesFromArm = userManagerEJB.getListRolesFromArm(new Long(pidArm));
 			
@@ -264,7 +261,7 @@ public class UserManagerBean implements Serializable {
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 					     .get("idArm");
 			
-			logger.info("UserManagerBean:getListGroupsFromArm:01:"+pidArm);
+			LOGGER.debug("UserManagerBean:getListGroupsFromArm:01:"+pidArm);
 			
 			listGroupsFromArm = userManagerEJB.getListGroupsFromArm(new Long(pidArm));
 			
@@ -295,8 +292,8 @@ public class UserManagerBean implements Serializable {
 			 String nameRole = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				        .get("nameRole");
 	
-			 logger.info("UserManagerBean:addRole:01:"+idRole);
-			 logger.info("UserManagerBean:addRole:02:"+nameRole);
+			 LOGGER.debug("UserManagerBean:addRole:01:"+idRole);
+			 LOGGER.debug("UserManagerBean:addRole:02:"+nameRole);
 			 
 			 if(userSessionBean.getSumRoles()==null){
 				Map<Long, String> sumRoles = new  HashMap<Long, String>();
@@ -310,7 +307,7 @@ public class UserManagerBean implements Serializable {
 			 }
 			 
 		}catch(Exception e){
-			 logger.error("UserManagerBean:addRole:error:"+e);
+			 LOGGER.error("UserManagerBean:addRole:error:"+e);
 		}
 	}
 
@@ -321,8 +318,8 @@ public class UserManagerBean implements Serializable {
 			 String nameGroup = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				        .get("nameGroup");
 	
-			 logger.info("UserManagerBean:addGroup:01:"+idGroup);
-			 logger.info("UserManagerBean:addGroup:02:"+nameGroup);
+			 LOGGER.debug("UserManagerBean:addGroup:01:"+idGroup);
+			 LOGGER.debug("UserManagerBean:addGroup:02:"+nameGroup);
 			 
 			 if(userSessionBean.getSumGroups()==null){
 				Map<Long, String> sumGroups = new  HashMap<Long, String>();
@@ -336,13 +333,13 @@ public class UserManagerBean implements Serializable {
 			 }
 			 
 		}catch(Exception e){
-			 logger.error("UserManagerBean:addGroup:error:"+e);
+			 LOGGER.error("UserManagerBean:addGroup:error:"+e);
 		}
 	}
 	
 	public List<String> getSumRoles() {
 		try{
-			 logger.info("UserManagerBean:getSumRoles:01");
+			 LOGGER.debug("UserManagerBean:getSumRoles:01");
 			 
 			 if(this.sumRoles==null){
 				 if(userSessionBean.getSumRoles()!=null){
@@ -356,7 +353,7 @@ public class UserManagerBean implements Serializable {
 				 }
 			 }
 		}catch(Exception e){
-			 logger.error("UserManagerBean:getSumRoles:error:"+e);
+			 LOGGER.error("UserManagerBean:getSumRoles:error:"+e);
 		}
 		return this.sumRoles;
 	}
@@ -367,7 +364,7 @@ public class UserManagerBean implements Serializable {
 	
 	public List<String> getSumGroups() {
 		try{
-			 logger.info("UserManagerBean:getSumGroups:01");
+			 LOGGER.debug("UserManagerBean:getSumGroups:01");
 			 
 			 if(this.sumGroups==null){
 				 if(userSessionBean.getSumGroups()!=null){
@@ -381,7 +378,7 @@ public class UserManagerBean implements Serializable {
 				 }
 			 }
 		}catch(Exception e){
-			 logger.error("UserManagerBean:getSumGroups:error:"+e);
+			 LOGGER.error("UserManagerBean:getSumGroups:error:"+e);
 		}
 		return this.sumGroups;
 	}
@@ -395,7 +392,7 @@ public class UserManagerBean implements Serializable {
 			 String requestType = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("requestType");
 			
-			 logger.info("UserManagerBean:resetSumRoles:01:"+requestType);
+			 LOGGER.debug("UserManagerBean:resetSumRoles:01:"+requestType);
 			 
 			 if(userSessionBean.getSumRoles()!=null&&
 					 "armSelect".equals(requestType)){
@@ -403,7 +400,7 @@ public class UserManagerBean implements Serializable {
 				 userSessionBean.getSumRoles().clear();
 			 }
 		}catch(Exception e){
-			 logger.error("UserManagerBean:resetSumRoles:error:"+e);
+			 LOGGER.error("UserManagerBean:resetSumRoles:error:"+e);
 		}
 	}
 	
@@ -412,7 +409,7 @@ public class UserManagerBean implements Serializable {
 			 String requestType = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("requestType");
 			
-			 logger.info("UserManagerBean:resetSumGroups:01:"+requestType);
+			 LOGGER.debug("UserManagerBean:resetSumGroups:01:"+requestType);
 			 
 			 if(userSessionBean.getSumGroups()!=null&&
 					 "armSelect".equals(requestType)){
@@ -420,14 +417,14 @@ public class UserManagerBean implements Serializable {
 				 userSessionBean.getSumGroups().clear();
 			 }
 		}catch(Exception e){
-			 logger.error("UserManagerBean:resetSumGroups:error:"+e);
+			 LOGGER.error("UserManagerBean:resetSumGroups:error:"+e);
 		}
 	}
 	
 	
 	public Boolean getRenderedRolesTable() {
 		
-		logger.info("UserManagerBean:getRenderedRolesTable:01");
+		LOGGER.debug("UserManagerBean:getRenderedRolesTable:01");
 		
 		if(this.renderedRolesTable==null){
 			
@@ -438,7 +435,7 @@ public class UserManagerBean implements Serializable {
 			   "rolesScroll".equals(requestType)||
 			   "rolesSum".equals(requestType)){
 				
-				logger.info("UserManagerBean:getRenderedRolesTable:02!!!");
+				LOGGER.debug("UserManagerBean:getRenderedRolesTable:02!!!");
 				this.renderedRolesTable=true;
 			}
 			
@@ -452,7 +449,7 @@ public class UserManagerBean implements Serializable {
 
    public Boolean getRenderedGroupsTable() {
 		
-		logger.info("UserManagerBean:getRenderedGroupsTable:01");
+		LOGGER.debug("UserManagerBean:getRenderedGroupsTable:01");
 		
 		if(this.renderedGroupsTable==null){
 			
@@ -463,7 +460,7 @@ public class UserManagerBean implements Serializable {
 			   "groupsScroll".equals(requestType)||
 			   "groupsSum".equals(requestType)){
 				
-				logger.info("UserManagerBean:getRenderedGroupsTable:02!!!");
+				LOGGER.debug("UserManagerBean:getRenderedGroupsTable:02!!!");
 				this.renderedGroupsTable=true;
 			}
 			
@@ -485,14 +482,14 @@ public class UserManagerBean implements Serializable {
 
 	public List<JournAppAdminUserSysBssT> getListAppAdminUserSys() {
 		
-     logger.info("UserManagerBean:getListAppAdminUserSys:01");
+     LOGGER.debug("UserManagerBean:getListAppAdminUserSys:01");
 		
 		if(listAppAdminUserSys==null){
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 			
-			logger.info("UserManagerBean:getListAppAdminUserSys:02:"+authUserID);
+			LOGGER.debug("UserManagerBean:getListAppAdminUserSys:02:"+authUserID);
 		
 			this.listAppAdminUserSys =userManagerEJB.getAppAdminUserSysList(authUserID);
 		}
@@ -506,14 +503,14 @@ public class UserManagerBean implements Serializable {
 
 	public List<JournAppOrgManagerBssT> getListAppOrgMan() {
 		
-	     logger.info("UserManagerBean:getListAppOrgMan:01");
+	     LOGGER.debug("UserManagerBean:getListAppOrgMan:01");
 			
 			if(listAppOrgMan==null){
 				
 				HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 				Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 				
-				logger.info("UserManagerBean:getListAppOrgMan:02:"+authUserID);
+				LOGGER.debug("UserManagerBean:getListAppOrgMan:02:"+authUserID);
 			
 				this.listAppOrgMan =userManagerEJB.getAppOrgManList(authUserID);
 			}
@@ -543,7 +540,7 @@ public class UserManagerBean implements Serializable {
     
 	public void changePassword() {
 		try{
-			 logger.info("UserManagerBean:changePassword:01");
+			 LOGGER.debug("UserManagerBean:changePassword:01");
 	
 	          String userOldPassword =  (String) FacesContext.getCurrentInstance().getExternalContext().getFlash()
 	        		  .get("userOldPassword");
@@ -554,16 +551,16 @@ public class UserManagerBean implements Serializable {
 	          String userReNewPassword =  (String) FacesContext.getCurrentInstance().getExternalContext().getFlash()
 	        		  .get("userReNewPassword");
 			 
-	          logger.info("UserManagerBean:changePassword:02:"+userOldPassword);
-	          logger.info("UserManagerBean:changePassword:03:"+userNewPassword);
-	          logger.info("UserManagerBean:changePassword:04:"+userReNewPassword);
+	          LOGGER.debug("UserManagerBean:changePassword:02:"+userOldPassword);
+	          LOGGER.debug("UserManagerBean:changePassword:03:"+userNewPassword);
+	          LOGGER.debug("UserManagerBean:changePassword:04:"+userReNewPassword);
 	          
 	          
 	          if(userOldPassword==null||userOldPassword.isEmpty()||
 	        	 userNewPassword==null||userNewPassword.isEmpty()||
 	        	 userReNewPassword==null||userReNewPassword.isEmpty()){
 	        	  
-	        	   logger.info("UserManagerBean:changePassword:05");
+	        	   LOGGER.debug("UserManagerBean:changePassword:05");
 	        	  
 	        	  FacesContext.getCurrentInstance().addMessage(null, 
 		        			new FacesMessage("Обязятельны все поля!"));
@@ -575,7 +572,7 @@ public class UserManagerBean implements Serializable {
 	        
 	          if(!latin){
 	        	  
-	        	  logger.info("UserManagerBean:changePassword:06");
+	        	  LOGGER.debug("UserManagerBean:changePassword:06");
 	        	  
 	        	  FacesContext.getCurrentInstance().addMessage(null, 
 		        			new FacesMessage("В пароле не допустима кириллица!"));
@@ -584,7 +581,7 @@ public class UserManagerBean implements Serializable {
 	          
 	          if(!userNewPassword.equals(userReNewPassword)){
 	        	  
-	        	  logger.info("UserManagerBean:changePassword:07");
+	        	  LOGGER.debug("UserManagerBean:changePassword:07");
 	        	  
 			      	FacesContext.getCurrentInstance().addMessage(null, 
 		        			new FacesMessage("Пароли не совпадают!"));
@@ -594,7 +591,7 @@ public class UserManagerBean implements Serializable {
 				HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 				Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 					
-				logger.info("UserManagerBean:changePassword:08:"+authUserID);
+				LOGGER.debug("UserManagerBean:changePassword:08:"+authUserID);
 				
 	          
 				try{
@@ -630,10 +627,10 @@ public class UserManagerBean implements Serializable {
 								+ "/context/profile/info/list.xhtml");
 	          }
 			 
-	          logger.info("UserManagerBean:changePassword:09");
+	          LOGGER.debug("UserManagerBean:changePassword:09");
 	          
 		}catch(Exception e){
-			 logger.error("UserManagerBean:changePassword:error:"+e);
+			 LOGGER.error("UserManagerBean:changePassword:error:"+e);
 				
 			 FacesContext.getCurrentInstance().addMessage(null, 
 	        			new FacesMessage("Во время выполнения произошла ошибка!"));
@@ -656,7 +653,7 @@ public class UserManagerBean implements Serializable {
 		 
 		try{
 		
-		   logger.info("UserManagerBean:uploadCertFile:01");
+		   LOGGER.debug("UserManagerBean:uploadCertFile:01");
 			
 		   HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 		   Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
@@ -664,16 +661,16 @@ public class UserManagerBean implements Serializable {
 		   
 		   inputStream = certFile.getInputStream();   
 		   
-		   CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
-           X509Certificate user_cert = (X509Certificate)
-        		   user_cf.generateCertificate(inputStream);
+		   CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+           X509Certificate userCertX = (X509Certificate)
+        		   userCf.generateCertificate(inputStream);
           
-           String x509Cert = Base64.encode(user_cert.getEncoded());
+           String x509Cert = Base64.encode(userCertX.getEncoded());
            
-           String serial = dec_to_hex(user_cert.getSerialNumber());
+           String serial = dec_to_hex(userCertX.getSerialNumber());
            
            if(userManagerEJB.certNumExistCrt(serial)){
-        	   logger.info("UsrManager:saveUserCertificate:01_1:return;");
+        	   LOGGER.debug("UsrManager:saveUserCertificate:01_1:return;");
         	   FacesContext.getCurrentInstance().addMessage(null, 
            			new FacesMessage("Сертификат уже привязан!"));
         	   return ;
@@ -682,21 +679,21 @@ public class UserManagerBean implements Serializable {
            AcUsersCertBssT userCert = new AcUsersCertBssT();
     	   
     	   userCert.setCertNum(serial);
-    	   userCert.setCertDate(df.format(user_cert.getNotAfter()));
+    	   userCert.setCertDate(df.format(userCertX.getNotAfter()));
     	   
     	   //!!!
-    	   //сохраняем именно не user_cert.getEncoded(),
+    	   //сохраняем именно не userCertX.getEncoded(),
     	   //а x509Cert.getBytes
     	   userCert.setCertValue(x509Cert.getBytes("UTF-8"));
     	   
-    	   String subject = user_cert.getSubjectDN().getName();
+    	   String subject = userCertX.getSubjectDN().getName();
     	   
-    	   logger.info("UserManagerBean:saveUserCertificate:02:"+subject);
+    	   LOGGER.debug("UserManagerBean:saveUserCertificate:02:"+subject);
     	   
 		   LdapName ldapDN = new LdapName(subject);
 		   
 		   for(Rdn rdn: ldapDN.getRdns()) {
-			    logger.info(rdn.getType() + " -> " + rdn.getValue());
+			    LOGGER.debug(rdn.getType() + " -> " + rdn.getValue());
 			    
 			    if("CN".equals(rdn.getType())){
 			    	userCert.setUserFio((String)rdn.getValue());
@@ -722,7 +719,7 @@ public class UserManagerBean implements Serializable {
     
 	       
 		} catch(Exception e){
-			 logger.error("UserManagerBean:uploadCertFile:error:"+e);
+			 LOGGER.error("UserManagerBean:uploadCertFile:error:"+e);
 			 
 			FacesContext.getCurrentInstance().addMessage(null, 
         			new FacesMessage("Ошибка при добавлении сертификата!"));
@@ -754,11 +751,11 @@ public class UserManagerBean implements Serializable {
 		try
 		{
 		 result = bi.toString(16);
-	     logger.info("num_convert:num:"+result);
+	     LOGGER.debug("num_convert:num:"+result);
 		}
 		catch (NumberFormatException e)
 		{
-		     logger.error("Error! tried to parse an invalid number format");
+		     LOGGER.error("Error! tried to parse an invalid number format");
 		}
 		 return result;
 	 }
@@ -771,17 +768,17 @@ public class UserManagerBean implements Serializable {
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			Long authUserID = (Long) hs.getAttribute(CUDUserConsoleConstants.authUserID);
 				
-			logger.info("UserManagerBean:getUserGroups:01:"+authUserID);
+			LOGGER.debug("UserManagerBean:getUserGroups:01:"+authUserID);
 		
 			userGroups = userManagerEJB.getUserGroups(authUserID);
 			
 			} catch(Exception e){
-				 logger.error("UserManagerBean:getUserGroups:error:"+e);
+				 LOGGER.error("UserManagerBean:getUserGroups:error:"+e);
 			
 				//не будет отображаться
 				//сообщения, созданные в RENDER_RESPONSE фазе не отображаются
-			/*	FacesContext.getCurrentInstance().addMessage(null, 
-	        		new FacesMessage("Ошибка при формировании списка групп!"));
+			/*	FacesCon/text.getCurren/tInstance().addM/essage(null, 
+	        		new Face/sMessage("Ошибка при форми/ровании списка групп!"));
 			 */	     
 	       }
 		}
@@ -805,7 +802,7 @@ public class UserManagerBean implements Serializable {
      		   this.userCertList =userManagerEJB.getUserCertList(authUserID);
 			
 			}catch(Exception e){
-				 logger.error("UserManagerBean:getUserCertList:error:"+e);
+				 LOGGER.error("UserManagerBean:getUserCertList:error:"+e);
 			}
 		}
 		
@@ -816,20 +813,5 @@ public class UserManagerBean implements Serializable {
 		this.userCertList = userCertList;
 	}
 	 
-	/*
-	  public void listener(FileUploadEvent event) throws Exception {
-	        UploadedFile item = event.getUploadedFile();
-	        
-	        logger.info("listener_01:"+item.getData().length);
-	        logger.info("listener_02:"+item.getName());
-	        logger.info("listener_03:"+item.getData());
-	        
-	        <!--h:form>
-	        <h:panelGrid columns="2" columnClasses="top,top">
-	            <r:fileUpload fileUploadListener="#{userManagerBean.listener}" id="upload"
-	             maxFilesQuantity="1"/>
-	        </h:panelGrid>
-	       </h:form-->
-	    }
-	     */
+	
 }

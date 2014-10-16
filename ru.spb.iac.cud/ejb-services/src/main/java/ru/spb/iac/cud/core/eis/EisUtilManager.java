@@ -1,7 +1,7 @@
 package ru.spb.iac.cud.core.eis;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +26,7 @@ import ru.spb.iac.cud.items.ResourcesData;
 import ru.spb.iac.cud.items.Role;
 import ru.spb.iac.cud.items.User;
 import ru.spb.iac.cud.items.UsersData;
+import ru.spb.iac.cud.util.CommonUtil;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -53,7 +54,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 	private static final String LINKS_SEPARATOR = ",";
 
-	Logger logger = LoggerFactory.getLogger(EisUtilManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(EisUtilManager.class);
 
 	public EisUtilManager() {
 	}
@@ -66,24 +67,23 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			Integer start, Integer count, Map<String, String> settings,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("users_data:01");
+		LOGGER.debug("users_data:01");
 
 		// onlyISUsers условие сильнее, чем rolesCodes
 		// то есть, если стоит onlyISUsers = false [все пользователи],
 		// то rolesCodes уже не учитывается
 
-		Integer result_count = 0;
+		Integer resultCount = 0;
 		List<User> result = new ArrayList<User>();
 		Map<String, User> result_ids = new HashMap<String, User>();
-		User uat = null;
+		/*User uat = null;
 		List<Attribute> atlist = null;
 		Attribute at = null;
-
+        String uid = null;
+		String idRec = null;
+		*/
 		List<Object[]> lo = null;
-		String uid = null;
-		// Long id_rec = null;
-		String id_rec = null;
-
+		
 		UsersData isu = new UsersData();
 
 		String rolesLine = null;
@@ -93,7 +93,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 		try {
 
 			if (idIS == null) {
-				logger.info("users_data:return:1");
+				LOGGER.debug("users_data:return:1");
 				throw new GeneralFailure("idIS is null!");
 			}
 
@@ -105,48 +105,54 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			}
 
 			if (MAX_CONT_USERS < count) {
-				logger.info("users_data:return:2");
+				LOGGER.debug("users_data:return:2");
 				throw new GeneralFailure("'count' should be less than "
 						+ MAX_CONT_USERS);
 			}
 
-			logger.info("users_data:idIS1:" + idIS);
+			LOGGER.debug("users_data:idIS1:" + idIS);
 
 			String uidsLine = null;
 
-			if (uidsUsers != null && !uidsUsers.isEmpty()) {
+            uidsLine = CommonUtil.createLine(uidsUsers);
+			/*if (uidsUsers != null && !uidsUsers.isEmpty()) {
 
-				for (String uid_user : uidsUsers) {
+				for (String uidUserValue : uidsUsers) {
 					if (uidsLine == null) {
-						uidsLine = "'" + uid_user + "'";
+						uidsLine = "'" + uidUserValue + "'";
 					} else {
-						uidsLine = uidsLine + ", '" + uid_user + "'";
+						uidsLine = uidsLine + ", '" + uidUserValue + "'";
 					}
 				}
-			}
+				
+			}*/
 
 			if (CUDConstants.categorySYS.equals(category) && rolesCodes != null
 					&& !rolesCodes.isEmpty()) {
 
+				rolesLine = CommonUtil.createLine(rolesCodes);
+			/*	
 				for (String role : rolesCodes) {
 					if (rolesLine == null) {
 						rolesLine = "'" + role + "'";
 					} else {
 						rolesLine = rolesLine + ", '" + role + "'";
 					}
-				}
+				}*/
 			}
 
 			if (/* CUDConstants.categorySYS.equals(category)&& */
 			groupsCodes != null && !groupsCodes.isEmpty()) {
 
-				for (String group : groupsCodes) {
+				groupsLine = CommonUtil.createLine(groupsCodes);
+				
+			/*for (String group : groupsCodes) {
 					if (groupsLine == null) {
 						groupsLine = "'" + group + "'";
 					} else {
 						groupsLine = groupsLine + ", '" + group + "'";
 					}
-				}
+				}*/
 			}
 
 			if (idIS.startsWith(CUDConstants.armPrefix)
@@ -155,7 +161,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				// !!!
 				idIS = get_code_is(idIS);
 
-				logger.info("is_users:idIS2:" + idIS);
+				LOGGER.debug("is_users:idIS2:" + idIS);
 
 				String filterSt = null;
 
@@ -303,6 +309,9 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 								count != null ? count.intValue() : 1000000)
 						.getResultList();
 
+				usersIdsLine = CommonUtil.createAttributes(lo,  result, result_ids);
+			
+				/*
 				for (Object[] objectArray : lo) {
 
 					// uid=objectArray[1].toString();
@@ -310,12 +319,12 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 					// Проверить
 					uid = objectArray[0].toString();
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new User();
 					atlist = new ArrayList<Attribute>();
 					String name = null;
-
+--
 					for (int i = 0; i < objectArray.length; i++) {
 
 						at = new Attribute();
@@ -382,8 +391,8 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 						if (name != null) {
 
 							at.setName(name);
-							at.setValue((objectArray[i] != null ? objectArray[i]
-									.toString() : ""));
+							at.setValue (objectArray[i] != null ? objectArray[i]
+									.toString() : "");
 
 							atlist.add(at);
 						}
@@ -393,16 +402,16 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 					uat.setAttributes(atlist);
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 					if (usersIdsLine == null) {
-						usersIdsLine = "'" + id_rec + "'";
+						usersIdsLine = "'" + idRec + "'";
 					} else {
-						usersIdsLine = usersIdsLine + ", '" + id_rec + "'";
+						usersIdsLine = usersIdsLine + ", '" + idRec + "'";
 					}
-				}
+				}*/
 
-				logger.info("users_data:02");
+				LOGGER.debug("users_data:02");
 
 				// 2.роли
 
@@ -469,9 +478,9 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				// 4.количество
 
-				logger.info("users_data:03");
+				LOGGER.debug("users_data:03");
 
-				result_count = ((java.math.BigDecimal) em
+				resultCount = ((java.math.BigDecimal) em
 						.createNativeQuery(
 								"select count(*) from ( "
 										+ "select t_core.t_core_id "
@@ -547,7 +556,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				// группы
 				// 1. пользователи
 
-				logger.info("users_data:05+");
+				LOGGER.debug("users_data:05+");
 
 				lo = em.createNativeQuery(
 						"select t1.t1_id, t1.t1_login, t1.t1_cert, t1.t1_usr_code, t1.t1_fio, t1.t1_tel, t1.t1_email,t1.t1_pos, t1.t1_dep_name,  "
@@ -674,15 +683,18 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 								count != null ? count.intValue() : 1000000)
 						.getResultList();
 
+				usersIdsLine = CommonUtil.createAttributes(lo,  result, result_ids);
+				/*
 				for (Object[] objectArray : lo) {
 
 					uid = objectArray[1].toString();
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new User();
 					atlist = new ArrayList<Attribute>();
 					String name = null;
+					
 
 					for (int i = 0; i < objectArray.length; i++) {
 
@@ -750,8 +762,8 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 						if (name != null) {
 
 							at.setName(name);
-							at.setValue((objectArray[i] != null ? objectArray[i]
-									.toString() : ""));
+							at.setValue (objectArray[i] != null ? objectArray[i]
+									.toString() : "");
 
 							atlist.add(at);
 						}
@@ -761,16 +773,16 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 					uat.setAttributes(atlist);
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 					if (usersIdsLine == null) {
-						usersIdsLine = "'" + id_rec + "'";
+						usersIdsLine = "'" + idRec + "'";
 					} else {
-						usersIdsLine = usersIdsLine + ", '" + id_rec + "'";
+						usersIdsLine = usersIdsLine + ", '" + idRec + "'";
 					}
 				}
-
-				logger.info("users_data:04");
+*/
+				LOGGER.debug("users_data:04");
 
 				// 2. роли
 
@@ -840,9 +852,9 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				// 4. количество
 
-				logger.info("users_data:05");
+				LOGGER.debug("users_data:05");
 
-				result_count = ((java.math.BigDecimal) em
+				resultCount = ((java.math.BigDecimal) em
 						.createNativeQuery(
 								"select count(*) from ( "
 										+ "select t_core.t_core_id "
@@ -904,19 +916,17 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			// isu.setUserAttributesRoles(new
 			// ArrayList<UserAttributesRoles>(result_ids.values()));
 			isu.setUsers(result);
-			isu.setCount(result_count);
+			isu.setCount(resultCount);
 
 			sys_audit(72L, /* "token:"+subject.getId()+ */"idIS:" + idIS
-					+ "result_count:" + result_count, "true; ", IPAddress,
+					+ "result_count:" + resultCount, "true; ", IPAddress,
 					idUserAuth);
 
 		} catch (Exception e) {
 			sys_audit(72L, /* "token:"+subject.getId()+ */"; idIS:" + idIS,
 					"error", IPAddress, idUserAuth);
 
-			logger.error("users_data+:Error:" + e);
-			
-			e.printStackTrace(System.out);
+			LOGGER.error("users_data+:Error:", e);
 			
 			throw new GeneralFailure(e.getMessage());
 			
@@ -935,7 +945,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			Integer count, Map<String, String> settings, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
 
-		logger.info("groups_data:01");
+		LOGGER.debug("groups_data:01");
 
 		// onlyISUsers условие сильнее, чем rolesCodes
 		// то есть, если стоит onlyISUsers = false [все пользователи],
@@ -947,13 +957,13 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 		// + USER
 
-		Integer result_count = 0;
+		Integer resultCount = 0;
 		List<Group> result = new ArrayList<Group>();
 		Map<String, Group> result_ids = new HashMap<String, Group>();
 		Group uat = null;
 
 		List<Object[]> lo = null;
-		String id_rec = null;
+		String idRec = null;
 
 		GroupsData isu = new GroupsData();
 
@@ -963,7 +973,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 		try {
 
 			if (idIS == null) {
-				logger.info("groups_data:return:1");
+				LOGGER.debug("groups_data:return:1");
 				throw new GeneralFailure("idIS is null!");
 			}
 
@@ -975,36 +985,41 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			}
 
 			if (MAX_CONT_GROUPS < count) {
-				logger.info("groups_data:return:2");
+				LOGGER.debug("groups_data:return:2");
 				throw new GeneralFailure("'count' should be less than "
 						+ MAX_CONT_GROUPS);
 			}
 
-			logger.info("groups_data:idIS1:" + idIS);
+			LOGGER.debug("groups_data:idIS1:" + idIS);
 
 			String uidsLine = null;
-
+			
+			uidsLine = CommonUtil.createLine(groupsCodes);
+			
+/*
 			if (groupsCodes != null && !groupsCodes.isEmpty()) {
 
-				for (String uid_user : groupsCodes) {
+				for (String uidUserValue : groupsCodes) {
 					if (uidsLine == null) {
-						uidsLine = "'" + uid_user + "'";
+						uidsLine = "'" + uidUserValue + "'";
 					} else {
-						uidsLine = uidsLine + ", '" + uid_user + "'";
+						uidsLine = uidsLine + ", '" + uidUserValue + "'";
 					}
 				}
-			}
+			}*/
 
 			if (CUDConstants.categorySYS.equals(category) && rolesCodes != null
 					&& !rolesCodes.isEmpty()) {
 
-				for (String role : rolesCodes) {
+				rolesLine = CommonUtil.createLine(rolesCodes);
+				
+				/*for (String role : rolesCodes) {
 					if (rolesLine == null) {
 						rolesLine = "'" + role + "'";
 					} else {
 						rolesLine = rolesLine + ", '" + role + "'";
 					}
-				}
+				}*/
 
 			}
 
@@ -1014,7 +1029,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				// !!!
 				idIS = get_code_is(idIS);
 
-				logger.info("groups_data:idIS2:" + idIS);
+				LOGGER.debug("groups_data:idIS2:" + idIS);
 
 				// системы и подсистемы
 				// 1.группы
@@ -1069,6 +1084,8 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				} else {
 					// группы текущего пользователя
 
+					LOGGER.debug("groups_data:02_01");
+					
 					lo = em.createNativeQuery(
 							"select gr_full.ID_SRV, gr_full.SIGN_OBJECT, gr_full.FULL_, gr_full.DESCRIPTION  "
 									+ "from GROUP_USERS_KNL_T gr_full, "
@@ -1099,7 +1116,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 									+ "order by gr_full.FULL_ ")
 
 							.setParameter("idIS", idIS)
-							.setParameter("onlyISUsers", 1)
+							.setParameter("onlyISUsers", -1)
 							.setParameter("idUser", idUserAuth)
 							.setFirstResult(
 									start != null ? start.intValue() : 0)
@@ -1109,30 +1126,31 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				}
 
+				
 				for (Object[] objectArray : lo) {
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new Group();
 
-					uat.setCode((objectArray[1] != null ? objectArray[1]
-							.toString() : ""));
-					uat.setName((objectArray[2] != null ? objectArray[2]
-							.toString() : ""));
-					uat.setDescription((objectArray[3] != null ? objectArray[3]
-							.toString() : ""));
+					uat.setCode (objectArray[1] != null ? objectArray[1]
+							.toString() : "");
+					uat.setName (objectArray[2] != null ? objectArray[2]
+							.toString() : "");
+					uat.setDescription (objectArray[3] != null ? objectArray[3]
+							.toString() : "");
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 					if (usersIdsLine == null) {
-						usersIdsLine = "'" + id_rec + "'";
+						usersIdsLine = "'" + idRec + "'";
 					} else {
-						usersIdsLine = usersIdsLine + ", '" + id_rec + "'";
+						usersIdsLine = usersIdsLine + ", '" + idRec + "'";
 					}
 				}
 
-				logger.info("groups_data:02");
+				LOGGER.debug("groups_data:02");
 
 				// 2.роли
 
@@ -1168,12 +1186,12 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				// 3.количество
 
-				logger.info("groups_data:03");
+				LOGGER.debug("groups_data:03");
 
 				if (!CUDConstants.categoryUSER.equals(category)) {
 					// от системы группы или весь список групп
 
-					result_count = ((java.math.BigDecimal) em
+					resultCount = ((java.math.BigDecimal) em
 							.createNativeQuery(
 									"select count(*) from  GROUP_USERS_KNL_T gr_full, "
 											+ "( "
@@ -1212,7 +1230,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				} else {
 					// группы текущего пользователя
 
-					result_count = ((java.math.BigDecimal) em
+					resultCount = ((java.math.BigDecimal) em
 							.createNativeQuery(
 									"select count(*)  "
 											+ "from GROUP_USERS_KNL_T gr_full, "
@@ -1241,7 +1259,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 											+ "order by gr_full.FULL_ ")
 
 							.setParameter("idIS", idIS)
-							.setParameter("onlyISUsers", 1)
+							.setParameter("onlyISUsers", -1)
 							.setParameter("idUser", idUserAuth)
 							.getSingleResult()).intValue();
 
@@ -1349,7 +1367,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 									+ "order by gr_full.FULL_ ")
 
 							.setParameter("idIS", idIS)
-							.setParameter("onlyISUsers", 1)
+							.setParameter("onlyISUsers", -1)
 							.setParameter("idUser", idUserAuth)
 							.setFirstResult(
 									start != null ? start.intValue() : 0)
@@ -1361,28 +1379,28 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				for (Object[] objectArray : lo) {
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new Group();
 
-					uat.setCode((objectArray[1] != null ? objectArray[1]
-							.toString() : ""));
-					uat.setName((objectArray[2] != null ? objectArray[2]
-							.toString() : ""));
-					uat.setDescription((objectArray[3] != null ? objectArray[3]
-							.toString() : ""));
+					uat.setCode (objectArray[1] != null ? objectArray[1]
+							.toString() : "");
+					uat.setName (objectArray[2] != null ? objectArray[2]
+							.toString() : "");
+					uat.setDescription (objectArray[3] != null ? objectArray[3]
+							.toString() : "");
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 					if (usersIdsLine == null) {
-						usersIdsLine = "'" + id_rec + "'";
+						usersIdsLine = "'" + idRec + "'";
 					} else {
-						usersIdsLine = usersIdsLine + ", '" + id_rec + "'";
+						usersIdsLine = usersIdsLine + ", '" + idRec + "'";
 					}
 				}
 
-				logger.info("groups_data:04");
+				LOGGER.debug("groups_data:04");
 
 				// 2. роли
 
@@ -1423,12 +1441,12 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				// 3. количество
 
-				logger.info("groups_data:05");
+				LOGGER.debug("groups_data:05");
 
 				if (!CUDConstants.categoryUSER.equals(category)) {
 					// от системы группы или весь список групп
 
-					result_count = ((java.math.BigDecimal) em
+					resultCount = ((java.math.BigDecimal) em
 							.createNativeQuery(
 									"select count(*) "
 											+ "from GROUP_USERS_KNL_T gr_full, "
@@ -1475,7 +1493,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				} else {
 					// группы текущего пользователя
 
-					result_count = ((java.math.BigDecimal) em
+					resultCount = ((java.math.BigDecimal) em
 							.createNativeQuery(
 
 									"select count(*)  "
@@ -1514,7 +1532,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 											+ "order by gr_full.FULL_ ")
 
 							.setParameter("idIS", idIS)
-							.setParameter("onlyISUsers", 1)
+							.setParameter("onlyISUsers", -1)
 							.setParameter("idUser", idUserAuth)
 							.getSingleResult()).intValue();
 
@@ -1524,17 +1542,17 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			// isu.setUserAttributesRoles(new
 			// ArrayList<UserAttributesRoles>(result_ids.values()));
 			isu.setGroups(result);
-			isu.setCount(result_count);
+			isu.setCount(resultCount);
 
 			sys_audit(72L, /* "token:"+subject.getId()+ */"idIS:" + idIS
-					+ "result_count:" + result_count, "true; ", IPAddress,
+					+ "result_count:" + resultCount, "true; ", IPAddress,
 					idUserAuth);
 
 		} catch (Exception e) {
 			sys_audit(72L, /* "token:"+subject.getId()+ */"; idIS:" + idIS,
 					"error", IPAddress, idUserAuth);
 
-			logger.error("groups_data:Error:" + e);
+			LOGGER.error("groups_data:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return isu;
@@ -1549,7 +1567,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			Map<String, String> settings, Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("resources_data:01");
+		LOGGER.debug("resources_data:01");
 
 		// onlyISUsers[category:SYS] условие сильнее, чем rolesCodes
 		// то есть, если стоит onlyISUsers = false [все пользователи],
@@ -1559,13 +1577,13 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 		// USER (используем idUserAuth)
 		// SYS
 
-		Integer result_count = 0;
+		Integer resultCount = 0;
 		List<ResourceNU> result = new ArrayList<ResourceNU>();
 		Map<String, ResourceNU> result_ids = new HashMap<String, ResourceNU>();
 		ResourceNU uat = null;
 
 		List<Object[]> lo = null;
-		String id_rec = null;
+		String idRec = null;
 
 		ResourcesData isu = new ResourcesData();
 
@@ -1575,7 +1593,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 		try {
 
 			if (idIS == null) {
-				logger.info("resources_data:return:1");
+				LOGGER.debug("resources_data:return:1");
 				throw new GeneralFailure("idIS is null!");
 			}
 
@@ -1587,36 +1605,40 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			}
 
 			if (MAX_CONT_RES < count) {
-				logger.info("resources_data:return:2");
+				LOGGER.debug("resources_data:return:2");
 				throw new GeneralFailure("'count' should be less than "
 						+ MAX_CONT_RES);
 			}
 
-			logger.info("resources_data:idIS1:" + idIS);
+			LOGGER.debug("resources_data:idIS1:" + idIS);
 
 			String uidsLine = null;
 
-			if (resourcesCodes != null && !resourcesCodes.isEmpty()) {
+			uidsLine = CommonUtil.createLine(resourcesCodes);
+			
+		/*	if (resourcesCodes != null && !resourcesCodes.isEmpty()) {
 
-				for (String uid_user : resourcesCodes) {
+				for (String uidUserValue : resourcesCodes) {
 					if (uidsLine == null) {
-						uidsLine = "'" + uid_user + "'";
+						uidsLine = "'" + uidUserValue + "'";
 					} else {
-						uidsLine = uidsLine + ", '" + uid_user + "'";
+						uidsLine = uidsLine + ", '" + uidUserValue + "'";
 					}
 				}
-			}
+			}*/
 
 			if (CUDConstants.categorySYS.equals(category) && rolesCodes != null
 					&& !rolesCodes.isEmpty()) {
 
+				rolesLine = CommonUtil.createLine(rolesCodes);
+				/*
 				for (String role : rolesCodes) {
 					if (rolesLine == null) {
 						rolesLine = "'" + role + "'";
 					} else {
 						rolesLine = rolesLine + ", '" + role + "'";
 					}
-				}
+				}*/
 
 			}
 
@@ -1626,7 +1648,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				// !!!
 				idIS = get_code_is(idIS);
 
-				logger.info("resources_data:idIS2:" + idIS);
+				LOGGER.debug("resources_data:idIS2:" + idIS);
 
 				// системы и подсистемы
 				// 1.группы
@@ -1672,28 +1694,28 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				for (Object[] objectArray : lo) {
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new ResourceNU();
 
-					uat.setCode((objectArray[1] != null ? objectArray[1]
-							.toString() : ""));
-					uat.setName((objectArray[2] != null ? objectArray[2]
-							.toString() : ""));
-					uat.setDescription((objectArray[3] != null ? objectArray[3]
-							.toString() : ""));
+					uat.setCode (objectArray[1] != null ? objectArray[1]
+							.toString() : "");
+					uat.setName (objectArray[2] != null ? objectArray[2]
+							.toString() : "");
+					uat.setDescription (objectArray[3] != null ? objectArray[3]
+							.toString() : "");
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 					if (usersIdsLine == null) {
-						usersIdsLine = "'" + id_rec + "'";
+						usersIdsLine = "'" + idRec + "'";
 					} else {
-						usersIdsLine = usersIdsLine + ", '" + id_rec + "'";
+						usersIdsLine = usersIdsLine + ", '" + idRec + "'";
 					}
 				}
 
-				logger.info("resources_data:02");
+				LOGGER.debug("resources_data:02");
 
 				// 2.роли
 
@@ -1729,9 +1751,9 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				// 3.количество
 
-				logger.info("resources_data:03");
+				LOGGER.debug("resources_data:03");
 
-				result_count = ((java.math.BigDecimal) em
+				resultCount = ((java.math.BigDecimal) em
 						.createNativeQuery(
 								"select count(*) from  GROUP_USERS_KNL_T gr_full, "
 										+ "( "
@@ -1822,28 +1844,28 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				for (Object[] objectArray : lo) {
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new ResourceNU();
 
-					uat.setCode((objectArray[1] != null ? objectArray[1]
-							.toString() : ""));
-					uat.setName((objectArray[2] != null ? objectArray[2]
-							.toString() : ""));
-					uat.setDescription((objectArray[3] != null ? objectArray[3]
-							.toString() : ""));
+					uat.setCode (objectArray[1] != null ? objectArray[1]
+							.toString() : "");
+					uat.setName (objectArray[2] != null ? objectArray[2]
+							.toString() : "");
+					uat.setDescription (objectArray[3] != null ? objectArray[3]
+							.toString() : "");
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 					if (usersIdsLine == null) {
-						usersIdsLine = "'" + id_rec + "'";
+						usersIdsLine = "'" + idRec + "'";
 					} else {
-						usersIdsLine = usersIdsLine + ", '" + id_rec + "'";
+						usersIdsLine = usersIdsLine + ", '" + idRec + "'";
 					}
 				}
 
-				logger.info("resources_data:04");
+				LOGGER.debug("resources_data:04");
 
 				// 2. роли
 
@@ -1884,9 +1906,9 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				// 3. количество
 
-				logger.info("resources_data:05");
+				LOGGER.debug("resources_data:05");
 
-				result_count = ((java.math.BigDecimal) em
+				resultCount = ((java.math.BigDecimal) em
 						.createNativeQuery(
 								"select count(*) "
 										+ "from GROUP_USERS_KNL_T gr_full, "
@@ -1934,15 +1956,15 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			// isu.setUserAttributesRoles(new
 			// ArrayList<UserAttributesRoles>(result_ids.values()));
 			isu.setResources(result);
-			isu.setCount(result_count);
+			isu.setCount(resultCount);
 
-			sys_audit(72L, "idIS:" + idIS + "result_count:" + result_count,
+			sys_audit(72L, "idIS:" + idIS + "result_count:" + resultCount,
 					"true; ", IPAddress, idUserAuth);
 
 		} catch (Exception e) {
 			sys_audit(72L, "; idIS:" + idIS, "error", IPAddress, idUserAuth);
 
-			logger.error("resources_data:Error:" + e);
+			LOGGER.error("resources_data:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return isu;
@@ -1956,7 +1978,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 	
 	String category, Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("resources_data:01");
+		LOGGER.debug("resources_data:01");
 
 		// onlyISUsers[category:SYS] условие сильнее, чем rolesCodes
 		// то есть, если стоит onlyISUsers = false [все пользователи],
@@ -1966,22 +1988,22 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 		// USER (используем idUserAuth)
 		// SYS
 
-		Integer result_count = 0;
+		Integer resultCount = 0;
 		List<Resource> result = new ArrayList<Resource>();
 		Map<String, Resource> result_ids = new HashMap<String, Resource>();
 		Resource uat = null;
 
 		List<Object[]> lo = null;
-		String id_rec = null;
+		String idRec = null;
 
 		try {
 
 			if (idIS == null) {
-				logger.info("resources_data:return:1");
+				LOGGER.debug("resources_data:return:1");
 				throw new GeneralFailure("idIS is null!");
 			}
 
-			logger.info("resources_data:idIS1:" + idIS);
+			LOGGER.debug("resources_data:idIS1:" + idIS);
 
 			if (idIS.startsWith(CUDConstants.armPrefix)
 					|| idIS.startsWith(CUDConstants.subArmPrefix)) {
@@ -1989,7 +2011,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				// !!!
 				idIS = get_code_is(idIS);
 
-				logger.info("resources_data:idIS2:" + idIS);
+				LOGGER.debug("resources_data:idIS2:" + idIS);
 
 				// системы и подсистемы
 
@@ -2028,16 +2050,16 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 				for (Object[] objectArray : lo) {
 
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new Resource();
 
-					uat.setCode((objectArray[1] != null ? objectArray[1]
-							.toString() : ""));
-					uat.setName((objectArray[2] != null ? objectArray[2]
-							.toString() : ""));
-					uat.setDescription((objectArray[3] != null ? objectArray[3]
-							.toString() : ""));
+					uat.setCode (objectArray[1] != null ? objectArray[1]
+							.toString() : "");
+					uat.setName (objectArray[2] != null ? objectArray[2]
+							.toString() : "");
+					uat.setDescription (objectArray[3] != null ? objectArray[3]
+							.toString() : "");
 
 					if (objectArray[4] != null
 							&& !objectArray[4].toString().trim().equals("")) {
@@ -2046,11 +2068,11 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 					}
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 				}
 
-				logger.info("resources_data:02");
+				LOGGER.debug("resources_data:02");
 
 			} else if (idIS.startsWith(CUDConstants.groupArmPrefix)) {
 
@@ -2103,16 +2125,16 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				for (Object[] objectArray : lo) {
 
 				// d_rec=((java.math.BigDecimal)objectArray[0]).longValue();
-					id_rec = objectArray[0].toString();
+					idRec = objectArray[0].toString();
 
 					uat = new Resource();
 
-					uat.setCode((objectArray[1] != null ? objectArray[1]
-							.toString() : ""));
-					uat.setName((objectArray[2] != null ? objectArray[2]
-							.toString() : ""));
-					uat.setDescription((objectArray[3] != null ? objectArray[3]
-							.toString() : ""));
+					uat.setCode (objectArray[1] != null ? objectArray[1]
+							.toString() : "");
+					uat.setName (objectArray[2] != null ? objectArray[2]
+							.toString() : "");
+					uat.setDescription (objectArray[3] != null ? objectArray[3]
+							.toString() : "");
 
 					if (objectArray[4] != null
 							&& !objectArray[4].toString().trim().equals("")) {
@@ -2123,23 +2145,21 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 					}
 
 					result.add(uat); // для сохранения сортировки из запроса
-					result_ids.put(id_rec, uat);
+					result_ids.put(idRec, uat);
 
 				}
 
-				logger.info("resources_data:04");
+				LOGGER.debug("resources_data:04");
 
 			}
 
-			sys_audit(72L, "idIS:" + idIS + "result_count:" + result_count,
+			sys_audit(72L, "idIS:" + idIS + "result_count:" + resultCount,
 					"true; ", IPAddress, idUserAuth);
 
 		} catch (Exception e) {
 			sys_audit(72L, "; idIS:" + idIS, "error", IPAddress, idUserAuth);
 
-			logger.error("resources_data:Error:" + e);
-
-			e.printStackTrace(System.out);
+			LOGGER.error("resources_data:Error:", e);
 
 			throw new GeneralFailure(e.getMessage());
 		}
@@ -2160,10 +2180,9 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				// SYS
 
 		
-				logger.info("roles_data:01");
+				LOGGER.debug("roles_data:01");
 
-				HashMap<String, Long> roles_cl = new HashMap<String, Long>();
-
+				
 				List<Role> result = new ArrayList<Role>();
 				List<String> keyList = new ArrayList<String>();
 
@@ -2172,14 +2191,14 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 				try {
 
 					if (idIS == null || idIS.trim().isEmpty()) {
-						logger.info("roles_data:01");
+						LOGGER.debug("roles_data:01");
 						throw new GeneralFailure("idIS is null!");
 					}
 
 					if (idIS.startsWith(CUDConstants.groupArmPrefix)) {
 						// группа ИС
 
-						logger.info("roles_data:02");
+						LOGGER.debug("roles_data:02");
 
 						// информация по системе
 						if (CUDConstants.categorySYS.equals(category)) {
@@ -2235,14 +2254,14 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 									.setParameter("idUser", idUserAuth).getResultList();
 						}
 						for (Object[] objectArray : lo) {
-							logger.info("IdRole:" + objectArray[0].toString());
+							LOGGER.debug("IdRole:" + objectArray[0].toString());
 
 							Role role = new Role();
 
 							role.setCode(objectArray[0].toString());
 							role.setName(objectArray[1].toString());
-							role.setDescription((objectArray[2] != null ? objectArray[2]
-									.toString() : null));
+							role.setDescription (objectArray[2] != null ? objectArray[2]
+									.toString() : null);
 
 							result.add(role);
 
@@ -2250,7 +2269,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 						}
 
-						logger.info("roles_data:03");
+						LOGGER.debug("roles_data:03");
 
 					} else if (idIS.startsWith(CUDConstants.armPrefix)
 							|| idIS.startsWith(CUDConstants.subArmPrefix)) {
@@ -2300,8 +2319,8 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 							role.setCode(objectArray[0].toString());
 							role.setName(objectArray[1].toString());
-							role.setDescription((objectArray[2] != null ? objectArray[2]
-									.toString() : null));
+							role.setDescription (objectArray[2] != null ? objectArray[2]
+									.toString() : null);
 
 							result.add(role);
 
@@ -2309,7 +2328,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 
 						}
 
-						logger.info("roles_data:04");
+						LOGGER.debug("roles_data:04");
 
 					}
 
@@ -2331,7 +2350,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 	    String idIS, Integer start, Integer count, List<String> rolesCodes,
 	    Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("is_organisations:STUB");
+		LOGGER.debug("is_organisations:STUB");
 
 		return null;
 	}
@@ -2341,7 +2360,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 	 */
 	public void is_exist(String idIS) throws GeneralFailure {
 
-		logger.info("is_exist:idIS:" + idIS);
+		LOGGER.debug("is_exist:idIS:" + idIS);
 
 		try {
 
@@ -2351,10 +2370,10 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 					.getSingleResult();
 
 		} catch (NoResultException ex) {
-			logger.error("is_exist:NoResultException");
+			LOGGER.error("is_exist:NoResultException");
 			throw new GeneralFailure("Информационная система не определёна!");
 		} catch (Exception e) {
-			logger.error("is_exist:Error:" + e);
+			LOGGER.error("is_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -2364,7 +2383,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 	 */
 	private void sys_audit(Long idServ, String inp_param, String result,
 			String ip_adr, Long idUser) {
-		logger.info("sys_audit");
+		LOGGER.debug("sys_audit");
 		try {
 
 			if (idUser != null && !idUser.equals(-1L)) {
@@ -2388,7 +2407,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 						.setParameter(4, ip_adr).executeUpdate();
 			}
 		} catch (Exception e) {
-			logger.error("sys_audit:Error:" + e);
+			LOGGER.error("sys_audit:Error:", e);
 			
 		}
 
@@ -2408,7 +2427,7 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			// при группе систем своя ветка - там код группы
 			// используется прямо в запросе.
 
-			// if(codeSys.startsWith(CUDConstants.armPrefix)||codeSys.startsWith(CUDConstants.subArmPrefix)){
+			// if(cod/eSys.startsWith(CUDCo/nstants.armPre/fix)||codeSys./startsWith(CUDConstants.subArmPrefix)){
 			// системы и подсистемы
 
 			result = (String) em
@@ -2424,12 +2443,13 @@ public class EisUtilManager implements UtilManagerLocal, UtilManagerRemote {
 			// }
 
 		} catch (NoResultException ex) {
-			logger.error("get_code_is:NoResultException");
+			LOGGER.error("get_code_is:NoResultException");
 			throw new GeneralFailure("System is not defined");
 		} catch (Exception e) {
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
 	}
-
+	
+	
 }

@@ -33,6 +33,9 @@ import iac.cud.infosweb.ws.classifierzip.clientsample.ClassifLoadProcessor;
 import iac.cud.infosweb.ws.classifierzip.clientsample.ClientSample;
 import iac.cud.infosweb.ws.classifierzip.clientsample.GRuNProFileLiteLocal;
 import iac.cud.infosweb.ws.classifierzip.clientsample.PojoRunProcess;
+import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.export.AuditExportData;
+import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.navig.LinksMap;
 
 import java.io.BufferedReader;
@@ -52,8 +55,6 @@ import javax.naming.InitialContext;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
-
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
 
 import javax.persistence.NoResultException;
@@ -78,7 +79,6 @@ public class ClUsrManager {
      * Ёкспортируема€ сущности 
      * дл€ отображени€
      */
-	//private BaseItem usrBean;             !!! ѕроверить !!!
 	
 	private int versionDetectFlag = 1;
 	
@@ -88,7 +88,7 @@ public class ClUsrManager {
 	 
 	private String classifExistVersion = "Ќе установлена";
 	
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -104,8 +104,6 @@ public class ClUsrManager {
 	private List<AcLegalEntityType> listLET = null;
 	
 	private List<IspTempBssT> listOrg = null;
-	
-	private List<IspTempBssT> listUsr = null;
 	
 	private List<IspBssT> listUsrAutocomplete = null;
 	
@@ -128,14 +126,13 @@ public class ClUsrManager {
 			  Component.getInstance("clUsrListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    clUsrListCached!=null){
-		 	//	log.info("getAuditList:02:"+clUsrListCached.size());
-			    	this.auditList=clUsrListCached;
+		 	    	this.auditList=clUsrListCached;
 			}else{
 				log.info("getAuditList:03");
 		    	invokeLocal("list", firstRow, numberOfRows, null);
@@ -143,12 +140,12 @@ public class ClUsrManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecOrg = (ArrayList<String>)
+		 	List<String>  selRecOrg = (ArrayList<String>)
 					  Component.getInstance("selRecOrg",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecOrg!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecOrg.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					  it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -167,7 +164,7 @@ public class ClUsrManager {
 			 String orderQuery=null;
 			 log.info("hostsManager:invokeLocal");
 			 
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 ClUsrStateHolder clUsrStateHolder = (ClUsrStateHolder)
@@ -185,7 +182,6 @@ public class ClUsrManager {
       		     }
                  log.info("invokeLocal:list:orderQuery:"+orderQuery);
                  
-				// auditList = new ArrayList<BaseItem>();
 				 auditList = entityManager.createQuery(
 				//	"select o from IspBssT o where o.status='A' and o.signObject not like '%000' " +
 					"select o from IspTempBssT o " +
@@ -195,7 +191,7 @@ public class ClUsrManager {
                        .getResultList();
              log.info("invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
+			 } else if("count".equals(type)){
 				 log.info("IHReposList:count:01");
 				 auditCount = (Long)entityManager.createQuery(
 						 "select count(o) " +
@@ -204,7 +200,7 @@ public class ClUsrManager {
 		                .getSingleResult();
 				 
                log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
@@ -223,35 +219,13 @@ public class ClUsrManager {
 		        .get("sessionId");
 	  log.info("forView:sessionId:"+sessionId);
 	  log.info("forView:modelType:"+modelType);
-	  if(sessionId!=null /*&& usrBean==null*/){
+	  if(sessionId!=null ){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
-			if(modelType.equals("clUsrDataModel")){
-				//service=ServiceReestr.Repos;
-			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
+			
 			IspTempBssT ar = searchBean(sessionId);
 		 Contexts.getEventContext().set("clTempBean", ar);
 	  }
@@ -265,7 +239,7 @@ public class ClUsrManager {
 		if(clUsrListCached!=null){
 			for(IspTempBssT it : clUsrListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -281,7 +255,7 @@ public class ClUsrManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("ќшибка доступа к серверу xxx.xxx.x.xxx!");
+	  
    }
    
    public void addOrg(){
@@ -295,9 +269,8 @@ public class ClUsrManager {
 	   }
 	 
 	   try {
-		  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
 		   
-	    //  clUsrBeanCrt.setCreator(au.getIdUser());
+	    
 		  clUsrBeanCrt.setCreated(new Date());
 	      entityManager.persist(clUsrBeanCrt);
 	    	   
@@ -321,13 +294,8 @@ public class ClUsrManager {
 		   
 		  log.info("clUsrManager:loadClassif:02:"+clVersion);
 		  
-		  // entityManager.createNativeQuery("TRUNCATE TABLE ISP_TEMP_BSS_T")
-		 //   .executeUpdate();
-		   
-		  // entityManager.createNativeQuery("TRUNCATE TABLE ISP_TEMP_BSS_T")
-		//	.executeUpdate();
-		   
-		  // ClientSample.run();
+		 
+		  
 		   
 		   AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
 		 
@@ -341,19 +309,7 @@ public class ClUsrManager {
 		   		   "VALUES ("+seancact+", sysdate, sysdate, "+au.getIdUser()+" ) ")
 			.executeUpdate();
 		  
-		 //  PojoRunProcess pp = new PojoRunProcess();
-		 //  pp.startProcess();
-			
-		  /*
-		   GRuNProFileLiteLocal gl = (GRuNProFileLiteLocal) Component.getInstance("gRuNProFileLite",ScopeType.EVENT);
-			
-		   System.out.println("IServCatalogLoadinge:init:02");
-		   int result=gl.process();
-		   System.out.println("IServCatalogLoading:init:result:"+result);
-		   
-		   log.info("clUsrManager:loadClassif:02");
-		   
-		   */
+		
 		   Context ctx = new InitialContext(); 
 	    	 
 	       BaseParamItem bpi = new BaseParamItem(ServiceReestrPro.ClassifLoad.name());
@@ -370,9 +326,10 @@ public class ClUsrManager {
         		   
            obj.run(bpi);
 		   
+           audit(ResourcesMap.CLASSIF_IOGV, ActionsMap.LOAD); 
+           
 	    }catch (Exception e) {
 	       log.error("clUsrManager:loadClassif:ERROR:"+e);
-	       e.printStackTrace(System.out);
 	    }
 	   
    }
@@ -389,12 +346,17 @@ public class ClUsrManager {
 		   
 		  log.info("clUsrManager:moveClassif:02:"+clVersion);
 		 
+		   
+			 
 		  
 		   Context ctx = new InitialContext(); 
 	    	 
 	       BaseParamItem bpi = new BaseParamItem(ServiceReestrPro.ClassifLoad.name());
 	
 	       bpi.put("gactiontype", ServiceReestrAction.TO_WORK.name());
+	     //пока не задействовали
+	     
+	       
 	       
 	       IRemoteFrontageLocal obj = (IRemoteFrontageLocal)ctx.lookup(jndiBinding);
        		   
@@ -403,152 +365,28 @@ public class ClUsrManager {
 		  /*
 		  //чистим архив
 		  //clear ISP_ARH_BSS_T
-		   entityManager.createNativeQuery(
-				   "TRUNCATE TABLE ISP_ARH_BSS_T")
-			.executeUpdate();
-		 
+		
 		   //копируем текущее в архив на случай отката
 		   //ISP_BSS_T -> ISP_ARH_BSS_T
 		   entityManager.createNativeQuery(
-				   "insert*/ /*+ APPEND */ /*into ISP_ARH_BSS_T( "+
-				     "ID_SRV, "+
-                     "SIGN_OBJECT, "+
-					  "SIGN_OKOGY, "+
-					  "FULL_, "+
-					  "POSITION, "+
-					  "FIO, "+
-					  "POSTAL_CODE, "+
-					  "COUNTRY, "+
-					  "REGION, "+
-					  "PLACE, "+
-					  "PREFIX, "+
-					  "HOUSE, "+
-					  "HOUSING, "+
-					  "FLAT, "+
-					  "PHONE, "+
-					  "FAX, "+
-					  "EMAIL, "+
-					  "STATUS, "+
-					  "DATE_IN_SRV, "+
-					  "DATE_DEL_SRV, "+
-					  "DOC_IN_SRV, "+
-					  "DOC_DEL_SRV, "+
-					  "UNI_ID, "+
-					  "IS_EXTERNAL, "+
-					  "SIGN_OKATO, "+
-					  "UP_ISP_LOAD, "+
-					  "CREATED "+
-				 ") select "+
-					 "ID_SRV, "+
-                     "SIGN_OBJECT, "+
-					  "SIGN_OKOGY, "+
-					  "FULL_, "+
-					  "POSITION, "+
-					  "FIO, "+
-					  "POSTAL_CODE, "+
-					  "COUNTRY, "+
-					  "REGION, "+
-					  "PLACE, "+
-					  "PREFIX, "+
-					  "HOUSE, "+
-					  "HOUSING, "+
-					  "FLAT, "+
-					  "PHONE, "+
-					  "FAX, "+
-					  "EMAIL, "+
-					  "STATUS, "+
-					  "DATE_IN_SRV, "+
-					  "DATE_DEL_SRV, "+
-					  "DOC_IN_SRV, "+
-					  "DOC_DEL_SRV, "+
-					  "UNI_ID, "+
-					  "IS_EXTERNAL, "+
-					  "SIGN_OKATO, "+
-					  "UP_ISP_LOAD, "+
-					  "sysdate "+
-				   " from ISP_TEST_BSS_T  ")
-					.executeUpdate();
-		
+			
 		  //чистим текущее
 		  //clear ISP_BSS_T
-		   entityManager.createNativeQuery(
-				   "TRUNCATE TABLE ISP_TEST_BSS_T")
-			.executeUpdate();
-		
+		   
 		   
 		   //копируем из технологич. т. в текущее
 		   //ISP_TEMP_BSS_T -> ISP_BSS_T	   
-		   entityManager.createNativeQuery(
-				   "insert*/ /*+ APPEND */ /*into ISP_TEST_BSS_T( "+
-				     "ID_SRV, "+
-                     "SIGN_OBJECT, "+
-					  "SIGN_OKOGY, "+
-					  "FULL_, "+
-					  "POSITION, "+
-					  "FIO, "+
-					  "POSTAL_CODE, "+
-					  "COUNTRY, "+
-					  "REGION, "+
-					  "PLACE, "+
-					  "PREFIX, "+
-					  "HOUSE, "+
-					  "HOUSING, "+
-					  "FLAT, "+
-					  "PHONE, "+
-					  "FAX, "+
-					  "EMAIL, "+
-					  "STATUS, "+
-					  "DATE_IN_SRV, "+
-					  "DATE_DEL_SRV, "+
-					  "DOC_IN_SRV, "+
-					  "DOC_DEL_SRV, "+
-					  "UNI_ID, "+
-					  "IS_EXTERNAL, "+
-					  "SIGN_OKATO, "+
-					  "UP_ISP_LOAD, "+
-					  "CREATED "+
-				 ") select "+
-					 "ID_SRV, "+
-                     "SIGN_OBJECT, "+
-					  "SIGN_OKOGY, "+
-					  "FULL_, "+
-					  "POSITION, "+
-					  "FIO, "+
-					  "POSTAL_CODE, "+
-					  "COUNTRY, "+
-					  "REGION, "+
-					  "PLACE, "+
-					  "PREFIX, "+
-					  "HOUSE, "+
-					  "HOUSING, "+
-					  "FLAT, "+
-					  "PHONE, "+
-					  "FAX, "+
-					  "EMAIL, "+
-					  "STATUS, "+
-					  "DATE_IN_SRV, "+
-					  "DATE_DEL_SRV, "+
-					  "DOC_IN_SRV, "+
-					  "DOC_DEL_SRV, "+
-					  "UNI_ID, "+
-					  "IS_EXTERNAL, "+
-					  "SIGN_OKATO, "+
-					  "UP_ISP_LOAD, "+
-					  "sysdate "+
-				   " from ISP_TEMP_BSS_T  ")
-					.executeUpdate();
-		
-		   entityManager.createNativeQuery(
-				   "TRUNCATE TABLE ISP_TEMP_BSS_T")
-			.executeUpdate();
+		   
+		   
+		    // "TRUNCATE TABLE ISP_TEMP_BSS_T")
+			
 		*/
 		   
-		   
+           audit(ResourcesMap.CLASSIF_IOGV, ActionsMap.TRANSFER);   
 		   
 	    }catch (Exception e) {
 	       log.error("clUsrManager:moveClassif:ERROR:"+e);
-	       e.printStackTrace(System.out);
-	    }
+	     }
 	   
    }
    
@@ -569,26 +407,17 @@ public class ClUsrManager {
 	   }
 	
 	   try {
-		   AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
-		   
-		 //	entityManager.merge(acUsrBean);
+		  
 		  IspTempBssT aom = entityManager.find(IspTempBssT.class, new Long(sessionId));
 		  
 		  aom.setFull(clUsrBean.getFull());
-		 /* aom.setShortName(clUsrBean.getShortName());
-		  aom.setContactEmployeeFio(clUsrBean.getContactEmployeeFio());
-		  aom.setContactEmployeePosition(clUsrBean.getContactEmployeePosition());
-		  aom.setContactEmployeePhone(clUsrBean.getContactEmployeePhone());
-		  aom.setAcLegalEntityType(clUsrBean.getAcLegalEntityType());
-		  aom.setIsExternal(clUsrBean.getIsExternal());*/
-		  
-		 // aom.setModificator(au.getIdUser());
-		 // aom.setModified(new Date());
+		
+		 
+		 
 		  
 		  entityManager.flush();
 	      entityManager.refresh(aom);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
 	      Contexts.getEventContext().set("clUsrBean", aom);
 	    	  
 	     }catch (Exception e) {
@@ -621,19 +450,12 @@ public class ClUsrManager {
  
     public void forViewUpdDel() {
 	   try{
-	  /*  String sessionId = FacesContext.getCurrentInstance().getExternalContext()
-			        .getRequestParameterMap()
-			        .get("sessionId");
-	     log.info("forViewUpdDel:sessionId:"+sessionId);
-	     if(sessionId!=null){
-	    	 IspTempBssT ao = entityManager.find(IspTempBssT.class, new Long(sessionId));
-	    	 Contexts.getEventContext().set("clUsrBean", ao);
-	   	 }*/
+	 
 		   
 		  try{
 			  //1 - успех
 			  //0 или null- не успех
-			  String cl_ver_temp = (String) entityManager.createNativeQuery(
+			  String clVerTemp = (String) entityManager.createNativeQuery(
 				   "select to_char(max(JIL.CLASSIF_VERSION)) cl_ver "+
                    "from JOURN_ISP_LOAD jil, "+
                 //   "ISP_TEST_BSS_T it "+
@@ -641,8 +463,8 @@ public class ClUsrManager {
                    "where JIL.ID_SRV=IT.UP_ISP_LOAD  ")
 		   		.getSingleResult();
 			
-			  if(cl_ver_temp!=null&&!cl_ver_temp.trim().isEmpty()){
-	   				this.classifExistVersion =cl_ver_temp;
+			  if(clVerTemp!=null&&!clVerTemp.trim().isEmpty()){
+	   				this.classifExistVersion =clVerTemp;
 			  }
 			  
 		  }catch(NoResultException e){
@@ -677,23 +499,12 @@ public class ClUsrManager {
 		   
 	   }catch(Exception e){
 		   log.error("clUsrManager:forViewUpdDel:Error:"+e);
-		   e.printStackTrace(System.out);
 		   this.versionDetectFlag=0;
 	   }
     } 
    
     public void forViewDelMessage() {
-		/*  String sessionId = FacesContext.getCurrentInstance().getExternalContext()
-				.getRequestParameterMap()
-				.get("sessionId");
-		  log.info("forViewDel:sessionId:"+sessionId);
-		  if(sessionId!=null){
-			 IspBssT ao = entityManager.find(IspBssT.class, new Long(sessionId));
-			 if(ao.getAcUsers()!=null&&!ao.getAcUsers().isEmpty()){
-				dellMessage="” организации есть порождЄнные записи! ѕри удалении они будут удалены!";
-			 }
-			 Contexts.getEventContext().set("clUsrBean", ao);
-		 }	*/
+		
     }
     
      public void forViewLoadMessage() {
@@ -742,14 +553,14 @@ public class ClUsrManager {
 			  
 		
         if(lo==null||lo.isEmpty()){
-       	 // moveMessage="“аблица пуста!";
+       	 
         	workExistFlag=-1;
         }else{
         	
         	 try{
    			  //1 - успех
    			  //0 или null- не успех
-        		String cl_ver_temp = (String) entityManager.createNativeQuery(
+        		String clVerTemp = (String) entityManager.createNativeQuery(
    				   "select to_char(max(JIL.CLASSIF_VERSION)) cl_ver "+
                       "from JOURN_ISP_LOAD jil, "+
                     //  "ISP_TEST_BSS_T it "+
@@ -757,8 +568,8 @@ public class ClUsrManager {
                       "where JIL.ID_SRV=IT.UP_ISP_LOAD  ")
    		   		.getSingleResult();
    			  
-   			 if(cl_ver_temp!=null&&!cl_ver_temp.trim().isEmpty()){
-   				this.classifExistVersion =cl_ver_temp;
+   			 if(clVerTemp!=null&&!clVerTemp.trim().isEmpty()){
+   				this.classifExistVersion =clVerTemp;
 			  }
    			
    		  }catch(NoResultException e){
@@ -769,15 +580,15 @@ public class ClUsrManager {
         try{
  			  //1 - успех
  			  //0 или null- не успех
- 			  String cl_ver_temp = (String) entityManager.createNativeQuery(
+ 			  String clVerTemp = (String) entityManager.createNativeQuery(
  				   "select to_char(max(JIL.CLASSIF_VERSION)) cl_ver "+
                     "from JOURN_ISP_LOAD jil, "+
                     "ISP_TEMP_BSS_T it "+
                     "where JIL.ID_SRV=IT.UP_ISP_LOAD  ")
  		   		.getSingleResult();
  			 
- 			  if(cl_ver_temp!=null&&!cl_ver_temp.trim().isEmpty()){
- 			     this.classifLoadVersion =cl_ver_temp;
+ 			  if(clVerTemp!=null&&!clVerTemp.trim().isEmpty()){
+ 			     this.classifLoadVersion =clVerTemp;
  			  }
  		  }catch(NoResultException e){
  			  log.info("clUsrManager:forViewMove:2:NoResultException");
@@ -818,35 +629,19 @@ public class ClUsrManager {
    }
    
    public List <BaseTableItem> getAuditItemsListSelect() {
-		  // log.info("getAuditItemsListSelect:01");
+		   
 	
 	    ClUsrContext ac= new ClUsrContext();
 		   if( auditItemsListSelect==null){
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("signObject"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("full"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("fio"));
 			   
-			/*   auditItemsListSelect.add(ac.getAuditItemsMap().get("letValue"));
-			   auditItemsListSelect.add(ac.getAuditItemsMap().get("contactEmployeePosition"));
-			   auditItemsListSelect.add(ac.getAuditItemsMap().get("contactEmployeeFio"));
-			   auditItemsListSelect.add(ac.getAuditItemsMap().get("isExternalValue"));*/
-		   }
+			   }
 	       return this.auditItemsListSelect;
    }
    
@@ -859,8 +654,8 @@ public class ClUsrManager {
 	   if(auditItemsListContext==null){
 		   ClUsrContext ac= new ClUsrContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
@@ -873,8 +668,8 @@ public class ClUsrManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecOrg = (ArrayList<String>)
+	   //  for/View(); //!!!
+	    List<String>  selRecOrg = (ArrayList<String>)
 				  Component.getInstance("selRecOrg",ScopeType.SESSION);
 	    
 	    if(selRecOrg==null){
@@ -882,9 +677,9 @@ public class ClUsrManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	  //  AcOrganization ao = searchBean(sessionId);
+	  
 	   IspTempBssT ao = new IspTempBssT();
-	 // в getAuditList : else{it.setSelected(false);}
+	 
 	    
 	    if(ao!=null){
 	     if(selRecOrg.contains(sessionId)){
@@ -1027,11 +822,11 @@ public class ClUsrManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("reposManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -1040,7 +835,7 @@ public class ClUsrManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
+	  
 	   	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -1050,12 +845,12 @@ public class ClUsrManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		  log.info("clUsrManager:evaluteForListFooter!!!");
 	   		      evaluteForListFooter=true;
 	    	}
@@ -1065,7 +860,7 @@ public class ClUsrManager {
    
    public Boolean getEvaluteForBean() {
 		
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForBean==null){
 		   		evaluteForBean=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -1077,8 +872,8 @@ public class ClUsrManager {
 			             .get("sessionId");
 			    log.info("clUsrManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("clUsrManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -1128,13 +923,15 @@ public void setListUsrAutocomplete(List<IspBssT> listUsrAutocomplete) {
 	this.listUsrAutocomplete = listUsrAutocomplete;
 }
 
+public void audit(ResourcesMap resourcesMap, ActionsMap actionsMap){
+	   try{
+		   AuditExportData auditExportData = (AuditExportData)Component.getInstance("auditExportData",ScopeType.SESSION);
+		   auditExportData.addFunc(resourcesMap.getCode()+":"+actionsMap.getCode());
+		   
+	   }catch(Exception e){
+		   log.error("clUsrManager:audit:error:"+e);
+	   }
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/
+
+}
+

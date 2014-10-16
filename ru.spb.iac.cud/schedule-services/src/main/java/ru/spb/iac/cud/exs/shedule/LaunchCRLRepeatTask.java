@@ -52,19 +52,21 @@ public class LaunchCRLRepeatTask {
 			+ "/"
 			+ "crl_reestr.properties";
 
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(LaunchCRLRepeatTask.class);
 
 	public static void initTask(Long start) {
 
-		logger.info("initTask:01");
+		LOGGER.debug("initTask:01");
 
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			public void run() {
 
 				try {
 
-					logger.info("initTask:run:01");
+					LOGGER.info("CRL:task_run:start");
+					
+					LOGGER.debug("initTask:run:01");
 
 					synchronized (this) {
 
@@ -72,7 +74,7 @@ public class LaunchCRLRepeatTask {
 
 						String file_name = lct.content();
 
-						logger.info("initTask:02:" + file_name);
+						LOGGER.debug("initTask:02:" + file_name);
 
 						String file_checksum = lct.doChecksumContent(directory
 								+ "tmp_" + file_name);
@@ -91,13 +93,15 @@ public class LaunchCRLRepeatTask {
 						}
 					}
 
+					LOGGER.info("CRL:task_run:end");
+					
 				} catch (Exception e) {
-					logger.error("initTask:error:" + e);
+					LOGGER.error("initTask:error:", e);
 				} finally {
 					try {
 
 					} catch (Exception e) {
-						logger.error("initTask:finally:is:error:" + e);
+						LOGGER.error("initTask:finally:is:error:", e);
 					}
 				}
 			}
@@ -114,7 +118,7 @@ public class LaunchCRLRepeatTask {
 
 		String file_name = "qual_" + System.currentTimeMillis() + ".crl";
 
-		logger.info("content:file_name:" + file_name);
+		LOGGER.debug("content:file_name:" + file_name);
 
 		try {
 			// DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
@@ -129,8 +133,7 @@ public class LaunchCRLRepeatTask {
 
 			uc.connect();
 
-			// is = uc.getInputStream();
-
+			
 			in = new BufferedInputStream(uc.getInputStream());
 
 			byte[] buffer = new byte[4096];
@@ -147,7 +150,7 @@ public class LaunchCRLRepeatTask {
 			output.close();
 
 		} catch (Exception e) {
-			logger.error("content:error:" + e);
+			LOGGER.error("content:error:", e);
 		} finally {
 			try {
 				if (in != null) {
@@ -160,7 +163,7 @@ public class LaunchCRLRepeatTask {
 					output.close();
 				}
 			} catch (Exception e) {
-				logger.error("content:finally:is:error:" + e);
+				LOGGER.error("content:finally:is:error:", e);
 			}
 		}
 
@@ -172,7 +175,7 @@ public class LaunchCRLRepeatTask {
 		InputStream is = null;
 		OutputStream os = null;
 
-		logger.info("content:set_reestr");
+		LOGGER.debug("content:set_reestr");
 
 		try {
 
@@ -190,7 +193,7 @@ public class LaunchCRLRepeatTask {
 						try {
 							prev_file.delete();
 						} catch (Exception e) {
-							logger.error("set_reestr:delete:error:" + e);
+							LOGGER.error("set_reestr:delete:error:", e);
 						}
 					}
 				}
@@ -205,7 +208,7 @@ public class LaunchCRLRepeatTask {
 			properties.store(os = new FileOutputStream(f), null);
 
 		} catch (Exception e) {
-			logger.error("set_reestr:error:" + e);
+			LOGGER.error("set_reestr:error:", e);
 		} finally {
 			try {
 				if (is != null) {
@@ -216,7 +219,7 @@ public class LaunchCRLRepeatTask {
 				}
 
 			} catch (Exception e) {
-				logger.error("set_reestr:finally:is:error:" + e);
+				LOGGER.error("set_reestr:finally:is:error:", e);
 			}
 		}
 	}
@@ -226,7 +229,7 @@ public class LaunchCRLRepeatTask {
 		InputStream is = null;
 		String result = null;
 
-		logger.info("get_reestr");
+		LOGGER.debug("get_reestr");
 
 		try {
 			// URL url = new URL(reestr_path);
@@ -240,63 +243,24 @@ public class LaunchCRLRepeatTask {
 
 				result = properties.getProperty(prop_name);
 
-				logger.info("get_reestr:result:" + result);
+				LOGGER.debug("get_reestr:result:" + result);
 			}
 
 		} catch (Exception e) {
-			logger.error("initTask:error:" + e);
+			LOGGER.error("initTask:error:", e);
 		} finally {
 			try {
 				if (is != null) {
 					is.close();
 				}
 			} catch (Exception e) {
-				logger.error("initTask:finally:is:error:" + e);
+				LOGGER.error("initTask:finally:is:error:", e);
 			}
 		}
 		return result;
 	}
 
-	private synchronized void loadCrl(String curr_crl) {
-
-		CertificateFactory cf = null;
-		InputStream is = null;
-		Collection<? extends X509CRL> x509Crls = null;
-		File crlFile = new File(curr_crl);
-
-		try {
-			logger.info("loadCrl:01:lastModified:" + crlFile.lastModified());
-
-			cf = CertificateFactory.getInstance("X.509");
-
-			x509Crls = (Collection<? extends X509CRL>) cf
-					.generateCRLs(is = new FileInputStream(crlFile));
-
-			logger.info("loadCrl:02");
-
-			List<CRL> cpCrls = new ArrayList<CRL>(x509Crls.size());
-
-			for (X509CRL crl : x509Crls) {
-
-				X509CRLEntry xce = crl.getRevokedCertificate(new BigInteger(
-						"80281257310973985818053"));
-
-			}
-
-			logger.info("loadCrl:03");
-
-		} catch (Exception e) {
-			logger.error("loadCrl:error:" + e);
-		} finally {
-			try {
-				if (is != null) {
-					is.close();
-				}
-			} catch (Exception e) {
-				logger.error("initTask:finally:is:error:" + e);
-			}
-		}
-	}
+	
 
 	private String doChecksumContent(String fileName) {
 
@@ -314,7 +278,7 @@ public class LaunchCRLRepeatTask {
 				in = new BufferedInputStream(cis);
 
 			} catch (FileNotFoundException e) {
-				logger.error("doChecksumContent:error:" + e);
+				LOGGER.error("doChecksumContent:error:", e);
 			}
 
 			byte[] buf = new byte[5000];
@@ -325,10 +289,10 @@ public class LaunchCRLRepeatTask {
 
 			result = Long.toString(checksum_content);
 
-			logger.info("result: " + checksum_content + " " + fileName);
+			LOGGER.debug("result: " + checksum_content + " " + fileName);
 
 		} catch (IOException e) {
-			logger.error("doChecksumContent:error_2:" + e);
+			LOGGER.error("doChecksumContent:error_2:", e);
 		} finally {
 			try {
 				if (cis != null) {
@@ -339,53 +303,14 @@ public class LaunchCRLRepeatTask {
 				}
 
 			} catch (Exception e) {
-				logger.error("set_reestr:finally:is:error:" + e);
+				LOGGER.error("set_reestr:finally:is:error:", e);
 			}
 		}
 
 		return result;
 	}
 
-	private void doChecksum(String fileName) {
-
-		try {
-
-			CheckedInputStream cis = null;
-			BufferedInputStream in = null;
-			long fileSize = 0;
-			try {
-				// Computer CRC32 checksum
-				cis = new CheckedInputStream(new FileInputStream(fileName),
-						new CRC32());
-
-				in = new BufferedInputStream(cis);
-
-				fileSize = new File(fileName).length();
-
-			} catch (FileNotFoundException e) {
-				logger.error("doChecksum:error:" + e);
-			}
-
-			byte[] buf = new byte[4096];
-			while (in.read(buf, 0, 4096) >= 0) {
-			}
-
-			long checksum_content = cis.getChecksum().getValue();
-
-			// name
-			byte bytes[] = fileName.getBytes();
-			Checksum checksum = new CRC32();
-			checksum.update(bytes, 0, bytes.length);
-			long checksum_name = checksum.getValue();
-
-			System.out.println(checksum_content + " " + checksum_name + " "
-					+ fileSize + " " + fileName);
-
-		} catch (IOException e) {
-			logger.error("doChecksum:error_2:" + e);
-		}
-	}
-
+	
 	public void getMD5Checksum(File file) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -403,7 +328,7 @@ public class LaunchCRLRepeatTask {
 						.substring(1);
 			}
 
-			logger.info("getMD5Checksum:1:" + result);
+			LOGGER.debug("getMD5Checksum:1:" + result);
 
 			result = "";
 
@@ -415,17 +340,17 @@ public class LaunchCRLRepeatTask {
 				result += Integer.toString((digest[i] & 0xff) + 0x100, 16)
 						.substring(1);
 			}
-			logger.info("getMD5Checksum:2:" + result);
+			LOGGER.debug("getMD5Checksum:2:" + result);
 
-			logger.info("getMD5Checksum:3:"
+			LOGGER.debug("getMD5Checksum:3:"
 					+ new BigInteger(1, md.digest()).toString(16));
 
 			BigInteger i = new BigInteger(1, md.digest());
 
-			logger.info(String.format("%1$032X", i));
+			LOGGER.debug(String.format("%1$032X", i));
 
 		} catch (Exception e) {
-			logger.error("getMD5Checksum:error:" + e);
+			LOGGER.error("getMD5Checksum:error:", e);
 		}
 	}
 

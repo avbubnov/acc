@@ -30,50 +30,32 @@ public class ContextApplicationManager {
 	static Context ctx;
 	ApplicationManagerLocal aml = null;
 
-	Logger logger = LoggerFactory.getLogger(ContextApplicationManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ContextApplicationManager.class);
 
 	static {
 		try {
 			ctx = new InitialContext();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("error",e);
 		}
 	}
 
-	/*
-	 * public static void initContext(String jboss_jndi_port){ try{
-	 * System.out.println
-	 * ("CudServices:ContextUtilManager:initContext:jboss_jndi_port:"
-	 * +jboss_jndi_port);
-	 * 
-	 * jboss_jndi_port=(jboss_jndi_port!=null?jboss_jndi_port:"1099");
-	 * 
-	 * Properties env = new Properties();
-	 * env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-	 * "org.jnp.interfaces.NamingContextFactory");
-	 * env.setProperty(Context.URL_PKG_PREFIXES, "org.jboss.naming");
-	 * env.setProperty(Context.PROVIDER_URL, "localhost:"+jboss_jndi_port); ctx
-	 * = new InitialContext(env);
-	 * 
-	 * }catch(Exception e){
-	 * System.out.println("authServices.ContextAccessWebManager:error:"+e); } }
-	 */
-
+	
 	public ContextApplicationManager() {
 		try {
 			this.aml = (ApplicationManagerLocal) ctx
 					.lookup("java:global/AuthServices/ApplicationManager!ru.spb.iac.cud.core.app.ApplicationManagerLocal");
 
 		} catch (Exception e) {
-			logger.error("ContextApplicationManager:error:" + e);
+			LOGGER.error("ContextApplicationManager:error:", e);
 		}
 	}
 
 	public AppAccept system_registration(List<AppAttribute> attributes,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("system_registration");
+		LOGGER.debug("system_registration");
 
 		return aml.system_registration(attributes, null, idUserAuth, IPAddress);
 	}
@@ -81,7 +63,7 @@ public class ContextApplicationManager {
 	public AppAccept user_registration(List<AppAttribute> attributes,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("user_registration");
+		LOGGER.debug("user_registration");
 
 		return aml.user_registration(attributes, null, idUserAuth, IPAddress);
 	}
@@ -90,7 +72,7 @@ public class ContextApplicationManager {
 			String codeSystem, List<String> codesRoles, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
 
-		logger.info("access_roles");
+		LOGGER.debug("access_roles");
 		return aml.access_roles(modeExec, loginUser, codeSystem, codesRoles,
 				null, idUserAuth, IPAddress);
 	}
@@ -99,7 +81,7 @@ public class ContextApplicationManager {
 			String codeSystem, List<String> codesGroups, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
 
-		logger.info("access_groups");
+		LOGGER.debug("access_groups");
 
 		return aml.access_groups(modeExec, loginUser, codeSystem, codesGroups,
 				null, idUserAuth, IPAddress);
@@ -109,7 +91,7 @@ public class ContextApplicationManager {
 			String blockReason, Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("block");
+		LOGGER.debug("block");
 
 		return aml.block(modeExec, loginUser, blockReason, null, idUserAuth,
 				IPAddress);

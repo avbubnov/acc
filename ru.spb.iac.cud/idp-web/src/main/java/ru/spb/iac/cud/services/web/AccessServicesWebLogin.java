@@ -27,7 +27,7 @@ import ru.spb.iac.cud.items.Token;
  */
 public class AccessServicesWebLogin extends HttpServlet {
 
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(AccessServicesWebLogin.class);
 
 	private static final long serialVersionUID = 1L;
@@ -51,11 +51,11 @@ public class AccessServicesWebLogin extends HttpServlet {
 	protected void service(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 
-		String backUrl = null, login = null, password = null, checkSession = null, pswitch = null;
+		String backUrl = null, login = null, password = null,  pswitch = null;
 		String destination = "WebLoginAction";
 
 		try {
-			logger.info("service:01");
+			LOGGER.debug("service:01");
 
 			org.apache.catalina.connector.Request request2 = null;
 			request2 = SecurityContextAssociationValve.getActiveRequest();
@@ -80,13 +80,13 @@ public class AccessServicesWebLogin extends HttpServlet {
 
 			/*
 			 * //не дойдёт до выполнения //перехватывается в фильтре //if
-			 * requestURI.endsWith(cert_to_form_ie) //if(principal2!=null){
-			 * //response.sendRedirect(request.getContextPath()+main);
-			 * if(tokenID_attr!=null&&isTokenActive(tokenID_attr)){ //sso && не
-			 * было logout sendPost(backUrl, response, "true", tokenID_attr);
+			 * requestURI/.endsWith(cert_to_form_ie) //if(principal2/!=null)/{
+			 * 
+			 * if(tokenID/_attr!=null&&/isTokenActive(tokenID_attr)){ //sso && не
+			 * было logout/ sendPost/(backUrl, response, "true", /tokenID_attr);
 			 * }else{
 			 */
-			// if(checkSession==null){
+			
 
 			if (login == null && password == null) {
 
@@ -180,48 +180,16 @@ public class AccessServicesWebLogin extends HttpServlet {
 				pw.print("<input type=\"submit\" value=\"Войти\" class=\"but_class\"/>");
 				pw.print("</td>");
 
-				/*
-				 * pw.print("<td align=\"center\" height = \"30px\">");
-				 * pw.print(
-				 * "<a href=\""+request.getContextPath()+"/AccessServicesWebGeneral"
-				 * +(backUrl!=null?"?backUrl="+backUrl:"")+
-				 * "\" class=\"but_link_class\"/>Войти по сертификату</a>");
-				 * pw.print("</td>");
-				 */
-
+				
 				pw.print("</tr>");
-				/*
-				 * pw.print("<tr>");
-				 * 
-				 * pw.print("<td colspan=\"2\" align=\"right\" height = \"20px\">"
-				 * ); pw.print("<a href=\""+request.getContextPath()+
-				 * "/AccessServicesWebGeneral"
-				 * +(backUrl!=null?"?backUrl="+backUrl:"")+
-				 * "\" />Войти по сертификату</a>"); pw.print("</td>");
-				 * 
-				 * pw.print("</tr>");
-				 */
+				
 				pw.print("</table>");
 
 				pw.print("</FORM>");
 
 				pw.print("</div>");
 
-				/*
-				 * if(pswitch==null||!pswitch.equals("false")){
-				 * 
-				 * pw.print("<table width = \"220px\">"); pw.print("<tr>");
-				 * 
-				 * pw.print("<td colspan=\"2\" align=\"right\" >");
-				 * pw.print("<a href=\""
-				 * +request.getContextPath()+"/AccessServicesWebGeneral"
-				 * +(backUrl!=null?"?backUrl="+backUrl:"")+
-				 * "\" />Войти по сертификату</a>"); pw.print("</td>");
-				 * 
-				 * pw.print("</tr>"); pw.print("</table>");
-				 * 
-				 * }
-				 */
+				
 
 				pw.print("</td>");
 				pw.print("</tr>");
@@ -238,9 +206,9 @@ public class AccessServicesWebLogin extends HttpServlet {
 				response.sendRedirect(process);
 			}
 
-			// }
+			
 		} catch (Exception e3) {
-			logger.error("error3:" + e3.getMessage());
+			LOGGER.error("error3:" + e3.getMessage());
 		}
 
 	}
@@ -261,17 +229,6 @@ public class AccessServicesWebLogin extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 	}
 
-	private String getIPAddress(HttpServletRequest request) {
 
-		String ipAddress = request.getRemoteAddr();
-
-		return ipAddress;
-	}
-
-	private static void common(String destination, HttpServletResponse response) {
-		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Pragma", "no-cache");
-		response.setHeader("Cache-Control", "no-cache, no-store");
-	}
 
 }

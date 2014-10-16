@@ -25,7 +25,7 @@ import ru.spb.iac.cud.uarm.util.CUDUserConsoleConstants;
 @WebFilter("*")
 public class AuthSessionFilter implements Filter {
 
-	final static Logger logger = LoggerFactory.getLogger(AuthSessionFilter.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(AuthSessionFilter.class);
 	
     /**
      * Default constructor. 
@@ -57,7 +57,7 @@ public class AuthSessionFilter implements Filter {
 		String contextPath = hsr.getContextPath();
 		
 		
-		logger.info("AuthSessionFilter:doFilter:01:"+requestURI);
+		LOGGER.debug("AuthSessionFilter:doFilter:01:"+requestURI);
 		
 		if(
 			!requestURI.endsWith(".js")&&
@@ -80,14 +80,9 @@ public class AuthSessionFilter implements Filter {
 			   !requestURI.startsWith(contextPath+"/context/registr/")&&
 			   !requestURI.startsWith(contextPath+"/context/forgot/")){
 				
-				System.out.print("AuthSessionFilter:doFilter:02");
 						
 				hsresp.sendRedirect(contextPath+"/welcome.xhtml?error=req_auth");
 				
-			//	FacesContext.getCurrentInstance().addMessage(null, 
-	        //			new FacesMessage("Необходимо авторизоваться!"));
-			//	FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-			       
 				
 				flag_redirect=1;
 			}
@@ -95,7 +90,7 @@ public class AuthSessionFilter implements Filter {
 		}
 		
 		if(flag_redirect==0){
-		  logger.info("AuthSessionFilter:doFilter:03");
+		  LOGGER.debug("AuthSessionFilter:doFilter:03");
 		  chain.doFilter(request, response);
 		}
 	}

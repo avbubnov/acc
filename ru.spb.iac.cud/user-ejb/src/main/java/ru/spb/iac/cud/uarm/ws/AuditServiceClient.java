@@ -62,19 +62,14 @@ import ru.spb.iac.cud.services.audit.AuditService;
 
 public class AuditServiceClient {
 
-	final static Logger logger = LoggerFactory.getLogger(AuditServiceClient.class);
-	
-	//@Logger private Log log;
+	final static Logger LOGGER = LoggerFactory.getLogger(AuditServiceClient.class);
 	
 	//test-contur
-	//static String endpointURI ="https://localhost:7443/CudServicesPro/AuditService?wsdl";
+	//"https://localhost:7443/CudServicesPro/AuditService?wsdl";
 	//+ в jboss-deployment-structure.xml
 	
-	//static String endpointURI ="https://acc.lan.iac.spb.ru:18443/CudServicesPro/AuditService?wsdl";
 	static String endpointURI =Configuration.getAuditService();
 	
-	//static String endpointURI ="https://cudvm:18443/CudServicesPro/AuditService?wsdl";
-	//static String endpointURI ="https://192.168.12.16:8443/CudServicesPro/AuditService?wsdl";
 	
 	private AuditService accessServices= null;
 	
@@ -83,21 +78,11 @@ public class AuditServiceClient {
    public void audit(String login, List<AuditFunction> funccodes) throws Exception{
 	 try{ 	 
 	   
-	   logger.info("auditServicesClient:audit:01");
+	   LOGGER.debug("auditServicesClient:audit:01");
 		
 	      System.setProperty("javax.net.debug", "all"); 
-			/*	
-				System.setProperty("javax.net.ssl.trustStore", "/Development/cert/gost/client/bubnov2014.store");
-				System.setProperty("javax.net.ssl.trustStoreType", "OCFStore");
-				System.setProperty("javax.net.ssl.trustStorePassword", "1234567890");
-				
-			    System.setProperty("javax.net.ssl.keyStore", "@");
-				System.setProperty("javax.net.ssl.keyStoreType", "OCFStore");
-				System.setProperty("javax.net.ssl.keyStorePassword", "1234567890");
-	          */
-	      
-	    		//System.setProperty("javax.net.ssl.trustStore", "/home/jboss/jboss/certstore/cudvm.store");
-				System.setProperty("javax.net.ssl.trustStore", Configuration.getStorePath());
+			
+	      System.setProperty("javax.net.ssl.trustStore", Configuration.getStorePath());
 				System.setProperty("javax.net.ssl.trustStoreType", "HDImageStore");
 				System.setProperty("javax.net.ssl.trustStorePassword", "Access_Control");
 				
@@ -107,31 +92,30 @@ public class AuditServiceClient {
 	 
 		/*
 			//test-contur	
-			HostnameVerifier hv = new HostnameVerifier() {
-			public boolean verify(String urlHostName, SSLSession session) {
-							 logger.info("Warning: URL Host: "+ urlHostName+ " vs. " + session.getPeerHost());
-							 return true;
+			HostnameVerifier hv = n/ew HostnameVerifier() {
+			public boolea/n verify(/String urlHostName, SSLSession session) {
+							 logger/.info("Warning: URL Host: "+ urlHostName+ " vs. " + session.getPeerHost());
+							 return/ true;
 			  }
 			};
-			HttpsURLConnection.setDefaultHostnameVerifier(hv); 
+			HttpsURL/onnection.setDefaultHos/tnameVerifier(hv); 
 			*/	
 				
 	   TokenInstall ti = new TokenInstall();
 	   
 	   String samlAssertion = ti.get_assertion() ;
 	   
-	//   logger.info("auditServicesClient:audit:02:"+samlAssertion);
+	 
 	   
 	   getPort(endpointURI, samlAssertion).audit(login, funccodes);
 	 
-	//   logger.info("auditServicesClient:audit:03");
+	 
 	   
 	 }catch(GeneralFailure e1){
-		 logger.error("auditServicesClient:audit:error1:"+e1.getMessage());
+		 LOGGER.error("auditServicesClient:audit:error1:"+e1.getMessage());
      }catch(Exception e2){
-		 logger.error("auditServicesClient:audit:error2:"+e2.getMessage());
-		 e2.printStackTrace(System.out);
-     }
+		 LOGGER.error("auditServicesClient:audit:error2:"+e2.getMessage());
+	    }
 	}
    
    public void sync_functions(List<Function> functions) throws Exception{
@@ -140,24 +124,24 @@ public class AuditServiceClient {
    	
    	  String samlAssertion = null;
    		
-   	  logger.info("auditServicesClient:sync_functions:01");
+   	  LOGGER.debug("auditServicesClient:sync_functions:01");
    	  
    	  getPort(endpointURI, samlAssertion).sync_functions(functions, "ADD");
    	  
    	}catch(GeneralFailure e1){
-      	  logger.error("auditServicesClient:sync_functions:error1:"+e1);
+      	  LOGGER.error("auditServicesClient:sync_functions:error1:"+e1);
     }catch(Exception e2){
-		  logger.error("auditServicesClient:sync_functions:error2:"+e2);
+		  LOGGER.error("auditServicesClient:sync_functions:error2:"+e2);
 	}
    }
    
  
 	private  AuditService getPort(String endpointURI, String samlAssertion) throws MalformedURLException   {
 		
-		//logger.info("auditServicesClient:getPort:01");
+		 
 		if(accessServices==null){
 			 
-		   logger.info("getPort:02");
+		   LOGGER.debug("getPort:02");
 		   
 		   QName serviceName = new QName("http://audit.services.cud.iac.spb.ru/", "AuditServiceImplService");
 		   URL wsdlURL = new URL(endpointURI);
@@ -170,16 +154,15 @@ public class AuditServiceClient {
 	       
 	         
 	      /*//test-contur
-	      // HTTPConduit httpConduit = (HTTPConduit)  ((org.apache.cxf.jaxws.DispatchImpl)dispatch).getClient().getConduit() ; 
-			HTTPConduit httpConduit = (HTTPConduit) ClientProxy.getClient(accessServices).getConduit();
-			TLSClientParameters tlsCP = new TLSClientParameters();
-		    final SSLSocketFactoryImpl sslFact = new SSLSocketFactoryImpl();
-			tlsCP.setSSLSocketFactory(sslFact);
-			tlsCP.setDisableCNCheck(true);
-			httpConduit.setTlsClientParameters(tlsCP);
+	      // HTTP/Conduit htt/pConduit = (HTTPConduit)  ((org.apache.cxf.jaxws.DispatchImpl)dispatch).getClient().getConduit() ; 
+			HTTPConduit htt/pConduit = (HTTPConduit) ClientProxy.getClient(accessServices).getConduit();
+			TLSClientParam/eters tlsCP = new TLSClientParameters();
+		    final SS/LSocketFactoryImpl sslFact = new SSLSocketFactoryImpl();
+			tlsCP.setS/SLSocketFactory(sslFact);
+			tlsCP.set/DisableCNCheck(true);
+			httpConduit.se/tTlsClientParameters(tlsCP);
 	   */
 			
-	      //  Element assertion = get_saml_assertion_from_xml(samlAssertion);
 	        Element assertion = get_saml_assertion_from_xml_simple(samlAssertion);
 	        
 		   BindingProvider bp = (BindingProvider) accessServices;
@@ -190,21 +173,21 @@ public class AuditServiceClient {
 		    bp.getBinding().setHandlerChain(handlers);
 		  }
 		
-		//logger.info("auditServicesClient:getPort:03");
+		 
 		
 		  return accessServices;
-		// return service.getPort(portName, AccessServices.class);
 		 }
 	
 	private static Element get_saml_assertion_from_xml_simple(String samlAssertion){
 		
-		logger.info("AuditServiceClient:get_saml_assertion_from_xml_simple:01");
+		LOGGER.debug("AuditServiceClient:get_saml_assertion_from_xml_simple:01");
 		 
 		Element result = null;
 		try{
 			//!!!нельзя так просто
-			//нужно именно setNamespaceAware(true)
-			//DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			//нужно именно set/NamespaceAware(true)
+			//Doc/umentBuilder db = DocumentBuilderF/actory.ne/wInstance().n/ewDocumentBuilder();
+			
 			
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         	//!!!
@@ -216,99 +199,18 @@ public class AuditServiceClient {
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(samlAssertion));
 
-			Document ass_doc = db.parse(is);
+			Document assDoc = db.parse(is);
 			
-			result=ass_doc.getDocumentElement();
+			result=assDoc.getDocumentElement();
 			
-			logger.info("AuditServiceClient:get_saml_assertion_from_xml_simple:02:"+DocumentUtil.asString(ass_doc));
+			LOGGER.debug("AuditServiceClient:get_saml_assertion_from_xml_simple:02:"+DocumentUtil.asString(assDoc));
 		       
 			
 		}catch(Exception e){
-			logger.error("AuditServiceClient:get_saml_assertion_from_xml_simple:error:"+e);
+			LOGGER.error("AuditServiceClient:get_saml_assertion_from_xml_simple:error:"+e);
 		}
 		return result;
 	}	
 	
-private static Element get_saml_assertion_from_xml(String samlAssertion){
-		
-		Element result = null;
-		InputStream samlAssertionInputStream = null;
-				
-		try{
-		
-		 logger.info("AuditServiceClient:get_saml_assertion_from_xml:01");
-		 
-		 if(samlAssertion!=null){
-			 
-		   samlAssertionInputStream = new ByteArrayInputStream(samlAssertion.getBytes("UTF-8"));
-		 //  logger.info("AuditServiceClient:get_saml_assertion_from_xml:01_1");
-		   
-		 }else{
-			 
-		  // samlAssertionInputStream = new FileInputStream("/home/jboss/jboss/data/saml/saml_asserion.xml");
-		   samlAssertionInputStream = new FileInputStream(Configuration.getSamlAssertion());
-			
-		   
-		 }
-		   
-		   
-		 //  logger.info("AuditServiceClient:get_saml_assertion_from_xml:01_3");
-		   
-	        SAMLParser samlParser = new SAMLParser();
 
-	        Object parsedObject = samlParser.parse(samlAssertionInputStream);
-
-	       // logger.info("AuditServiceClient:get_saml_assertion_from_xml:02:"+(parsedObject==null));
-	      
-	     //   logger.info("AuditServiceClient:get_saml_assertion_from_xml:03:"+parsedObject.getClass());
-	       
-	       // cast the parsed object to the expected type, in this case AssertionType
-	        AssertionType assertionType = (AssertionType) parsedObject;
-
-	        //Важно!!!
-	        SubjectConfirmationType sct = assertionType.getSubject().getConfirmation().get(0);
-	        SubjectConfirmationDataType  scdt = sct.getSubjectConfirmationData();
-	        KeyInfoConfirmationDataType type = new KeyInfoConfirmationDataType();
-	        type.setAnyType(scdt.getAnyType());		
-	        sct.setSubjectConfirmationData(type);
-	        
-	        logger.info("AuditServiceClient:get_saml_assertion_from_xml:04+:"+AssertionUtil.hasExpired(assertionType));
-	        
-	        
-	      // тут может возникнуть NullPointerException
-	      // при парсинге строки в AssertionType через picketlink api
-	      // и без ручной установки sct.setSubjectConfirmationData(type) 
-	      // в TokenInstall.load();  
-	       
-	         byte[] bb = (( X509CertificateType) ( (X509DataType )((KeyInfoType)assertionType.getSubject().getConfirmation().get(0).getSubjectConfirmationData().getAnyType()).getContent().get(0)).getDataObjects().get(0)).getEncodedCertificate();
-            
-          //  logger.info("AuditServiceClient:get_saml_assertion_from_xml:04_1:"+new String(bb));
-     
-	        
-	        Document ass_doc = AssertionUtil.asDocument(assertionType);
-	     
-	     //   logger.info("AuditServiceClient:get_saml_assertion_from_xml:04_1");
-	        		
-	       // result = ass_doc.getDocumentElement();
-	        
-	       result = SAMLUtil.toElement(assertionType);
-	        
-	       logger.info("AuditServiceClient:get_saml_assertion_from_xml:05:"+DocumentUtil.asString(ass_doc));
-	        
-	        // let's write the parsed assertion to the sysout
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-	        SAMLAssertionWriter writer = new SAMLAssertionWriter(StaxUtil.getXMLStreamWriter(baos));
-
-	        writer.write(assertionType);
-
-	        
-	    //    logger.info(new String(baos.toByteArray()));
-		  			      
-	  }catch(Exception e3){
-			 logger.error("get_saml_assertion_from_xml:error:"+e3);
-			 e3.printStackTrace(System.out);
-	  }
-		return result;
-	}
 }

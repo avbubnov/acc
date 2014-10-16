@@ -132,10 +132,10 @@ import static org.picketlink.common.util.StringUtil.*;
 
 public abstract class CUDAbstractIDPValve extends ValveBase {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDAbstractIDPValve.class);
 
 	protected boolean enableAudit = false;
@@ -203,14 +203,14 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 	public void setConfigProvider(String cp) {
 		if (cp == null)
-			throw logger.nullArgumentError("configProvider");
+			throw LOGGER.nullArgumentError("configProvider");
 		Class<?> clazz = SecurityActions.loadClass(getClass(), cp);
 		if (clazz == null)
-			throw new RuntimeException(logger.classNotLoadedError(cp));
+			throw new RuntimeException(LOGGER.classNotLoadedError(cp));
 		try {
 			configProvider = (SAMLConfigurationProvider) clazz.newInstance();
 		} catch (Exception e) {
-			throw new RuntimeException(logger.couldNotCreateInstance(cp, e));
+			throw new RuntimeException(LOGGER.couldNotCreateInstance(cp, e));
 		}
 	}
 
@@ -225,34 +225,34 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 	@Deprecated
 	public void setRoleGenerator(String rgName) {
-		logger.warn("Option 'roleGenerator' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
+		LOGGER.warn("Option 'roleGenerator' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
 	}
 
 	@Deprecated
 	public void setSamlHandlerChainClass(String samlHandlerChainClass) {
-		logger.warn("Option 'samlHandlerChainClass' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
+		LOGGER.warn("Option 'samlHandlerChainClass' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
 	}
 
 	@Deprecated
 	public void setIdentityParticipantStack(String fqn) {
-		logger.warn("Option 'identityParticipantStack' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
+		LOGGER.warn("Option 'identityParticipantStack' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
 	}
 
 	@Deprecated
 	public void setStrictPostBinding(Boolean strictPostBinding) {
-		logger.warn("Option 'strictPostBinding' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
+		LOGGER.warn("Option 'strictPostBinding' is deprecated and should not be used. This configuration is now set in picketlink.xml.");
 	}
 
 	@Deprecated
 	public Boolean getIgnoreIncomingSignatures() {
-		logger.warn("Option 'ignoreIncomingSignatures' is deprecated and should not be used. Signatures are verified if "
+		LOGGER.warn("Option 'ignoreIncomingSignatures' is deprecated and should not be used. Signatures are verified if "
 				+ "SAML2SignatureValidationHandler is available.");
 		return false;
 	}
 
 	@Deprecated
 	public void setIgnoreIncomingSignatures(Boolean ignoreIncomingSignature) {
-		logger.warn("Option 'ignoreIncomingSignatures' is deprecated and not used. Signatures are verified if "
+		LOGGER.warn("Option 'ignoreIncomingSignatures' is deprecated and not used. Signatures are verified if "
 				+ "SAML2SignatureValidationHandler is available.");
 	}
 
@@ -263,7 +263,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 	@Deprecated
 	public void setValidatingAliasToTokenIssuer(
 			Boolean validatingAliasToTokenIssuer) {
-		logger.warn("Option 'validatingAliasToTokenIssuer' is deprecated and not used. The IDP will always use the issuer host to validate signatures.");
+		LOGGER.warn("Option 'validatingAliasToTokenIssuer' is deprecated and not used. The IDP will always use the issuer host to validate signatures.");
 	}
 
 	/**
@@ -278,14 +278,14 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 	@Deprecated
 	public Boolean getSignOutgoingMessages() {
-		logger.warn("Option signOutgoingMessages is used for signing of error messages. Normal SAML messages are "
+		LOGGER.warn("Option signOutgoingMessages is used for signing of error messages. Normal SAML messages are "
 				+ "signed by SAML2SignatureGenerationHandler.");
 		return true;
 	}
 
 	@Deprecated
 	public void setSignOutgoingMessages(Boolean signOutgoingMessages) {
-		logger.warn("Option signOutgoingMessages is used for signing of error messages. Normal SAML messages are "
+		LOGGER.warn("Option signOutgoingMessages is used for signing of error messages. Normal SAML messages are "
 				+ "signed by SAML2SignatureGenerationHandler.");
 	}
 
@@ -306,7 +306,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			return;
 		}
 
-		loggerslf4j.info("invoke:01");
+		LOGGERSLF4J.debug("invoke:01");
 
 		if (isNotNull(request.getParameter(GeneralConstants.SAML_REQUEST_KEY))) {
 			// считаем, что это новый запрос от ИС
@@ -319,7 +319,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 						request.getSessionInternal().getNote(
 								GeneralConstants.SAML_REQUEST_KEY));
 
-				loggerslf4j.info("invoke:02:"
+				LOGGERSLF4J.debug("invoke:02:"
 						+ request.getSession().getAttribute(
 								"incoming_http_method"));
 
@@ -338,7 +338,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		// authentication request
 		Principal userPrincipal = getUserPrincipal(request, response);
 
-		loggerslf4j.info("invoke:03:" + userPrincipal);
+		LOGGERSLF4J.debug("invoke:03:" + userPrincipal);
 
 		// we only handle SAML messages for authenticated users.
 		// if (userPrincipal != null) {
@@ -349,7 +349,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				.getParameter(GeneralConstants.SAML_REQUEST_KEY))
 				&& isLogout(request)) {
 			// logout
-			loggerslf4j.info("invoke:04");
+			LOGGERSLF4J.debug("invoke:04");
 			try {
 				// !!!
 				// нужен reset, т.к. в фильтре перед этим может быть установлен
@@ -366,7 +366,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			}
 		} else if (isIsPassiveFailed(request)) {
 			// нет активной сессии при isPassive запросе
-			loggerslf4j.info("invoke:05");
+			LOGGERSLF4J.debug("invoke:05");
 			try {
 				// response.reset();
 				response.recycle();
@@ -377,7 +377,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				cleanUpSessionNote(request);
 			}
 		}
-		loggerslf4j.info("invoke:06");
+		LOGGERSLF4J.debug("invoke:06");
 	}
 
 	private void handleSAMLMessage(Request request, Response response)
@@ -407,7 +407,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			String sigAlg = (String) session
 					.getNote(GeneralConstants.SAML_SIG_ALG_REQUEST_KEY);
 
-			if (logger.isTraceEnabled()) {
+			if (LOGGER.isTraceEnabled()) {
 				StringBuilder builder = new StringBuilder();
 				builder.append("Retrieved saml messages and relay state from session");
 				builder.append("saml Request message=").append(
@@ -418,7 +418,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 				builder.append("Signature=").append(signature)
 						.append("::sigAlg=").append(sigAlg);
-				logger.trace(builder.toString());
+				LOGGER.trace(builder.toString());
 			}
 
 			if (isNotNull(samlRequestMessage)) {
@@ -448,7 +448,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 	private void forwardHosted(Request request, Response response)
 			throws ServletException, IOException {
-		logger.trace("SAML 1.1::Proceeding to IDP index page");
+		LOGGER.trace("SAML 1.1::Proceeding to IDP index page");
 		RequestDispatcher dispatch = getContext().getServletContext()
 				.getRequestDispatcher(this.idpConfiguration.getHostedURI());
 
@@ -521,7 +521,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		Session session = request.getSessionInternal();
 
 		if (containsSAMLRequestMessage || containsSAMLResponseMessage) {
-			logger.trace("Storing the SAMLRequest/SAMLResponse and RelayState in session");
+			LOGGER.trace("Storing the SAMLRequest/SAMLResponse and RelayState in session");
 			if (isNotNull(samlRequestMessage))
 				session.setNote(GeneralConstants.SAML_REQUEST_KEY,
 						samlRequestMessage);
@@ -591,7 +591,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 	private void handleIsPassiveFailedResponse(Request request,
 			Response response) throws IOException, ServletException {
 
-		loggerslf4j.info("handleIsPassiveFailedResponse:01");
+		LOGGERSLF4J.debug("handleIsPassiveFailedResponse:01");
 
 		// IDPWebRequestUtil webRequestUtil = new IDPWebRequestUtil(request,
 		// idpConfiguration, keyManager);
@@ -614,10 +614,10 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			destination = authRequest.getAssertionConsumerServiceURL()
 					.toASCIIString();
 		} catch (Exception e) {
-			loggerslf4j.error("handleIsPassiveFailedResponse:error:" + e);
+			LOGGERSLF4J.error("handleIsPassiveFailedResponse:error:", e);
 		}
 
-		loggerslf4j.info("handleIsPassiveFailedResponse:02:" + destination);
+		LOGGERSLF4J.debug("handleIsPassiveFailedResponse:02:" + destination);
 
 		if (isNotNull(relayState))
 			relayState = RedirectBindingUtil.urlDecode(relayState);
@@ -640,7 +640,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					.hasSAMLRequestInPostProfile());
 
 			if (this.idpConfiguration.isSupportsSignature()) {
-				loggerslf4j.info("handleIsPassiveFailedResponse:02");
+				LOGGERSLF4J.debug("handleIsPassiveFailedResponse:02");
 
 				holder.setSupportSignature(true).setPrivateKey(
 						keyManager.getSigningKey());
@@ -649,7 +649,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			holder.setStrictPostBinding(this.idpConfiguration
 					.isStrictPostBinding());
 
-			loggerslf4j.info("handleIsPassiveFailedResponse:03:"
+			LOGGERSLF4J.debug("handleIsPassiveFailedResponse:03:"
 					+ this.idpConfiguration.isStrictPostBinding());
 
 			webRequestUtil.send(holder);
@@ -662,15 +662,15 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 	private void handleLogout(Request request, Response response)
 			throws IOException, ServletException {
 
-		loggerslf4j.info("handleLogout:01");
+		LOGGERSLF4J.debug("handleLogout:01");
 
-		// IDPWebRequestUtil webRequestUtil = new IDPWebRequestUtil(request,
-		// idpConfiguration, keyManager);
+		// IDPWebRequestUtil w/ebRequestUtil = /new /IDPWebRequestUtil/(request,
+		// /idpConfiguration, /keyManager);
 		IDPWebRequestUtil webRequestUtil = new CUDIDPWebRequestUtil(request,
 				idpConfiguration, keyManager);
 
 		Document samlResponseDoc = null;
-		String referer = request.getHeader("Referer");
+		
 		String relayState = request.getParameter(GeneralConstants.RELAY_STATE);
 
 		URI destination = null;
@@ -687,7 +687,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			logoutRequestID = logoutRequest.getID();
 
 			// destination =
-			// authRequest.getAssertionConsumerServiceURL().toASCIIString();
+			// authRequest/.getAssertionConsumerServiceURL()/.toASCIIString();
 			destination = logoutRequest.getDestination();
 
 			if (destination != null) {
@@ -697,10 +697,10 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			}
 
 		} catch (Exception e) {
-			loggerslf4j.error("handleLogout:error:" + e);
+			LOGGERSLF4J.error("handleLogout:error:", e);
 		}
 
-		loggerslf4j.info("handleLogout:02:" + logoutBackUrl);
+		LOGGERSLF4J.debug("handleLogout:02:" + logoutBackUrl);
 
 		if (isNotNull(relayState))
 			relayState = RedirectBindingUtil.urlDecode(relayState);
@@ -736,17 +736,17 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			SAML2Response saml2Response = new SAML2Response();
 			samlResponseDoc = saml2Response.convert(statusResponse);
 
-			// loggerslf4j.info("handleLogout:03:"+DocumentUtil.asString(samlResponseDoc));
+			 
 
-			// samlResponseDoc = ss.sign(statusResponse,
-			// keyManager.getSigningKeyPair());
+			// /samlResponseDoc = /ss.sign/(statusResponse,
+			// keyManager/.getSigningKeyPair());
 			Node nextSibling = samlSignature
 					.getNextSiblingOfIssuer(samlResponseDoc);
 			samlSignature.setNextSibling(nextSibling);
 			samlSignature.signSAMLDocument(samlResponseDoc,
 					keyManager.getSigningKeyPair());
 
-			// loggerslf4j.info("handleLogout:04:"+DocumentUtil.asString(samlResponseDoc));
+			 
 
 			WebRequestUtilHolder holder = webRequestUtil.getHolder();
 			holder.setResponseDoc(samlResponseDoc)
@@ -758,7 +758,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					.hasSAMLRequestInPostProfile());
 
 			if (this.idpConfiguration.isSupportsSignature()) {
-				loggerslf4j.info("handleLogout:05");
+				LOGGERSLF4J.debug("handleLogout:05");
 
 				holder.setSupportSignature(true).setPrivateKey(
 						keyManager.getSigningKey());
@@ -767,12 +767,12 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			holder.setStrictPostBinding(this.idpConfiguration
 					.isStrictPostBinding());
 
-			loggerslf4j.info("handleLogout:06:"
+			LOGGERSLF4J.debug("handleLogout:06:"
 					+ this.idpConfiguration.isStrictPostBinding());
 
 			webRequestUtil.send(holder);
 
-			loggerslf4j.info("handleLogout:07");
+			LOGGERSLF4J.debug("handleLogout:07");
 
 		} catch (GeneralSecurityException e) {
 			throw new ServletException(e);
@@ -796,7 +796,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		boolean result = false;
 
 		try {
-			loggerslf4j.info("isLogout:01");
+			LOGGERSLF4J.debug("isLogout:01");
 
 			String samlRequestMessage = (String) request.getSessionInternal()
 					.getNote(GeneralConstants.SAML_REQUEST_KEY);
@@ -804,33 +804,33 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			// при logout мы не сохраняем incoming_http_method в сессии
 			// поэтому надо брать как в ExtFilter из запроса
 			// boolean begin_req_method =
-			// "GET".equals((String)request.getSession().getAttribute("incoming_http_method"));
+			// "GET"/.equals((String/)request/.getSession()/.getAttribute(/"incoming_http_method"));
 			boolean begin_req_method = "GET".equals((String) request
 					.getMethod());
 
-			loggerslf4j.info("isLogout:01+:" + begin_req_method);
+			LOGGERSLF4J.debug("isLogout:01+:" + begin_req_method);
 
 			SAMLDocumentHolder samlDocumentHolder = getSAMLDocumentHolder(
 					samlRequestMessage, begin_req_method);
 			if (samlDocumentHolder != null) {
-				loggerslf4j.info("isLogout:02:"
+				LOGGERSLF4J.debug("isLogout:02:"
 						+ (samlDocumentHolder.getSamlObject() == null));
 
 				if (samlDocumentHolder.getSamlObject() != null) {
-					// RequestAbstractType requestAbstractType =
-					// (RequestAbstractType)samlDocumentHolder.getSamlObject();
+					// RequestAbstractType /requestAbstractType /=
+					// (/RequestAbstractType)samlDocumentHolder/.getSamlObject(/);
 					// AuthnRequestType requestAbstractType =
-					// (AuthnRequestType)samlDocumentHolder.getSamlObject();
+					// (AuthnRequestType)/samlDocumentHolder/.getSamlObject(/);
 
 					if (samlDocumentHolder.getSamlObject() instanceof LogoutRequestType == true) {
 						result = true;
 					}
 				}
 			}
-			loggerslf4j.info("isLogout:03:" + result);
+			LOGGERSLF4J.debug("isLogout:03:" + result);
 
 		} catch (Exception e) {
-			loggerslf4j.error("isLogout:error:" + e);
+			LOGGERSLF4J.error("isLogout:error:", e);
 		}
 
 		return result;
@@ -881,8 +881,8 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 	public Principal authenticateSSL(Request request, Response response)
 			throws IOException {
 		// Retrieve the certificate chain for this client
-		// if (containerLog.isDebugEnabled())
-		// containerLog.debug(" Looking up certificates");
+		// if /(containerLog.isDebugEnabled(/))
+		// containerLog.debug(" /Looking up certificates");
 
 		X509Certificate certs[] = (X509Certificate[]) request
 				.getAttribute(Globals.CERTIFICATES_ATTR);
@@ -902,8 +902,6 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		}
 
 		if ((certs == null) || (certs.length < 1)) {
-			// if (containerLog.isDebugEnabled())
-			// containerLog.debug("  No certificates included with this request");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
 					sm.getString("authenticator.certificates"));
 			return null;
@@ -913,8 +911,6 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		Principal principal = getContext().getRealm().authenticate(certs);
 
 		if (principal == null) {
-			// if (containerLog.isDebugEnabled())
-			// containerLog.debug("  Realm.authenticate() returned false");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
 					sm.getString("authenticator.unauthorized"));
 			return null;
@@ -999,7 +995,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 			webRequestUtil.send(holder);
 		} catch (GeneralSecurityException e) {
-			logger.samlIDPHandlingSAML11Error(e);
+			LOGGER.samlIDPHandlingSAML11Error(e);
 			throw new ServletException();
 		}
 	}
@@ -1033,14 +1029,14 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		cleanUpSessionNote(request);
 
 		// Determine the transport mechanism
-		boolean isSecure = request.isSecure();
-		// String loginType = determineLoginType(isSecure);
+		//boolean isSecure = request isSecure 
+		// String /loginType = /determineLoginType(isSecure) 
 
 		String loginType = request.getAuthType();
 
-		loggerslf4j.info("processSAMLRequestMessage:01:" + request.getMethod());
-		loggerslf4j.info("processSAMLRequestMessage:02:" + loginType);
-		// loggerslf4j.info("processSAMLRequestMessage:03:"+samlRequestMessage);
+		LOGGERSLF4J.debug("processSAMLRequestMessage:01:" + request.getMethod());
+		LOGGERSLF4J.debug("processSAMLRequestMessage:02:" + loginType);
+		 
 
 		IDPWebRequestUtil webRequestUtil = new IDPWebRequestUtil(request,
 				idpConfiguration, keyManager);
@@ -1052,7 +1048,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			samlObject = samlDocumentHolder.getSamlObject();
 
 			if (!(samlObject instanceof RequestAbstractType)) {
-				throw logger.wrongTypeError(samlObject.getClass().getName());
+				throw LOGGER.wrongTypeError(samlObject.getClass().getName());
 			}
 
 			// Get the SAML Request Message
@@ -1060,7 +1056,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			String issuer = requestAbstractType.getIssuer().getValue();
 
 			if (samlRequestMessage == null)
-				throw logger.samlIDPValidationCheckFailed();
+				throw LOGGER.samlIDPValidationCheckFailed();
 
 			IssuerInfoHolder idpIssuer = new IssuerInfoHolder(getIdentityURL());
 			ProtocolContext protocolContext = new HTTPContext(request,
@@ -1072,9 +1068,9 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			saml2HandlerRequest.setRelayState(relayState);
 
 			/*
-			 * if (StringUtil.isNotNull(loginType)) {
-			 * saml2HandlerRequest.addOption(GeneralConstants.LOGIN_TYPE,
-			 * loginType); }
+			 * if /(StringUtil/.isNotNull(/loginType)) {
+			 * saml2HandlerRequest/.addOption(GeneralConstants.LOGIN_TYPE,
+			 * loginType/); }
 			 */
 
 			String assertionID = (String) session.getSession().getAttribute(
@@ -1120,7 +1116,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 						.getSAML2Object();
 
 				String codeSystem = so.getIssuer().getValue();
-				loggerslf4j.info("handleRequestType:03:" + codeSystem);
+				LOGGERSLF4J.debug("handleRequestType:03:" + codeSystem);
 
 				// session.getSession().setAttribute("CUD_CODE_SYSTEM",
 				// codeSystem);
@@ -1133,9 +1129,9 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 				// точка включения/отключения передачи ресурсов - подсистем
 				// пока закомментировали
-				// List<String> resources =
-				// ((CUDRoleGenerator)roleGenerator).generateResources(userPrincipal);
-				// session.getSession().setAttribute("CUD_RESOURCES",
+				// List<String>/ resources =
+				// ((CUDRoleGenerator/)roleGenerator)/.generateResources(userPrincipal);
+				// session/.getSession()/.setAttribute("CUD_RESOURCES",
 				// resources);
 
 				Map<String, Object> attribs = this.attribManager.getAttributes(
@@ -1154,7 +1150,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 			Set<SAML2Handler> handlers = chain.handlers();
 
-			logger.trace("Handlers are=" + handlers);
+			LOGGER.trace("Handlers are=" + handlers);
 
 			if (handlers != null) {
 				try {
@@ -1181,7 +1177,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			requestedPostProfile = saml2HandlerResponse
 					.isPostBindingForResponse();
 
-			loggerslf4j.info("processSAMLRequestMessage:04:"
+			LOGGERSLF4J.debug("processSAMLRequestMessage:04:"
 					+ requestedPostProfile);
 
 			destinationQueryStringWithSignature = saml2HandlerResponse
@@ -1192,7 +1188,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					|| e.getCause() instanceof IssuerNotTrustedException) {
 				status = JBossSAMLURIConstants.STATUS_REQUEST_DENIED.get();
 			}
-			logger.samlIDPRequestProcessingError(e);
+			LOGGER.samlIDPRequestProcessingError(e);
 			samlResponse = webRequestUtil.getErrorResponse(referer, status,
 					getIdentityURL(),
 					this.idpConfiguration.isSupportsSignature());
@@ -1258,11 +1254,11 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					webRequestUtil.send(holder);
 				}
 			} catch (ParsingException e) {
-				logger.samlAssertionPasingFailed(e);
+				LOGGER.samlAssertionPasingFailed(e);
 			} catch (GeneralSecurityException e) {
-				logger.trace("Security Exception:", e);
+				LOGGER.trace("Security Exception:", e);
 			} catch (Exception e) {
-				logger.error(e);
+				LOGGER.error(e);
 			}
 		}
 		return;
@@ -1287,27 +1283,27 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		try {
 			issuerHost = new URL(issuer).getHost();
 		} catch (MalformedURLException e) {
-			logger.trace("Token issuer is not a valid URL: " + issuer, e);
+			LOGGER.trace("Token issuer is not a valid URL: " + issuer, e);
 			issuerHost = issuer;
 		}
 
-		logger.trace("Trying to find a PK for issuer: " + issuerHost);
+		LOGGER.trace("Trying to find a PK for issuer: " + issuerHost);
 		try {
 			issuerPublicKey = CoreConfigUtil.getValidatingKey(keyManager,
 					issuerHost);
 		} catch (IllegalStateException ise) {
-			logger.trace("Token issuer is not found for: " + issuer, ise);
+			LOGGER.trace("Token issuer is not found for: " + issuer, ise);
 		}
 
 		if (issuerPublicKey == null) {
 			issuerHost = request.getRemoteAddr();
 
-			logger.trace("Trying to find a PK for issuer " + issuerHost);
+			LOGGER.trace("Trying to find a PK for issuer " + issuerHost);
 			issuerPublicKey = CoreConfigUtil.getValidatingKey(keyManager,
 					issuerHost);
 		}
 
-		logger.trace("Using Validating Alias=" + issuerHost
+		LOGGER.trace("Using Validating Alias=" + issuerHost
 				+ " to check signatures.");
 
 		return issuerPublicKey;
@@ -1320,18 +1316,18 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			throws ConfigurationException, ProcessingException {
 		PublicKey issuerPublicKey = null;
 
-		loggerslf4j.info("getIssuerPublicKey:01:" + issuer);
+		LOGGERSLF4J.debug("getIssuerPublicKey:01:" + issuer);
 
 		try {
 			issuerPublicKey = CoreConfigUtil.getValidatingKey(keyManager,
 					issuer);
 		} catch (IllegalStateException ise) {
-			logger.trace("Token issuer is not found for: " + issuer, ise);
+			LOGGER.trace("Token issuer is not found for: " + issuer, ise);
 		}
-		logger.trace("Using Validating Alias=" + issuer
+		LOGGER.trace("Using Validating Alias=" + issuer
 				+ " to check signatures.");
 
-		loggerslf4j.info("getIssuerPublicKey:02:" + issuerPublicKey);
+		LOGGERSLF4J.debug("getIssuerPublicKey:02:" + issuerPublicKey);
 
 		return issuerPublicKey;
 	}
@@ -1372,7 +1368,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			samlObject = samlDocumentHolder.getSamlObject();
 
 			if (!(samlObject instanceof StatusResponseType)) {
-				throw logger.wrongTypeError(samlObject.getClass().getName());
+				throw LOGGER.wrongTypeError(samlObject.getClass().getName());
 			}
 
 			StatusResponseType statusResponseType = (StatusResponseType) samlObject;
@@ -1381,7 +1377,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			boolean isValid = samlResponseMessage != null;
 
 			if (!isValid)
-				throw logger.samlIDPValidationCheckFailed();
+				throw LOGGER.samlIDPValidationCheckFailed();
 
 			IssuerInfoHolder idpIssuer = new IssuerInfoHolder(getIdentityURL());
 			ProtocolContext protocolContext = new HTTPContext(request,
@@ -1444,7 +1440,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			if (e instanceof IssuerNotTrustedException) {
 				status = JBossSAMLURIConstants.STATUS_REQUEST_DENIED.get();
 			}
-			logger.samlIDPRequestProcessingError(e);
+			LOGGER.samlIDPRequestProcessingError(e);
 			samlResponse = webRequestUtil.getErrorResponse(referer, status,
 					getIdentityURL(),
 					this.idpConfiguration.isSupportsSignature());
@@ -1454,7 +1450,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				WebRequestUtilHolder holder = webRequestUtil.getHolder();
 				if (destination == null)
 					throw new ServletException(
-							logger.nullValueError("Destination"));
+							LOGGER.nullValueError("Destination"));
 				holder.setResponseDoc(samlResponse)
 						.setDestination(destination)
 						.setRelayState(relayState)
@@ -1468,9 +1464,9 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 								destinationQueryStringWithSignature);
 
 				/*
-				 * if (requestedPostProfile)
-				 * holder.setPostBindingRequested(requestedPostProfile); else
-				 * holder.setPostBindingRequested(postProfile);
+				 * if (/requestedPostProfile)
+				 * holder/.setPostBindingRequested(requestedPostProfile/); else
+				 * holder/.setPostBindingRequested(postProfile);
 				 */
 
 				if (this.idpConfiguration.isSupportsSignature()) {
@@ -1494,9 +1490,9 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				}
 				webRequestUtil.send(holder);
 			} catch (ParsingException e) {
-				logger.samlAssertionPasingFailed(e);
+				LOGGER.samlAssertionPasingFailed(e);
 			} catch (GeneralSecurityException e) {
-				logger.trace("Security Exception:", e);
+				LOGGER.trace("Security Exception:", e);
 			}
 		}
 		return;
@@ -1521,7 +1517,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 		String sigAlg = (String) session
 				.getNote(GeneralConstants.SAML_SIG_ALG_REQUEST_KEY);
 
-		if (logger.isTraceEnabled()) {
+		if (LOGGER.isTraceEnabled()) {
 			StringBuilder builder = new StringBuilder();
 			builder.append("Retrieved saml messages and relay state from session");
 			builder.append("saml Request message=").append(samlRequestMessage);
@@ -1531,7 +1527,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 			builder.append("Signature=").append(signature).append("::sigAlg=")
 					.append(sigAlg);
-			logger.trace(builder.toString());
+			LOGGER.trace(builder.toString());
 		}
 
 		if (isNotNull(samlRequestMessage))
@@ -1552,7 +1548,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			String relayState, IDPWebRequestUtil webRequestUtil)
 			throws ServletException, IOException, ConfigurationException {
 
-		logger.trace("About to send error response to SP:" + referrer);
+		LOGGER.trace("About to send error response to SP:" + referrer);
 
 		String contextPath = getContextPath();
 
@@ -1620,13 +1616,13 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 							.loadClass(getClass(), this.idpConfiguration
 									.getIdentityParticipantStack());
 					if (clazz == null)
-						throw logger.classNotLoadedError(this.idpConfiguration
+						throw LOGGER.classNotLoadedError(this.idpConfiguration
 								.getIdentityParticipantStack());
 
 					identityServer.setStack((IdentityParticipantStack) clazz
 							.newInstance());
 				} catch (Exception e) {
-					logger.samlIDPUnableToSetParticipantStackUsingDefault(e);
+					LOGGER.samlIDPUnableToSetParticipantStackUsingDefault(e);
 				}
 			}
 		}
@@ -1678,7 +1674,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				handler.initChainConfig(handlerChainConfig);
 			}
 		} catch (Exception e) {
-			logger.samlHandlerConfigurationError(e);
+			LOGGER.samlHandlerConfigurationError(e);
 			throw new LifecycleException(e.getLocalizedMessage());
 		}
 	}
@@ -1690,7 +1686,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					.getKeyProvider();
 			if (keyProvider == null)
 				throw new LifecycleException(
-						logger.nullValueError("Key Provider is null for context="
+						LOGGER.nullValueError("Key Provider is null for context="
 								+ getContext().getName()));
 
 			try {
@@ -1702,17 +1698,17 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				keyManager.setAuthProperties(authProperties);
 				keyManager.setValidatingAlias(keyProvider.getValidatingAlias());
 			} catch (Exception e) {
-				logger.trustKeyManagerCreationError(e);
+				LOGGER.trustKeyManagerCreationError(e);
 				throw new LifecycleException(e.getLocalizedMessage());
 			}
 
-			logger.samlIDPSettingCanonicalizationMethod(idpConfiguration
+			LOGGER.samlIDPSettingCanonicalizationMethod(idpConfiguration
 					.getCanonicalizationMethod());
 
 			XMLSignatureUtil.setCanonicalizationMethodType(idpConfiguration
 					.getCanonicalizationMethod());
 
-			logger.trace("Key Provider=" + keyProvider.getClassName());
+			LOGGER.trace("Key Provider=" + keyProvider.getClassName());
 		}
 	}
 
@@ -1727,7 +1723,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 			try {
 				is = new FileInputStream(this.configFile);
 			} catch (FileNotFoundException e) {
-				throw logger.samlIDPConfigurationError(e);
+				throw LOGGER.samlIDPConfigurationError(e);
 			}
 		}
 
@@ -1758,9 +1754,9 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 						.getPicketLinkConfiguration();
 				idpConfiguration = configProvider.getIDPConfiguration();
 			} catch (ProcessingException e) {
-				throw logger.samlIDPConfigurationError(e);
+				throw LOGGER.samlIDPConfigurationError(e);
 			} catch (ParsingException e) {
-				throw logger.samlIDPConfigurationError(e);
+				throw LOGGER.samlIDPConfigurationError(e);
 			}
 		}
 
@@ -1772,8 +1768,8 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					idpConfiguration = (IDPType) picketLinkConfiguration
 							.getIdpOrSP();
 				} catch (ParsingException e) {
-					logger.trace(e);
-					logger.samlIDPConfigurationError(e);
+					LOGGER.trace(e);
+					LOGGER.samlIDPConfigurationError(e);
 				}
 			}
 
@@ -1782,13 +1778,13 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				is = getContext().getServletContext().getResourceAsStream(
 						DEPRECATED_CONFIG_FILE_LOCATION);
 				if (is == null)
-					throw logger
+					throw LOGGER
 							.configurationFileMissing(DEPRECATED_CONFIG_FILE_LOCATION);
 				try {
 					idpConfiguration = ConfigurationUtil
 							.getIDPConfiguration(is);
 				} catch (ParsingException e) {
-					logger.samlIDPConfigurationError(e);
+					LOGGER.samlIDPConfigurationError(e);
 				}
 			}
 		}
@@ -1817,7 +1813,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				}
 			}
 
-			logger.trace("Identity Provider URL=" + getIdentityURL());
+			LOGGER.trace("Identity Provider URL=" + getIdentityURL());
 
 			// Get the attribute manager
 			String attributeManager = idpConfiguration.getAttributeManager();
@@ -1826,7 +1822,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 						attributeManager);
 				if (clazz == null)
 					throw new RuntimeException(
-							logger.classNotLoadedError(attributeManager));
+							LOGGER.classNotLoadedError(attributeManager));
 				AttributeManager delegate = (AttributeManager) clazz
 						.newInstance();
 				this.attribManager.setDelegate(delegate);
@@ -1841,7 +1837,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 						roleGeneratorAttribute);
 				if (clazz == null)
 					throw new RuntimeException(
-							logger.classNotLoadedError(roleGeneratorAttribute));
+							LOGGER.classNotLoadedError(roleGeneratorAttribute));
 				roleGenerator = (RoleGenerator) clazz.newInstance();
 			}
 
@@ -1861,7 +1857,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				}
 			}
 		} catch (Exception e) {
-			throw logger.samlIDPConfigurationError(e);
+			throw LOGGER.samlIDPConfigurationError(e);
 		}
 
 		initHostedURI();
@@ -1891,7 +1887,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 			if (stsTokenConfigFile == null
 					|| stsTokenConfigFile.exists() == false) {
-				logger.samlIDPInstallingDefaultSTSConfig();
+				LOGGER.samlIDPInstallingDefaultSTSConfig();
 				sts.installDefaultConfiguration();
 			} else
 				sts.installDefaultConfiguration(stsTokenConfigFile.toURI()
@@ -1953,7 +1949,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 					try {
 						initKeyManager();
 					} catch (LifecycleException e) {
-						logger.trace(e.getMessage());
+						LOGGER.trace(e.getMessage());
 					}
 				}
 			}, timerInterval, timerInterval);
@@ -2023,7 +2019,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 		Boolean isRequestSigned = currentSPMetadata.isAuthnRequestsSigned();
 
-		logger.trace("Issuer: " + spIssuer + ", isRequestSigned: "
+		LOGGER.trace("Issuer: " + spIssuer + ", isRequestSigned: "
 				+ isRequestSigned);
 
 		return !isRequestSigned;
@@ -2073,7 +2069,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 
 	public SAMLDocumentHolder getSAMLDocumentHolder(String samlMessage,
 			boolean redirectProfile) throws Exception {
-		loggerslf4j.info("getSAMLDocumentHolder:01:" + redirectProfile);
+		LOGGERSLF4J.debug("getSAMLDocumentHolder:01:" + redirectProfile);
 
 		InputStream is = null;
 		SAML2Request saml2Request = new SAML2Request();
@@ -2085,7 +2081,7 @@ public abstract class CUDAbstractIDPValve extends ValveBase {
 				is = new ByteArrayInputStream(samlBytes);
 			}
 		} catch (Exception rte) {
-			loggerslf4j.error("getSAMLDocumentHolder:error:" + rte);
+			LOGGERSLF4J.error("getSAMLDocumentHolder:error:" + rte);
 			throw rte;
 		}
 

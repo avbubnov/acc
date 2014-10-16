@@ -2,6 +2,7 @@ package iac.cud.authmodule.dataitem;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Данные по наличию прав доступа к ресурсу приложения
@@ -12,7 +13,7 @@ public class PageItem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private ArrayList<String> permList = new ArrayList<String>();
+	private List<String> permList = new ArrayList<String>();
 
 	public PageItem() {
 	}
@@ -26,7 +27,7 @@ public class PageItem implements Serializable {
 	 * 
 	 * @return список доступных привилегий, если есть, иначе - empty
 	 */
-	public ArrayList<String> getPermList() {
+	public List<String> getPermList() {
 		return this.permList;
 	}
 

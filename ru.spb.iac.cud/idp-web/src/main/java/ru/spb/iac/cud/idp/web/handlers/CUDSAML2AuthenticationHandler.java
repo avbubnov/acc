@@ -90,7 +90,7 @@ import static org.picketlink.common.util.StringUtil.*;
 
 public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
 
-	final static Logger loggerslf4j = LoggerFactory.getLogger(CUDSAML2AuthenticationHandler.class);
+	final static Logger LOGGERSLF4J = LoggerFactory.getLogger(CUDSAML2AuthenticationHandler.class);
 	
     private final IDPAuthenticationHandler idp = new IDPAuthenticationHandler();
 
@@ -99,8 +99,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
     private static final String auth_type_password = "urn:oasis:names:tc:SAML:2.0:ac:classes:password";
 	
     public void handleRequestType(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
-        if (request.getSAML2Object() instanceof AuthnRequestType == false)
-            return;
+        if (request.getSAML2Object() instanceof AuthnRequestType == false){
+            return;}
 
         if (getType() == HANDLER_TYPE.IDP) {
             idp.handleRequestType(request, response);
@@ -150,8 +150,9 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             ServletContext servletContext = httpContext.getServletContext();
 
             AuthnRequestType art = (AuthnRequestType) request.getSAML2Object();
-            if (art == null)
+            if (art == null){
                 throw logger.samlHandlerAuthnRequestIsNull();
+                }
 
             String destination = art.getAssertionConsumerServiceURL().toASCIIString();
 
@@ -160,8 +161,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             //[urn:eis:sys]http://...
             String complex_id = "["+issuer+"]"+destination;
             
-            //art.isForceAuthn();
-            //art.isIsPassive()
+            //art/.isForceAuthn/();
+            //art/.isIsPassive/()
             
             logger.trace("Destination = " + destination);
 
@@ -169,21 +170,22 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
 
             HttpSession session = BaseSAML2Handler.getHttpSession(request);
             Principal userPrincipal = (Principal) session.getAttribute(GeneralConstants.PRINCIPAL_ID);
-            if (userPrincipal == null)
+            if (userPrincipal == null){
                 userPrincipal = httpContext.getRequest().getUserPrincipal();
+                }
             /*
-             * List<String> roles = (List<String>) session.getAttribute(GeneralConstants.ROLES_ID);
+             * List/<String> r/oles = (List<String>)/ session/.getAttribute(GeneralConstants.ROLES_ID);
              */
             try {
             	
             	//!!!
-            	//session.setAttribute(GeneralConstants.PRINCIPAL_ID, userPrincipal);
+            	//session/.setAttribute(GeneralConstants.PRINCIPAL_ID, /userPrincipal);
             	
                 /*
-                 * Map<String,Object> attribs = (Map<String, Object>) request.getOptions().get(GeneralConstants.ATTRIBUTES);
-                 * long assertionValidity = (Long) request.getOptions().get(GeneralConstants.ASSERTIONS_VALIDITY); String
-                 * destination = art.getAssertionConsumerServiceURL().toASCIIString(); Document samlResponse =
-                 * this.getResponse(destination, userPrincipal, roles, request.getIssuer().getValue(), attribs,
+                 * Map/<String,Object> attribs = /(Map<String, Object>) /request.getOptions().get(GeneralConstants.ATTRIBUTES);
+                 * long /assertionValidity = (Long) request.getOptions()/.get(GeneralConstants.ASSERTIONS_VALIDITY); String
+                 * destination = /art.getAssertionConsumerServiceURL()/.toASCIIString(); Document samlResponse =
+                 * this/.getResponse(destination, /userPrincipal, roles, request.getIssuer().getValue(), attribs,
                  * assertionValidity, art.getID());
                  */
 
@@ -202,7 +204,7 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
 
                 // If URL is null, participant doesn't support global logout
                 if (participantLogoutURL != null) {
-                   // identityServer.stack().register(session.getId(), participantLogoutURL, isPost);
+                   // identityServer/.stack()/.register(session.getId()/, participantLogoutURL, isPost);
                     identityServer.stack().register(session.getId(), complex_id, isPost);
                 }
 
@@ -211,8 +213,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
                         && (Boolean) request.getOptions().get(GeneralConstants.SAML_IDP_STRICT_POST_BINDING);
                 boolean postBindingForResponse = isPost || strictPostBinding;
 
-              //  loggerslf4j.info("handleRequestType:01:"+isPost);
-              //  loggerslf4j.info("handleRequestType:02:"+strictPostBinding);
+               
+               
                 
                 
                 response.setResultingDocument(samlResponse);
@@ -227,7 +229,6 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
         @SuppressWarnings("unchecked")
         public Document getResponse(SAML2HandlerRequest request) throws ConfigurationException, ProcessingException {
           
-        //	loggerslf4j.info("getResponse:01");
         	
         	HTTPContext httpContext = (HTTPContext) request.getContext();
             AuthnRequestType art = (AuthnRequestType) request.getSAML2Object();
@@ -246,7 +247,7 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
 
             String authMethod = (String) request.getOptions().get(GeneralConstants.LOGIN_TYPE);
 
-          //  loggerslf4j.info("getResponse:02:"+authMethod);
+           
             
             logger.trace("AssertionConsumerURL=" + assertionConsumerURL);
 
@@ -270,8 +271,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             if (assertionID != null) {
                 // Just renew the assertion
                 AssertionType latestAssertion = (AssertionType) session.getAttribute(GeneralConstants.ASSERTION);
-                if (latestAssertion != null)
-                    idp.setAssertion(latestAssertion);
+                if (latestAssertion != null){
+                    idp.setAssertion(latestAssertion);}
             }
 
             SPInfoHolder sp = new SPInfoHolder();
@@ -289,19 +290,13 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             // Create an AuthnStatementType
             if (handlerConfig.getParameter(DISABLE_AUTHN_STATEMENT) == null) {
                 String authContextRef = JBossSAMLURIConstants.AC_PASSWORD.get();
-                if (isNotNull(authMethod))
-                    authContextRef = authMethod;
+                if (isNotNull(authMethod)){
+                    authContextRef = authMethod;}
 
                 AuthnStatementType authnStatement = StatementUtil.createAuthnStatement(XMLTimeUtil.getIssueInstant(),
                         authContextRef);
 
-             /*   loggerslf4j.info("getResponse:01:"+(XMLTimeUtil.getIssueInstant()));
-                loggerslf4j.info("getResponse:02:"+(TimeZone.getDefault()));
-                loggerslf4j.info("getResponse:03:"+(new Date()));
-                loggerslf4j.info("getResponse:04:"+(XMLTimeUtil.getCurrentTimeZoneID()));
-                loggerslf4j.info("getResponse:05:"+(System.getProperty("picketlink.timezone")));
-              */  
-                authnStatement.setSessionIndex(assertion.getID());
+                  authnStatement.setSessionIndex(assertion.getID());
 
                 assertion.addStatement(authnStatement);
             }
@@ -309,9 +304,9 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             AttributeStatementType attrStatement = null;
             if (handlerConfig.getParameter(DISABLE_SENDING_ROLES) == null && (roles != null && !roles.isEmpty())) {
                 
-             	// AttributeStatementType attrStatement = null;
+             	// AttributeStatementType /attrStatement = /null;
                 if (handlerConfig.getParameter(USE_MULTI_VALUED_ROLES) != null) {
-                    // attrStatement = StatementUtil.createAttributeStatementForRoles(roles, true);
+                    // attrStatement /= S/tatementUtil/.createAttributeStatementForRoles(roles, true);
                      attrStatement = CUDStatementUtil.createAttributeStatementForRoles(roles, true);
                      
                 } else {
@@ -339,8 +334,7 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             		
             	
             	 KeyPair keypair = (KeyPair) handlerChainConfig.getParameter(GeneralConstants.KEYPAIR);
-                 X509Certificate x509Certificate = (X509Certificate) handlerChainConfig.getParameter(GeneralConstants.X509CERTIFICATE);
-
+                
                  if (keypair == null) {
                      logger.samlHandlerKeyPairNotFound();
                      throw logger.samlHandlerKeyPairNotFoundError();
@@ -354,7 +348,7 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
                  //имеющийся тип аутентификации
                  String main_auth_type = (String) session.getAttribute("cud_auth_type");
 				
-                 loggerslf4j.info("getResponse:01:"+main_auth_type);
+                 LOGGERSLF4J.debug("getResponse:01:"+main_auth_type);
                  
               
                  StringBuilder sb = new StringBuilder();
@@ -371,8 +365,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
                  
                  attribs.put("TOKEN_ID", base64tokenID);
 
-                 loggerslf4j.info("getResponse:02:"+tokenID);
-				 loggerslf4j.info("getResponse:03:"+base64tokenID);
+                 LOGGERSLF4J.debug("getResponse:02:"+tokenID);
+				 LOGGERSLF4J.debug("getResponse:03:"+base64tokenID);
                  
 				 
 				 (new ContextIDPAccessManager())
@@ -387,8 +381,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             
             // Add in the attributes information
             if (attribs != null && attribs.size() > 0) {
-            	// AttributeStatementType attStatement = StatementUtil.createAttributeStatement(attribs);
-            	// assertion.addStatement(attStatement);
+            	// AttributeStatementType /attStatement /= StatementUtil.createAttributeStatement(attribs);
+            	// assertion/.addStatement(attStatement)/;
             	 
             	AttributeStatementType attStatement = StatementUtil.createAttributeStatement(attribs);
             	if(attrStatement==null){
@@ -565,8 +559,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
                 Document doc = saml2Response.convert(responseType);
 
                 Element enc = DocumentUtil.getElement(doc, new QName(JBossSAMLConstants.ENCRYPTED_ASSERTION.get()));
-                if (enc == null)
-                    throw logger.samlHandlerNullEncryptedAssertion();
+                if (enc == null){
+                    throw logger.samlHandlerNullEncryptedAssertion();}
                 String oldID = enc.getAttribute(JBossSAMLConstants.ID.get());
                 Document newDoc = DocumentUtil.createDocument();
                 Node importedNode = newDoc.importNode(enc, true);
@@ -588,20 +582,20 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
 
         private Principal handleSAMLResponse(ResponseType responseType, SAML2HandlerResponse response)
                 throws ProcessingException {
-            if (responseType == null)
-                throw logger.nullArgumentError("response type");
+            if (responseType == null){
+                throw logger.nullArgumentError("response type");}
 
             StatusType statusType = responseType.getStatus();
-            if (statusType == null)
-                throw logger.nullArgumentError("Status Type from the IDP");
+            if (statusType == null){
+                throw logger.nullArgumentError("Status Type from the IDP");}
 
             String statusValue = statusType.getStatusCode().getValue().toASCIIString();
             if (JBossSAMLURIConstants.STATUS_SUCCESS.get().equals(statusValue) == false)
-                throw logger.samlHandlerIDPAuthenticationFailedError();
+            { throw logger.samlHandlerIDPAuthenticationFailedError();}
 
             List<RTChoiceType> assertions = responseType.getAssertions();
             if (assertions.size() == 0)
-                throw logger.samlHandlerNoAssertionFromIDP();
+            { throw logger.samlHandlerNoAssertionFromIDP();}
 
             AssertionType assertion = assertions.get(0).getAssertion();
             // Check for validity of assertion
@@ -631,12 +625,12 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
                 throw logger.nullValueError("Subject in the assertion");
 
             STSubType subType = subject.getSubType();
-            if (subType == null)
-                throw logger.nullValueError("Unable to find subtype via subject");
+            if (subType == null){
+                throw logger.nullValueError("Unable to find subtype via subject");}
             NameIDType nameID = (NameIDType) subType.getBaseID();
 
-            if (nameID == null)
-                throw logger.nullValueError("Unable to find username via subject");
+            if (nameID == null){
+                throw logger.nullValueError("Unable to find username via subject");}
 
             final String userName = nameID.getValue();
             List<String> roles = new ArrayList<String>();
@@ -683,8 +677,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             // PLFED-141: Disable role picking from IDP response
             if (handlerConfig.containsKey(DISABLE_ROLE_PICKING)) {
                 String val = (String) handlerConfig.getParameter(DISABLE_ROLE_PICKING);
-                if (isNotNull(val) && "true".equalsIgnoreCase(val))
-                    return roles;
+                if (isNotNull(val) && "true".equalsIgnoreCase(val)){
+                    return roles;}
             }
 
             // PLFED-140: which of the attribute statements represent roles?
@@ -701,8 +695,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
             for (ASTChoiceType obj : attList) {
                 AttributeType attr = obj.getAttribute();
                 if (roleKeys.size() > 0) {
-                    if (!roleKeys.contains(attr.getName()))
-                        continue;
+                    if (!roleKeys.contains(attr.getName())){
+                        continue;}
                 }
                 List<Object> attributeValues = attr.getAttributeValue();
                 if (attributeValues != null) {
@@ -712,8 +706,8 @@ public class CUDSAML2AuthenticationHandler extends BaseSAML2Handler  {
                         } else if (attrValue instanceof Node) {
                             Node roleNode = (Node) attrValue;
                             roles.add(roleNode.getFirstChild().getNodeValue());
-                        } else
-                            throw logger.unsupportedRoleType(attrValue);
+                        } else{
+                            throw logger.unsupportedRoleType(attrValue);}
                     }
                 }
             }

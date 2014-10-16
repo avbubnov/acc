@@ -21,5 +21,5 @@ import org.jboss.seam.annotations.Name;
 @Local
 public interface GRuNProFileLiteLocal {
 	
-	public int process(/*final String tableName, final List <String> fileList, final String dirName*/);
+	public int process();
 }

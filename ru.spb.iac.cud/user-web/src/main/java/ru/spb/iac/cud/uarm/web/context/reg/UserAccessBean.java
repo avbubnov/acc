@@ -31,7 +31,7 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserAccessBean implements Serializable {
 
-	final static Logger logger = LoggerFactory.getLogger(UserAccessBean.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserAccessBean.class);
 	
 	@EJB(beanName = "CUDUserConsole-ejb.jar#UserAccessEJB")
 	private UserAccessEJB userAccessEJB;
@@ -47,16 +47,14 @@ public class UserAccessBean implements Serializable {
 
 		try {
 
-			logger.info("userAccessRegBean:action:01");
+			LOGGER.debug("userAccessRegBean:action:01");
 
-			//String version = FacesContext.class.getPackage()
-			//		.getImplementationVersion();
-
+		
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("idArm");
 	
-			logger.info("userAccessRegBean:action:03:" + pidArm);
-			//logger.info("userAccessRegBean:action:04:" + userSessionBean.getSumRoles().size());
+			LOGGER.debug("userAccessRegBean:action:03:" + pidArm);
+			 
 
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
@@ -104,7 +102,7 @@ public class UserAccessBean implements Serializable {
 									+ "/context/app/roles/list.xhtml");
 
 		} catch (Exception e) {
-			logger.error("userAccessRegBean:action:error:" + e);
+			LOGGER.error("userAccessRegBean:action:error:", e);
 		}
 	}
 
@@ -112,16 +110,14 @@ public class UserAccessBean implements Serializable {
 
 		try {
 
-			logger.info("userAccessRegBean:actionGroup:01");
+			LOGGER.debug("userAccessRegBean:actionGroup:01");
 
-			//String version = FacesContext.class.getPackage()
-			//		.getImplementationVersion();
-
+		
 			String pidArm = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				     .get("idArm");
 	
-			logger.info("userAccessRegBean:actionGroup:03:" + pidArm);
-			//logger.info("userAccessRegBean:action:04:" + userSessionBean.getSumRoles().size());
+			LOGGER.debug("userAccessRegBean:actionGroup:03:" + pidArm);
+			 
 
 			
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
@@ -153,8 +149,7 @@ public class UserAccessBean implements Serializable {
 			
 			userAccessEJB.saveGroup(t1);
 
-			// return "home?faces-redirect=true";
-			FacesContext
+				FacesContext
 					.getCurrentInstance()
 					.getExternalContext()
 					.redirect(
@@ -164,8 +159,7 @@ public class UserAccessBean implements Serializable {
 									+ "/context/app/groups/list.xhtml");
 
 		} catch (Exception e) {
-			logger.error("userAccessRegBean:actionGroup:error:" + e);
-			e.printStackTrace(System.out);
+			LOGGER.error("userAccessRegBean:actionGroup:error:", e);
 		}
 	}
 	

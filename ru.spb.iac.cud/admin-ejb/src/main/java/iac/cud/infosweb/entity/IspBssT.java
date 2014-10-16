@@ -23,8 +23,8 @@ import java.util.Set;
 @Name("clOrgBean")
 @Roles({
 	@Role(name="clOrgBeanCrt"),
- /**/   @Role(name="clUsrBean"),
-    @Role(name="clUsrBeanCrt")/**/
+    @Role(name="clUsrBean"),
+    @Role(name="clUsrBeanCrt")
 })
 
 public class IspBssT extends BaseItem implements Serializable {

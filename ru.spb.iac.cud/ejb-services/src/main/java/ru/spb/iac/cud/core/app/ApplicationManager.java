@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -52,7 +52,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 
 	private static int max_size_roles = 500;
 
-	Logger logger = LoggerFactory.getLogger(ApplicationManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ApplicationManager.class);
 
 	public ApplicationManager() {
 	}
@@ -64,7 +64,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			String shortNameSystem, String descriptionSystem, String principal,
 			Long idUser, String IPAddress) throws GeneralFailure {
 
-		logger.info("system_registration:01:" + principal);
+		LOGGER.debug("system_registration:01:" + principal);
 
 		AppAccept result = new AppAccept();
 
@@ -92,7 +92,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			result.setNumber(number.toString());
 			result.setSecret(secret);
 
-			logger.info("system_registration:number:" + number);
+			LOGGER.debug("system_registration:number:" + number);
 
 			em.createNativeQuery(
 					"insert into JOURN_APP_SYSTEM_BSS_T (ID_SRV, FULL_NAME, SHORT_NAME, "
@@ -103,30 +103,30 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					.setParameter(4, descriptionSystem).setParameter(5, idUser)
 					.setParameter(6, secret).executeUpdate();
 
-			logger.info("system_registration:02");
+			LOGGER.debug("system_registration:02");
 
 			utx.commit();
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
+			
+			
 		} catch (GeneralFailure eg) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("system_registration:ErrorEG:" + eg);
+			LOGGER.error("system_registration:ErrorEG:" + eg);
 			throw eg;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("system_registration:Error:" + e);
+			LOGGER.error("system_registration:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -145,7 +145,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// idUser может = -1L
 		// это значит заявка от самого пользователя на себя
 
-		logger.info("user_registration:01:" + idUser);
+		LOGGER.debug("user_registration:01:" + idUser);
 
 		AppAccept result = new AppAccept();
 
@@ -183,7 +183,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			result.setNumber(number.toString());
 			result.setSecret(secret);
 
-			logger.info("user_registration:number:" + number);
+			LOGGER.debug("user_registration:number:" + number);
 
 			em.createNativeQuery(
 					"insert into JOURN_APP_USER_BSS_T (ID_SRV, SURNAME_USER, NAME_USER, PATRONYMIC_USER, "
@@ -202,31 +202,29 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					.setParameter(13, (!idUser.equals(-1L) ? idUser : ""))
 					.setParameter(14, secret).executeUpdate();
 
-			logger.info("user_registration:02");
+			LOGGER.debug("user_registration:02");
 
 			utx.commit();
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (GeneralFailure eg) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_registration:ErrorEG:" + eg);
+			LOGGER.error("user_registration:ErrorEG:" + eg);
 			throw eg;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_registration:Error:" + e);
+			LOGGER.error("user_registration:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -239,7 +237,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			String principal, Long idUser, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("system_registration:");
+		LOGGER.debug("system_registration:");
 
 		// principal - принудительно = null
 		// idUser - это действующий id user
@@ -256,8 +254,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			HashMap<String, String> atMap = new HashMap<String, String>();
 
 			for (AppAttribute attr : attributes) {
-				// System.out.println("main:Name:"+attr.getName());
-				// System.out.println("main:Value:"+attr.getValue());
+				 
+				 
 				if (attr.getName() != null) {
 					atMap.put(attr.getName(), attr.getValue());
 				}
@@ -269,9 +267,9 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					principal, idUser, IPAddress);
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("system_registration:Error:" + e);
+			LOGGER.error("system_registration:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -286,7 +284,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// principal - принудительно = null
 		// idUser - это действующий id user
 
-		logger.info("user_registration:");
+		LOGGER.debug("user_registration:");
 
 		try {
 
@@ -298,8 +296,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			HashMap<String, String> atMap = new HashMap<String, String>();
 
 			for (AppAttribute attr : attributes) {
-				// System.out.println("main:Name:"+attr.getName());
-				// System.out.println("main:Value:"+attr.getValue());
+				 
+				 
 				if (attr.getName() != null) {
 					atMap.put(attr.getName(), attr.getValue());
 				}
@@ -320,9 +318,9 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					principal, idUser, IPAddress);
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_registration:Error:" + e);
+			LOGGER.error("user_registration:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -342,7 +340,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// 1 - ADD
 		// 2 - REMOVE
 
-		logger.info("access_roles:" + loginUser);
+		LOGGER.debug("access_roles:" + loginUser);
 
 		AppAccept result = new AppAccept();
 
@@ -415,22 +413,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("access_roles:Error:" + ge);
+			LOGGER.error("access_roles:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("access_roles:Error:" + e);
+			LOGGER.error("access_roles:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -451,7 +449,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// 1 - ADD
 		// 2 - REMOVE
 
-		logger.info("access_groups:" + loginUser);
+		LOGGER.debug("access_groups:" + loginUser);
 
 		AppAccept result = new AppAccept();
 
@@ -522,22 +520,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("access_groups:Error:" + ge);
+			LOGGER.error("access_groups:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("access_groups:Error:" + e);
+			LOGGER.error("access_groups:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -557,7 +555,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// 0 - BLOCK
 		// 1 - UNBLOCK
 
-		logger.info("block:01");
+		LOGGER.debug("block:01");
 
 		AppAccept result = new AppAccept();
 
@@ -585,7 +583,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			result.setNumber(number.toString());
 			result.setSecret(secret);
 
-			logger.info("block:number:" + number);
+			LOGGER.debug("block:number:" + number);
 
 			// решили определять пользователей извне ЦУД по их ИД, а не логинам
 			// Long idUserApp = user_exist(loginUser);
@@ -609,7 +607,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					.setParameter(5, mode).setParameter(6, idUser)
 					.setParameter(7, secret).executeUpdate();
 
-			logger.info("block:02");
+			LOGGER.debug("block:02");
 
 			utx.commit();
 
@@ -617,22 +615,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
 			// 450):loginsLine), IPAddress, idUser );
 		} catch (GeneralFailure eg) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("block:ErrorEG:" + eg);
+			LOGGER.error("block:ErrorEG:" + eg);
 			throw eg;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("block:Error:" + e);
+			LOGGER.error("block:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -649,7 +647,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// principal - принудительно = null
 		// idUser - это действующий id user
 
-		logger.info("system_modification");
+		LOGGER.debug("system_modification");
 
 		AppAccept result = new AppAccept();
 
@@ -667,8 +665,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			HashMap<String, String> atMap = new HashMap<String, String>();
 
 			for (AppAttribute attr : attributes) {
-				// System.out.println("main:Name:"+attr.getName());
-				// System.out.println("main:Value:"+attr.getValue());
+				 
+				 
 				if (attr.getName() != null) {
 					// сейчас берём себе за правило, что переданные аттрибуты
 					// без значений игнорируются
@@ -722,22 +720,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("system_modification:Error:" + ge);
+			LOGGER.error("system_modification:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("system_modification:Error:" + e);
+			LOGGER.error("system_modification:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -753,7 +751,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// principal - принудительно = null
 		// idUser - это заявитель
 
-		logger.info("user_modification:01");
+		LOGGER.debug("user_modification:01");
 
 		AppAccept result = new AppAccept();
 
@@ -775,8 +773,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			HashMap<String, String> atMap = new HashMap<String, String>();
 
 			for (AppAttribute attr : attributes) {
-				// System.out.println("main:Name:"+attr.getName());
-				// System.out.println("main:Value:"+attr.getValue());
+				 
+				 
 				if (attr.getName() != null) {
 					// сейчас берём себе за правило, что переданные аттрибуты
 					// без значений игнорируются
@@ -1015,22 +1013,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_modification:Error:" + ge);
+			LOGGER.error("user_modification:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_modification:Error:" + e);
+			LOGGER.error("user_modification:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -1049,7 +1047,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// principal - принудительно = null
 		// idUser - это действующий id user
 
-		logger.info("user_identity_modification:01");
+		LOGGER.debug("user_identity_modification:01");
 
 		AppAccept result = new AppAccept();
 
@@ -1089,22 +1087,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_identity_modification:Error:" + ge);
+			LOGGER.error("user_identity_modification:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_identity_modification:Error:" + e);
+			LOGGER.error("user_identity_modification:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -1127,7 +1125,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// 0 - REMOVE
 		// 1 - ADD
 
-		logger.info("user_cert_modification:01");
+		LOGGER.debug("user_cert_modification:01");
 
 		AppAccept result = new AppAccept();
 
@@ -1150,19 +1148,19 @@ public class ApplicationManager implements ApplicationManagerLocal,
 				mode = 0;
 			}
 
-			byte[] cert_byte = Base64.decode(certBase64);
+			byte[] certByteX = Base64.decode(certBase64);
 
-			CertificateFactory user_cf = CertificateFactory
+			CertificateFactory userCf = CertificateFactory
 					.getInstance("X.509");
-			X509Certificate user_cert = (X509Certificate) user_cf
-					.generateCertificate(new ByteArrayInputStream(cert_byte));
+			X509Certificate userCertX = (X509Certificate) userCf
+					.generateCertificate(new ByteArrayInputStream(certByteX));
 
-			String x509Cert = Base64.encode(user_cert.getEncoded());
+			String x509Cert = Base64.encode(userCertX.getEncoded());
 
 			// !!!
 			// нужно брать байты именно от кодированного сертификата
 			// (x509Cert.getBytes("utf-8")),
-			// а не от самого сертификата (user_cert.getEncoded())
+			// а не от самого сертификата (userCertX.getEncoded())
 
 			Long idUserApp = user_exist(loginUser);
 
@@ -1190,22 +1188,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_cert_modification:Error:" + ge);
+			LOGGER.error("user_cert_modification:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_cert_modification:Error:" + e);
+			LOGGER.error("user_cert_modification:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -1223,7 +1221,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		// principal - принудительно = null
 		// idUser - это действующий id user
 
-		logger.info("user_dep_modification:01");
+		LOGGER.debug("user_dep_modification:01");
 
 		AppAccept result = new AppAccept();
 
@@ -1240,8 +1238,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			HashMap<String, String> atMap = new HashMap<String, String>();
 
 			for (AppAttribute attr : attributes) {
-				// System.out.println("main:Name:"+attr.getName());
-				// System.out.println("main:Value:"+attr.getValue());
+				 
+				 
 				if (attr.getName() != null) {
 					// сейчас берём себе за правило, что переданные аттрибуты
 					// без значений игнорируются
@@ -1286,22 +1284,22 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			utx.commit();
 
 		} catch (GeneralFailure ge) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_dep_modification:Error:" + ge);
+			LOGGER.error("user_dep_modification:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 			try {
 				utx.rollback();
 			} catch (Exception er) {
-				System.out.println("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
-			logger.error("user_dep_modification:Error:" + e);
+			LOGGER.error("user_dep_modification:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -1317,7 +1315,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 		try {
 			principal = principal.replaceAll(" ", "").toUpperCase();
 
-			logger.info("principal_exist:principal:" + principal);
+			LOGGER.debug("principal_exist:principal:" + principal);
 
 			idUser = ((java.math.BigDecimal) em
 					.createNativeQuery(
@@ -1332,15 +1330,15 @@ public class ApplicationManager implements ApplicationManagerLocal,
 									"and AU.STATUS = 1 ")
 					.setParameter(1, principal).getSingleResult()).longValue();
 
-			logger.info("principal_exist:idUser:" + idUser);
+			LOGGER.debug("principal_exist:idUser:" + idUser);
 
 			return idUser;
 
 		} catch (NoResultException ex) {
-			logger.error("principal_exist:NoResultException");
+			LOGGER.error("principal_exist:NoResultException");
 			throw new GeneralFailure("Пользователь не идентифицирован! ");
 		} catch (Exception e) {
-			logger.error("principal_exist:Error:" + e);
+			LOGGER.error("principal_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -1350,7 +1348,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 	 */
 	private Long system_exist(String codeSystem) throws GeneralFailure {
 
-		logger.info("system_exist:codeSystem:" + codeSystem);
+		LOGGER.debug("system_exist:codeSystem:" + codeSystem);
 
 		Long result = null;
 
@@ -1365,10 +1363,10 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			return result;
 
 		} catch (NoResultException ex) {
-			logger.error("system_exist:NoResultException");
+			LOGGER.error("system_exist:NoResultException");
 			throw new GeneralFailure("Информационная система не определёна!");
 		} catch (Exception e) {
-			logger.error("system_exist:Error:" + e);
+			LOGGER.error("system_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -1378,7 +1376,7 @@ public class ApplicationManager implements ApplicationManagerLocal,
 	 */
 	private Long user_exist(String idUser) throws GeneralFailure {
 
-		logger.info("user_exist:idUser:" + idUser);
+		LOGGER.debug("user_exist:idUser:" + idUser);
 
 		Long result = null;
 
@@ -1393,10 +1391,10 @@ public class ApplicationManager implements ApplicationManagerLocal,
 			return result;
 
 		} catch (NoResultException ex) {
-			logger.error("user_exist:NoResultException");
+			LOGGER.error("user_exist:NoResultException");
 			throw new GeneralFailure("Пользователь не определён!");
 		} catch (Exception e) {
-			logger.error("system_exist:Error:" + e);
+			LOGGER.error("system_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -1407,8 +1405,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 	private Long role_exist(Long idSystem, String codeRole)
 			throws GeneralFailure {
 
-		logger.info("role_exist:idSystem:" + idSystem);
-		logger.info("role_exist:codeRole:" + codeRole);
+		LOGGER.debug("role_exist:idSystem:" + idSystem);
+		LOGGER.debug("role_exist:codeRole:" + codeRole);
 
 		Long result = null;
 
@@ -1423,10 +1421,10 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					.getSingleResult()).longValue();
 
 		} catch (NoResultException ex) {
-			logger.error("system_exist:NoResultException");
+			LOGGER.error("system_exist:NoResultException");
 			throw new GeneralFailure("Роль " + codeRole + " не определёна!");
 		} catch (Exception e) {
-			logger.error("role_exist:Error:" + e);
+			LOGGER.error("role_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 
@@ -1439,8 +1437,8 @@ public class ApplicationManager implements ApplicationManagerLocal,
 	private Long group_exist(Long idSystem, String codeGroup)
 			throws GeneralFailure {
 
-		logger.info("group_exist:idSystem:" + idSystem);
-		logger.info("group_exist:codeRole:" + codeGroup);
+		LOGGER.debug("group_exist:idSystem:" + idSystem);
+		LOGGER.debug("group_exist:codeRole:" + codeGroup);
 
 		Long result = null;
 
@@ -1453,10 +1451,10 @@ public class ApplicationManager implements ApplicationManagerLocal,
 					.setParameter(1, codeGroup).getSingleResult()).longValue();
 
 		} catch (NoResultException ex) {
-			logger.error("group_exist:NoResultException");
+			LOGGER.error("group_exist:NoResultException");
 			throw new GeneralFailure("Группа " + codeGroup + " не определёна!");
 		} catch (Exception e) {
-			logger.error("group_exist:Error:" + e);
+			LOGGER.error("group_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 
@@ -1466,33 +1464,5 @@ public class ApplicationManager implements ApplicationManagerLocal,
 	/**
 	 * протоколирование действий
 	 */
-	private void sys_audit(Long idServ, String inp_param, String result,
-			String ip_adr, Long idUser) {
-		logger.info("sys_audit");
-		try {
-
-			if (idUser != null && !idUser.equals(-1L)) {
-				em.createNativeQuery(
-						"insert into SERVICES_LOG_KNL_T( "
-								+ "ID_SRV,  UP_SERVICES, DATE_ACTION, CREATED, "
-								+ "input_param, result_value, ip_address, UP_USERS ) "
-								+ "values(SERVICES_LOG_KNL_SEQ.nextval , ?, sysdate, sysdate, "
-								+ "?, ?, ?, ? ) ").setParameter(1, idServ)
-						.setParameter(2, inp_param).setParameter(3, result)
-						.setParameter(4, ip_adr).setParameter(5, idUser)
-						.executeUpdate();
-			} else {
-				em.createNativeQuery(
-						"insert into SERVICES_LOG_KNL_T( "
-								+ "ID_SRV,  UP_SERVICES, DATE_ACTION, CREATED, "
-								+ "input_param, result_value, ip_address ) "
-								+ "values(SERVICES_LOG_KNL_SEQ.nextval , ?, sysdate, sysdate, "
-								+ "?, ?, ? ) ").setParameter(1, idServ)
-						.setParameter(2, inp_param).setParameter(3, result)
-						.setParameter(4, ip_adr).executeUpdate();
-			}
-		} catch (Exception e) {
-			logger.error("is_exist:Error:" + e);
-		}
-	}
+	
 }

@@ -30,8 +30,6 @@ import javax.naming.InitialContext;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
-
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletResponse;
@@ -53,11 +51,10 @@ public class PermManager {
      * Экспортируемая сущности 
      * для отображения
      */
-	//private BaseItem usrBean;             !!! Проверить !!!
 	
 	private String dellMessage;
 	 
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -70,7 +67,6 @@ public class PermManager {
 	private Boolean evaluteForListFooter;  
 	private Boolean evaluteForBean;
 	
-//	private List<AcApplication> listArm = null;
 	 
 	public List<BaseItem> getAuditList(int firstRow, int numberOfRows){
 	  String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -86,14 +82,13 @@ public class PermManager {
 			  Component.getInstance("permListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    permListCached!=null){
-		 	//	log.info("getAuditList:02:"+orgListCached.size());
-			    	this.auditList=permListCached;
+		 	    	this.auditList=permListCached;
 			}else{
 				log.info("getAuditList:03");
 		    	invokeLocal("list", firstRow, numberOfRows, null);
@@ -101,12 +96,12 @@ public class PermManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecArm = (ArrayList<String>)
+		 	List<String>  selRecArm = (ArrayList<String>)
 					  Component.getInstance("selRecPerm",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecArm!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecArm.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					 it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -125,7 +120,7 @@ public class PermManager {
 			 String orderQuery=null;
 			 log.info("hostsManager:invokeLocal");
 			 
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 PermStateHolder permStateHolder = (PermStateHolder)
@@ -143,14 +138,13 @@ public class PermManager {
       		     }
                  log.info("invokeLocal:list:orderQuery:"+orderQuery);
                  
-				// auditList = new ArrayList<BaseItem>();
-				 auditList = entityManager.createQuery("select o from AcPermissionsList o "+(orderQuery!=null ? orderQuery+", orderNum " : " order by orderNum "))
+					 auditList = entityManager.createQuery("select o from AcPermissionsList o "+(orderQuery!=null ? orderQuery+", orderNum " : " order by orderNum "))
                        .setFirstResult(firstRow)
                        .setMaxResults(numberOfRows)
                        .getResultList();
              log.info("invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
+			 } else if("count".equals(type)){
 				 log.info("IHReposList:count:01");
 				 auditCount = (Long)entityManager.createQuery(
 						 "select count(o) " +
@@ -158,7 +152,7 @@ public class PermManager {
 		                .getSingleResult();
 				 
                log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
@@ -177,35 +171,13 @@ public class PermManager {
 		        .get("sessionId");
 	  log.info("forView:sessionId:"+sessionId);
 	  log.info("forView:modelType:"+modelType);
-	  if(sessionId!=null /*&& usrBean==null*/){
+	  if(sessionId!=null ){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
-			if(modelType.equals("permDataModel")){
-				//service=ServiceReestr.Repos;
-			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
+			
 			 AcPermissionsList ar = searchBean(sessionId);
 		 Contexts.getEventContext().set("permBean", ar);
 	  }
@@ -220,7 +192,7 @@ public class PermManager {
 		if(permListCached!=null){
 			for( AcPermissionsList it : permListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -236,7 +208,7 @@ public class PermManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+	  
    }
    
    public void addPerm(){
@@ -250,14 +222,11 @@ public class PermManager {
 	   }
 	 
 	   try {
-		//  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
-		   
-		//  permBeanCrt.setCreator(au.getIdUser());
-		//  permBeanCrt.setCreated(new Date());
+		
 	      entityManager.persist(permBeanCrt);
 	 
-	     //  entityManager.flush();
-	    //  entityManager.refresh(permBeanCrt);
+	     
+	    
 	    
 	    }catch (Exception e) {
 	       log.error("permManager:addPerm:ERROR:"+e);
@@ -282,22 +251,20 @@ public class PermManager {
 	   }
 	
 	   try {
-		  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
-		   
+		    
 		  AcPermissionsList aam = entityManager.find(AcPermissionsList.class, new Long(sessionId));
 		  
 		  aam.setPermName(permBean.getPermName());
 		  aam.setPermDescr(permBean.getPermDescr());
 		  aam.setOrderNum(permBean.getOrderNum());
 		  
-		 // aam.setModificator(au.getIdUser());
-		//  aam.setModified(new Date());
+		 
+		
 		  
 		  entityManager.flush();
 	      entityManager.refresh(aam);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
-	      Contexts.getEventContext().set("permBean", aam);
+	       Contexts.getEventContext().set("permBean", aam);
 	    	  
 	     }catch (Exception e) {
            log.error("armManager:updSrm:ERROR:"+e);
@@ -360,19 +327,7 @@ public class PermManager {
    public int getConnectError(){
 	   return connectError;
    }
-  /* 
-   public List<AcApplication> getListArm() throws Exception{
-	    log.info("armManager::getListArm:01");
-	    try {
-	    	if(listArm==null){
-	       		listArm=entityManager.createQuery("select o from AcApplication o").getResultList();
-	    	}
-	     } catch (Exception e) {
-	    	 log.error("armManager::getListArm:ERROR:"+e);
-	         throw e;
-	     }
-	    return listArm;
-  }*/
+ 
    
    public List <BaseTableItem> getAuditItemsListSelect() {
 		 log.info("getAuditItemsListSelect:01");
@@ -382,19 +337,7 @@ public class PermManager {
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("permName"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("permDescr"));
 		   }
@@ -410,8 +353,8 @@ public class PermManager {
 	   if(auditItemsListContext==null){
 		   PermContext ac= new PermContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
@@ -424,8 +367,8 @@ public class PermManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecArm = (ArrayList<String>)
+	   //  fo/rView(/); //!!!
+	    List<String>  selRecArm = (ArrayList<String>)
 				  Component.getInstance("selRecPerm",ScopeType.SESSION);
 	    
 	    if(selRecArm==null){
@@ -433,9 +376,9 @@ public class PermManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	    // AcApplication aa = searchBean(sessionId);
+	    
 	    AcPermissionsList aa = new  AcPermissionsList();
-  	    // в getAuditList : else{it.setSelected(false);}
+  	   
 	    
 	    if(aa!=null){
 	     if(selRecArm.contains(sessionId)){
@@ -472,11 +415,11 @@ public class PermManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("permManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -485,7 +428,7 @@ public class PermManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
+	  
 	   	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -495,12 +438,12 @@ public class PermManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		  log.info("permManager:evaluteForListFooter!!!");
 	   		      evaluteForListFooter=true;
 	    	}
@@ -510,7 +453,7 @@ public class PermManager {
    
    public Boolean getEvaluteForBean() {
 		
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForBean==null){
 		   		evaluteForBean=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -522,8 +465,8 @@ public class PermManager {
 			             .get("sessionId");
 			    log.info("permManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("permManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -532,12 +475,3 @@ public class PermManager {
 		   }
 
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/

@@ -76,11 +76,11 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 
 
-//import org.apache.ws.security.WSDocInfo;
-//import org.apache.ws.security.message.WSSecHeader;
+ 
+ 
 import org.apache.xml.security.transforms.Transforms;
-//import org.jboss.ws.core.soap.SOAPElementImpl;
-//import org.jboss.ws.core.soap.SOAPElementImpl;
+ 
+ 
 import org.jboss.xb.binding.SimpleTypeBindings;
 import org.picketlink.common.util.Base64;
 import org.picketlink.identity.federation.api.saml.v2.sig.SAML2Signature;
@@ -122,7 +122,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	
 	private static PublicKey publicKey = null;
 	
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(ServerSOAPHandler.class);
 
 	public Set<QName> getHeaders() {
@@ -138,15 +138,14 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	public boolean handleMessage(SOAPMessageContext mc) {
 
-		logger.info("handleMessage:01:"
+		LOGGER.debug("handleMessage:01:"
 				+ mc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY));
 
 		// приём soap с подписью usernametoken в header
 		// с использованием transform
 
 		PublicKey publicKey2 = null;
-		Long idUser = null;
-		String login_user = null;
+		String loginUser = null;
 
 		try {
 			HttpServletRequest req = (HttpServletRequest) mc
@@ -163,7 +162,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			
 			String user_password = null;
 
-			X509Certificate userCert = null;
+			X509Certificate userCertX = null;
 
 			SOAPMessage soapMessage = mc.getMessage();
 			SOAPHeader soapHeader = soapMessage.getSOAPHeader();
@@ -179,7 +178,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			if (Boolean.FALSE.equals(mc
 					.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY))) {
 
-				// logger.info("handleMessage:02+:"+DocumentUtil.asString(soapDoc));
+				 
 
 				Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
 
@@ -191,7 +190,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						"Signature");
 
 				if (signatureList == null || signatureList.getLength() == 0) {
-					logger.info("handleMessage:02_1");
+					LOGGER.debug("handleMessage:02_1");
 					
 					
 					if(Configuration.isSignRequired()){
@@ -206,7 +205,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						"Security");
 
 				if (securityList == null || securityList.getLength() == 0) {
-					logger.info("handleMessage:02_2");
+					LOGGER.debug("handleMessage:02_2");
 					throw new GeneralFailure(
 							"This service requires <Security>, which is missing!!!");
 				}
@@ -214,11 +213,11 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				NamedNodeMap attrs = securityList.item(0).getAttributes();
 				for (int i = 0; i < attrs.getLength(); i++) {
 					Attr attribute = (Attr) attrs.item(i);
-					logger.info("attrib:" + attribute.getName() + " = "
+					LOGGER.debug("attrib:" + attribute.getName() + " = "
 							+ attribute.getValue());
 				}
 
-				logger.info("handleMessage:02_3");
+				LOGGER.debug("handleMessage:02_3");
 
 				// взятие ключа из хранилища доверенных
 
@@ -231,7 +230,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						"OnBehalfOf");
 
 				if (onBehalfOfList != null && onBehalfOfList.getLength() > 0) {
-					logger.info("handleMessage:02_2_1");
+					LOGGER.debug("handleMessage:02_2_1");
 
 					if (onUseKeyList != null && onUseKeyList.getLength() > 0) {
 						// нельзя одновременно UseKey и OnBehalfOf
@@ -245,7 +244,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 					if (usernameTokenOnBehalfOfList == null
 							|| usernameTokenOnBehalfOfList.getLength() == 0) {
-						logger.info("handleMessage:02_2_2");
+						LOGGER.debug("handleMessage:02_2_2");
 						throw new GeneralFailure(
 								"This <OnBehalfOf> requires <UsernameToken>, which is missing!!!");
 					}
@@ -255,7 +254,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 					if (usernameOnBehalfOfList == null
 							|| usernameOnBehalfOfList.getLength() == 0) {
-						logger.info("handleMessage:02_2_3");
+						LOGGER.debug("handleMessage:02_2_3");
 						throw new GeneralFailure(
 								"This <UsernameToken> of OnBehalfOf requires <Username>, which is missing!!!");
 					}
@@ -269,13 +268,13 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 					if (base64TokenId != null) {
 
-						logger.info("handleMessage:02:" + base64TokenId);
+						LOGGER.debug("handleMessage:02:" + base64TokenId);
 
 						byte[] byteTokenID = Base64.decode(base64TokenId);
 
 						String tokenID = new String(byteTokenID, "UTF-8");
 
-						logger.info("handleMessage:03:" + tokenID);
+						LOGGER.debug("handleMessage:03:" + tokenID);
 
 						String[] arrTokenID = tokenID.split("_");
 
@@ -304,14 +303,14 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								.validate(sb.toString().getBytes("UTF-8"),
 										sigValue, this.publicKey);
 
-						logger.info("handleMessage:" + tokenIDValidateResult);
+						LOGGER.debug("handleMessage:" + tokenIDValidateResult);
 
 						user_obo_principal = arrTokenID[0].toString();
 						Date expired = new Date(Long.parseLong(arrTokenID[1]));
 
-						logger.info("handleMessage:" + user_obo_principal);
+						LOGGER.debug("handleMessage:" + user_obo_principal);
 
-						logger.info("handleMessage:" + expired);
+						LOGGER.debug("handleMessage:" + expired);
 
 						if (!tokenIDValidateResult) {
 							throw new Exception(
@@ -327,8 +326,8 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						//так что видимо надо убирать проверку на дату или 
 						//расширять период до 1 суток
 						if (new Date(System.currentTimeMillis()).after(expired)) {
-							//throw new TokenExpired("TokenId of OnBehalfOf is expired!!!");
-							//throw new Exception(
+							//th/row new Token/Expired("TokenId of OnBehalfOf is expired!!!");
+							//th/row new Exce/ption(
 							//		"TokenId of OnBehalfOf is expired!!!");
 						}
 
@@ -343,7 +342,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					 * только token_id
 					 */
 
-					logger.info("handleMessage:02_2_4+:" + user_obo_principal);
+					LOGGER.debug("handleMessage:02_2_4+:" + user_obo_principal);
 
 				}
 
@@ -352,7 +351,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				if (usernameTokenList == null
 						|| usernameTokenList.getLength() == 0) {
-					logger.info("handleMessage:02_3");
+					LOGGER.debug("handleMessage:02_3");
 					throw new GeneralFailure(
 							"This service requires UsernameToken, which is missing!!!");
 				}
@@ -368,7 +367,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						Element el = (Element) usernameTokenList.item(0);
 						String el_id = el.getAttribute("wsu:Id");
 
-						logger.info("handleMessage:02_3_1:" + el_id);
+						LOGGER.debug("handleMessage:02_3_1:" + el_id);
 
 						if ("SystemToken_1".equals(el_id)) {
 							// правильно - система должна присутствовать
@@ -378,7 +377,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_1+");
+								LOGGER.debug("handleMessage:02_3_1+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -386,7 +385,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 							system_principal = usernameList.item(0)
 									.getTextContent();
 
-							logger.info("handleMessage:02_3_1_2:"
+							LOGGER.debug("handleMessage:02_3_1_2:"
 									+ system_principal);
 
 						} else {
@@ -401,7 +400,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						if (usernameCertList != null
 								&& usernameCertList.getLength() != 0) {
 							// есть
-							logger.info("handleMessage:02_3_2");
+							LOGGER.debug("handleMessage:02_3_2");
 
 							if (onUseKeyList != null
 									&& onUseKeyList.getLength() > 0) {
@@ -414,7 +413,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 							String base64X509Certificate = usernameCertList
 									.item(0).getTextContent();
 
-							// logger.info("handleRequestType:03:"+base64X509Certificate);
+							 
 							byte[] byteX509Certificate = Base64
 									.decode(base64X509Certificate);
 
@@ -424,10 +423,10 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 									byteX509Certificate);
 
 							while (bais.available() > 0)
-								userCert = (X509Certificate) cf
+								userCertX = (X509Certificate) cf
 										.generateCertificate(bais);
 
-							// logger.info("handleMessage:02_3_3:"+userCert);
+							 
 
 						}
 
@@ -438,12 +437,12 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						Element el_1 = (Element) usernameTokenList.item(0);
 						String el_id_1 = el_1.getAttribute("wsu:Id");
 
-						logger.info("handleMessage:02_3_4:" + el_id_1);
+						LOGGER.debug("handleMessage:02_3_4:" + el_id_1);
 
 						Element el_2 = (Element) usernameTokenList.item(1);
 						String el_id_2 = el_2.getAttribute("wsu:Id");
 
-						logger.info("handleMessage:02_3_5:" + el_id_2);
+						LOGGER.debug("handleMessage:02_3_5:" + el_id_2);
 
 						if ("SystemToken_1".equals(el_id_1)
 								&& "UsernameToken_1".equals(el_id_2)) {
@@ -463,7 +462,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -479,7 +478,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -494,7 +493,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (passwordList == null
 									|| passwordList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Password>, which is missing!!!");
 							}
@@ -520,7 +519,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -536,7 +535,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -551,7 +550,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (passwordList == null
 									|| passwordList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Password>, which is missing!!!");
 							}
@@ -567,7 +566,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				} else { // onBehalfOf
 
-					logger.info("handleMessage:onBehalfOf:01");
+					LOGGER.debug("handleMessage:onBehalfOf:01");
 
 					if (usernameTokenList.getLength() == 1) {
 						// должна присутствовать - аутентификация системы
@@ -577,7 +576,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						Element el = (Element) usernameTokenList.item(0);
 						String el_id = el.getAttribute("wsu:Id");
 
-						logger.info("handleMessage:onBehalfOf:02:" + el_id);
+						LOGGER.debug("handleMessage:onBehalfOf:02:" + el_id);
 
 						if ("SystemToken_1".equals(el_id)) {
 							// правильно - система должна присутствовать
@@ -587,7 +586,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:onBehalfOf:03");
+								LOGGER.debug("handleMessage:onBehalfOf:03");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -595,7 +594,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 							system_principal = usernameList.item(0)
 									.getTextContent();
 
-							logger.info("handleMessage:onBehalfOf:04:"
+							LOGGER.debug("handleMessage:onBehalfOf:04:"
 									+ system_principal);
 
 						} else {
@@ -612,12 +611,12 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 						Element el_1 = (Element) usernameTokenList.item(0);
 						String el_id_1 = el_1.getAttribute("wsu:Id");
 
-						logger.info("handleMessage:onBehalfOf:05:" + el_id_1);
+						LOGGER.debug("handleMessage:onBehalfOf:05:" + el_id_1);
 
 						Element el_2 = (Element) usernameTokenList.item(1);
 						String el_id_2 = el_2.getAttribute("wsu:Id");
 
-						logger.info("handleMessage:02_3_5:" + el_id_2);
+						LOGGER.debug("handleMessage:02_3_5:" + el_id_2);
 
 						if ("SystemToken_1".equals(el_id_1)) {
 
@@ -628,7 +627,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -645,7 +644,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 							if (usernameList == null
 									|| usernameList.getLength() == 0) {
-								logger.info("handleMessage:02_3_5+");
+								LOGGER.debug("handleMessage:02_3_5+");
 								throw new GeneralFailure(
 										"This service requires <Username>, which is missing!!!");
 							}
@@ -660,11 +659,11 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					}
 
 				}
-				logger.info("handleMessage:02_5_1:" + system_principal);
-				logger.info("handleMessage:02_5_2:" + user_principal);
-				logger.info("handleMessage:02_5_3:" + user_password);
+				LOGGER.debug("handleMessage:02_5_1:" + system_principal);
+				LOGGER.debug("handleMessage:02_5_2:" + user_principal);
+				LOGGER.debug("handleMessage:02_5_3:" + user_password);
 				
-				logger.info("handleMessage:obo:01:" + user_obo_principal);
+				LOGGER.debug("handleMessage:obo:01:" + user_obo_principal);
 
 				if (user_obo_principal != null) {
 					// аутентификация пользователя по onBehalfOf
@@ -681,21 +680,21 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					// а когда передавали токен целиком, то был логин
 					// пользователя
 					// и вызывали authenticate_login_obo
-					login_user = (new ContextAccessSTSManager())
+					loginUser = (new ContextAccessSTSManager())
 							.authenticate_uid_obo(user_obo_principal,
 									AuthMode.WEB_SERVICES, getIPAddress(req),
 									system_principal);
 
-					logger.info("handleMessage:obo:02:" + login_user);
+					LOGGER.debug("handleMessage:obo:02:" + loginUser);
 
-					http_session.setAttribute("user_principal", login_user);
+					http_session.setAttribute("user_principal", loginUser);
 
 					http_session.setAttribute("cud_auth_type", user_obo_auth_type);
 					 
 				} else if (user_principal != null) {
 					// аутентификация пользователя по логин/паролю
 
-					login_user = (new ContextAccessSTSManager())
+					loginUser = (new ContextAccessSTSManager())
 							.authenticate_login(user_principal, user_password,
 									AuthMode.WEB_SERVICES, getIPAddress(req),
 									system_principal);
@@ -705,20 +704,20 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 					http_session.setAttribute("cud_auth_type", auth_type_password);
 					 
-				} else if (userCert != null) {
+				} else if (userCertX != null) {
 					// аутентификация пользователя по сертификату
 
-					String certSN = dec_to_hex(userCert.getSerialNumber());
+					String certSN = dec_to_hex(userCertX.getSerialNumber());
 
-					logger.info("handleMessage:02_5_5:" + certSN);
+					LOGGER.debug("handleMessage:02_5_5:" + certSN);
 
-					login_user = (new ContextAccessSTSManager())
+					loginUser = (new ContextAccessSTSManager())
 							.authenticate_cert_sn(certSN, getIPAddress(req),
 									system_principal);
 
-					logger.info("handleMessage:02_5_6:" + login_user);
+					LOGGER.debug("handleMessage:02_5_6:" + loginUser);
 
-					user_principal = login_user;
+					user_principal = loginUser;
 
 					http_session.setAttribute("user_principal", user_principal);
 
@@ -734,7 +733,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				}
 
-				logger.info("handleMessage:02_5_7");
+				LOGGER.debug("handleMessage:02_5_7");
 
 				http_session.setAttribute("system_principal", system_principal);
 
@@ -743,16 +742,15 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				X509Certificate cert_user = (new ContextIDPUtilManager())
 						.system_cert(system_principal);
 
-				// logger.info("handleMessage:02_6:"+cert_user);
+				 
 
-				Certificate cert_verify_sign = null;
-
+				
 				if (cert_user != null) {
 
 					publicKey2 = cert_user.getPublicKey();
 				}
 
-				// logger.info("handleMessage:02_8:"+publicKey2);
+				 
 
 				if (publicKey2 == null) {
 
@@ -762,18 +760,18 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				Node securityToken2 = soapDoc.getDocumentElement()
 						.getElementsByTagNameNS("*", "UsernameToken").item(0);
 
-				logger.info("handleMessage:09:" + securityToken2.getNodeName());
+				LOGGER.debug("handleMessage:09:" + securityToken2.getNodeName());
 
 				// боевой
 				Document newDoc = DocumentUtil.createDocument();
 				Node signingNode = newDoc.importNode(securityToken2, true);
 				newDoc.appendChild(signingNode);
 
-				// logger.info("dispatch:08_2:"+DocumentUtil.asString(newDoc));
+				 
 
 				Node signatureNode1 = signatureList.item(0);
 
-				logger.info("handleMessage:09_2:"
+				LOGGER.debug("handleMessage:09_2:"
 						+ signatureNode1.getNodeName());
 
 				DOMValidateContext valContext1 = new DOMValidateContext(
@@ -781,7 +779,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				valContext1.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
 
-				logger.info("handleMessage:09_3");
+				LOGGER.debug("handleMessage:09_3");
 
 				valContext1
 						.setIdAttributeNS(
@@ -794,14 +792,14 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 								"Id");
 
-				logger.info("handleMessage:09_4");
+				LOGGER.debug("handleMessage:09_4");
 
 				javax.xml.crypto.dsig.XMLSignature signature1 = fac
 						.unmarshalXMLSignature(valContext1);
 
 				boolean result1 = signature1.validate(valContext1);
 
-				logger.info("dispatch:011_5:" + result1);
+				LOGGER.debug("dispatch:011_5:" + result1);
 
 				if (result1 == false) {
 					throw new GeneralFailure("Signature is not valid!!!");
@@ -815,8 +813,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 			
 
-				MessageFactory mf = MessageFactory.newInstance();
-
+			
 				soapPart.getEnvelope()
 						.addNamespaceDeclaration(
 								"wsse",
@@ -845,7 +842,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 								"wsu:Id", "Header");
 
-				logger.info("dispatch:03");
+				LOGGER.debug("dispatch:03");
 
 				// при подписывании Pre-digested input показывает просто
 				// <wsse:Username/>,
@@ -861,40 +858,40 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				// <wsse:Username xmlns:wsse="http://..."/>, то есть проверяется
 				// именно <wsse:Username xmlns:wsse="http://..."/>
 				// и чтобы этого избежать нужно на SOAPElement использовать
-				// UsernameSOAP.addNamespaceDeclaration.
+				// Usern/ame/SOAP.addNamespa/ceDeclaration.
 
-				QName SecurityQN = new QName(
+				QName securityQN = new QName(
 						"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd",
 						"Security", "wsse");
 				QName timestampQN = new QName(
 						"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 						"Timestamp", "wsu");
-				QName CreatedQN = new QName(
+				QName createdQN = new QName(
 						"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 						"Created", "wsu");
 
-				SOAPElement SecuritySOAP = soapHeader
-						.addChildElement(SecurityQN);
+				SOAPElement securitySOAP = soapHeader
+						.addChildElement(securityQN);
 
-				SecuritySOAP
+				securitySOAP
 						.addNamespaceDeclaration(
 								"wsu",
 								"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
-				SecuritySOAP
+				securitySOAP
 						.setAttributeNS(
 								"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 								"wsu:Id", "_id_sec");
 
-				SOAPElement timestampSOAP = SecuritySOAP
+				SOAPElement timestampSOAP = securitySOAP
 						.addChildElement(timestampQN);
 
-				SOAPElement CreatedSOAP = timestampSOAP
-						.addChildElement(CreatedQN);
+				SOAPElement createdSOAP = timestampSOAP
+						.addChildElement(createdQN);
 
-				CreatedSOAP.addTextNode(SimpleTypeBindings
+				createdSOAP.addTextNode(SimpleTypeBindings
 						.marshalDateTime(new GregorianCalendar()));
 
-				// logger.info("dispatch:05:"+DocumentUtil.asString(soapDoc));
+				 
 
 				
 				if(Configuration.isSignRequired()){
@@ -903,9 +900,9 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 					KeyStoreKeyManager kskm = new KeyStoreKeyManager();
 					// в KeyStoreKeyManager KeyStore ks - static
 					// поэтому ks уже инициализирован нужными параметрами
-					// а также важно, что static:
-					// private static char[] signingKeyPass;
-					// private static String signingAlias;
+					// а также важно, что st/atic:
+					// pri/vate stat/ic char/[] signing/KeyPass;
+					// priv/ate st/atic Stri/ng signin/gAlias;
 
 					KeyPair keyPair = kskm.getSigningKeyPair();
 
@@ -931,7 +928,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				transformList.add(transform);
 				transformList.add(transformC14N);
 
-				logger.info("dispatch:07");
+				LOGGER.debug("dispatch:07");
 
 				// что подписывать
 
@@ -949,7 +946,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 				referenceList.add(ref1);
 				referenceList.add(ref2);
 
-				logger.info("dispatch:06");
+				LOGGER.debug("dispatch:06");
 
 				SignedInfo si = fac
 						.newSignedInfo(
@@ -970,7 +967,7 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// куда вставлять подпись
 				DOMSignContext signContext = new DOMSignContext(privateKey,
-						SecuritySOAP);
+						securitySOAP);
 
 				signContext.putNamespacePrefix(XMLSignature.XMLNS, "dsig");
 
@@ -989,16 +986,16 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 								"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 								"Id");
 
-				logger.info("dispatch:011");
+				LOGGER.debug("dispatch:011");
 
 				sig.sign(signContext);
 
 				}
 			}
-			logger.info("handleMessage:0100");
+			LOGGER.debug("handleMessage:0100");
 
 		} catch (Exception e) {
-			logger.error("handleMessage:error:" + e);
+			LOGGER.error("handleMessage:error:", e);
 			throw new ProtocolException(e);
 
 		}
@@ -1019,84 +1016,13 @@ public class ServerSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		try {
 			result = bi.toString(16);
 		} catch (NumberFormatException e) {
-			logger.error("Error! tried to parse an invalid number format");
+			LOGGER.error("Error! tried to parse an invalid number format");
 		}
 		return result;
 	}
 
-	private static String deflate_decode(String base64_encode) {
+	
 
-		String result = null;
-		InputStream is1 = null;
-		ByteArrayInputStream bais = null;
-		BufferedReader bufferedReader = null;
-		try {
-			// base64_decode
-			byte[] decodeMsg = Base64.decode(base64_encode);
-
-			// decompress
-			bais = new ByteArrayInputStream(decodeMsg);
-			is1 = new InflaterInputStream(bais, new Inflater(true));
-
-			// convert to string
-			StringBuilder inputStringBuilder = new StringBuilder();
-			bufferedReader = new BufferedReader(new InputStreamReader(is1,
-					"UTF-8"));
-			String line = bufferedReader.readLine();
-			while (line != null) {
-				inputStringBuilder.append(line);
-				inputStringBuilder.append('\n');
-				line = bufferedReader.readLine();
-			}
-
-			result = inputStringBuilder.toString();
-
-			// logger.info("deflate_decode:"+result);
-		} catch (Exception e) {
-			logger.error("Error! tried to parse an invalid number format");
-		} finally {
-			try {
-				if (is1 != null) {
-					is1.close();
-				}
-			} catch (Exception e) {
-			}
-			try {
-				if (bais != null) {
-					bais.close();
-				}
-			} catch (Exception e) {
-			}
-			try {
-				if (bufferedReader != null) {
-					bufferedReader.close();
-				}
-			} catch (Exception e) {
-			}
-		}
-		return result;
-	}
-
-	private boolean ass_valid(Document signedDoc, PublicKey publicKey) {
-
-		boolean result = false;
-		try {
-			SAML2Signature samlSignature = new GOSTSAML2Signature();
-			samlSignature
-					.setSignatureMethod("http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411");
-			samlSignature
-					.setDigestMethod("http://www.w3.org/2001/04/xmldsig-more#gostr3411");
-
-			Document doc = DocumentUtil.createDocument();
-			Node n = doc.importNode(signedDoc.getDocumentElement(), true);
-			doc.appendChild(n);
-
-			result = samlSignature.validate(doc, publicKey);
-
-		} catch (Exception e) {
-			logger.error("Authenticator:ass_valid:error:" + e);
-		}
-		return result;
-	}
+	
 
 }

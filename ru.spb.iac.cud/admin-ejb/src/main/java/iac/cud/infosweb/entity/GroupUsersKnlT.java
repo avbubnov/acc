@@ -49,11 +49,9 @@ public class GroupUsersKnlT extends BaseItem implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date modified;
 	    
-	//bi-directional many-to-one association to LinkGroupUsersRolesKnlT
 	@OneToMany(mappedBy="groupUsersKnlT", cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
 	private List<LinkGroupUsersRolesKnlT> linkGroupUsersRolesKnlTs;
 
-	//bi-directional many-to-one association to LinkGroupUsersUsersKnlT
 	@OneToMany(mappedBy="groupUsersKnlT",  cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
 	private List<LinkGroupUsersUsersKnlT> linkGroupUsersUsersKnlTs;
 

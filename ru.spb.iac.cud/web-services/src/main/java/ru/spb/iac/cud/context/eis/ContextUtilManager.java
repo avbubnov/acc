@@ -32,7 +32,7 @@ import ru.spb.iac.cud.items.UsersData;
 
 public class ContextUtilManager {
 
-	Logger logger = LoggerFactory.getLogger(ContextUtilManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ContextUtilManager.class);
 
 	static Context ctx;
 	UtilManagerLocal aml = null;
@@ -42,25 +42,11 @@ public class ContextUtilManager {
 			ctx = new InitialContext();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("error",e);
 		}
 	}
 
-	/*
-	 * public static void initContext(String jboss_jndi_port){ try{
-	 * logger.info("initContext:jboss_jndi_port:"+jboss_jndi_port);
-	 * 
-	 * jboss_jndi_port=(jboss_jndi_port!=null?jboss_jndi_port:"1099");
-	 * 
-	 * Properties env = new Properties();
-	 * env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-	 * "org.jnp.interfaces.NamingContextFactory");
-	 * env.setProperty(Context.URL_PKG_PREFIXES, "org.jboss.naming");
-	 * env.setProperty(Context.PROVIDER_URL, "localhost:"+jboss_jndi_port); ctx
-	 * = new InitialContext(env);
-	 * 
-	 * }catch(Exception e){ logger.error("initContext:error:"+e); } }
-	 */
+	
 
 	public ContextUtilManager() {
 		try {
@@ -68,7 +54,7 @@ public class ContextUtilManager {
 					.lookup("java:global/AuthServices/EisUtilManager!ru.spb.iac.cud.core.UtilManagerLocal");
 
 		} catch (Exception e) {
-			logger.error("ContextUtilManager:error:" + e);
+			LOGGER.error("ContextUtilManager:error:", e);
 		}
 	}
 
@@ -76,7 +62,7 @@ public class ContextUtilManager {
 			String category, List<String> rolesCodes, List<String> groupsCodes,
 			Integer start, Integer count, Map<String, String> settings,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
-		logger.info("users_data");
+		LOGGER.debug("users_data");
 
 		return aml.users_data(idIS, uidsUsers, category, rolesCodes,
 				groupsCodes, start, count, settings, idUserAuth, IPAddress);
@@ -86,7 +72,7 @@ public class ContextUtilManager {
 			String category, List<String> rolesCodes, Integer start,
 			Integer count, Map<String, String> settings, Long idUserAuth,
 			String IPAddress) throws GeneralFailure {
-		logger.info("groups_data");
+		LOGGER.debug("groups_data");
 
 		return aml.groups_data(idIS, groupsCodes, category, rolesCodes, start,
 				count, settings, idUserAuth, IPAddress);
@@ -97,7 +83,7 @@ public class ContextUtilManager {
 			List<String> rolesCodes, Integer start, Integer count,
 			Map<String, String> settings, Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
-		logger.info("sys_resources");
+		LOGGER.debug("sys_resources");
 
 		return aml.resources_data(idIS, resourcesCodes, category, rolesCodes,
 				start, count, settings, idUserAuth, IPAddress);
@@ -114,14 +100,10 @@ public class ContextUtilManager {
 			Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("roles_data");
+		LOGGER.debug("roles_data");
 
 		return aml.roles_data(idIS, category, idUserAuth, IPAddress);
 	}
 	
-	private void is_exist(String idIS) throws GeneralFailure {
-		logger.info(":is_exist:01");
-		aml.is_exist(idIS);
-	}
-
+	
 }

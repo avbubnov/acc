@@ -48,7 +48,7 @@ import java.util.Set;
 
 public class CUDStatementUtil extends StatementUtil {
 
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(CUDStatementUtil.class);
 
 	public static AttributeStatementType createAttributeStatementForRoles(
@@ -57,8 +57,8 @@ public class CUDStatementUtil extends StatementUtil {
 			return createAttributeStatement(roles);
 		}
 		AttributeStatementType attrStatement = new AttributeStatementType();
-		// AttributeType attr = new
-		// AttributeType(AttributeConstants.ROLE_IDENTIFIER_ASSERTION);
+		// AttributeType /attr = new
+		// AttributeType/(AttributeConstants/.ROLE_IDENTIFIER_ASSERTION);
 		AttributeType attr = new AttributeType("USER_ROLES");
 		for (String role : roles) {
 			attr.addAttributeValue(role);
@@ -74,15 +74,15 @@ public class CUDStatementUtil extends StatementUtil {
 		}
 
 		AttributeStatementType attrStatement = new AttributeStatementType();
-		// AttributeType attr = new
-		// AttributeType(AttributeConstants.ROLE_IDENTIFIER_ASSERTION);
+		// AttributeType /attr = new
+		// AttributeType/(AttributeConstants/.ROLE_IDENTIFIER_ASSERTION);
 		AttributeType attr = new AttributeType("RESOURCES");
 		for (String role : resources) {
 			attr.addAttributeValue(role);
 		}
 		attrStatement.addAttribute(new ASTChoiceType(attr));
 
-		logger.info("createAttributeStatementForResources:03");
+		LOGGER.debug("createAttributeStatementForResources:03");
 
 		return attrStatement;
 	}

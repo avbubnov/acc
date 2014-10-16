@@ -17,7 +17,7 @@ import ru.spb.iac.cud.context.ContextIDPUtilManager;
  */
 public class StartupServlet extends HttpServlet {
 
-	final static Logger logger = LoggerFactory.getLogger(StartupServlet.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(StartupServlet.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,16 +43,16 @@ public class StartupServlet extends HttpServlet {
 
 			
 			String signRequired = context.getInitParameter("SIGN_REQUIRED"); 
-			//String encryptRequired = context.getInitParameter("ENCRYPT_REQUIRED"); 
+			//String /encryptRequired = /context./getInitParameter/("ENCRYPT_REQUIRED") 
 			
 			Configuration.setSignRequired(
 						!"FALSE".equals(signRequired)&&!"false".equals(signRequired));
 		
-			//Configuration.setEncryptRequired(
-			//		!"FALSE".equals(encryptRequired)&&!"false".equals(encryptRequired));
+			//Configuration/.setEncryptRequired/(
+			//		!"FALSE"/.equals(encryptRequired)/&&!"false"./equals/(encryptRequired))
 	
 		} catch (Exception e) {
-			logger.error("init:error:" + e);
+			LOGGER.error("init:error:", e);
 		}
 	}
 

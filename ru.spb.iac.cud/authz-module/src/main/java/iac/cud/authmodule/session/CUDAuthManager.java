@@ -1,6 +1,6 @@
 package iac.cud.authmodule.session;
 
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
@@ -33,15 +33,15 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 	@PersistenceContext(unitName = "CUDAuthModule")
 	EntityManager em;
 
-	final static Logger logger = LoggerFactory.getLogger(CUDAuthManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(CUDAuthManager.class);
 
 	public CUDAuthManager() {
 	}
 
-	public Map<String, ArrayList<String>[]> authComplete(Long appCode,
+	public Map<String, List<String>[]> authComplete(Long appCode,
 			String login, String password) throws Exception {
 
-		logger.info("authComplete");
+		LOGGER.debug("authComplete");
 		try {
 			if (appCode == null || login == null || password == null) {
 				return null;
@@ -52,11 +52,11 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 			if (idUser == null) {
 				return null;
 			}
-			logger.info("authComplete:idUser:" + idUser);
+			LOGGER.debug("authComplete:idUser:" + idUser);
 
 			return createResourceTree(appCode, null, idUser);
 		} catch (Exception e) {
-			logger.error("authComplete:Error:" + e);
+			LOGGER.error("authComplete:Error:", e);
 			throw e;
 		}
 	}
@@ -72,16 +72,16 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 	 * @throws Exception
 	 */
 	public Long authenticate(String login, String password) throws Exception {
-		logger.info("authenticate");
+		LOGGER.debug("authenticate");
 		if (login == null || password == null) {
 			return null;
 		}
 		return createAuth(login, password);
 	}
 
-	public ArrayList<String>[] access(Long appCode, String pageCode, Long idUser)
+	public List<String>[] access(Long appCode, String pageCode, Long idUser)
 			throws Exception {
-		logger.info("access");
+		LOGGER.debug("access");
 		if (appCode == null || pageCode == null || idUser == null) {
 			return null;
 		}
@@ -91,7 +91,7 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 	private Long createAuth(String login, String password) throws Exception {
 		Long idUser = null;
 		try {
-			logger.info("createAuth:01");
+			LOGGER.debug("createAuth:01");
 			idUser = ((java.math.BigDecimal) em
 					.createNativeQuery(
 							"select AU.ID_SRV "
@@ -104,21 +104,21 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 					.setParameter(1, login).setParameter(2, password)
 					.getSingleResult()).longValue();
 
-			logger.info("authenticate:idUser:" + idUser);
+			LOGGER.debug("authenticate:idUser:" + idUser);
 
 		} catch (NoResultException ex) {
-			logger.error("createAuth:NoResultException");
+			LOGGER.error("createAuth:NoResultException");
 		} catch (Exception e) {
-			logger.error("createAuth:Error:" + e);
+			LOGGER.error("createAuth:Error:", e);
 			throw e;
 		}
 		return idUser;
 	}
 
-	private Map<String, ArrayList<String>[]> createResourceTree(Long appCode,
+	private Map<String, List<String>[]> createResourceTree(Long appCode,
 			String pageCode, Long idUser) throws Exception {
 
-		Map<String, ArrayList<String>[]> result = new HashMap<String, ArrayList<String>[]>();
+		Map<String, List<String>[]> result = new HashMap<String, List<String>[]>();
 
 		ArrayList<String> raiList = new ArrayList<String>();
 		ArrayList<String> permList = new ArrayList<String>();
@@ -187,7 +187,7 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 				result.put(pageCode_prev, new ArrayList[] { raiList, permList });
 			}
 		} catch (Exception e) {
-			logger.error("createResourceTree:Error:" + e);
+			LOGGER.error("createResourceTree:Error:", e);
 			throw e;
 		}
 		return result;
@@ -208,22 +208,22 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 	public AuthItem authCompleteItem(Long appCode, String login, String password)
 			throws Exception {
 		try {
-			logger.info("authCompleteItem:appCode:" + appCode);
+			LOGGER.debug("authCompleteItem:appCode:" + appCode);
 
 			if (appCode == null || login == null || password == null) {
 				return null;
 			}
-			logger.info("auth_01");
+			LOGGER.debug("auth_01");
 			Long idUser = createAuth(login, password);
 
 			if (idUser == null) {
 				return null;
 			}
-			logger.info("authCompleteItem:idUser:" + idUser);
+			LOGGER.debug("authCompleteItem:idUser:" + idUser);
 
 			return createResourceTreeItem(appCode, null, idUser);
 		} catch (Exception e) {
-			logger.error("authCompleteItem:Error:" + e);
+			LOGGER.error("authCompleteItem:Error:", e);
 			throw e;
 		}
 	}
@@ -231,16 +231,14 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 	private AuthItem createResourceTreeItem(Long appCode, String pageCode,
 			Long idUser) throws Exception {
 
-		logger.info("createResourceTreeItem:01");
+		LOGGER.debug("createResourceTreeItem:01");
 
 		AuthItem result = new AuthItem();
 		result.setIdUser(idUser);
 
 		ArrayList<String> permList = new ArrayList<String>();
 		String pageCode_prev = "", pageCode_curr = "";
-		String idRai_prev = "";
-		int raiChange = 0;
-
+		
 		try {
 			List<Object[]> lo = em
 					.createNativeQuery(
@@ -275,8 +273,7 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 					result.getPageList().put(pageCode_prev,
 							new PageItem(permList));
 
-					raiChange = 0;
-
+				
 					permList = new ArrayList<String>();
 
 					permList.add(objectArray[1].toString());
@@ -291,7 +288,7 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 			}
 
 		} catch (Exception e) {
-			logger.error("createResourceTreeItem:Error:" + e);
+			LOGGER.error("createResourceTreeItem:Error:", e);
 			throw e;
 		}
 		return result;
@@ -311,7 +308,7 @@ public class CUDAuthManager implements CUDAuthManagerLocal,
 	 */
 	public PageItem accessItem(Long appCode, String pageCode, Long idUser)
 			throws Exception {
-		logger.info("accessItem");
+		LOGGER.debug("accessItem");
 		if (appCode == null || pageCode == null || idUser == null) {
 			return null;
 		}

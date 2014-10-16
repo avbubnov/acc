@@ -8,6 +8,7 @@ import org.jboss.seam.annotations.Out;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
+
 import java.io.File;
 
 import iac.cud.infosweb.dataitems.BaseItem;
@@ -20,9 +21,9 @@ import iac.cud.infosweb.entity.AcRole;
 import iac.cud.infosweb.entity.AcUser;
 import iac.cud.infosweb.entity.GroupUsersKnlT;
 import iac.cud.infosweb.entity.LinkGroupUsersUsersKnlT;
-import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.audit.export.AuditExportData;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.navig.LinksMap;
 
 import java.io.BufferedReader;
@@ -32,6 +33,7 @@ import java.io.OutputStream;
 import java.util.*;
 
 import org.jboss.seam.Component;
+
 import javax.faces.context.FacesContext;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -39,8 +41,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
 
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
+
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,7 +66,7 @@ public class RolManager {
 	//private BaseItem usrBean;             !!! Проверить !!!
 	
 		
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -85,7 +87,6 @@ public class RolManager {
 	
 	private List<AcApplication> listArm = null;
 	
-	//private List<AcApplication> listArmFull = null;
 	
 	private List<AcApplication> listArmUgroup = null;
 	
@@ -97,7 +98,6 @@ public class RolManager {
 	
 	private List<AcUser> usrSelectListForView;
 	
-	//private boolean updRoleCodeExist=false;
 	
 	public List<BaseItem> getAuditList(int firstRow, int numberOfRows){
 	  String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -113,11 +113,11 @@ public class RolManager {
 			  Component.getInstance("rolListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    rolListCached!=null){
 		 		log.info("getAuditList:02:"+rolListCached.size());
 			    	this.auditList=rolListCached;
@@ -128,12 +128,12 @@ public class RolManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecRol = (ArrayList<String>)
+		 	List<String>  selRecRol = (ArrayList<String>)
 					  Component.getInstance("selRecRol",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecRol!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecRol.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					 it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -150,16 +150,16 @@ public class RolManager {
 	           String sessionId) {
 		try{
 			 String orderQuery=null;
-			 log.info("hostsManager:invokeLocal");
+			 log.info("RolManager:invokeLocal");
 			 
 			 RolStateHolder rolStateHolder = (RolStateHolder)
 					  Component.getInstance("rolStateHolder",ScopeType.SESSION);
 			 
-			 HashMap<String, String> filterMap = rolStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = rolStateHolder.getColumnFilterValues();
 			 String st=null;
 			 
-			 if(type.equals("list")){
-				 log.info("invokeLocal:list:01");
+			 if("list".equals(type)){
+				 log.info("Rol:invokeLocal:list:01");
 				 
 				
 				 
@@ -174,28 +174,21 @@ public class RolManager {
       		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
       		       }
       		     }
-                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 log.info("Rol:invokeLocal:list:orderQuery:"+orderQuery);
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	            
-    	            	/*if(me.getKey().equals("dateAction")){  
-    	    	        	// st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	    	   		     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
-    	    	    	}else{*/
-    	   		       if(me.getKey().equals("acApplication")){  
+    	    		 Set<Map.Entry<String, String>> setFilterRol = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterRol) {
+    	            	
+    	               if("acApplication".equals(me.getKey())){  
     	   		    	  st=(st!=null?st+" and " :" ")+me.getKey()+"='"+me.getValue()+"' ";
     	    	       }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
     	        		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	               }
     	              }
     	    	   }
-                 log.info("invokeLocal:list:filterQuery:"+st);
+                 log.info("Rol:invokeLocal:list:filterQuery:"+st);
                  
 				
                 AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
@@ -218,31 +211,25 @@ public class RolManager {
  	                           .getResultList();
  	    		}
 				
-             log.info("invokeLocal:list:02");
+             log.info("Rol:invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
-				 log.info("IHReposList:count:01");
+			 } else if("count".equals(type)){
+				 log.info("RolList:count:01");
 				 
 				 if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	   		      
-    	             /*if(me.getKey().equals("dateAction")){  
-  	    	        	// st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-  	    	   		     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
-  	    	    	 }else{*/
-  	   		         if(me.getKey().equals("acApplication")){  
+    	    		 Set<Map.Entry<String, String>> setFilterRol = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterRol) {
+    	              
+    	              if("acApplication".equals(me.getKey())){  
   	   		    	   st=(st!=null?st+" and " :" ")+me.getKey()+"='"+me.getValue()+"' ";
   	    	         }else{
-  	        		  // st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
+  	        		  
   	        		  //делаем фильтр на начало
   	            	    st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
   	            	   }
     	             }
     	    	   }
-                 log.info("invokeLocal:count:filterQuery:"+st);
+                 log.info("Rol:invokeLocal:count:filterQuery:"+st);
 				 
                  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
 	    		 
@@ -261,56 +248,30 @@ public class RolManager {
 					         (st!=null ? " where "+st :""))
 			                .getSingleResult();
   	    		 }
-               log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
-				 
-			 }
+               log.info("Rol:invokeLocal:count:02:"+auditCount);
+           	 }
 		}catch(Exception e){
-			  log.error("invokeLocal:error:"+e);
+			  log.error("Rol:invokeLocal:error:"+e);
 			  evaluteForList=false;
 			  FacesMessages.instance().add("Ошибка!");
 		}
 	}
-	  /**
-	  * Подготовка сущности Аудит УФМС 
-	  * для последующих операций просмотра
-	  */
+
+
    public void forView(String modelType) {
-	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+	   String  rolId = FacesContext.getCurrentInstance().getExternalContext()
 		        .getRequestParameterMap()
 		        .get("sessionId");
-	  log.info("forView:sessionId:"+sessionId);
+	  log.info("forView:rolId:"+rolId);
 	  log.info("forView:modelType:"+modelType);
-	  if(sessionId!=null /*&& usrBean==null*/){
+	  if(rolId!=null){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
-			if(modelType.equals("rolDataModel")){
-				//service=ServiceReestr.Repos;
-			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
-		 AcRole ar = searchBean(sessionId);
+			
+		 AcRole ar = searchBean(rolId);
 		 
 		 Long appCode = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode();
 			
@@ -336,7 +297,7 @@ public class RolManager {
 		if(rolListCached!=null){
 			for(AcRole it : rolListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -352,7 +313,7 @@ public class RolManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+	  
    }
    
    public void addRol(){
@@ -376,7 +337,7 @@ public class RolManager {
 		      rolBeanCrt.setRoleTitle(rolBeanCrt.getRoleTitle().trim());
 		      rolBeanCrt.setSign(rolBeanCrt.getSign().trim());
 		      
-		      if(rolBeanCrt.getRoleDescription()!=null&&!rolBeanCrt.getRoleDescription().trim().equals("")){
+		      if(rolBeanCrt.getRoleDescription()!=null&&!"".equals(rolBeanCrt.getRoleDescription().trim())){
 		    	  rolBeanCrt.setRoleDescription(rolBeanCrt.getRoleDescription().trim());
 			  }else{
 				  rolBeanCrt.setRoleDescription(null);
@@ -394,38 +355,13 @@ public class RolManager {
 	    			  ap.setCreated(new Date());
 	    			  ap.setCreator(new Long(1));
 	    			  arList.add(ap);
-	    			//  entityManager.persist(ap);
+	    			
 	    		  }
 	    	  }
-	    	   /*  for(AcApplication arm:listUsrArm){
-		    		  log.info("UsrManager:addUsr:Arm:"+arm.getName());
-		    		  for(AcRole rol:arm.getAcRoles()){
-		    			  log.info("UsrManager:addUsr:RolTitle:"+rol.getRoleTitle());
-		    			  log.info("UsrManager:addUsr:RolChecked:"+rol.getUsrChecked());
-		    			  
-		    			  if(rol.getUsrChecked().booleanValue()){
-		    				  
-		    				 if(rol.getRaions()!=null&&!rol.getRaions().isEmpty()){
-		    					 for(Object idRai: rol.getRaions()){
-		    					   AcLinkUserToRoleToRaion au = new AcLinkUserToRoleToRaion(new Long(idRai.toString()), rol.getIdRol(), usrBeanCrt.getIdUser());
-			    			       au.setCreated(new Date());
-			    			       au.setCreator(new Long(1));
-			    			       //entityManager.persist(au);
-			    			       arList.add(au);
-			    			      }
-		    				 }else{
-		    			       AcLinkUserToRoleToRaion au = new AcLinkUserToRoleToRaion(new Long(-1), rol.getIdRol(), usrBeanCrt.getIdUser());
-		    			       au.setCreated(new Date());
-		    			       au.setCreator(new Long(1));
-		    			      // entityManager.persist(au);
-		    			       arList.add(au);
-		    			      }
-		    			  }
-		    		  }
-		    	  }*/
+	    	   
 	    	     
 	    	     if(arList.size()>0){
-	    	 		//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    	 		//  @On/eTo/Many(map/pedBy="acHost", casc/ade=/{CascadeType.PE/RSIST, CascadeType/.REFRESH})
 	    	 	     rolBeanCrt.setAcLinkRoleAppPagePrmssns(new HashSet(arList));
 	    	 	 }
 	    	 	   
@@ -465,13 +401,13 @@ public class RolManager {
 		   
 		  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
 		   
-		 //	entityManager.merge(acUsrBean);
+		 
 		  AcRole arm = entityManager.find(AcRole.class, new Long(sessionId));
 		  
 		  arm.setRoleTitle(rolBean.getRoleTitle().trim());
 		  arm.setSign(rolBean.getSign().trim());
 		  
-		  if(rolBean.getRoleDescription()!=null&&!rolBean.getRoleDescription().trim().equals("")){
+		  if(rolBean.getRoleDescription()!=null&&!"".equals(rolBean.getRoleDescription().trim())){
 			  arm.setRoleDescription(rolBean.getRoleDescription().trim());
 		  }else{
 			  arm.setRoleDescription(null);
@@ -497,20 +433,19 @@ public class RolManager {
     			  AcLinkRoleAppPagePrmssn ap = new AcLinkRoleAppPagePrmssn(res.getIdRes(), new Long(l.toString()), new Long(sessionId));
     			  ap.setCreated(new Date());
     			  ap.setCreator(new Long(1));
-    			 // entityManager.persist(ap);
+    			 
     			  arList.add(ap);
     		  }
     	  }
 	    	  
 	       	  if(arList.size()>0){
-	    	 	//  @OneToMany(mappedBy="acHost", cascade={CascadeType.PERSIST, CascadeType.REFRESH})
+	    	 	//  @OneT/oMany(mapp/edBy="acHo/st", cascade={C/ascadeType./PERSIST,/ CascadeType.REFRE/SH})
 	    		  arm.setAcLinkRoleAppPagePrmssns(new HashSet(arList));
 	    	  }
 	    	 	   
 	    	 entityManager.flush();
 	    	 entityManager.refresh(arm);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
 	    	 Contexts.getEventContext().set("rolBean", arm);
 	    	 
 	    	 audit(ResourcesMap.ROLE, ActionsMap.UPDATE); 
@@ -548,18 +483,17 @@ public class RolManager {
 		   
 		   List<AcLinkUserToRoleToRaion> oldLinkList = aum.getAcLinkUserToRoleToRaions();
 		   
-		 // log.info("rolManager:updUgroupUserAlf:size1:"+(this.usrAlfList!=null?this.usrAlfList.size():"null"));
-		 // log.info("rolManager:updUgroupUserAlf:size2:"+(oldLinkList!=null?oldLinkList.size():"null"));
+		  
+		  
 		   
 		   for(BaseItem user:this.usrAlfList){
- 			 // log.info("ugroupManager:updUgroupUserAlf:Login:"+((AcUser)user).getLogin());
- 			//  log.info("ugroupManager:updUgroupUserAlf:UsrChecked:"+((AcUser)user).getUsrChecked());
+ 			  
+ 			 
  			  
  			  if(((AcUser)user).getUsrChecked().booleanValue()){ //отмечен
  				
  				 log.info("rolManager:updUgroupUserAlf:02:"+((AcUser)user).getLogin());
  				 
- 				//  if(listIdUsr.contains(user.getBaseId())){ //база и так содержит
  				 
  				 lguu=new AcLinkUserToRoleToRaion(new Long(sessionId), user.getBaseId());
  				 if(oldLinkList.contains(lguu)){  
@@ -575,11 +509,9 @@ public class RolManager {
 			         
 			         oldLinkList.add(lguu);
 			         
- 					// entityManager.persist(au);
  				  }
  				  
  			  }else{//не отмечен
- 				// if(listIdUsr.contains(user.getBaseId())){ //есть в базе
  				  
  				 lguu=new AcLinkUserToRoleToRaion(new Long(sessionId), user.getBaseId());
  				 if(oldLinkList.contains(lguu)){
@@ -595,7 +527,7 @@ public class RolManager {
  					    .executeUpdate();
 				  }else{//в базе и так нет
 				 
-					//  log.info("rolManager:updUgroupUserAlf:06");
+					 
 					  
 				  }
  			  }
@@ -608,7 +540,7 @@ public class RolManager {
 	    	  
 	    	Contexts.getEventContext().set("rolBean", aum);
 	    	 
-	    	audit(ResourcesMap.ROLE, ActionsMap.UPDATE); 
+	    	audit(ResourcesMap.ROLE, ActionsMap.UPDATE_USER); 
 	    	
 	    	
 	     }catch (Exception e) {
@@ -683,10 +615,10 @@ public class RolManager {
 	  				.getResultList();
 			  
 			  if(!lo.isEmpty()){
-				  if(!lo.get(0)[0].toString().equals("0")){
+				  if(!"0".equals(lo.get(0)[0].toString())){
 					  dellMessage="Есть пользователи с этой ролью!<br/>";
 				  }
-				  if(!lo.get(0)[1].toString().equals("0")){
+				  if(!"0".equals(lo.get(0)[1].toString())){
 					  if(dellMessage!=null){
 					   dellMessage+="Есть группы пользователей с этой ролью!";
 					  }else{
@@ -716,7 +648,7 @@ public class RolManager {
    }
    
    public List<AcAppPage> getListRolRes() throws Exception{
-	   // log.info("RolManager:getListRolRes:arm:"+this.arm);
+	    
 	    try {
 	    	log.info("RolManager:getListRolRes:01");
 	    
@@ -779,12 +711,8 @@ public class RolManager {
    }
    
    public List<AcAppPage> getListRolResEdit() throws Exception{
-	   // log.info("RolManager:getListRolResEdit:arm:"+this.arm);
-	  /*  String pscipAllFlag= FacesContext.getCurrentInstance().getExternalContext()
-		        .getRequestParameterMap()
-		        .get("scipAllFlag");
-	    	
-	   if(pscipAllFlag==null){ */
+	    
+	
 	    try {
 	    	
 	    	// при заходе со списка - 1)идАРМ = editRol.getAcApplication(),
@@ -799,10 +727,6 @@ public class RolManager {
 			       .get("sessionId");
 		    log.info("rolManager:getListUsrArmEdit:sessionId:"+idRol);
 		    
-		  /*  String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
-			       .getRequestParameterMap()
-			       .get("remoteAudit");
-		    log.info("rolManager:getListUsrArmEdit:remoteAudit:"+remoteAudit);*/
 		  
 	    	//pidRol -global переменная!!!
 	    	String pidArm=null, saveEditFlag,idForAjax;
@@ -810,13 +734,12 @@ public class RolManager {
 	    	AcRole rolBean = (AcRole)
 					  Component.getInstance("rolBean", ScopeType.EVENT);
 	    	
-	    	//log.info("RolManager:getListRolResEdit:editRol.getAcApplication:"+rolBean.getAcApplication());
+	    	 
 	    	
 	    	if(rolBean.getAcApplication()==null){ //при заходе со списка условие = нет
 	    		 pidArm= FacesContext.getCurrentInstance().getExternalContext()
 		        .getRequestParameterMap()
 		        .get("CBformUpd:appl"); //идАРМ при нажатии кнопки сохранить
-	    		// .get("CBformUpd:alUpd")
 	    		 log.info("RolManager:getListRolResEdit:pidArm:"+pidArm);
 	       	}
 	    	if(listRolResEdit==null&&(rolBean.getAcApplication()!=null||pidArm!=null)){
@@ -839,7 +762,7 @@ public class RolManager {
 	    		 
 	    		 idForAjax= FacesContext.getCurrentInstance().getExternalContext()
 	 			        .getRequestParameterMap()
-	 			      //  .get("CBformUpd:idForAjax");
+	 			      
 	    		         .get("idForAjax");
 	    		 log.info("RolManager:getListRolResEdit:idForAjax!!!:"+idForAjax);
 	    		
@@ -885,7 +808,7 @@ public class RolManager {
 	    	 log.error("getListRolResEdit:ERROR="+e);
 	         throw e;
 	     }
-	  //  }
+	  
 	    return listRolResEdit;
    }
    public void setListRolResEdit( List<AcAppPage> listRolResEdit ){
@@ -946,8 +869,7 @@ public class RolManager {
  	        log.info("rolManager:getUsrSelectListForView:remoteAudit:"+remoteAudit);
  	        log.info("rolManager:getUsrSelectListForViewt:sessionId:"+sessionId);
  	        
- 	        //if(!remoteAudit.equals("UpdFact")){
- 	 	        
+ 	            
  	       lo=entityManager.createNativeQuery(
 		    	   "select t1.t1_id, t1.t1_login, t1.t1_fio "+
                    "from (select AU_FULL.ID_SRV t1_id, AU_FULL.LOGIN t1_login, "+  
@@ -971,8 +893,7 @@ public class RolManager {
                      ") t1 ")
 		      		.setParameter(1, new Long(sessionId))
 				 .getResultList();
- 	    	//}
- 	         
+ 	    	    
  	       this.usrSelectListForView=new ArrayList<AcUser>();
  	       
  	       for(Object[] objectArray :lo){
@@ -999,26 +920,14 @@ public class RolManager {
    }
    
    public List <BaseTableItem> getAuditItemsListSelect() {
-		  // log.info("getAuditItemsListSelect:01");
+		   
 	
 	    RolContext ac= new RolContext();
 		   if( auditItemsListSelect==null){
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("roleTitle"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("sign"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("roleDescription"));
@@ -1036,39 +945,13 @@ public class RolManager {
 	   if(auditItemsListContext==null){
 		   RolContext ac= new RolContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
    }
-   /*
-   public List<AcApplication> getListArm() throws Exception{
-	    log.info("roleManager:getListArm:01");
-	    try {
-	    	if(listArm==null){
-	    		
-	    		String query="select o from AcApplication o ";
-	    		
-	    		AcUser cau = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
-	    		Long appCode = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode();
-				
-	    		if(!cau.getIsSysAdmin().equals(1L)){
-	    			query+="where o.idArm!="+appCode;
-	    		}
-	    		
-	    		
-	    		
-	    		listArm=entityManager.createQuery(query).getResultList();
-	    		
-	       		//listArm=entityManager.createQuery("select o from AcApplication o").getResultList();
-	    	}
-	     } catch (Exception e) {
-	    	 log.error("roleManager:getListArm:ERROR:"+e);
-	         throw e;
-	     }
-	    return listArm;
-  }*/
+ 
    
    public List<AcApplication> getListArm() throws Exception{
 	    log.info("roleManager:getListArm:01");
@@ -1108,23 +991,8 @@ public class RolManager {
   
    
  /*
-  //используется  armManager.listArm
-   public List<AcApplication> getListArmFull() throws Exception{
-	    log.info("roleManager:getListArmFull:01");
-	    try {
-	    	if(listArmFull==null){
-	    		
-	    		String query="select o from AcApplication o ";
-	    		
-	    		listArmFull=entityManager.createQuery(query).getResultList();
-	    		
-	    	}
-	     } catch (Exception e) {
-	    	 log.error("roleManager:getListArmFull:ERROR:"+e);
-	         throw e;
-	     }
-	    return listArmFull;
- }*/
+  //используется  armMana/ger./listArm
+   pu/blic List<Ac/Application> getLi/stAr/mFull() thro/ws Exce/ption{*/
    
    public List<AcApplication> getListArmUgroup() throws Exception{
 	   
@@ -1191,15 +1059,15 @@ public class RolManager {
  		   }
  		   
  		   
- 		   if(idAlf==null||idAlf.equals("1")){
+ 		   if(idAlf==null||"1".equals(idAlf)){
  			 alfDiap="А-ЕЁ";
- 		   }else if(idAlf.equals("2")){
+ 		   }else if("2".equals(idAlf)){
  			 alfDiap="Ж-Л";
- 		   }else if(idAlf.equals("3")){
+ 		   }else if("3".equals(idAlf)){
  			 alfDiap="М-Т";
- 		   }else if(idAlf.equals("4")){
+ 		   }else if("4".equals(idAlf)){
  			 alfDiap="У-Ш";
- 		   }else if(idAlf.equals("5")){
+ 		   }else if("5".equals(idAlf)){
  			 alfDiap="Щ-Я";
  		   }else{
  			 alfDiap="А-ЕЁ"; 
@@ -1307,9 +1175,7 @@ public class RolManager {
 	    return roleCodeExist;
    }
    
-  /* public boolean getUpdRoleCodeExist() {
-	    return updRoleCodeExist;
-   }*/
+ 
    
    private boolean roleCodeExistCrt(Long idArm, String roleCode) throws Exception {
 		log.info("RoleManager:codeRoleExistCrt:roleCode="+roleCode);
@@ -1379,8 +1245,8 @@ public class RolManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecRol = (ArrayList<String>)
+	   //  forV/iew/(/); //!!!
+	    List<String>  selRecRol = (ArrayList<String>)
 				  Component.getInstance("selRecRol",ScopeType.SESSION);
 	    
 	    if(selRecRol==null){
@@ -1388,9 +1254,9 @@ public class RolManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	   // AcRole ar = searchBean(sessionId);
+	   
 	    AcRole ar = new  AcRole();
-	   // в getAuditList : else{it.setSelected(false);}
+	 
 	    
 	    if(ar!=null){
 	     if(selRecRol.contains(sessionId)){
@@ -1430,11 +1296,11 @@ public class RolManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("reposManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -1443,7 +1309,7 @@ public class RolManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
+	  
 	   	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -1453,12 +1319,12 @@ public class RolManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		log.info("usrManager:evaluteForListFooter!!!");
 	   		    evaluteForListFooter=true;
 	    	}
@@ -1468,7 +1334,7 @@ public class RolManager {
    
    public Boolean getEvaluteForBean() {
 		
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForBean==null){
 		   		evaluteForBean=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -1480,8 +1346,8 @@ public class RolManager {
 			             .get("sessionId");
 			    log.info("usrManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("usrManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -1490,12 +1356,4 @@ public class RolManager {
 		   }
 
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/
+

@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import org.jboss.seam.ScopeType;
-//import org.hibernate.annotations.OnDelete;
-//import org.hibernate.annotations.OnDeleteAction;
 
 
 /**
@@ -78,10 +76,7 @@ public class AcOrganization extends BaseItem implements Serializable {
 	@Column(name="IS_EXTERNAL")
     private Long isExternal;
 	
-	//@OneToMany(mappedBy="acOrganization2", fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
-/*	@OneToMany(mappedBy="acOrganization2", cascade=CascadeType.REMOVE)
-	private Set<AcUser> acUsers;
-*/
+
 	@Transient
 	private List<AcUser> acUsersList;
 	
@@ -156,14 +151,6 @@ public class AcOrganization extends BaseItem implements Serializable {
 	public void setCrtUser(AcUser crtUser) {
 		this.crtUser = crtUser;
 	}
-	/*
-	public AcUser getUpdUser() {
-		return this.updUser;
-	}
-	public void setUpdUser(AcUser updUser) {
-		this.updUser = updUser;
-	}
-	*/
 	public Long getCreator() {
 		return this.creator;
 	}
@@ -207,24 +194,6 @@ public class AcOrganization extends BaseItem implements Serializable {
 		this.acLegalEntityType2 = acLegalEntityType2;
 	}
 	
-	/*
-	public Set <AcUser> getAcUsers() {
-		return this.acUsers;
-	}
-	public void setAcUsers(Set<AcUser> acUsers) {
-		this.acUsers = acUsers;
-	}
-	
-	public List<AcUser> getAcUsersList() {
-		if(this.acUsersList==null){
-			this.acUsersList=new ArrayList<AcUser>(this.acUsers);
-		}
-		return this.acUsersList;
-	}
-	public void setAcUsersList(List<AcUser> acUsersList) {
-		this.acUsersList = acUsersList;
-	}
-	*/
 	public Long getIsExternal() {
 		return this.isExternal;
 	}

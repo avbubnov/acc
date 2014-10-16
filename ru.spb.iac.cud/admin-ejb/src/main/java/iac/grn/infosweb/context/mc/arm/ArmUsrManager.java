@@ -12,8 +12,8 @@ import iac.cud.infosweb.entity.LinkGroupUsersUsersKnlT;
 import iac.grn.infosweb.context.mc.usr.UsrContext;
 import iac.grn.infosweb.context.mc.usr.UsrDataModel;
 import iac.grn.infosweb.context.mc.usr.UsrStateHolder;
-import iac.grn.infosweb.session.audit.export.ActionsMap;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.serviceitems.BaseTableItem;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +53,7 @@ import org.richfaces.model.ExtendedFilterField;
 import org.richfaces.model.FilterField;
 import org.richfaces.model.Modifiable;
 import org.richfaces.model.SortField2;
-//import org.ajax4jsf.model.DataComponentState;
+ 
 
 @Name("armUsrManager")
 public class ArmUsrManager {
@@ -65,13 +65,12 @@ public class ArmUsrManager {
 	
 	private List <BaseTableItem> auditItemsListSelect;
 	
-    private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+    private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
 	private Boolean evaluteForList;
 	private Boolean evaluteForListFooter;  
-	private Boolean evaluteForBean;
 	
 	public List<BaseItem> getAuditList(int firstRow, int numberOfRows){
 		  
@@ -93,11 +92,11 @@ public class ArmUsrManager {
 				  Component.getInstance("armUsrListCached",ScopeType.SESSION);
 		  if(auditList==null){
 			  log.info("armUsrManager:getAuditList:01");
-			 	if((remoteAudit.equals("rowSelectFact")||
-				    remoteAudit.equals("selRecAllFact")||
-				    remoteAudit.equals("clRecAllFact")||
-				    remoteAudit.equals("clSelOneFact")||
-				    remoteAudit.equals("onSelColSaveFact"))&&
+			 	if(("rowSelectFact".equals(remoteAudit)||
+				    "selRecAllFact".equals(remoteAudit)||
+				    "clRecAllFact".equals(remoteAudit)||
+				    "clSelOneFact".equals(remoteAudit)||
+				    "onSelColSaveFact".equals(remoteAudit))&&
 				    armUsrListCached!=null){
 			 		log.info("armUsrManager:getAuditList:02:"+armUsrListCached.size());
 				    	this.auditList=armUsrListCached;
@@ -107,19 +106,7 @@ public class ArmUsrManager {
 				    Contexts.getSessionContext().set("armUsrListCached", this.auditList);
 				    log.info("armUsrManager:getAuditList:03:"+this.auditList.size());
 				}
-			 	/*
-			 	ArrayList<String> selRecUgroupUsr = (ArrayList<String>)
-						  Component.getInstance("selRecUgroupUsr",ScopeType.SESSION);
-			 	if(this.auditList!=null && selRecUgroupUsr!=null) {
-			 		 for(BaseItem it:this.auditList){
-					   if(selRecUgroupUsr.contains(it.getBaseId().toString())){
-						// log.info("invoke:Selected!!!");
-						 it.setSelected(true);
-					   }else{
-						 it.setSelected(false);
-					   }
-					 }
-			      }*/
+			 	
 			 	
 			 	
 			 	try{
@@ -137,17 +124,7 @@ public class ArmUsrManager {
 	   	 	         } 
 			 	
 			 	//альтернативное решение - через createNativeQuery
-			 	/*	//List<BigDecimal> listUsr
-	   	 		   List<String> listUsr=entityManager.createNativeQuery(
-	   	 		    		 "select to_char(laus.UP_USER) from LINK_ADMIN_USER_SYS laus " +
-	   	 		    		 "where laus.UP_SYS = :idArm ")
-	   	 					 .setParameter("idArm", new Long(sessionId))
-	   	 		      		 .getResultList();
-			 	   for(BaseItem user :this.auditList){
-	   	 		    if (listUsr.contains(user.getBaseId().toString())){ 
-	   	 	        	  ((UserItem)user).setUsrChecked(true);
-	   	 			   }
-	   	 	         } */
+			 	
 			 		
 			 	}catch(Exception e){
 			 		log.error("armUsrManager:getUsrAlfList:error:"+e);
@@ -168,10 +145,10 @@ public class ArmUsrManager {
 				 ArmUsrStateHolder armUsrStateHolder = (ArmUsrStateHolder)
 						  Component.getInstance("armUsrStateHolder",ScopeType.SESSION);
 				 
-				 HashMap<String, String> filterMap = armUsrStateHolder.getColumnFilterValues();
+				 Map<String, String> filterMap = armUsrStateHolder.getColumnFilterValues();
 				 String st=null;
 				  
-				 if(type.equals("list")){
+				 if("list".equals(type)){
 					 log.info("armUsrManager:list:01");
 					 
 					 Set<Map.Entry<String, String>> set = armUsrStateHolder.getSortOrders().entrySet();
@@ -188,18 +165,15 @@ public class ArmUsrManager {
 	                 log.info("armUsrManager:invokeLocal:list:orderQuery:"+orderQuery);
 	                 
 	                 if(filterMap!=null){
-	    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-	    	              for (Map.Entry<String, String> me : set_filter) {
-	    	            	  log.info("me.getKey+:"+me.getKey());
-	    	            	  log.info("me.getValue:"+me.getValue());
-	    	   		      
-	    	   		     if(me.getKey().equals("t1_crt_date")){  
-	    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+	    	    		 Set<Map.Entry<String, String>> setFilterArmUsr = filterMap.entrySet();
+	    	              for (Map.Entry<String, String> me : setFilterArmUsr) {
+	    	              
+	    	   		     if("t1_crt_date".equals(me.getKey())){  
+	    	        	   
 	    	        	   //делаем фильтр на начало  
 	    	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
 	    	    	     }else{
-	    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-	    	        		//делаем фильтр на начало
+	    	        			//делаем фильтр на начало
 	    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
 	    	        	  }
 	    	              }
@@ -281,31 +255,31 @@ public class ArmUsrManager {
 	               for(Object[] objectArray :lo){
 	            	   try{
 	            	     ui= new UserItem(
-	            			   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-	            			   (objectArray[1]!=null?objectArray[1].toString():""),
-	            			   (objectArray[2]!=null?objectArray[2].toString():""),
-	            			   (objectArray[3]!=null?objectArray[3].toString():""),
-	            			   (objectArray[4]!=null?objectArray[4].toString():""),
-	            			   (objectArray[5]!=null?objectArray[5].toString():""),
-	            			   (objectArray[6]!=null?objectArray[6].toString():""),
-	            			   (objectArray[7]!=null?objectArray[7].toString():""),
-	            			   (objectArray[8]!=null?objectArray[8].toString():""),
-	            			   (objectArray[9]!=null?objectArray[9].toString():""),
-	            			   (objectArray[10]!=null?objectArray[10].toString():""),
-	            			   (objectArray[11]!=null?objectArray[11].toString():""),
-	            			   (objectArray[12]!=null?objectArray[12].toString():""),
-	            			   (objectArray[13]!=null?objectArray[13].toString():""),
-	            			   (objectArray[14]!=null?objectArray[14].toString():""),
-	            			   (objectArray[15]!=null?new Long(objectArray[15].toString()):null),
-	            			   (objectArray[16]!=null?df.format((Date)objectArray[16]) :""),
-	            			   (objectArray[17]!=null?objectArray[17].toString():""),
-	            			   (objectArray[18]!=null?objectArray[18].toString():""),
-	            			   (objectArray[19]!=null?objectArray[19].toString():""),
-	            			   (objectArray[20]!=null?objectArray[20].toString():""),
-	            			   (objectArray[21]!=null?objectArray[21].toString():""),
-	            			   (objectArray[22]!=null?objectArray[22].toString():""),
-	            			   (objectArray[23]!=null?objectArray[23].toString():""),
-	            			   (objectArray[24]!=null?new Long(objectArray[24].toString()):null)
+	            			  objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+	            			  objectArray[1]!=null?objectArray[1].toString():"",
+	            			  objectArray[2]!=null?objectArray[2].toString():"",
+	            			  objectArray[3]!=null?objectArray[3].toString():"",
+	            			  objectArray[4]!=null?objectArray[4].toString():"",
+	            			  objectArray[5]!=null?objectArray[5].toString():"",
+	            			  objectArray[6]!=null?objectArray[6].toString():"",
+	            			  objectArray[7]!=null?objectArray[7].toString():"",
+	            			  objectArray[8]!=null?objectArray[8].toString():"",
+	            			  objectArray[9]!=null?objectArray[9].toString():"",
+	            			  objectArray[10]!=null?objectArray[10].toString():"",
+	            			  objectArray[11]!=null?objectArray[11].toString():"",
+	            			  objectArray[12]!=null?objectArray[12].toString():"",
+	            			  objectArray[13]!=null?objectArray[13].toString():"",
+	            			  objectArray[14]!=null?objectArray[14].toString():"",
+	            			  objectArray[15]!=null?new Long(objectArray[15].toString()):null,
+	            			  objectArray[16]!=null?df.format((Date)objectArray[16]) :"",
+	            			  objectArray[17]!=null?objectArray[17].toString():"",
+	            			  objectArray[18]!=null?objectArray[18].toString():"",
+	            			  objectArray[19]!=null?objectArray[19].toString():"",
+	            			  objectArray[20]!=null?objectArray[20].toString():"",
+	            			  objectArray[21]!=null?objectArray[21].toString():"",
+	            			  objectArray[22]!=null?objectArray[22].toString():"",
+	            			  objectArray[23]!=null?objectArray[23].toString():"",
+	            			  objectArray[24]!=null?new Long(objectArray[24].toString()):null
 	            			   );
 	            	     auditList.add(ui);
 	            	   }catch(Exception e1){
@@ -315,24 +289,17 @@ public class ArmUsrManager {
 	               
 	             log.info("armUsrManager:invokeLocal:list:02");
 	             
-				 } else if(type.equals("count")){
+				 } else if("count".equals(type)){
 					 log.info("armUsrManager:count:01");
 					 
 	                 
 	                 if(filterMap!=null){
-	    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-	    	              for (Map.Entry<String, String> me : set_filter) {
-	    	            	  log.info("me.getKey+:"+me.getKey());
-	    	            	  log.info("me.getValue:"+me.getValue());
-	    	   		      
-	    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
-	    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-	    	        	//   }else{
-	    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-	    	        		//делаем фильтр на начало
+	    	    		 Set<Map.Entry<String, String>> setFilterArmUsr = filterMap.entrySet();
+	    	              for (Map.Entry<String, String> me : setFilterArmUsr) {
+	    	              
+	    	   		   		//делаем фильтр на начало
 	    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-	    	        	 //  }
-	    	              }
+	    	               }
 	    	    	   }
 					 
 					 
@@ -396,7 +363,7 @@ public class ArmUsrManager {
 	                 
 	                 
 	               log.info("armUsrManager:invokeLocal:count:02:"+auditCount);
-	           	 } else if(type.equals("bean")){
+	           	 } else if("bean".equals(type)){
 					 
 				 }
 			}catch(Exception e){
@@ -412,7 +379,7 @@ public class ArmUsrManager {
 			   invokeLocal("count",0,0,null);
 			  
 			   return auditCount;
-			  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+			  
 		   }	
 		
 		 public void updArmUserAlf(){
@@ -438,8 +405,8 @@ public class ArmUsrManager {
 				   
 				   List<LinkAdminUserSys> oldLinkList = aum.getLinkAdminUserSys();
 				   
-				  // log.info("armUsrManager:updArmUserAlf:size1:"+oldLinkList.size());
-				  // log.info("armUsrManager:updArmUserAlf:size2:"+(this.auditList!=null?this.auditList.size():"is null"));
+				   
+				   
 				   
 				   for(BaseItem user:this.auditList){
 					  log.info("ugroupManager:updArmUserAlf:Login:"+((UserItem)user).getLogin());
@@ -486,7 +453,7 @@ public class ArmUsrManager {
 			    	 
 				  //аудит!!!
 				    ArmManager armManager = (ArmManager)Component.getInstance("armManager", ScopeType.EVENT);
-					armManager.audit(ResourcesMap.ROLE, ActionsMap.UPDATE_USER); 
+					armManager.audit(ResourcesMap.IS, ActionsMap.UPDATE_USER); 
 			    	
 			    	
 			    	
@@ -497,7 +464,7 @@ public class ArmUsrManager {
 		 
 		 
 	public List <BaseTableItem> getAuditItemsListSelect() {
-		  // log.info("getAuditItemsListSelect:01");
+		   
 	
 	    UsrContext ac= new UsrContext();
 		   if( auditItemsListSelect==null){
@@ -509,8 +476,8 @@ public class ArmUsrManager {
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("fio"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("login"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
-			  // auditItemsListSelect.add(ac.getAuditItemsMap().get("crtDate"));
-			 //  auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
+			  
+			 
 			   
 			   
 				   }
@@ -533,11 +500,11 @@ public class ArmUsrManager {
 	     	
 	    	if(remoteAudit!=null&&
 	    	 
-	    	   !remoteAudit.equals("OpenCrtFact")&&	
-	    	   !remoteAudit.equals("OpenUpdFact")&&
-	    	   !remoteAudit.equals("OpenDelFact")&&
-	   	       !remoteAudit.equals("onSelColFact")&&
-	   	       !remoteAudit.equals("refreshPdFact")){
+	    	   !"OpenCrtFact".equals(remoteAudit)&&	
+	    	   !"OpenUpdFact".equals(remoteAudit)&&
+	    	   !"OpenDelFact".equals(remoteAudit)&&
+	   	       !"onSelColFact".equals(remoteAudit)&&
+	   	       !"refreshPdFact".equals(remoteAudit)){
 	    		log.info("armUsrManager:evaluteForList!!!");
 	   		    evaluteForList=true;
 	    	}
@@ -546,7 +513,7 @@ public class ArmUsrManager {
 	   }
 	   public Boolean getEvaluteForListFooter() {
 			
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForListFooter==null){
 		   		evaluteForListFooter=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -556,12 +523,12 @@ public class ArmUsrManager {
 		     
 		    	if(getEvaluteForList()&&
 		    	   //new-1-	
-		    	   !remoteAudit.equals("protBeanWord")&&	
+		    	   !"protBeanWord".equals(remoteAudit)&&	
 		    	   //new-2-	
-		   	       !remoteAudit.equals("selRecAllFact")&&
-		   	       !remoteAudit.equals("clRecAllFact")&&
-		   	      // !remoteAudit.equals("clSelOneFact")&&
-		   	       !remoteAudit.equals("onSelColSaveFact")){
+		   	       !"selRecAllFact".equals(remoteAudit)&&
+		   	       !"clRecAllFact".equals(remoteAudit)&&
+		   	      // !remoteAudit equals "clSelOneFact"
+		   	       !"onSelColSaveFact".equals(remoteAudit)){
 		    		log.info("armUsrManager:evaluteForListFooter!!!");
 		   		    evaluteForListFooter=true;
 		    	}

@@ -4,7 +4,7 @@ import iac.cud.infosweb.dataitems.BaseItem;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
@@ -22,46 +22,10 @@ public class AFuncDataProvider implements Serializable{
 	@In(create=true)
 	private AFuncManager aFuncManager;
 
-	private List<BaseItem> allItems = null;
-	
-	/*	private synchronized void initData() {
-		log.info("AuditDataProvider:initData");
-		allItems=auditManager.getAuditList();
-	}
-
-	public List<VAuditReport> getAllItems() {
-		log.info("AuditDataProvider:getAllItems");
-		if (allItems!=null && allItems.size()>0) {
-			return allItems;
-		} else {
-			initData();
-			return allItems;
-		}
-	}
-	public VAuditReport getAuctionItemByPk(VAuditReportPK pk) {
-		for (VAuditReport item:getAllItems()) {
-			if (item.getPk().equals(pk)) {
-				return item;
-			}
-		}
-		throw new RuntimeException("Auction Item pk="+pk.toString()+" not found");
-	}
-	public boolean hasAuctionItemByPk(VAuditReportPK pk) {
-		for (VAuditReport item:getAllItems()) {
-			if (item.getPk().equals(pk)) {
-				return true;
-			}
-		}
-		return false;
-		
-	}*/
 	
 	public List<BaseItem> getItemsByrange(int firstRow, int numberOfRows, String sortField, 
 			                                   boolean ascending) {
 		List<BaseItem> ret = new ArrayList<BaseItem>();
-	/*	for (int counter=0; counter<numberOfRows; counter++) {
-			ret.add(getAllItems().get(startPk.intValue()+counter));
-		}*/
 		log.info("AuditDataProvider:getItemsByrange");
 		ret=aFuncManager.getAuditList(firstRow, numberOfRows);
 		return ret;

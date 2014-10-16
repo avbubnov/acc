@@ -31,7 +31,7 @@ import test.ejb.HomeBean;
 @RequestScoped
 public class UserForgotBean implements Serializable {
  
-	final static Logger logger = LoggerFactory.getLogger(UserForgotBean.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserForgotBean.class);
 	
 	private static final long serialVersionUID = 1L;
 	   
@@ -42,7 +42,6 @@ public class UserForgotBean implements Serializable {
  
     private String userEmail;
     
-    private static final String userEmailReg = "userEmailReg";
     private static final String userEmailsList = "userEmailsList";
     
     private String newPass;
@@ -52,20 +51,20 @@ public class UserForgotBean implements Serializable {
         
     	try{
         
-    	logger.info("UserForgotBean:action:01");
+    	LOGGER.debug("UserForgotBean:action:01");
         
     	 String userNewPassword = newPass;
          
          String userReNewPassword = reNewPass;
 		 
-         logger.info("UserForgotBean:changePassword:03:"+userNewPassword);
-         logger.info("UserForgotBean:changePassword:04:"+userReNewPassword);
+         LOGGER.debug("UserForgotBean:changePassword:03:"+userNewPassword);
+         LOGGER.debug("UserForgotBean:changePassword:04:"+userReNewPassword);
          
          
          if(userNewPassword==null||userNewPassword.isEmpty()||
        	  userReNewPassword==null||userReNewPassword.isEmpty()){
        	  
-       	   logger.info("UserForgotBean:changePassword:05");
+       	   LOGGER.debug("UserForgotBean:changePassword:05");
        	  
        	  FacesContext.getCurrentInstance().addMessage(null, 
 	        			new FacesMessage("ќб€з€тельны все пол€!"));
@@ -77,7 +76,7 @@ public class UserForgotBean implements Serializable {
        
          if(!latin){
        	  
-       	  logger.info("UserForgotBean:changePassword:06");
+       	  LOGGER.debug("UserForgotBean:changePassword:06");
        	  
        	  FacesContext.getCurrentInstance().addMessage(null, 
 	        			new FacesMessage("¬ пароле не допустима кириллица!"));
@@ -86,17 +85,16 @@ public class UserForgotBean implements Serializable {
          
          if(!userNewPassword.equals(userReNewPassword)){
        	  
-       	  logger.info("UserForgotBean:changePassword:07");
+       	  LOGGER.debug("UserForgotBean:changePassword:07");
        	  
 		      	FacesContext.getCurrentInstance().addMessage(null, 
 	        			new FacesMessage("ѕароли не совпадают!"));
-	        	//FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-		 }else{
+	   	 }else{
          
 			HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 			String userLogin = (String) hs.getAttribute(CUDUserConsoleConstants.userLoginForgot);
 				
-			logger.info("UserForgotBean:changePassword:08:"+userLogin);
+			LOGGER.debug("UserForgotBean:changePassword:08:"+userLogin);
 			
 			userForgotEJB.changePassword(userLogin, userNewPassword);
 			
@@ -110,33 +108,10 @@ public class UserForgotBean implements Serializable {
 							+ "/welcome.xhtml");
          }
 		 
-         logger.info("UserForgotBean:changePassword:09");
-       /*  
-        HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
-		String email = (String) hs.getAttribute(CUDUserConsoleConstants.userEmailReg);
-	
-        
-        JournAppUserBssT t1 = new JournAppUserBssT();
-        
-        t1.setSurnameUser(userFam);
-        t1.setNameUser(userName);
- 	    t1.setPatronymicUser(userOtch);
- 	   // t1.setEmailUser(userEmail);
- 	    t1.setEmailUser(email);
- 	    t1.setPhoneUser(userPhone);
- 	    t1.setNameOrg(orgName);
- 	    t1.setNameDepartament(depName);
- 	    t1.setPositionUser(userPos);
-        
-        userRegEJB.save(t1);
+         LOGGER.debug("UserForgotBean:changePassword:09");
       
-        
-        //return "home?faces-redirect=true";
-        FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
-        		.getContextPath()+"/context/registr/reg_user_step2_message.xhtml");
-       */
     	}catch(Exception e){
-    		logger.error("UserForgotBean:action:error:"+e);
+    		LOGGER.error("UserForgotBean:action:error:"+e);
     	}
    }
 
@@ -147,12 +122,12 @@ public class UserForgotBean implements Serializable {
 	   //2) пользователь уточнил свой email (this.userEmail = уточнЄнный email)
      try{
         
-    	logger.info("UserForgotBean:step1:01");
+    	LOGGER.debug("UserForgotBean:step1:01");
         
     	HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
  		
-    	//this.userLogin!=null при шаге1
-    	//this.userLogin==null при уточнении пользователем email
+    	//th/is.use/rLogin!=null при шаге1
+    	//th/is.us/erLogin==null при уточнении пользователем email
     	String userLoginFact=(this.userLogin!=null?this.userLogin:(String)hs.getAttribute(CUDUserConsoleConstants.userLoginForgot));
     	
     	HttpServletRequest request = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
@@ -164,7 +139,7 @@ public class UserForgotBean implements Serializable {
     	if(emails==null||emails.isEmpty()){
     		//у пользовател€ нет прикреплЄнных email
     		
-    		logger.info("UserForgotBean:step1:02");
+    		LOGGER.debug("UserForgotBean:step1:02");
     		
     		  FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
     	        		.getContextPath()+"/context/forgot/pass_step1_message_not_email.xhtml");
@@ -173,10 +148,8 @@ public class UserForgotBean implements Serializable {
     		//у пользовател€ не один email
     		//даЄм пользователю выбрать email
     		
-    		logger.info("UserForgotBean:step1:03:"+emails.size());
+    		LOGGER.debug("UserForgotBean:step1:03:"+emails.size());
     		
-    		//FacesContext.getCurrentInstance().getExternalContext().getFlash()
-            //.put(userEmailsList, emails);
     		
     		 hs.setAttribute(userEmailsList, emails);
     		 
@@ -189,19 +162,15 @@ public class UserForgotBean implements Serializable {
     	}else {
     		//нормальный вариант - один email
     		
-    		logger.info("UserForgotBean:step1:04");
+    		LOGGER.debug("UserForgotBean:step1:04");
     		
-    	//FacesContext.getCurrentInstance().getExternalContext().getFlash()
-       //      .put(userEmailReg, emails.get(0));
-        
-        //return "home?faces-redirect=true";
-        FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
+    	    FacesContext.getCurrentInstance().getExternalContext().redirect(((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
         		.getContextPath()+"/context/forgot/pass_step1_message.xhtml");
    
     	}
         
       }catch(BaseError be){
- 		logger.error("UserForgotBean:step1:berror:"+be);
+ 		LOGGER.error("UserForgotBean:step1:berror:"+be);
  		
  		if(CodesErrors.NOT_FOUND.equals(be.getCodeError())){
  			//пользователь не определЄн
@@ -211,13 +180,13 @@ public class UserForgotBean implements Serializable {
  	        			new FacesMessage("ѕользователь не определЄн!"));
  	      	
  			 }catch(Exception e){
- 	    		logger.error("UserForgotBean:step1:error2:"+e);
+ 	    		LOGGER.error("UserForgotBean:step1:error2:"+e);
  	          }
  			
  		}
  		
  	  }catch(Exception e){
-    		logger.error("UserForgotBean:step1:error:"+e);
+    		LOGGER.error("UserForgotBean:step1:error:"+e);
       }
      }
 

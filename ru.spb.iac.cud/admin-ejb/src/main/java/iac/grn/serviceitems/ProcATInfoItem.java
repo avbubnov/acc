@@ -4,12 +4,5 @@ import java.util.Date;
 
 public class ProcATInfoItem extends ProcInfoItem{
 
- /* 	private Long confPeriod;
-	
-	public Long getConfPeriod(){
-		return this.confPeriod;
-	}
-	public void setConfPeriod(Long confPeriod){
-		this.confPeriod=confPeriod;
-	}*/
+ 
 }

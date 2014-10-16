@@ -1,20 +1,19 @@
 package iac.grn.infosweb.session.audit.export;
 
-import iac.cud.authmodule.dataitem.AuthItem;
-import iac.cud.infosweb.dataitems.NavigItem;
-import iac.cud.infosweb.entity.AcAppPage;
-import iac.cud.infosweb.entity.AcUser;
-import iac.cud.infosweb.ws.AccessServiceClient;
+
 import iac.cud.infosweb.ws.AuditServiceClient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.navig.LinksMap;
 
 import org.jboss.seam.Component;
@@ -57,9 +56,9 @@ public class AuditExportManager {
 		    	
 		    	AccessServiceClient asc = (AccessServiceClient)Component.getInstance("asClient",ScopeType.EVENT);
 		    	
-		    //	AuditExportData auditExportData = (AuditExportData)Component.getInstance("auditExportData",ScopeType.SESSION);
+		    
 
-		    //	List<AuditFunction> funcList = auditExportData.getFuncList();
+		    
 		    	
 		    	log.info("auditExportManager:export:funcList:"+(funcList!=null?funcList.size():"null"));
 		    	log.info("auditExportManager:export:tokenID:"+tokenID);
@@ -89,24 +88,29 @@ public class AuditExportManager {
 		    	
 		    	AuditServiceClient asc = (AuditServiceClient)Component.getInstance("auditServicesClient",ScopeType.EVENT);
 		    	
-		    //	AuditExportData auditExportData = (AuditExportData)Component.getInstance("auditExportData",ScopeType.SESSION);
+		    
 
-		    //	List<AuditFunction> funcList = auditExportData.getFuncList();
+		    
 		    	
 		    	log.info("auditExportManager:export:funcList:"+(funcList!=null?funcList.size():"null"));
 		    	log.info("auditExportManager:export:uid:"+uid);
 		    	
-		    	if(funcList!=null&&!funcList.isEmpty()){
-		    		asc.audit(uid, funcList); 
+		    	if(funcList==null){
+		    		funcList = new ArrayList<AuditFunction>();
 		     	}
+		    	//добавление logout
+		    	AuditFunction func = new AuditFunction();
+				func.setDateFunction(new Date());
+				func.setCodeFunction(ResourcesMap.USER.getCode()+":"+ActionsMap.LOGOUT_ADM.getCode());
+		    	funcList.add(func);
+		    	
+		        asc.audit(uid, funcList);
 		    	
 		      } catch (Exception e) {
 		    	 log.error("auditExportManager:export:ERROR:"+e);
 		    	 log.trace(e);
 		    	 
-		    	 e.printStackTrace(System.out);
-		    	
-		         throw e;
+		    	  throw e;
 		   }
 		    
 		    log.info("auditExportManager:export:02");

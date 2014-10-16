@@ -37,10 +37,10 @@ import ru.spb.iac.pl.sp.key.KeyStoreKeyManager;
 public class CUDSAML20CommonTokenRoleAttributeProvider implements
 		SAML20TokenAttributeProvider {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDSAML20CommonTokenRoleAttributeProvider.class);
 	/**
 	 * The name of the principal in JBoss that is expected to include user roles
@@ -81,13 +81,13 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 	public AttributeStatementType getAttributeStatement(String systemCode,
 			String userCode, String authType, String lifetimeMs) {
 
-		loggerslf4j.info("getAttributeStatement:01:" + systemCode);
-		loggerslf4j.info("getAttributeStatement:02:" + userCode);
+		LOGGERSLF4J.debug("getAttributeStatement:01:" + systemCode);
+		LOGGERSLF4J.debug("getAttributeStatement:02:" + userCode);
 
 		List<String> roles = new ArrayList<String>();
 
 		if (systemCode == null) {
-			logger.trace("No authentication Subject found, cannot provide any user roles!");
+			LOGGER.trace("No authentication Subject found, cannot provide any user roles!");
 
 			return null;
 		} else {
@@ -147,66 +147,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 						 * при получении токена на систему // а если первый
 						 * вызов - токен на пользователя, то //signingKeyPass и
 						 * signingAlias будут пустыми!!!
-						 * 
-						 * // KeyStoreKeyManager kskm = new
-						 * KeyStoreKeyManager(); // в KeyStoreKeyManager
-						 * KeyStore ks - static // поэтому ks уже
-						 * инициализирован нужными параметрами //а также важно,
-						 * что static: // private static char[] signingKeyPass;
-						 * // private static String signingAlias;
-						 * 
-						 * // KeyPair keyPair = kskm.getSigningKeyPair(); /
-						 * PrivateKey privateKey = keyPair.getPrivate() ;
-						 * 
-						 * 
-						 * 
-						 * //надо переделать!!!
-						 * 
-						 * char[] signingKeyPass="Access_Control".toCharArray();
-						 * String signingAlias="cudvm_export";
-						 * 
-						 * KeyStore ks = KeyStore.getInstance("HDImageStore",
-						 * "JCP"); ks.load(null, null);
-						 * 
-						 * PrivateKey privateKey =
-						 * (PrivateKey)ks.getKey(signingAlias, signingKeyPass);
-						 * 
-						 * 
-						 * String lifetime = lifetimeMs;
-						 * 
-						 * loggerslf4j.info("getAttributeStatement:01+:"+new
-						 * Date(new Long(lifetime)));
-						 * 
-						 * 
-						 * String userUID = userAttributes.get("USER_UID");
-						 * 
-						 * StringBuilder sb = new StringBuilder();
-						 * 
-						 * sb.append(userUID).append("_").append(lifetime);
-						 * 
-						 * byte[] sigValue =
-						 * GOSTSignatureUtil.sign(sb.toString(), privateKey);
-						 * 
-						 * String base64SigValue = Base64.encodeBytes(sigValue,
-						 * Base64.DONT_BREAK_LINES);
-						 * 
-						 * String tokenID = sb.toString()+"_"+base64SigValue;
-						 * 
-						 * String base64tokenID =
-						 * Base64.encodeBytes(tokenID.getBytes("utf-8"),
-						 * Base64.DONT_BREAK_LINES);
-						 * 
-						 * userAttributes.put("TOKEN_ID", base64tokenID);
-						 * 
-						 * loggerslf4j.info("getAttributeStatement:01:"+tokenID);
-						 * loggerslf4j
-						 * .info("getAttributeStatement:02:"+base64tokenID);
-						 * 
-						 * 
-						 * 
-						 * }catch(Exception e){
-						 * loggerslf4j.error("getAttributeStatement:tokenID:error:"
-						 * +e); }
+						
 						 */
 
 					}
@@ -216,9 +157,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 					while (it.hasNext()) {
 						Map.Entry<String, String> pairs = (Map.Entry<String, String>) it
 								.next();
-						// loggerslf4j.info(pairs.getKey() + " = " +
-						// pairs.getValue());
-
+					
 						AttributeType fioAttribute = new AttributeType(
 								pairs.getKey());
 						attributeStatement.addAttribute(new ASTChoiceType(
@@ -229,11 +168,11 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 				}
 
 			} catch (Exception e) {
-				loggerslf4j.error("getAttributeStatement:error:" + e);
+				LOGGERSLF4J.error("getAttributeStatement:error:", e);
 
 			}
 
-			// logger.trace("Returning an AttributeStatement with a [" +
+			// LOGGER.trace("Returning an AttributeStatement with a [" +
 			// tokenRoleAttributeName + "] attribute containing: " +
 			// rolesAttribute.getAttributeValue().toString());
 			return attributeStatement;
@@ -251,16 +190,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 			// так как инизиализация происходит при получении токена на систему
 			// а если первый вызов - токен на пользователя, то
 			// signingKeyPass и signingAlias будут пустыми!!!
-			/*
-			 * KeyStoreKeyManager kskm = new KeyStoreKeyManager(); // в
-			 * KeyStoreKeyManager KeyStore ks - static // поэтому ks уже
-			 * инициализирован нужными параметрами //а также важно, что static:
-			 * // private static char[] signingKeyPass; // private static String
-			 * signingAlias;
-			 * 
-			 * KeyPair keyPair = kskm.getSigningKeyPair(); PrivateKey privateKey
-			 * = keyPair.getPrivate() ;
-			 */
+			
 
 			// надо переделать!!!
 
@@ -277,7 +207,7 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 					signingKeyPass);
 			}
 			
-			loggerslf4j.info("tokenIDCreate:01+:"
+			LOGGERSLF4J.debug("tokenIDCreate:01+:"
 					+ new Date(new Long(lifetime)));
 
 			StringBuilder sb = new StringBuilder();
@@ -294,17 +224,17 @@ public class CUDSAML20CommonTokenRoleAttributeProvider implements
 			base64tokenID = Base64.encodeBytes(tokenID.getBytes("utf-8"),
 					Base64.DONT_BREAK_LINES);
 
-			loggerslf4j.info("tokenIDCreate:01:" + tokenID);
-			loggerslf4j.info("tokenIDCreate:02+:" + base64tokenID);
+			LOGGERSLF4J.debug("tokenIDCreate:01:" + tokenID);
+			LOGGERSLF4J.debug("tokenIDCreate:02+:" + base64tokenID);
 
 			
 			(new ContextIDPAccessManager())
 			   .saveTokenID(base64tokenID, userUID);
 			
-			loggerslf4j.info("tokenIDCreate:03");
+			LOGGERSLF4J.debug("tokenIDCreate:03");
 			
 		} catch (Exception e) {
-			loggerslf4j.error("tokenIDCreate:tokenID:error:" + e);
+			LOGGERSLF4J.error("tokenIDCreate:tokenID:error:", e);
 		}
 
 		return base64tokenID;

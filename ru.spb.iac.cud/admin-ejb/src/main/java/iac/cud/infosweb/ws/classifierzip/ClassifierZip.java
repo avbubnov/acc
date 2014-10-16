@@ -14,6 +14,8 @@ import javax.xml.ws.ResponseWrapper;
  * Generated source version: 2.6.4
  * 
  */
+
+// RSID: 20174
 @WebService(targetNamespace = "http://ws.iac.spb.ru/ClassifierZip", name = "ClassifierZip")
 @XmlSeeAlso({ObjectFactory.class, iac.cud.infosweb.ws.classif.common.ObjectFactory.class})
 public interface ClassifierZip {

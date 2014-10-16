@@ -1,6 +1,6 @@
 package iac.grn.serviceitems;
 
-//import iac.grn.ramodule._entity.VAuditReportPK;
+ 
 
 public class BaseTableItem {
 
@@ -118,5 +118,12 @@ public class BaseTableItem {
 		}
 		BaseTableItem other = (BaseTableItem) o;
 		return this.itemField.equals(other.itemField);
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.itemField.hashCode()
+			 ^ this.itemField.hashCode()
+			;
 	}
 }

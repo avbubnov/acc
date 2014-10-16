@@ -10,7 +10,10 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.transaction.Transaction;
-//import org.picketlink.common.util.Base64;
+ 
+
+
+
 
 import iac.cud.infosweb.dataitems.BaseItem;
 import iac.cud.infosweb.dataitems.SystemCertItem;
@@ -20,9 +23,9 @@ import iac.cud.infosweb.entity.AcUser;
 import iac.grn.infosweb.context.mc.cpar.CparManager;
 import iac.grn.infosweb.context.mc.rol.RolStateHolder;
 import iac.grn.infosweb.context.mc.usr.TIDEncodePLBase64;
-import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.audit.export.AuditExportData;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.cache.CacheManager;
 import iac.grn.infosweb.session.navig.LinksMap;
 
@@ -40,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jboss.seam.Component;
+
 import javax.faces.context.FacesContext;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -47,8 +51,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
 
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
+
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -69,12 +73,11 @@ public class ArmManager {
      * Экспортируемая сущности 
      * для отображения
      */
-	//private BaseItem usrBean;             !!! Проверить !!!
 	
 	private String dellMessage=null;
 	private int delNot=0;
 	
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -99,23 +102,22 @@ public class ArmManager {
 	  String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
 	             .getRequestParameterMap()
 	             .get("remoteAudit");
-	   log.info("auditManager:getAuditList:remoteAudit:"+remoteAudit);
+	   log.info("ArmManager:auditManager:getAuditList:remoteAudit:"+remoteAudit);
 	  
 	  
-	  log.info("getAuditList:firstRow:"+firstRow);
-	  log.info("getAuditList:numberOfRows:"+numberOfRows);
+	  log.info("ArmManager:getAuditList:firstRow:"+firstRow);
+	  log.info("ArmManager:getAuditList:numberOfRows:"+numberOfRows);
 	  
 	  List<BaseItem> armListCached = (List<BaseItem>)
 			  Component.getInstance("armListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    armListCached!=null){
-		 	//	log.info("getAuditList:02:"+orgListCached.size());
 			    	this.auditList=armListCached;
 			}else{
 				log.info("getAuditList:03");
@@ -124,12 +126,12 @@ public class ArmManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecArm = (ArrayList<String>)
+		 	List<String>  selRecArm = (ArrayList<String>)
 					  Component.getInstance("selRecArm",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecArm!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecArm.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					 it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -151,79 +153,55 @@ public class ArmManager {
 			 ArmStateHolder orgStateHolder = (ArmStateHolder)
 					  Component.getInstance("armStateHolder",ScopeType.SESSION);
 			 
-			 HashMap<String, String> filterMap = orgStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = orgStateHolder.getColumnFilterValues();
 			 String st=null;
 			 
-			 if(type.equals("list")){
-				 log.info("invokeLocal:list:01");
+			 if("list".equals(type)){
+				 log.info("ArmManager:invokeLocal:list:01");
 				 
 				
 				 Set<Map.Entry<String, String>> set = orgStateHolder.getSortOrders().entrySet();
                  for (Map.Entry<String, String> me : set) {
-      		       log.info("me.getKey+:"+me.getKey());
-      		       log.info("me.getValue:"+me.getValue());
-      		       
+      		        
       		       if(orderQuery==null){
       		    	 orderQuery="order by "+me.getKey()+" "+me.getValue();
       		       }else{
       		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
       		       }
       		     }
-                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 log.info("ArmManager:invokeLocal:list:orderQuery:"+orderQuery);
                 
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	            
-    	            	/*if(me.getKey().equals("dateAction")){  
-    	    	        	// st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	    	   		     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
-    	    	    	}else{
-    	   		       if(me.getKey().equals("acApplication")){  
-    	   		    	  st=(st!=null?st+" and " :" ")+me.getKey()+"='"+me.getValue()+"' ";
-    	    	       }else{*/
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
+    	    		 Set<Map.Entry<String, String>> setFilterArmManager = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterArmManager) {
+    	            	      		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	             //  }
+    	           
     	              }
     	    	   }
-                 log.info("invokeLocal:list:filterQuery:"+st);
+                 log.info("Arm:invokeLocal:list:filterQuery:"+st);
                  
-				// auditList = new ArrayList<BaseItem>();
 				 auditList = entityManager.createQuery("select o from AcApplication o "+
 						 (st!=null ? " where "+st :"")+
 						 (orderQuery!=null ? orderQuery+", o.idArm " : " order by o.idArm "))
                        .setFirstResult(firstRow)
                        .setMaxResults(numberOfRows)
                        .getResultList();
-             log.info("invokeLocal:list:02");
+             log.info("Arm:invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
-				 log.info("IHReposList:count:01");
+			 } else if("count".equals(type)){
+				 log.info("ArmManagerList:count:01");
 				 
 				 if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	            
-    	            	/*if(me.getKey().equals("dateAction")){  
-    	    	        	// st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	    	   		     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
-    	    	    	}else{
-    	   		       if(me.getKey().equals("acApplication")){  
-    	   		    	  st=(st!=null?st+" and " :" ")+me.getKey()+"='"+me.getValue()+"' ";
-    	    	       }else{*/
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
+    	    		 Set<Map.Entry<String, String>> setFilterArmManager = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterArmManager) {
+    	            	
+    	            		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	             //  }
+    	         
     	              }
     	    	   }
-                 log.info("invokeLocal:count:filterQuery:"+st);
+                 log.info("ArmManager:invokeLocal:count:filterQuery:"+st);
 				 
 				 
 				 auditCount = (Long)entityManager.createQuery(
@@ -232,56 +210,32 @@ public class ArmManager {
 				         (st!=null ? " where "+st :""))
 		                .getSingleResult();
 				 
-               log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
-				 
-			 }
+               log.info("ArmManager:invokeLocal:count:02:"+auditCount);
+           	 } 
 		}catch(Exception e){
-			  log.error("invokeLocal:error:"+e);
+			  log.error("ArmManager:invokeLocal:error:"+e);
 			  evaluteForList=false;
 			  FacesMessages.instance().add("Ошибка!");
 		}
 	}
-	  /**
-	  * Подготовка сущности Аудит УФМС 
-	  * для последующих операций просмотра
-	  */
+	 
+	
    public void forView(String modelType) {
-	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+	   
+	   String  armId = FacesContext.getCurrentInstance().getExternalContext()
 		        .getRequestParameterMap()
 		        .get("sessionId");
-	  log.info("forView:sessionId:"+sessionId);
+	   
+	  log.info("forView:armId:"+armId);
 	  log.info("forView:modelType:"+modelType);
-	  if(sessionId!=null /*&& usrBean==null*/){
+	  if(armId!=null /*&& usrBean==null*/){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
-			if(modelType.equals("armDataModel")){
-				//service=ServiceReestr.Repos;
-			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
-		 AcApplication ar = searchBean(sessionId);
+			
+		 AcApplication ar = searchBean(armId);
 		 Contexts.getEventContext().set("armBean", ar);
 		 
 		 forViewCert();
@@ -296,7 +250,7 @@ public class ArmManager {
 		if(armListCached!=null){
 			for(AcApplication it : armListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -312,7 +266,7 @@ public class ArmManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
+	  
    }
    
    public void addArm(){
@@ -329,8 +283,6 @@ public class ArmManager {
 		  
 		   AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION); 
 			 
-		   CparManager cparManager = (CparManager) Component.getInstance("cparManager",ScopeType.CONVERSATION); 
-			   
 		   
 		 if((au.getAllowedSys()!=null && !au.isAllowedReestr("004", "2"))||!armCodeExistCrt(armBeanCrt.getCode().trim())){
 		   
@@ -342,6 +294,8 @@ public class ArmManager {
 	    		  
 	    		  armBeanCrt.setCreator(au.getIdUser());
 	    		  addArmApp(armBeanCrt, commentApp);
+	    		  
+	    		  audit(ResourcesMap.APP_SYS, ActionsMap.CREATE) ;
 	    		  
 	    	  }else{  
 	    		  
@@ -430,8 +384,7 @@ public class ArmManager {
 	   try {
 		   
 		 if(!armCodeExistUpd(armBean.getCode().trim(), new Long(sessionId))){  
-		//  AcUser au = (AcUser) Component.getInstance("currentUser",ScopeType.SESSION);
-		   
+			   
 		  AcApplication aam = entityManager.find(AcApplication.class, new Long(sessionId));
 		  
 		  aam.setName(armBean.getName().trim());
@@ -450,14 +403,11 @@ public class ArmManager {
 		  }
 		  
 		  
-		//  aam.setModificator(au.getIdUser());
-		//  aam.setModified(new Date());
 		  
 		  entityManager.flush();
 	      entityManager.refresh(aam);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
-	      Contexts.getEventContext().set("armBean", aam);
+	       Contexts.getEventContext().set("armBean", aam);
 		  
 	      audit(ResourcesMap.IS, ActionsMap.UPDATE); 
 	      
@@ -475,16 +425,43 @@ public class ArmManager {
        //при base64 нам не надо здесь добавлять ----BEGIN CERT---- и ---END CERT---
        //так как они уже есть в загружаемом файле - 
        //windows при создании файла сертификата помещает в него эти конструкции
+  	 
+ 	  //это хорошо, но работает только когда сертификат получается из криптопро CSP,
+ 	  //а когда скачивается вручную с сайта реестра, то в нём нет ---BEGIN CERT---- и ---END CERT---
+ 	  //и их надо добавлять вручную.
     	
 	   log.info("armManager:saveArmCertificate:01:"+(file_byte!=null));
 	   
 	   try {
 		   
-		   CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
-           X509Certificate user_cert = (X509Certificate)
-        		   user_cf.generateCertificate(new  ByteArrayInputStream(file_byte));
-          // String x509Cert = org.picketlink.common.util.Base64.encodeBytes(user_cert.getEncoded());
-           String x509Cert = Base64.encode(user_cert.getEncoded());
+		   CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+           
+           X509Certificate userCertX = null;
+           try{
+        	   
+         
+           userCertX = (X509Certificate)
+        		   userCf.generateCertificate(new  ByteArrayInputStream(file_byte));
+           
+           }catch(Exception e){
+        	   
+        	   log.info("armManager:saveArmCertificate:02");
+        	   
+        	   
+           //2-я попытка
+           //ловим случай - когда сертификат скачан вручную  с сайта УЦ
+           //в этом случае он без -BEGIN CERTIFICATE-
+           
+        	String certificateString =  "-----BEGIN CERTIFICATE-----\n"+new String(file_byte, "utf-8")+"\n-----END CERTIFICATE-----";
+        	
+        
+        	   
+            userCertX = (X509Certificate)
+        		   userCf.generateCertificate(new ByteArrayInputStream(certificateString.getBytes("utf-8")));
+           }
+           
+           
+           String x509Cert = Base64.encode(userCertX.getEncoded());
            
            log.info("armManager:saveArmCertificate:02:"+x509Cert);
            
@@ -499,6 +476,8 @@ public class ArmManager {
 		   .setParameter(2, id_sys)
 		   .executeUpdate();  
 			 
+		   audit(ResourcesMap.IS, ActionsMap.ADD_CERT); 
+		   
 		   Transaction.instance().commit();
 		   
 	     }catch (Exception e) {
@@ -528,7 +507,8 @@ public class ArmManager {
   		   .setParameter(1, new Long(sessionId))
   		   .executeUpdate();  
   			 
-  			   
+  		 audit(ResourcesMap.IS, ActionsMap.REMOVE_CERT); 
+  		 
   	     }catch (Exception e) {
              log.error("armManager:removeCert:ERROR:"+e);
            }
@@ -612,9 +592,9 @@ public class ArmManager {
 			    List<AcAppPage> aapl = aa.getAcAppPages();
 			    if(aapl!=null&&!aapl.isEmpty()){
 			      int NOT_ROOT_NODE=0;
-			   // log.info("forViewDelMessage:01");
+			    
 				  for(AcAppPage aap :aapl){
-					//log.info("forViewDelMessage:02");
+					 
 					 if(aap.getIdParent2()!=null&&!aap.getIdParent2().equals(1L)){
 						 
 					//	 log.info("forViewDelMessage:03");
@@ -622,9 +602,9 @@ public class ArmManager {
 						 NOT_ROOT_NODE=1;
 						 break;
 					 }
-					// log.info("forViewDelMessage:04");
+					 
 				  }
-			  //	log.info("forViewDelMessage:05");
+			  
 				
 				 if(NOT_ROOT_NODE==1){
 				   if(dellMessage!=null){ 
@@ -665,35 +645,35 @@ public class ArmManager {
  	    
  	     if(sessionId!=null){
  	    	 
- 	    	String cert_data = (String) entityManager.createNativeQuery(
+ 	    	String certDataX = (String) entityManager.createNativeQuery(
  	    			 "select to_char(T1.CERT_DATE) " + 
  	    	 		 "from AC_IS_BSS_T t1 " + 
  	    	 		 "where T1.ID_SRV=? ")
                  .setParameter(1, new Long(sessionId))
                  .getSingleResult();
  	    	
- 	    	 log.info("forViewCert:cert_data:"+cert_data); 
+ 	    	 log.info("forViewCert:cert_data:"+certDataX); 
  	    	 
  	    	 SystemCertItem sci = new SystemCertItem();
  	    	 
- 	    	 if(cert_data!=null){
+ 	    	 if(certDataX!=null){
  	    	 
- 	    	 byte[] cert_byte = Base64.decode(cert_data);
- 	    	 // String x509Cert = org.picketlink.common.util.Base64.encodeBytes(user_cert.getEncoded());
+ 	    	 byte[] certByteX = Base64.decode(certDataX);
+ 	    	 
  	         
  	    	 
- 	    	 CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
- 	           X509Certificate user_cert = (X509Certificate)
- 	        		   user_cf.generateCertificate(new  ByteArrayInputStream(cert_byte ));
+ 	    	 CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+ 	           X509Certificate userCertX = (X509Certificate)
+ 	        		   userCf.generateCertificate(new  ByteArrayInputStream(certByteX));
  	          
  	           
- 	           log.info("armManager:forViewCert:02:"+user_cert);
+ 	           log.info("armManager:forViewCert:02:"+userCertX);
  	         
- 	          sci.setName(user_cert.getSubjectDN().getName());
- 	          sci.setIssuer(user_cert.getIssuerDN().getName());
- 	          sci.setSerial(dec_to_hex(user_cert.getSerialNumber()));
- 	          sci.setDate1(df.format(user_cert.getNotBefore()));
-	          sci.setDate2(df.format(user_cert.getNotAfter()));
+ 	          sci.setName(userCertX.getSubjectDN().getName());
+ 	          sci.setIssuer(userCertX.getIssuerDN().getName());
+ 	          sci.setSerial(dec_to_hex(userCertX.getSerialNumber()));
+ 	          sci.setDate1(df.format(userCertX.getNotBefore()));
+	          sci.setDate2(df.format(userCertX.getNotAfter()));
 	          
  	    	// AcApplication ao = entityManager.find(AcApplication.class, new Long(sessionId));
  	    	 
@@ -721,7 +701,7 @@ public class ArmManager {
 	    		 
 	    		if(au.getAllowedSys()!=null){
 	    			
-	    		   // List<Long> names = Arrays.asList(1L);
+	    		   
 	    			 
 	    			listArm=entityManager.createQuery(
 		       				  "select o from AcApplication o " +
@@ -749,19 +729,7 @@ public class ArmManager {
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("name"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("code"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("description"));
@@ -778,8 +746,8 @@ public class ArmManager {
 	   if(auditItemsListContext==null){
 		   ArmContext ac= new ArmContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
@@ -805,8 +773,7 @@ public class ArmManager {
 	 	        log.info("rolManager:getUsrSelectListForView:remoteAudit:"+remoteAudit);
 	 	        log.info("rolManager:getUsrSelectListForViewt:sessionId:"+sessionId);
 	 	        
-	 	        //if(!remoteAudit.equals("UpdFact")){
-	 	 	        
+	 	            
 	 	       lo=entityManager.createNativeQuery(
 			    	   "select t1.t1_id, t1.t1_login, t1.t1_fio "+
 	                   "from (select AU_FULL.ID_SRV t1_id, AU_FULL.LOGIN t1_login, "+  
@@ -838,7 +805,7 @@ public class ArmManager {
 	 	    	 this.adminListForView.add(au);
 	 	    	 
 	 	    	 //не используется при только отображении
-	 	    	 //au.setIdUser(new Long(objectArray[0].toString()));
+	 	    	 
 	 	    	 au.setFio(objectArray[2]!=null?objectArray[2].toString():"");
 	 	    	 au.setLogin(objectArray[1]!=null?objectArray[1].toString():"");
 	 	       }
@@ -860,8 +827,8 @@ public class ArmManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecArm = (ArrayList<String>)
+	   //  forView; //!!!
+	    List<String>  selRecArm = (ArrayList<String>)
 				  Component.getInstance("selRecArm",ScopeType.SESSION);
 	    
 	    if(selRecArm==null){
@@ -869,9 +836,9 @@ public class ArmManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	    // AcApplication aa = searchBean(sessionId);
+	    
 	    AcApplication aa = new AcApplication();
-  	    // в getAuditList : else{it.setSelected(false);}
+  	   
 	    
 	    if(aa!=null){
 	     if(selRecArm.contains(sessionId)){
@@ -977,11 +944,11 @@ public class ArmManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("reposManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -990,7 +957,7 @@ public class ArmManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
+	  
 	   	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -1000,12 +967,12 @@ public class ArmManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		  log.info("armManager:evaluteForListFooter!!!");
 	   		      evaluteForListFooter=true;
 	    	}
@@ -1015,7 +982,7 @@ public class ArmManager {
    
    public Boolean getEvaluteForBean() {
 		
-		  // 	log.info("reposManager:evaluteForListFooter:01");
+		  
 		   	if(evaluteForBean==null){
 		   		evaluteForBean=false;
 		    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
@@ -1027,8 +994,8 @@ public class ArmManager {
 			             .get("sessionId");
 			    log.info("armManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("armManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -1036,18 +1003,18 @@ public class ArmManager {
 		     return evaluteForBean;
 		   }
    
-   private static String dec_to_hex(BigInteger bi) {
+   private String dec_to_hex(BigInteger bi) {
 		
 		String result = null;
 		
 		try
 		{
 		 result = bi.toString(16);
-	     System.out.println("num_convert:num:"+result);
+		 
 		}
 		catch (NumberFormatException e)
 		{
-		     System.out.println("Error! tried to parse an invalid number format");
+			log.error("Error! tried to parse an invalid number format");
 		}
 		 return result;
 	}
@@ -1058,12 +1025,4 @@ public void setCommentApp(String commentApp) {
 	this.commentApp = commentApp;
 }
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/
+

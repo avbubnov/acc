@@ -42,7 +42,7 @@ public class AccessServicesWeb extends HttpServlet {
 
 	private static final String X509CERTIFICATE_REQUEST_ATTRIBUTE = "javax.servlet.request.X509Certificate";
 
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(AccessServicesWeb.class);
 
 	/**
@@ -61,33 +61,19 @@ public class AccessServicesWeb extends HttpServlet {
 
 		Token token = null;
 		String success = "false";
-		int revokedCertificate = 0;
-		String login_user = null;
+		String loginUser = null;
 
 		HttpSession hs = request.getSession();
 
 		try {
 
-			/*
-			 * String tokenID_attr = (String) hs.getAttribute("tokenID");
-			 * 
-			 * logger.info("service:tokenID_attr:"+tokenID_attr);
-			 * 
-			 * 
-			 * //не дойдёт до выполнения //перехватывается в фильтре //if
-			 * requestURI.endsWith(cert_to_form_ie) //if(principal2!=null){
-			 * //response.sendRedirect(request.getContextPath()+main);
-			 * if(tokenID_attr!=null&&isTokenActive(tokenID_attr)){ //sso && не
-			 * было logout
-			 * 
-			 * sendPost(backUrl, response, "true", tokenID_attr, 0); }else{
-			 */
+			
 
 			String sn = getSN(request);
 
 			if (sn != null) {
 
-				login_user = (new ContextAccessWebManager())
+				loginUser = (new ContextAccessWebManager())
 						.authenticate_cert_sn(sn, getIPAddress(request),
 								getCodeSystem(request));
 
@@ -95,20 +81,20 @@ public class AccessServicesWeb extends HttpServlet {
 
 				hs.setAttribute("tokenID", token.getId());
 
-				hs.setAttribute("login_user", login_user);
+				hs.setAttribute("login_user", loginUser);
 			}
 
-			// }
+			
 
 		} catch (InvalidCredentials e1) {
-			logger.error("service:error1:" + e1.getMessage());
+			LOGGER.error("service:error1:" + e1.getMessage());
 		} catch (GeneralFailure e2) {
-			logger.error("service:error2:" + e2.getMessage());
+			LOGGER.error("service:error2:" + e2.getMessage());
 		} catch (RevokedCertificate e3) {
-			revokedCertificate = 1;
-			logger.error("service:error3:" + e3.getMessage());
+			
+			LOGGER.error("service:error3:" + e3.getMessage());
 		} catch (Exception e4) {
-			logger.error("service:error4:" + e4.getMessage());
+			LOGGER.error("service:error4:" + e4.getMessage());
 		}
 		if (success.equals("true")) {
 
@@ -122,10 +108,7 @@ public class AccessServicesWeb extends HttpServlet {
 
 			failure(response);
 
-			// hs.invalidate();
-
-			// eraseCookie(request, response);
-
+		
 		}
 
 	}
@@ -148,7 +131,7 @@ public class AccessServicesWeb extends HttpServlet {
 
 	private String getSN(HttpServletRequest hsr) {
 
-		// logger.info("getSN:01");
+		 
 
 		String result = null;
 
@@ -157,7 +140,7 @@ public class AccessServicesWeb extends HttpServlet {
 
 		X509Certificate clientCert = null;
 		if (null != certs) {
-			// logger.info("verify:length:"+certs.length);
+			 
 		}
 
 		if (null != certs && certs.length > 0) {
@@ -165,8 +148,8 @@ public class AccessServicesWeb extends HttpServlet {
 
 			result = clientCert.getSerialNumber().toString(16).toUpperCase();
 
-			// logger.info("getSN:SubjectDN:"+clientCert.getSubjectDN().getName());
-			// logger.info("getSN:SerialNumber:"+clientCert.getSerialNumber());
+			 
+			 
 
 		}
 
@@ -182,15 +165,14 @@ public class AccessServicesWeb extends HttpServlet {
 
 	public void failure(HttpServletResponse response) throws IOException {
 
-		// logger.info("failure:01");
+		 
 
 		try {
 
 			common(response);
 
 			response.setContentType("text/html; charset=windows-1251");
-			// response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
+		
 			PrintWriter pw = response.getWriter();
 
 			pw.print("<html>");
@@ -201,14 +183,7 @@ public class AccessServicesWeb extends HttpServlet {
 			pw.print("<br/>");
 			pw.print("<a href='javascript:location.reload(true);'>");
 			pw.print("Войти</a>");
-			/*
-			 * pw.print("<a href='javascript:history.go(-1);'>");
-			 * pw.print("Вернуться назад</a>");
-			 */
-			/*
-			 * pw.print("<a href='"); pw.print(redirect_url);
-			 * pw.print("'>Войти заново</a>");
-			 */
+		
 			pw.print("</div>");
 
 			pw.print("</body>");
@@ -221,29 +196,13 @@ public class AccessServicesWeb extends HttpServlet {
 			pw.close();
 
 		} catch (Exception e) {
-			logger.error("failure:error:" + e);
+			LOGGER.error("failure:error:", e);
 		}
 
 		return;
 	}
 
-	private void eraseCookie(HttpServletRequest req, HttpServletResponse resp) {
-
-		// logger.info("eraseCookie:01");
-
-		Cookie[] cookies = req.getCookies();
-		if (cookies != null) {
-			for (int i = 0; i < cookies.length; i++) {
-
-				// logger.info("eraseCookie:02:"+cookies[i].getName());
-
-				cookies[i].setValue("");
-				cookies[i].setPath("/");
-				cookies[i].setMaxAge(0);
-				resp.addCookie(cookies[i]);
-			}
-		}
-	}
+	
 
 	private static void common(HttpServletResponse response) {
 		response.setCharacterEncoding("UTF-8");
@@ -266,7 +225,7 @@ public class AccessServicesWeb extends HttpServlet {
 		// 2)ExtFilter - просто пропускает запрос ниже - на сервлет
 		// 3)AccessServicesWeb
 
-		logger.info("getCodeSystem:031");
+		LOGGER.debug("getCodeSystem:031");
 		String result = null;
 
 		try {
@@ -280,11 +239,7 @@ public class AccessServicesWeb extends HttpServlet {
 
 			if (samlRequestMessage != null) {
 
-				// IDPWebRequestUtil webRequestUtil = new
-				// IDPWebRequestUtil(request, null, null);
-				// SAMLDocumentHolder samlDocumentHolder =
-				// webRequestUtil.getSAMLDocumentHolder(samlRequestMessage);
-
+				
 				boolean begin_req_method = "GET".equals((String) request
 						.getSession().getAttribute("incoming_http_method"));
 
@@ -294,13 +249,11 @@ public class AccessServicesWeb extends HttpServlet {
 				if (samlDocumentHolder != null) {
 
 					if (samlDocumentHolder.getSamlObject() != null) {
-						// RequestAbstractType requestAbstractType =
-						// (RequestAbstractType)samlDocumentHolder.getSamlObject();
 						AuthnRequestType requestAbstractType = (AuthnRequestType) samlDocumentHolder
 								.getSamlObject();
 						result = requestAbstractType.getIssuer().getValue();
 
-						logger.info("getCodeSystem:032:" + result);
+						LOGGER.debug("getCodeSystem:032:" + result);
 
 					}
 				}
@@ -308,8 +261,7 @@ public class AccessServicesWeb extends HttpServlet {
 			}
 
 		} catch (Exception e) {
-			logger.error("getCodeSystem:error:" + e);
-			// e.printStackTrace(System.out);
+			LOGGER.error("getCodeSystem:error:", e);
 		}
 
 		return result;
@@ -317,7 +269,7 @@ public class AccessServicesWeb extends HttpServlet {
 
 	public SAMLDocumentHolder getSAMLDocumentHolder(String samlMessage,
 			boolean redirectProfile) throws Exception {
-		logger.info("getSAMLDocumentHolder:01:" + redirectProfile);
+		LOGGER.debug("getSAMLDocumentHolder:01:" + redirectProfile);
 
 		InputStream is = null;
 		SAML2Request saml2Request = new SAML2Request();
@@ -329,7 +281,7 @@ public class AccessServicesWeb extends HttpServlet {
 				is = new ByteArrayInputStream(samlBytes);
 			}
 		} catch (Exception rte) {
-			logger.error("getSAMLDocumentHolder:error:" + rte);
+			LOGGER.error("getSAMLDocumentHolder:error:" + rte);
 			throw rte;
 		}
 

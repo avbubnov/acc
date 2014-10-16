@@ -36,6 +36,9 @@ public class ReportsBssT implements Serializable {
 	
 	@Column(name="DATE_REQUIRED")
 	private Long dateRequired;
+		
+	@Column(name="REPORT_PATH")
+	private String reportPath;
 	
 	public ReportsBssT() {
 	}
@@ -94,6 +97,14 @@ public class ReportsBssT implements Serializable {
 
 	public void setDateRequired(Long dateRequired) {
 		this.dateRequired = dateRequired;
+	}
+
+	public String getReportPath() {
+		return reportPath;
+	}
+
+	public void setReportPath(String reportPath) {
+		this.reportPath = reportPath;
 	}
 
 }

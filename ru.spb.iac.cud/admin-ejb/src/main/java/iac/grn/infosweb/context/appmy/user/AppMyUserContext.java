@@ -7,32 +7,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class AppMyUserContext {
 
-	//private HashMap<String, HeaderTableItem> headerItemsMap=new HashMap<String, HeaderTableItem>();
 	
 	private List<HeaderTableItem> headerItemsList=new ArrayList<HeaderTableItem>();
 	
-    private HashMap<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
+    private Map<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
 	
-	public HashMap <String, BaseTableItem> getAuditItemsMap() {
+	public Map <String, BaseTableItem> getAuditItemsMap() {
         return this.auditItemsMap;
     }
 	
 	public List<HeaderTableItem> getHeaderItemsList() {
         return this.headerItemsList;
     }
-	/*private TreeMap<String, BaseTableItem> auditItemsMap=new TreeMap<String, BaseTableItem>();
-	
-	public TreeMap <String, BaseTableItem> getAuditItemsMap() {
-        return this.auditItemsMap;
-    }*/
-	
+		
 	public List <BaseTableItem> getAuditItemsCollection() {
 		
 		List<BaseTableItem> btiList = new ArrayList<BaseTableItem>(this.auditItemsMap.values());
@@ -91,7 +85,6 @@ public class AppMyUserContext {
 		auditItemsMap.put("commentApp",new BaseTableItem("Комментарий заявки", "...", "commentApp", "t1_comment_app", 12, h1));
 		
 
-		//auditItemsMap.put("idUser",new BaseTableItem("ИД Пользователя", "...", "idArm", "t1_user_id", 33, h4));
 		auditItemsMap.put("login",new BaseTableItem("Логин пользователя", "...", "login", "t1_user_login", 34, h4));
 			
 	

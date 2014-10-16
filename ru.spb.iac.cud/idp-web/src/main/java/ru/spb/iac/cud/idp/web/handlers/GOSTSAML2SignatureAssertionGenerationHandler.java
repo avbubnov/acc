@@ -37,7 +37,7 @@ import static org.picketlink.common.util.StringUtil.isNotNull;
 public class GOSTSAML2SignatureAssertionGenerationHandler extends
 		AbstractSignatureHandler {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(GOSTSAML2SignatureAssertionGenerationHandler.class);
 
 	public void handleRequestType(SAML2HandlerRequest request,
@@ -45,7 +45,7 @@ public class GOSTSAML2SignatureAssertionGenerationHandler extends
 
 		Document responseDocument = response.getResultingDocument();
 
-		loggerslf4j.info("handleRequestType:01");
+		LOGGERSLF4J.debug("handleRequestType:01");
 
 		if (responseDocument == null) {
 			logger.trace("No response document found");
@@ -65,9 +65,7 @@ public class GOSTSAML2SignatureAssertionGenerationHandler extends
 		// Get the Key Pair
 		KeyPair keypair = (KeyPair) this.handlerChainConfig
 				.getParameter(GeneralConstants.KEYPAIR);
-		X509Certificate x509Certificate = (X509Certificate) this.handlerChainConfig
-				.getParameter(GeneralConstants.X509CERTIFICATE);
-
+	
 		if (keypair == null) {
 			logger.samlHandlerKeyPairNotFound();
 			throw logger.samlHandlerKeyPairNotFoundError();
@@ -76,14 +74,14 @@ public class GOSTSAML2SignatureAssertionGenerationHandler extends
 		// сами решили подписывать Assertion
 		try {
 
-			// loggerslf4j.info("signAssertion:01:"+DocumentUtil.asString(samlDocument));
+			 
 
 			NodeList assertionList = samlDocument.getElementsByTagNameNS(
 					"urn:oasis:names:tc:SAML:2.0:assertion", "Assertion");
 
-			// loggerslf4j.info(sign:02:"+(assertionList==null));
+			 
 
-			// loggerslf4j.info("sign:03:"+assertionList.getLength());
+			 
 
 			if (assertionList != null && assertionList.getLength() > 0) {
 
@@ -95,7 +93,7 @@ public class GOSTSAML2SignatureAssertionGenerationHandler extends
 				Node n = assertionDocument.importNode(oldAssertion, true);
 				assertionDocument.appendChild(n);
 
-				// loggerslf4j.info("sign:04:"+DocumentUtil.asString(assertionDocument));
+				 
 
 				SAML2Signature samlSignature = new GOSTSAML2Signature();
 				samlSignature
@@ -106,24 +104,24 @@ public class GOSTSAML2SignatureAssertionGenerationHandler extends
 				Node nextSibling = samlSignature
 						.getNextSiblingOfIssuer(assertionDocument);
 				samlSignature.setNextSibling(nextSibling);
-				// if(x509Certificate != null){
-				// samlSignature.setX509Certificate(x509Certificate);
+				// if(/x509Certificate != null){
+				// samlSignature/.setX509Certificate/(x509Certificate);
 				// }
 				samlSignature.signSAMLDocument(assertionDocument, keypair);
 
-				// loggerslf4j.info("sign:05:"+DocumentUtil.asString(assertionDocument));
+				 
 
 				Node newAssertion = samlDocument.importNode(
 						assertionDocument.getFirstChild(), true);
 
 				parentOldAssertion.replaceChild(newAssertion, oldAssertion);
 
-				// loggerslf4j.info("signAssertion:06:"+DocumentUtil.asString(samlDocument));
+				 
 
 			}
 
 		} catch (Exception e) {
-			loggerslf4j.error("signAssertion:Error:" + e);
+			LOGGERSLF4J.error("signAssertion:Error:", e);
 		}
 
 	}

@@ -7,31 +7,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class AppSystemContext {
 
-	//private HashMap<String, HeaderTableItem> headerItemsMap=new HashMap<String, HeaderTableItem>();
-	
+		
 	private List<HeaderTableItem> headerItemsList=new ArrayList<HeaderTableItem>();
 	
-    private HashMap<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
+    private Map<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
 	
-	public HashMap <String, BaseTableItem> getAuditItemsMap() {
+	public Map <String, BaseTableItem> getAuditItemsMap() {
         return this.auditItemsMap;
     }
 	
 	public List<HeaderTableItem> getHeaderItemsList() {
         return this.headerItemsList;
     }
-	/*private TreeMap<String, BaseTableItem> auditItemsMap=new TreeMap<String, BaseTableItem>();
 	
-	public TreeMap <String, BaseTableItem> getAuditItemsMap() {
-        return this.auditItemsMap;
-    }*/
 	
 	public List <BaseTableItem> getAuditItemsCollection() {
 		
@@ -82,11 +78,8 @@ public class AppSystemContext {
 		auditItemsMap.put("description",new BaseTableItem("Описание ИС", "...", "description", "t1_description", 32, h1));
 		
 		
-		//auditItemsMap.put("idArm",new BaseTableItem("ИД ИС", "...", "idArm", "t1_arm_id", 33, h4));
 		auditItemsMap.put("codeArm",new BaseTableItem("Код ИС", "...", "codeArm", "t1_arm_code", 34, h4));
-		//auditItemsMap.put("fullNameArm",new BaseTableItem("Полное наименование ИС", "...", "fullNameArm", "t1_arm_name", 35, h4));
-		//auditItemsMap.put("descriptionArm",new BaseTableItem("Описание ИС", "...", "descriptionArm", "t1_arm_description", 36, h4));
-		
+			
 	
 		}
 }

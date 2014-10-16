@@ -5,7 +5,7 @@ import iac.cud.infosweb.dataitems.BaseItem;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,7 @@ import org.richfaces.model.ExtendedFilterField;
 import org.richfaces.model.FilterField;
 import org.richfaces.model.Modifiable;
 import org.richfaces.model.SortField2;
-//import org.ajax4jsf.model.DataComponentState;
+ 
 
 @Name("aFuncDataModel")
 public class AFuncDataModel extends SerializableDataModel implements Modifiable {
@@ -40,8 +40,6 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	@In(create=true)
 	private AFuncDataProvider aFuncDataProvider;
 	
-//	@In(create=true)
-//	private DatatableStateHolder datatableStateHolder;
 	
 	private Long currentPk;
 	private Map<Long,BaseItem> wrappedData = new HashMap<Long, BaseItem>();
@@ -54,9 +52,6 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	private HashMap<String, String> filterColumnValues = new HashMap<String, String>();
 	 
 	private int flagAction=0;
-	//private List<FilterField> filterFields;
-	
-//	private HashMap<String,String> filterFieldsHM = new HashMap<String,String>();
 	/**
 	 * 
 	 */
@@ -69,8 +64,7 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	 */
 	@Override
 	public Object getRowKey() {
-	//	log.info("getRowKey:currentPk:"+currentPk);
-		return currentPk;
+			return currentPk;
 	}
 
 	/**
@@ -78,8 +72,7 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	 */
 	@Override
 	public void setRowKey(Object key) {
-	//	log.info("setRowKey:key:"+key);
-		this.currentPk = (Long) key;
+			this.currentPk = (Long) key;
 		
 	}
 	/**
@@ -89,24 +82,7 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	public void walk(FacesContext context, DataVisitor visitor, Range range, Object argument) throws IOException {
 		
 		log.info("walk:01:start");
-	/*	if(componentState!=null){
-			log.info("walk:01:2");
-			Range range2=componentState.getRange();
-			int firstRow = ((SequenceRange)range2).getFirstRow();
-			int numberOfRows = ((SequenceRange)range2).getRows();
 			
-			log.info("walkt:firstRow:"+firstRow);
-			log.info("walk:numberOfRows:"+numberOfRows);
-		}else{
-			log.info("walk:01:3");
-		}*/
-		
-	/*	try{
-			throw new NullPointerException();
-		}catch(Exception e){
-			e.printStackTrace(System.out);
-		}*/
-		
 		int firstRow = ((SequenceRange)range).getFirstRow();
 		int numberOfRows = ((SequenceRange)range).getRows();
 		
@@ -124,11 +100,9 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 		  for (BaseItem item:cachedItems) {
 			wrappedKeys.add(item.getBaseId());
 			wrappedData.put(item.getBaseId(), item);  
-		//	wrappedKeys.add(item.getSessionId());
-		//	wrappedData.put(item.getSessionId(), item);
-			//log.info("visitor:start:"+item.getId().toString());
+			 
 		    visitor.process(context, item.getBaseId(), argument);
-			//log.info("visitor:end");
+			 
 		 }
 		}
 		log.info("walk:end");
@@ -146,26 +120,6 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	public int getRowCount() {
 		
 	log.info("auditDataModel:getRowCount:01");
-		/*if(componentState!=null){
-			log.info("getRowCount:01:2");
-			Range range=componentState.getRange();
-			int firstRow = ((SequenceRange)range).getFirstRow();
-			int numberOfRows = ((SequenceRange)range).getRows();
-			
-			log.info("getRowCount:firstRow:"+firstRow);
-			log.info("getRowCount:numberOfRows:"+numberOfRows);
-		}else{
-			log.info("getRowCount:01:3");
-		}*/
-		
-		/*if (rowCount==null) {
-			rowCount = new Integer(getDataProvider().getRowCount(filterColumnValues));
-			log.info("getRowCount:02:rowCount:"+rowCount);
-			return rowCount.intValue();
-		} else {
-			log.info("getRowCount:03:rowCount:"+rowCount);
-			return rowCount.intValue();
-		}*/
 		String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
 		         .getRequestParameterMap()
 		         .get("remoteAudit");
@@ -194,10 +148,10 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 					return 0;
 				}
 				if(remoteAudit!=null &&
-					(remoteAudit.equals("rowSelectFact")/*||
-				    remoteAudit.equals("selRecAllFact")||
-					remoteAudit.equals("clRecAllFact")||
-					remoteAudit.equals("clSelOneFact")*/)&&
+					("rowSelectFact".equals(remoteAudit)/*||
+				    "selRecAllFact".equals(remoteAudit)||
+					"clRecAllFact".equals(remoteAudit)||
+					"clSelOneFact".equals(remoteAudit)*/)&&
 					auditListCount!=null){
 					rowCount = new Integer(auditListCount);
 				}else{
@@ -215,79 +169,24 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	 */
 	@Override
 	public BaseItem getRowData() {
-	//	log.info("getRowData:currentPk:"+currentPk);
-		if (currentPk==null) {
+			if (currentPk==null) {
 			return null;
 		} else {
 			BaseItem ret = wrappedData.get(currentPk);
 			if (ret==null) {
-				//ret = getDataProvider().getAuctionItemByPk(currentPk);
-				//wrappedData.put(currentPk, ret);
-			//	log.info("getRowData:currentPk:ret==null!!");
 				return ret;
 			} else {
 				return ret;
 			}
 		}
 	}
-	//@Override
 	 public void modify(List<FilterField> filterFields, List<SortField2> sortFields) {
 		 log.info("!!!modify!!!");
-		// this.filterFields = filterFields;
-		if(this.flagAction==1){
-		// appendFilters(filterFields,FacesContext.getCurrentInstance());
-		}// this.cachedItems = null;
+			if(this.flagAction==1){
+		
+		}
 	 }
-/*
-	 private void appendFilters(List<FilterField> filterFields, FacesContext context) {
-        
-		 if (filterFields != null && !filterFields.isEmpty()) {
-			 
-		//	 filterFieldsHM.clear();
-			 
-        	      for (FilterField filterField : filterFields) {
-        	    	  
-                       //для rich:columns 
-        	    	    String propertyName = getPropertyName(context, filterField.getExpression());
-                       
-        	    	    log.info("appendFilters:1:"+(filterField.getExpression().getExpressionString()));
-        	    	     
-        	    	     //  для rich:column 
-        	    	     //  String propertyName = (filterField.getExpression().getExpressionString()).replaceAll("[#|$]{1}\\{.*?\\.", "").replaceAll("\\}", "");
-        	    	    
-        	    	     String filterValue=null;
-        	    	     try{ 
-        	    	    	 log.info("appendFilters:filterField.getClass:"+filterField.getClass());
-        	    	         filterValue = ((ExtendedFilterField) filterField).getFilterValue();
-                        }catch(Exception e){
-                        	log.info("appendFilters:error:"+e);
-                        }
-        	    	     
-        	    	   //log.info("appendFilters:filterColumnValue:"+filterColumnValues.get(propertyName));
-        	    	     
-                         log.info("appendFilters:propertyName:"+propertyName);
-                         log.info("appendFilters:filterValue:"+filterValue);
-                         
-                      //   if (propertyName!=null && filterColumnValues.get(propertyName)!=null && filterColumnValues.get(propertyName).length() != 0 ) {
-                         if (propertyName!=null && filterValue!=null && filterValue.length() != 0 ) {
-                                 	 
-                        	 filterColumnValues.put(propertyName, filterValue);   
-                        	 //filterColumnValues.put(propertyName, filterColumnValues.get(propertyName));   
-                                  
-                         }
-                 }
-         }
-    }
-	 
-	 
-	 private String getPropertyName(FacesContext facesContext, Expression expression) {
-         try {
-                 return (String) ((ValueExpression) expression).getValue(facesContext.getELContext());
-         } catch (ELException e) {
-                 throw new FacesException(e.getMessage(), e);
-         }
-    }
-	 */
+
 	 public void filterAction() {
 		 log.info("filterAction");
 		 this.cachedItems = null;
@@ -297,8 +196,7 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 		 AFuncStateHolder aFuncStateHolder = (AFuncStateHolder)Component.getInstance("aFuncStateHolder", ScopeType.SESSION);
 		 aFuncStateHolder.clearFilters();
 		 
-	//	 datatableStateHolder.clearFilters();
-	}
+		}
 	/**
 	 * Unused rudiment from old JSF staff.
 	 */
@@ -320,17 +218,16 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	 */
 	@Override
 	public boolean isRowAvailable() {
-		//log.info("isRowAvailable1");
+		 
 		if (currentPk==null) {
 			return false;
 		} else {
-			//log.info("isRowAvailable2");
+			 
 			if(wrappedKeys!=null){
-				//log.info("isRowAvailable3:"+(wrappedKeys.contains(currentPk)));
+				 
 			}
 			
 			return true;
-		//	return getDataProvider().hasAuctionItemByPk(currentPk);
 		}
 	}
 
@@ -366,12 +263,6 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 		}
 	}
 	
-	private <V> V lookupInContext(String expression, Class<? extends V> c) {
-		FacesContext facesContext = FacesContext.getCurrentInstance();
-		Application application = facesContext.getApplication();
-		return c.cast(application.evaluateExpressionGet(facesContext, MessageFormat.format("#'{'{0}'}'", expression), c));
-	}
-	
 	private String auctionDataModelExpressionString;
 
 	private String auctionDataProviderExpressionString;
@@ -383,18 +274,7 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 	 */
 	@Override
 	public void update() {
-	/*	AuditDataModel auctionDataModel = lookupInContext(auctionDataModelExpressionString, AuditDataModel.class);
-		Object savedKey = getRowKey();
-		for (Integer key : wrappedKeys) {
-			auctionDataModel.setRowKey(key);
-			auctionDataModel.getRowData().setBid(wrappedData.get(key).getBid());
-		}
-		setRowKey(savedKey);
-		//getDataProvider().update();
-		
-		this.wrappedData.clear();
-		this.wrappedKeys.clear();
-		resetDataProvider();*/
+	
 	}
 	
 	protected void resetDataProvider() {
@@ -424,7 +304,7 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 		this.auctionDataProviderExpressionString = auctionDataProviderExpressionString;
 	}
 	    
-	public HashMap<String, String> getFilterColumnValues() {
+	public Map<String, String> getFilterColumnValues() {
 		   if(filterColumnValues!=null){
 		       log.info("getFilterColumnValues:01:"+filterColumnValues.size());
 		   }else{
@@ -440,11 +320,5 @@ public class AFuncDataModel extends SerializableDataModel implements Modifiable 
 		   };
 		   this.filterColumnValues=filterColumnValues;
 	 }
-	/*   public DataComponentState getComponentState(){
-		   return this.componentState;
-	   }
-	   public void setComponentState(DataComponentState componentState){
-		   log.info("setComponentState!");
-		   this.componentState=componentState;
-	   }*/
+	
 }

@@ -6,12 +6,12 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
-//import org.jboss.seam.annotations.Logger;
+ 
 import org.apache.log4j.Logger;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.contexts.Contexts;
-//import org.jboss.seam.log.Log;
+ 
 
 /**
  * MyPhaseListener. The phase listener which prints the current phase to the system console.
@@ -22,7 +22,6 @@ import org.jboss.seam.contexts.Contexts;
 @Name("myPhaseListener")
 public class MyPhaseListener implements PhaseListener {
 
-	//@Logger private Log log;
 	
 	private Logger log = Logger.getLogger(MyPhaseListener.class);
 	
@@ -42,7 +41,6 @@ public class MyPhaseListener implements PhaseListener {
     		requestTime=System.currentTimeMillis();
     	}
     	phaseTime=System.currentTimeMillis();
-       // System.out.println("Phase Start: " + event.getPhaseId());
         log.info("Phase Start: " + event.getPhaseId());
      }
 

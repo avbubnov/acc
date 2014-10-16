@@ -26,8 +26,6 @@ public class AuthBean implements Serializable {
 	@EJB(beanName = "CUDUserConsole-ejb.jar#AuthEJB")
 	private AuthEJB authEJB;
 	
-	//@ManagedProperty("#{activeUser}")
-	//private ActiveUser activeUser;
 		
     private static final long serialVersionUID = 1L;
  
@@ -35,7 +33,7 @@ public class AuthBean implements Serializable {
    
     private String userPassword;
     
-    final static Logger logger = LoggerFactory
+    final static Logger LOGGER = LoggerFactory
 			.getLogger(AuthBean.class);
     
     public void action() {
@@ -43,11 +41,11 @@ public class AuthBean implements Serializable {
     	 
     	try{
         
-    	logger.info("AuthBean:action:01");
+    	LOGGER.debug("AuthBean:action:01");
         
         String version = FacesContext.class.getPackage().getImplementationVersion();
         
-        logger.info("AuthBean:action:02:"+version);
+        LOGGER.debug("AuthBean:action:02:"+version);
         
         String redirectURL = "/context/roles_pages/role_user.xhtml";
         
@@ -61,24 +59,19 @@ public class AuthBean implements Serializable {
         	FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
             
         }else{
-        	logger.info("AuthBean:action:03:"+user.getLogin());
-        	//FacesContext.getCurrentInstance().getExternalContext().getFlash().put("userData", user);
-        	//FacesContext.getCurrentInstance().getExternalContext().getFlash().put("userID", user.getIdSrv());
-        
+        	LOGGER.debug("AuthBean:action:03:"+user.getLogin());
+         
         	HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
          	hs.setAttribute(CUDUserConsoleConstants.authUserID, user.getIdSrv());
         }
         
          
-        //throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, msg));
-        
-        //return "home?faces-redirect=true";
-        FacesContext.getCurrentInstance().getExternalContext().redirect(
+          FacesContext.getCurrentInstance().getExternalContext().redirect(
         		((HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest())
         		.getContextPath()+redirectURL);
    
     	}catch(Exception e){
-    		logger.error("AuthBean:action:error:"+e);
+    		LOGGER.error("AuthBean:action:error:"+e);
     	}
    }
 
@@ -102,7 +95,7 @@ public class AuthBean implements Serializable {
 	       
    	  try{
         
-   		logger.info("cudAuth:01++:"+typeAuth);
+   		LOGGER.debug("cudAuth:01++:"+typeAuth);
         
     	  if(typeAuth==null){
     		  return;
@@ -111,7 +104,7 @@ public class AuthBean implements Serializable {
     	  HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
           Long userID =(Long)hs.getAttribute(CUDUserConsoleConstants.authUserID);
      
-          logger.info("AuthBean:cudAuth:02:"+userID);
+          LOGGER.debug("AuthBean:cudAuth:02:"+userID);
           
           if(userID==null||
         		  !typeAuth.equals(hs.getAttribute(CUDUserConsoleConstants.authType))){
@@ -127,7 +120,7 @@ public class AuthBean implements Serializable {
           }
            
     	}catch(Exception e){
-    		logger.error("AuthBean:cudAuth:error:"+e);
+    		LOGGER.error("AuthBean:cudAuth:error:"+e);
     	}
     }
 	
@@ -135,13 +128,13 @@ public class AuthBean implements Serializable {
 	       
 	   	  try{
 	        
-	    	  logger.info("AuthBean:cudAuthOBO:01");
+	    	  LOGGER.debug("AuthBean:cudAuthOBO:01");
 	        
 	    	  
 	    	  HttpSession hs = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false); 
 	          Long userID =(Long)hs.getAttribute(CUDUserConsoleConstants.authUserID);
 	     
-	          logger.info("AuthBean:cudAuthOBO:02:"+userID);
+	          LOGGER.debug("AuthBean:cudAuthOBO:02:"+userID);
 	          
 	          if(userID==null){
 	        	 
@@ -158,14 +151,14 @@ public class AuthBean implements Serializable {
 	          }
 	           
 	    	}catch(Exception e){
-	    		logger.error("AuthBean:cudAuthOBO:error:"+e);
+	    		LOGGER.error("AuthBean:cudAuthOBO:error:"+e);
 	    	}
 	    }
 	public void authenticate() {
 	       
 	   	  try{
 	        
-	    	  logger.info("AuthBean:authenticate:01");
+	    	  LOGGER.debug("AuthBean:authenticate:01");
 	        
 	    	  String redirectURL = null;
 	    	  
@@ -180,7 +173,7 @@ public class AuthBean implements Serializable {
 	               		.getContextPath()+redirectURL);
 	           
 	    	}catch(Exception e){
-	    		logger.error("AuthBean:authenticate:error:"+e);
+	    		LOGGER.error("AuthBean:authenticate:error:"+e);
 	    	}
 	    }
 	
@@ -188,12 +181,12 @@ public class AuthBean implements Serializable {
 	       
 	   	  try{
 	        
-	    	  logger.info("AuthBean:logout:01");
+	    	  LOGGER.debug("AuthBean:logout:01");
 	    	  
 	    	  authEJB.localLogout();
 	    	 	           
 	    	}catch(Exception e){
-	    		logger.error("AuthBean:logout:error:"+e);
+	    		LOGGER.error("AuthBean:logout:error:"+e);
 	    	}
 	    }
 }

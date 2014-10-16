@@ -1,12 +1,12 @@
 package iac.cud.infosweb.dataitems;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 
 public class BaseParamItem implements Serializable {
 	 private static final long serialVersionUID = 1L;
 
-	 private HashMap<String, Object> paramMap;
+	 private Map<String, Object> paramMap;
 	 
 	 public BaseParamItem(){
 	 }

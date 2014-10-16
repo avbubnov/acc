@@ -49,7 +49,7 @@ public class AuditServiceImpl implements AuditService{
 
      public static final String NS = "http://audit.services.cud.iac.spb.ru/";
 
-     Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
+     final static Logger LOGGER = LoggerFactory.getLogger(AuditServiceImpl.class);
      
      @Resource(name="wsContext")
      private WebServiceContext wsContext;
@@ -60,7 +60,7 @@ public class AuditServiceImpl implements AuditService{
 			    @WebParam(name = "uidUser", targetNamespace = NS) String uidUser,
 			    @WebParam(name = "userFunctions", targetNamespace = NS) List<AuditFunction> userFunctions) throws GeneralFailure{
     	 
-    	 logger.info("audit");
+    	 LOGGER.debug("audit");
 			(new ContextAccessManager()).audit(
 					getIDSystem(), uidUser, userFunctions, getIDUser(), getIPAddress());
 	 }
@@ -79,7 +79,7 @@ public class AuditServiceImpl implements AuditService{
 	      
 	        String idSystem = (String)request.getSession().getAttribute("cud_sts_principal"); 
 	        
-	        logger.info("getIDSystem:"+idSystem);
+	        LOGGER.debug("getIDSystem:"+idSystem);
 	        
 	               
 	    return idSystem;
@@ -99,7 +99,7 @@ public class AuditServiceImpl implements AuditService{
 	        	//и в сессию клали уже Long idUser, 
 	        	//поэтому при извлечении из сессии можно было делать привидение к Long
 	        	//сейчас же мы кладём в сессиию ид пользователя из текстового поля запроса
-	        	//Long idUser = (Long)request.getSession().getAttribute("user_id_principal"); 
+	        	//Long i/dUser = (Long/request.getSe/ssion().getAttr/ibute("user_id_principal"); 
 	        
 	        	
 	        	if(request.getSession().getAttribute("user_id_principal")!=null&&
@@ -108,7 +108,7 @@ public class AuditServiceImpl implements AuditService{
 	        	  //это заявитель
 	        		idUser = new Long((String)request.getSession().getAttribute("user_id_principal")); 
 	            
-	            //  logger.info("getIDUser:"+idUser);
+	             
 	        
 	         	}else{
 	         		//анаоним

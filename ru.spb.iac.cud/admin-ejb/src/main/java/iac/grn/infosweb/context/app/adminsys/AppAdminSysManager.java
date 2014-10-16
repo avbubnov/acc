@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,53 +48,50 @@ public class AppAdminSysManager extends BaseManager{
 		
 		 log.info("appAdminSysManager:invokeLocal");
 		 try{
-			 String orderQuery=null;
+			 String orderQueryAppAdmin=null;
 			 log.info("hostsManager:invokeLocal");
 			 
 			 AppAdminSysStateHolder appAdminSysStateHolder = (AppAdminSysStateHolder)
 					  Component.getInstance("appAdminSysStateHolder",ScopeType.SESSION);
-			 HashMap<String, String> filterMap = appAdminSysStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = appAdminSysStateHolder.getColumnFilterValues();
 			 String st=null;
 			  
-			 if(type.equals("list")){
-				 log.info("invokeLocal:list:01");
+			 if("list".equals(type)){
+				 log.info("AppAdmin:invokeLocal:list:01");
 				 
 				 Set<Map.Entry<String, String>> set = appAdminSysStateHolder.getSortOrders().entrySet();
                  for (Map.Entry<String, String> me : set) {
       		       log.info("me.getKey+:"+me.getKey());
       		       log.info("me.getValue:"+me.getValue());
       		       
-      		       if(orderQuery==null){
-      		    	 orderQuery="order by "+me.getKey()+" "+me.getValue();
+      		       if(orderQueryAppAdmin==null){
+      		    	 orderQueryAppAdmin="order by "+me.getKey()+" "+me.getValue();
       		       }else{
-      		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
+      		    	 orderQueryAppAdmin=orderQueryAppAdmin+", "+me.getKey()+" "+me.getValue();  
       		       }
       		     }
-                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 log.info("invokeLocal:list:orderQueryAppAdmin:"+orderQueryAppAdmin);
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	   		      
-    	   		     if(me.getKey().equals("t1_crt_date")){  
-    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	    		 Set<Map.Entry<String, String>> setFilterAppAdmin = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterAppAdmin) {
+    	              
+    	   		     if("t1_crt_date".equals(me.getKey())){  
+    	        	   
     	        	   //делаем фильтр на начало  
     	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
     	    	   
-    	   		     }else if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	   		     }else if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
     	    	    	 
     	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	    	    	 
     	    	     }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
     	        		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	        	  }
     	              }
     	    	   }
-                 log.info("invokeLocal:list:filterQuery:"+st);
+                 log.info("AppAdmin:invokeLocal:list:filterQuery:"+st);
 
              
                List<Object[]> lo=null;
@@ -172,7 +169,7 @@ public class AppAdminSysManager extends BaseManager{
                 "and CL_dep_app.ID_SRV=t04_APP.CL_dep_ID "+
              ") t1 "+
               (st!=null ? " where "+st :" ")+
-              (orderQuery!=null ? orderQuery+", t1_id desc " : " order by t1_id desc "))
+              (orderQueryAppAdmin!=null ? orderQueryAppAdmin+", t1_id desc " : " order by t1_id desc "))
               .setFirstResult(firstRow)
               .setMaxResults(numberOfRows)
               .getResultList();
@@ -181,29 +178,29 @@ public class AppAdminSysManager extends BaseManager{
                for(Object[] objectArray :lo){
             	   try{
             	     ui= new AppAdminSysItem(
-            	    		 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-            				 (objectArray[3]!=null?objectArray[3].toString():""),
-            				 (objectArray[4]!=null?objectArray[4].toString():""),
-            				 (objectArray[5]!=null?objectArray[5].toString():""),
-            				 (objectArray[6]!=null?objectArray[6].toString():""),
+            	    		objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+            				objectArray[3]!=null?objectArray[3].toString():"",
+            				objectArray[4]!=null?objectArray[4].toString():"",
+            				objectArray[5]!=null?objectArray[5].toString():"",
+            				objectArray[6]!=null?objectArray[6].toString():"",
             				 
-            				 (objectArray[7]!=null?new Long(objectArray[7].toString()):null),
-	            			 (objectArray[8]!=null?objectArray[8].toString():""),
-	            			 (objectArray[9]!=null?objectArray[9].toString():""),
-	            			 (objectArray[10]!=null?objectArray[10].toString():""),
+            				objectArray[7]!=null?new Long(objectArray[7].toString()):null,
+	            			objectArray[8]!=null?objectArray[8].toString():"",
+	            			objectArray[9]!=null?objectArray[9].toString():"",
+	            			objectArray[10]!=null?objectArray[10].toString():"",
 	            			 
-	            			 (objectArray[11]!=null?objectArray[11].toString():""),
+	            			objectArray[11]!=null?objectArray[11].toString():"",
 	            			 
-	            			 (objectArray[12]!=null?new Long(objectArray[12].toString()):null),
+	            			objectArray[12]!=null?new Long(objectArray[12].toString()):null,
 	            			 
-	            			 (objectArray[13]!=null?objectArray[13].toString():""),
-	            			 (objectArray[14]!=null?objectArray[14].toString():""),
-	            			 (objectArray[15]!=null?objectArray[15].toString():""),
+	            			objectArray[13]!=null?objectArray[13].toString():"",
+	            			objectArray[14]!=null?objectArray[14].toString():"",
+	            			objectArray[15]!=null?objectArray[15].toString():"",
 	            			 
-	            			 (objectArray[16]!=null?objectArray[16].toString():""), 
-	            			 (objectArray[17]!=null?Integer.parseInt(objectArray[17].toString()):1)
+	            			objectArray[16]!=null?objectArray[16].toString():"", 
+	            			objectArray[17]!=null?Integer.parseInt(objectArray[17].toString()):1
             	    		 );
             	     auditList.add(ui);
             	   }catch(Exception e1){
@@ -211,29 +208,17 @@ public class AppAdminSysManager extends BaseManager{
             	   }
                }  
                
-             log.info("invokeLocal:list:02");
+             log.info("AppAdmin:invokeLocal:list:02");
              
-			 } else if(type.equals("count")){
-				 log.info("IHReposList:count:01");
+			 } else if("count".equals(type)){
+				 log.info("AppAdmin:count:01");
 				 
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	   		    
-    	            	  /*
-    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
-    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	        	//   }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
-    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	        	 //  }
-    	            	 */ 
+    	    		 Set<Map.Entry<String, String>> setFilterAppAdmin = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterAppAdmin) {
     	            	  
-    	              if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	              if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
      	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	              }else{
     	            	 st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
@@ -242,13 +227,6 @@ public class AppAdminSysManager extends BaseManager{
     	            	  
     	              }
     	    	   }
-				 
-				/* 
-				 auditCount = (Long)entityManager.createQuery(
-						 "select count(au) " +
-				         "from AcUser au "+
-				         (st!=null ? " where "+st :""))
-		                .getSingleResult();*/
 				 
 				
 				 auditCount = ((java.math.BigDecimal)entityManager.createNativeQuery(
@@ -319,12 +297,12 @@ public class AppAdminSysManager extends BaseManager{
                .getSingleResult()).longValue();
                  
                  
-               log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+               log.info("AppAdmin:invokeLocal:count:02:"+auditCount);
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
-			  log.error("invokeLocal:error:"+e);
+			  log.error("AppAdmin:invokeLocal:error:"+e);
 			  evaluteForList=false;
 			  FacesMessages.instance().add("Ошибка!");
 		}
@@ -419,29 +397,29 @@ public class AppAdminSysManager extends BaseManager{
 	        		   log.info("AppAdminSysManager:getUserItem:login:"+objectArray[1].toString());
 	        		   
 	        		   ui= new AppAdminSysItem(
-	        				   (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-	            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-	            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-	            				 (objectArray[3]!=null?objectArray[3].toString():""),
-	            				 (objectArray[4]!=null?objectArray[4].toString():""),
-	            				 (objectArray[5]!=null?objectArray[5].toString():""),
-	            				 (objectArray[6]!=null?objectArray[6].toString():""),
+	        				  objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+	            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+	            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+	            				objectArray[3]!=null?objectArray[3].toString():"",
+	            				objectArray[4]!=null?objectArray[4].toString():"",
+	            				objectArray[5]!=null?objectArray[5].toString():"",
+	            				objectArray[6]!=null?objectArray[6].toString():"",
 	            				 
-	            				 (objectArray[7]!=null?new Long(objectArray[7].toString()):null),
-		            			 (objectArray[8]!=null?objectArray[8].toString():""),
-		            			 (objectArray[9]!=null?objectArray[9].toString():""),
-		            			 (objectArray[10]!=null?objectArray[10].toString():""),
+	            				objectArray[7]!=null?new Long(objectArray[7].toString()):null,
+		            			objectArray[8]!=null?objectArray[8].toString():"",
+		            			objectArray[9]!=null?objectArray[9].toString():"",
+		            			objectArray[10]!=null?objectArray[10].toString():"",
 		            			 
-		            			 (objectArray[11]!=null?objectArray[11].toString():""),
+		            			objectArray[11]!=null?objectArray[11].toString():"",
 		            			 
-		            			 (objectArray[12]!=null?new Long(objectArray[12].toString()):null),
+		            			objectArray[12]!=null?new Long(objectArray[12].toString()):null,
 		            			 
-		            			 (objectArray[13]!=null?objectArray[13].toString():""),
-		            			 (objectArray[14]!=null?objectArray[14].toString():""),
-		            			 (objectArray[15]!=null?objectArray[15].toString():""),
+		            			objectArray[13]!=null?objectArray[13].toString():"",
+		            			objectArray[14]!=null?objectArray[14].toString():"",
+		            			objectArray[15]!=null?objectArray[15].toString():"",
 		            			 
-		            			 (objectArray[16]!=null?objectArray[16].toString():""),
-		            			 (objectArray[17]!=null?Integer.parseInt(objectArray[17].toString()):1)
+		            			objectArray[16]!=null?objectArray[16].toString():"",
+		            			objectArray[17]!=null?Integer.parseInt(objectArray[17].toString()):1
 	            			   );
 	        	     return ui;
 	        	   }catch(Exception e1){
@@ -471,8 +449,7 @@ public class AppAdminSysManager extends BaseManager{
 	       Long idArm=null;
 	       int modeExec=1;
 	       
-	       String rolesLine=null; 
-	       
+	        
 		   try{
 			 
 			 if(sessionId==null){
@@ -533,7 +510,7 @@ public class AppAdminSysManager extends BaseManager{
 		        	 //ничего не делаем. и так есть в базе
 		        	 log.info("AppAdminSysManager:createAdminSys:04");
 		         }else{
-		           // arList.add(au);
+		           
 		            guuExistList.add(au);
 		            log.info("AppAdminSysManager:createAdminSys:05");
 		         }
@@ -697,7 +674,7 @@ public class AppAdminSysManager extends BaseManager{
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("idApp"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("created"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
-			  // auditItemsListSelect.add(ac.getAuditItemsMap().get("usrFio"));
+			  
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
 		   }
 	       return this.auditItemsListSelect;
@@ -709,9 +686,9 @@ public class AppAdminSysManager extends BaseManager{
 	   log.info("AppAdminSysManager:getAuditItemsListContext");
 	   if(auditItemsListContext==null){
 		   AppAdminSysContext ac= new AppAdminSysContext();
-		  // auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		  
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 		   
 	   }
@@ -722,22 +699,9 @@ public class AppAdminSysManager extends BaseManager{
 	  
 	  if(headerItemsListContext==null){
 		   AppAdminSysContext ac= new AppAdminSysContext();
-		//   headerItemsListContext = new ArrayList<BaseTableItem>();
 		   headerItemsListContext=ac.getHeaderItemsList();
 		   
-		/*   
-		   AppAccessItem ui = (AppAccessItem)
-					  Component.getInstance("contextBeanView",ScopeType.EVENT); 
-		   
-		   log.info("AppAccessManager:getHeaderItemsListContext:01");
-		   
-		   if(ui!=null){
-			   log.info("AppAccessManager:getHeaderItemsListContext:ui.getStatus():"+ui.getStatus());
-			   if(ui.getStatus()!=2){
-				   log.info("AppAccessManager:getHeaderItemsListContext:03:"+headerItemsListContext.get(2).getItems().g);
-				   headerItemsListContext.get(2).getItems().remove("rejectReason");
-			   }
-		   }*/
+	
 		   
 	   }
 	
@@ -753,7 +717,7 @@ public class AppAdminSysManager extends BaseManager{
 	 	
 	 		headerItemsListContext=new ArrayList<HeaderTableItem>();
 	 				
-	 	    //List<String> idsList = Arrays.asList(ids);
+	 	    
 	 	
 	 	     List<String> idsList =  Arrays.asList(ids.split(","));
 	 	   

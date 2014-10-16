@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,8 +40,8 @@ import org.jboss.seam.contexts.Contexts;
 import iac.cud.infosweb.local.service.ServiceReestr;
 import iac.grn.infosweb.context.proc.TaskProcessor;
 
-//import org.jboss.seam.annotations.Logger;
-//import org.jboss.seam.log.Log;
+ 
+ 
 import org.apache.log4j.Logger;
 
 @Stateless
@@ -56,14 +56,11 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 
 	private Logger log = Logger.getLogger(IHArchiveToken.class);
 
-	// private static String file_path="/distr/jboss/data/audit/token/";
-	// private static String file_path="/home/jboss/jboss/data/audit/token/";
+	// "/home/jboss/jboss/data/audit/token/";
 	private static String file_path = Configuration.getArchiveToken();
 
 	private static String param_code = "to_archive_audit_token";
 
-	// private static final String
-	// proc_atoken_info_file=System.getProperty("jboss.server.config.url")+"proc_atoken_info.properties";
 	private static final String proc_atoken_info_file = System
 			.getProperty("jboss.server.config.dir")
 			+ "/"
@@ -81,15 +78,12 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 		ScheduledFuture shf = scheduler.scheduleAtFixedRate(new Runnable() {
 			public void run() {
 
-				// String path =
-				// System.getProperty("jboss.server.config.url")+"conf_loaddata_exec.properties";
-
+		
 				try {
 
 					log.info("IHArchiveToken:process_start:run");
 
-					// synchronized(this){
-
+			
 					Calendar cln = Calendar.getInstance();
 
 					int day = cln.get(Calendar.DAY_OF_MONTH);
@@ -101,9 +95,8 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 						process_start_content();
 					}
 
-					// }
 				} catch (Exception e) {
-					log.error("IHArchiveToken:process_start:run:error:" + e);
+					log.error("IHArchiveToken:process_start:run:error:", e);
 				} finally {
 					try {
 
@@ -115,15 +108,13 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 			}
 		}, calendar(), 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS);
 
-		// Contexts.getApplicationContext().set("archiveAuditSysScheduled",
-		// shf);
-
+	
 		if (TaskProcessor.getControls().containsKey("archiveTokenScheduled")) {
 			try {
 				TaskProcessor.getControls().get("archiveTokenScheduled")
 						.cancel(false);
 			} catch (Exception e) {
-				log.info("IHArchiveToken:process_start:error:" + e);
+				log.info("IHArchiveToken:process_start:error:", e);
 			}
 		}
 		TaskProcessor.getControls().put("archiveTokenScheduled", shf);
@@ -138,9 +129,7 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 		log.info("IHConfLoadData:stopTask:01");
 
 		try {
-			// ScheduledFuture shf = (ScheduledFuture)
-			// Contexts.getApplicationContext().get("archiveAuditSysScheduled");
-
+		
 			ScheduledFuture shf = TaskProcessor.getControls().get(
 					"archiveTokenScheduled");
 
@@ -150,7 +139,7 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 				shf.cancel(false);
 			}
 		} catch (Exception e) {
-			log.error("IHConfLoadData:stopTask:error:" + e);
+			log.error("IHConfLoadData:stopTask:error:", e);
 			throw e;
 		}
 
@@ -159,7 +148,6 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 
 	private synchronized void process_start_content() throws Exception {
 
-		BaseParamItem bpi = new BaseParamItem();
 		String prev_date = null;
 		BufferedWriter bw = null;
 		File file = null;
@@ -205,7 +193,6 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 									+ monthInterval
 									+ "' month, 'MM.YYYY'),'DD.MM.YYYY')  "
 									+ "order by tt.CREATED ")
-					// .setParameter(1, monthInterval.toString())
 					.getResultList();
 			log.info("IHArchiveToken:process_start_content:02");
 
@@ -230,7 +217,7 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 							+ "UP_SERVICE" + "\n");
 				}
 
-				bw.append((objectArray[1] != null ? objectArray[1].toString()
+				bw.append ((objectArray[1] != null ? objectArray[1].toString()
 						: "null")
 						+ "\t"
 						+ (objectArray[2] != null ? objectArray[2].toString()
@@ -265,16 +252,14 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 					.executeUpdate();
 
 			utx.commit();
-			// jpi.put("list", JiList) ;
 		} catch (Exception e) {
-			log.error("IHArchiveToken:process_start_content:error" + e);
+			log.error("IHArchiveToken:process_start_content:error", e);
 
 			utx.rollback();
 
 			/*
 			 * можно в принципе файл и оставить. если в базе сведения не
 			 * удалились, то при следующем запуске файл будет перезаписан
-			 * if(bw!=null){ bw.close(); } file.delete();
 			 */
 
 			hit = false;
@@ -287,9 +272,7 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 						+ hit);
 
 				DateFormat df = new SimpleDateFormat("dd.MM.yy HH:mm:ss");
-				// URL url = new URL(proc_atoken_info_file);
-				// File f=new File(url.toURI());
-
+		
 				File f = new File(proc_atoken_info_file);
 
 				Properties properties = new Properties();
@@ -301,7 +284,7 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 				properties.store(os = new FileOutputStream(f), null);
 
 			} catch (Exception e) {
-				log.error("IHArchiveToken:process_start_content:error:2:" + e);
+				log.error("IHArchiveToken:process_start_content:error:2:", e);
 			} finally {
 				try {
 					if (os != null) {
@@ -320,8 +303,7 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 	}
 
 	private static Long calendar() {
-		// System.out.println("calendar:01");
-
+	
 		Long currentTime = System.currentTimeMillis();
 
 		// 5.00 в jboss - это в реальном времени 6.00
@@ -340,10 +322,9 @@ public class IHArchiveToken extends IHArchiveBase implements IHLocal {
 			start = start + 24 * 60 * 60 * 1000;
 		}
 
-		System.out.println("IHArchiveToken:calendar:start:" + start);
-
+		
 		return start;
-		// return 5000L;
+		//  5000L;
 	}
 
 }

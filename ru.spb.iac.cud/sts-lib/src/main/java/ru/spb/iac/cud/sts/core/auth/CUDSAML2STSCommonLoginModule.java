@@ -4,7 +4,7 @@ import java.security.Principal;
 import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -129,7 +129,7 @@ import org.w3c.dom.Element;
 public abstract class CUDSAML2STSCommonLoginModule extends
 		SAMLTokenFromHttpRequestAbstractLoginModule {
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDSAML2STSCommonLoginModule.class);
 
 	protected String stsConfigurationFile;
@@ -208,7 +208,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			Map<String, ?> sharedState, Map<String, ?> options) {
 		super.initialize(subject, callbackHandler, sharedState, options);
 
-		loggerslf4j.info("initialize:01");
+		LOGGERSLF4J.debug("initialize:01");
 
 		this.options.putAll(options);
 		this.rawOptions.putAll(options);
@@ -262,7 +262,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			}
 		}
 
-		loggerslf4j.info("initialize:02");
+		LOGGERSLF4J.debug("initialize:02");
 	}
 
 	/*
@@ -274,7 +274,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 	public boolean login() throws LoginException {
 		// if shared data exists, set our principal and assertion variables.
 
-		loggerslf4j.info("login:01");
+		LOGGERSLF4J.debug("login:01");
 
 		if (super.login()) {
 			Object sharedPrincipal = super.sharedState
@@ -299,7 +299,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			return true;
 		}
 
-		loggerslf4j.info("login:02");
+		LOGGERSLF4J.debug("login:02");
 
 		// obtain the assertion from the callback handler.
 		ObjectCallback callback = new ObjectCallback(null);
@@ -308,7 +308,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			if (getSamlTokenHttpHeader() != null) {
 				this.credential = getCredentialFromHttpRequest();
 			} else {
-				loggerslf4j.info("login:02_2");
+				LOGGERSLF4J.debug("login:02_2");
 
 				super.callbackHandler.handle(new Callback[] { callback });
 
@@ -320,14 +320,14 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 
 				if (callback.getCredential() instanceof SamlCredential == false) {
 
-					loggerslf4j.info("login:02_3");
+					LOGGERSLF4J.debug("login:02_3");
 
 					throw logger
 							.authSharedCredentialIsNotSAMLCredential(callback
 									.getCredential().getClass().getName());
 				}
 
-				loggerslf4j.info("login:02_4");
+				LOGGERSLF4J.debug("login:02_4");
 
 				this.credential = (SamlCredential) callback.getCredential();
 			}
@@ -336,18 +336,18 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			throw logger.authErrorHandlingCallback(e);
 		}
 
-		loggerslf4j.info("login:03");
+		LOGGERSLF4J.debug("login:03");
 
 		// if there is no shared data, validate the assertion using the STS.
 		if (localValidation) {
 
-			loggerslf4j.info("login:04");
+			LOGGERSLF4J.debug("login:04");
 
 			logger.trace("Local Validation is being Performed");
 			try {
 				boolean isValid = localValidation(assertionElement);
 
-				loggerslf4j.info("login:05:" + isValid);
+				LOGGERSLF4J.debug("login:05:" + isValid);
 				if (isValid) {
 					logger.trace("Local Validation passed.");
 				}
@@ -376,7 +376,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			}
 		}
 
-		loggerslf4j.info("login:06");
+		LOGGERSLF4J.debug("login:06");
 
 		// if the assertion is valid, create a principal containing the
 		// assertion subject.
@@ -417,7 +417,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			throw logger.authFailedToParseSAMLAssertion(e);
 		}
 
-		loggerslf4j.info("login:07");
+		LOGGERSLF4J.debug("login:07");
 
 		// if password-stacking has been configured, set the principal and the
 		// assertion in the shared map.
@@ -427,7 +427,7 @@ public abstract class CUDSAML2STSCommonLoginModule extends
 			super.sharedState.put("javax.security.auth.login.password",
 					this.credential);
 		}
-		loggerslf4j.info("login:08");
+		LOGGERSLF4J.debug("login:08");
 
 		return (super.loginOk = true);
 	}

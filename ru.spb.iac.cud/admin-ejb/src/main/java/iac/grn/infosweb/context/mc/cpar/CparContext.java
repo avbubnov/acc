@@ -6,24 +6,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class CparContext {
 
-    private HashMap<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
+    private Map<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
 	
-	public HashMap <String, BaseTableItem> getAuditItemsMap() {
+	public Map <String, BaseTableItem> getAuditItemsMap() {
         return this.auditItemsMap;
     }
-	/*private TreeMap<String, BaseTableItem> auditItemsMap=new TreeMap<String, BaseTableItem>();
-	
-	public TreeMap <String, BaseTableItem> getAuditItemsMap() {
-        return this.auditItemsMap;
-    }*/
-	
+		
 	public List <BaseTableItem> getAuditItemsCollection() {
 		
 		List<BaseTableItem> btiList = new ArrayList<BaseTableItem>(this.auditItemsMap.values());
@@ -48,7 +43,6 @@ public class CparContext {
     }
 	
 	public CparContext(){
-		//auditItemsMap.put("signObject",new BaseTableItem("Наименование", "...", "signObject", 1));
 		auditItemsMap.put("nameParam",new BaseTableItem("Наименование", "...", "nameParam", 1));
 		auditItemsMap.put("valueParam",new BaseTableItem("Значение", "...", "valueParam", 2));
 		auditItemsMap.put("servName",new BaseTableItem("Сервис", "...", "servName", "o1.full", 3));

@@ -40,15 +40,9 @@ public class ActionsLogKnlT extends BaseItem implements Serializable {
     @Temporal( TemporalType.DATE)
 	private Date modified;
 
-	//bi-directional many-to-one association to ActionsBssT
-    @ManyToOne
+	 @ManyToOne
 	@JoinColumn(name="UP_ACTIONS")
 	private ActionsBssT actionsBssT;
-
-	//bi-directional many-to-one association to TokenKnlT
-  /*  @ManyToOne
-	@JoinColumn(name="UP_TOKEN")
-	private TokenKnlT tokenKnlT;*/
 
     @ManyToOne
    	@JoinColumn(name="UP_USERS")
@@ -128,14 +122,6 @@ public class ActionsLogKnlT extends BaseItem implements Serializable {
 	public void setActionsBssT(ActionsBssT actionsBssT) {
 		this.actionsBssT = actionsBssT;
 	}
-	
-/*	public TokenKnlT getTokenKnlT() {
-		return this.tokenKnlT;
-	}
-	public void setTokenKnlT(TokenKnlT tokenKnlT) {
-		this.tokenKnlT = tokenKnlT;
-	}*/
-	
 	
 	
 	public String getActName() {

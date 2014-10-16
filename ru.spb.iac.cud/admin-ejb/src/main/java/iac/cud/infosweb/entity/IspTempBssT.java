@@ -21,13 +21,7 @@ import java.util.Set;
 @Entity
 @Table(name="ISP_TEMP_BSS_T")
 @Name("clTempBean")
-/*@Name("clOrgBean")
-@Roles({
-	@Role(name="clOrgBeanCrt"),
-    @Role(name="clUsrBean"),
-    @Role(name="clUsrBeanCrt"),
-})
-*/
+
 public class IspTempBssT extends BaseItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -39,8 +33,6 @@ public class IspTempBssT extends BaseItem implements Serializable {
 
     @Temporal( TemporalType.DATE)
 	private Date created;
-
-	//private Long creator;
 
 	private String email;
 
@@ -59,11 +51,6 @@ public class IspTempBssT extends BaseItem implements Serializable {
 
 	@Column(name="IS_EXTERNAL")
 	private Long isExternal;
-
-	//private Long modificator;
-
-   // @Temporal( TemporalType.DATE)
-	//private Date modified;
 
 	private String phone;
 
@@ -91,13 +78,6 @@ public class IspTempBssT extends BaseItem implements Serializable {
 	@Column(name="UNI_ID")
 	private String uniId;
 
-	
-	//@OneToMany(mappedBy="acClOrganization2")
-//	private Set<AcUser> acUsers;
-
-	//@OneToMany(mappedBy="acClUser2")
-	//private Set<AcUser> acUsersUser;
-	
 	@Transient
 	private String department;
 	
@@ -131,15 +111,7 @@ public class IspTempBssT extends BaseItem implements Serializable {
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-/*
-	public Long getCreator() {
-		return this.creator;
-	}
 
-	public void setCreator(Long creator) {
-		this.creator = creator;
-	}
-*/
 	public String getEmail() {
 		return this.email;
 	}
@@ -203,23 +175,7 @@ public class IspTempBssT extends BaseItem implements Serializable {
 	public void setIsExternal(Long isExternal) {
 		this.isExternal = isExternal;
 	}
-/*
-	public Long getModificator() {
-		return this.modificator;
-	}
 
-	public void setModificator(Long modificator) {
-		this.modificator = modificator;
-	}
-
-	public Date getModified() {
-		return this.modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
-	}
-*/
 	public String getPhone() {
 		return this.phone;
 	}
@@ -300,20 +256,6 @@ public class IspTempBssT extends BaseItem implements Serializable {
 		this.uniId = uniId;
 	}
 
-	/*public Set <AcUser> getAcUsers() {
-		return this.acUsers;
-	}
-	public void setAcUsers(Set<AcUser> acUsers) {
-		this.acUsers = acUsers;
-	}
-		
-	public Set <AcUser> getAcUsersUser() {
-		return this.acUsersUser;
-	}
-	public void setAcUsersUser(Set<AcUser> acUsersUser) {
-		this.acUsersUser = acUsersUser;
-	}*/
-	
 	public String getDepartment() {
 		return this.department;
 	}

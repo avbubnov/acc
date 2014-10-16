@@ -30,7 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 public class GOSTSignatureUtil {
 
     
-    private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
+    private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory.getLogger();
     
     /**
      * Marshall a SignatureType to output stream
@@ -41,7 +41,7 @@ public class GOSTSignatureUtil {
      * @throws JAXBException
      */
     public static void marshall(SignatureType signature, OutputStream os) throws JAXBException, SAXException {
-        throw logger.notImplementedYet("NYI");
+        throw LOGGER.notImplementedYet("NYI");
         /*
          * JAXBElement<SignatureType> jsig = objectFactory.createSignature(signature); Marshaller marshaller =
          * JAXBUtil.getValidatingMarshaller(pkgName, schemaLocation); marshaller.marshal(jsig, os);
@@ -75,11 +75,10 @@ public class GOSTSignatureUtil {
      */
     public static byte[] sign(String stringToBeSigned, PrivateKey signingKey) throws GeneralSecurityException {
         if (stringToBeSigned == null)
-            throw logger.nullArgumentError("stringToBeSigned");
+            throw LOGGER.nullArgumentError("stringToBeSigned");
         if (signingKey == null)
-            throw logger.nullArgumentError("signingKey");
+            throw LOGGER.nullArgumentError("signingKey");
 
-        String algo = signingKey.getAlgorithm();
         
        // Signature sig = getSignature(algo);
         Signature sig = Signature.getInstance("GOST3411withGOST3410EL");
@@ -101,16 +100,15 @@ public class GOSTSignatureUtil {
     public static boolean validate(byte[] signedContent, byte[] signatureValue, PublicKey validatingKey)
             throws GeneralSecurityException {
         if (signedContent == null)
-            throw logger.nullArgumentError("signedContent");
+            throw LOGGER.nullArgumentError("signedContent");
         if (signatureValue == null)
-            throw logger.nullArgumentError("signatureValue");
+            throw LOGGER.nullArgumentError("signatureValue");
         if (validatingKey == null)
-            throw logger.nullArgumentError("validatingKey");
+            throw LOGGER.nullArgumentError("validatingKey");
 
         // We assume that the sigatureValue has the same algorithm as the public key
         // If not, there will be an exception anyway
-        String algo = validatingKey.getAlgorithm();
-       // Signature sig = getSignature(algo);
+        // Signature sig = getSignature(algo);
         Signature sig = Signature.getInstance("GOST3411withGOST3410EL");
         
         sig.initVerify(validatingKey);
@@ -131,13 +129,13 @@ public class GOSTSignatureUtil {
     public static boolean validate(byte[] signedContent, byte[] signatureValue, String signatureAlgorithm,
             X509Certificate validatingCert) throws GeneralSecurityException {
         if (signedContent == null)
-            throw logger.nullArgumentError("signedContent");
+            throw LOGGER.nullArgumentError("signedContent");
         if (signatureValue == null)
-            throw logger.nullArgumentError("signatureValue");
+            throw LOGGER.nullArgumentError("signatureValue");
         if (signatureAlgorithm == null)
-            throw logger.nullArgumentError("signatureAlgorithm");
+            throw LOGGER.nullArgumentError("signatureAlgorithm");
         if (validatingCert == null)
-            throw logger.nullArgumentError("validatingCert");
+            throw LOGGER.nullArgumentError("validatingCert");
 
         Signature sig = getSignature(signatureAlgorithm);
 
@@ -248,7 +246,7 @@ public class GOSTSignatureUtil {
             dsaKeyValue.setY(Base64.encodeBytes(Y).getBytes());
             return dsaKeyValue;
         }
-        throw logger.unsupportedType(key.toString());
+        throw LOGGER.unsupportedType(key.toString());
     }
 
     private static Signature getSignature(String algo) throws GeneralSecurityException {
@@ -259,7 +257,7 @@ public class GOSTSignatureUtil {
         } else if ("RSA".equalsIgnoreCase(algo)) {
             sig = Signature.getInstance(PicketLinkFederationConstants.RSA_SIGNATURE_ALGORITHM);
         } else
-            throw logger.signatureUnknownAlgo(algo);
+            throw LOGGER.signatureUnknownAlgo(algo);
         return sig;
     }
 

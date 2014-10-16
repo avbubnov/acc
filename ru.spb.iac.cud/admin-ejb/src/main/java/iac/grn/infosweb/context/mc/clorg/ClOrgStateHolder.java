@@ -1,7 +1,9 @@
 package iac.grn.infosweb.context.mc.clorg;
 
+import iac.grn.infosweb.session.table.BaseStateHolder;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,57 +27,25 @@ import org.richfaces.model.SortOrder;
 @Name("clOrgStateHolder")
 @Scope(ScopeType.SESSION)
 @AutoCreate
-public class ClOrgStateHolder {
+public class ClOrgStateHolder extends BaseStateHolder{
 	
 	   @Logger private Log log;
 	
-       private HashMap<String, String> sortOrders = new HashMap<String, String>();
-       private HashMap<String, String> columnFilterValues = new HashMap<String, String>();
-      
-       private List <String> auditFieldListSelect = new ArrayList<String>();
-       
+        
        @Create
        public void create() {
     	   log.info("datatableStateHolder:create");
     	
-    	 /*  auditFieldListSelect.add("extendedTimestamp");
-   		   auditFieldListSelect.add("objectName");
-		   auditFieldListSelect.add("osUser");
-		   auditFieldListSelect.add("osHost");
-		   auditFieldListSelect.add("sessionId");*/
-   		   
+    	   		   
         }
        
-       public List <String> getAuditFieldListSelect() {
-    	   return this.auditFieldListSelect;
-       }
-       public void setAuditFieldListSelect(List <String> auditFieldListSelect) {
-    	   this.auditFieldListSelect=auditFieldListSelect;
-       }
-       public HashMap<String, String> getColumnFilterValues() {
-    	//   log.info("getColumnFilterValues:01");
-           return columnFilterValues;
-       }
-       public void setColumnFilterValues(HashMap<String, String> columnFilterValues) {
-    	//   log.info("setColumnFilterValues:02"); 
-    	   this.columnFilterValues = columnFilterValues;
-       }
-       public HashMap<String, String> getSortOrders() {
-               return sortOrders;
-       }
-       public void setSortOrders(HashMap<String, String> sortOrders) {
-                this.sortOrders = sortOrders;
-       }
        public void clearFilters(){
     	   log.info("clearFilters:01");
     	   if(columnFilterValues!=null){
-          	//	log.info("clearFilters:02");
           		for(Iterator<Map.Entry<String, String>> it = columnFilterValues.entrySet().iterator(); it.hasNext();)
     			{
     			      Map.Entry<String, String> me = it.next();
-    			    //  System.out.print("me.getKey:"+me.getKey());
-    	     		//  log.info("; me.getValue:"+me.getValue());
-    	     		  if(me.getValue()==null||me.getValue().isEmpty()){
+    			 	  if(me.getValue()==null||me.getValue().isEmpty()){
     	     			  log.info("Ahtung!!!");
     	     			  it.remove();
     	     		   }

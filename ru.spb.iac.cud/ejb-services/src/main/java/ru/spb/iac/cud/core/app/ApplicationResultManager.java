@@ -1,6 +1,6 @@
 package ru.spb.iac.cud.core.app;
 
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.Stateless;
@@ -37,7 +37,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 
 	private static Map<Integer, String> status_map = new HashMap<Integer, String>();
 
-	Logger logger = LoggerFactory.getLogger(ApplicationResultManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(ApplicationResultManager.class);
 
 	static {
 		status_map.put(0, AppStatusClassif.IN_PROCESSING.name());
@@ -55,9 +55,9 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 
 		// principal не используетс€
 
-		logger.info("registration_result:appType:"/* +appType */);
+		LOGGER.debug("registration_result:appType:"/* +appType */);
 
-		List<AppResult> result_list = null;
+		List<AppResult> resultList = null;
 
 		try {
 
@@ -69,74 +69,74 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 
 				number_secret_valid(number, secret, appType);
 
-				if (result_list == null) {
-					result_list = new ArrayList<AppResult>();
+				if (resultList == null) {
+					resultList = new ArrayList<AppResult>();
 				}
 				if (appType.equals(AppTypeClassif.SYSTEM_REGISTRATION.name())) {
 
-					result_list.add(system_registration_result(number, secret,
+					resultList.add(system_registration_result(number, secret,
 							idUserAuth, IPAddress));
 
 				} else if (appType.equals(AppTypeClassif.USER_REGISTRATION
 						.name())) {
 
-					result_list.add(user_registration_result(number, secret,
+					resultList.add(user_registration_result(number, secret,
 							idUserAuth, IPAddress));
 
 				} else if (appType.equals(AppTypeClassif.USER_ACCESS_ROLES
 						.name())) {
 
-					result_list.add(user_access_roles_result(number, secret,
+					resultList.add(user_access_roles_result(number, secret,
 							idUserAuth, IPAddress));
 
-				} else if (appType.equals(AppTypeClassif.USER_ACCESS_ROLES
+				} else if (appType.equals(AppTypeClassif.USER_ACCESS_GROUPS
 						.name())) {
 
-					result_list.add(user_access_groups_result(number, secret,
+					resultList.add(user_access_groups_result(number, secret,
 							idUserAuth, IPAddress));
 
 				} else if (appType.equals(AppTypeClassif.USER_BLOCK.name())) {
 
-					result_list.add(user_block_result(number, secret,
+					resultList.add(user_block_result(number, secret,
 							idUserAuth, IPAddress));
 
 				} else if (appType.equals(AppTypeClassif.SYSTEM_MODIFICATION
 						.name())) {
 
-					result_list.add(system_modification_result(number, secret,
+					resultList.add(system_modification_result(number, secret,
 							idUserAuth, IPAddress));
 
 				} else if (appType.equals(AppTypeClassif.USER_MODIFICATION
 						.name())) {
 
-					result_list.add(user_modification_result(number, secret,
+					resultList.add(user_modification_result(number, secret,
 							idUserAuth, IPAddress));
 				} else if (appType.equals(AppTypeClassif.USER_MODIFICATION_ACC
 						.name())) {
 
-					result_list.add(user_modification_acc_result(number,
+					resultList.add(user_modification_acc_result(number,
 							secret, idUserAuth, IPAddress));
 				} else if (appType.equals(AppTypeClassif.USER_MODIFICATION_CERT
 						.name())) {
 
-					result_list.add(user_modification_cert_result(number,
+					resultList.add(user_modification_cert_result(number,
 							secret, idUserAuth, IPAddress));
 				}
 			}
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("system_registration_result:Error:" + e);
+			LOGGER.error("system_registration_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
-		return result_list;
+		return resultList;
 
 	}
 
 	private AppResult system_registration_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("system_registration_result:01");
+		LOGGER.debug("system_registration_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -178,14 +178,12 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 
 			}
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("system_registration_result:Error:" + e);
+			LOGGER.error("system_registration_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -194,7 +192,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	private AppResult user_registration_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("user_registration_result:01");
+		LOGGER.debug("user_registration_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -246,16 +244,13 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_registration_result:02");
+			LOGGER.debug("user_registration_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
-
-			logger.error("user_registration_result:Error:" + e);
+			// sys_audit
+			LOGGER.error("user_registration_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -264,7 +259,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	private AppResult user_access_roles_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("user_access_roles_result:01");
+		LOGGER.debug("user_access_roles_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -292,16 +287,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_access_roles_result:02");
+			LOGGER.debug("user_access_roles_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_access_roles_result:Error:" + e);
+			LOGGER.error("user_access_roles_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -310,7 +303,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	private AppResult user_access_groups_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("user_access_groups_result:01");
+		LOGGER.debug("user_access_groups_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -338,16 +331,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_access_groups_result:02");
+			LOGGER.debug("user_access_groups_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_access_groups_result:Error:" + e);
+			LOGGER.error("user_access_groups_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -356,7 +347,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	private AppResult user_block_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("user_block_result:01");
+		LOGGER.debug("user_block_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -384,16 +375,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_block_result:02");
+			LOGGER.debug("user_block_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_block_result:Error:" + e);
+			LOGGER.error("user_block_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -402,7 +391,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	private AppResult system_modification_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("system_modification_result:01");
+		LOGGER.debug("system_modification_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -430,16 +419,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("system_modification_result:02");
+			LOGGER.debug("system_modification_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("system_modification_result:Error:" + e);
+			LOGGER.error("system_modification_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -448,7 +435,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	private AppResult user_modification_result(String number, String secret,
 			Long idUserAuth, String IPAddress) throws GeneralFailure {
 
-		logger.info("user_modification_result:01");
+		LOGGER.debug("user_modification_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -476,16 +463,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_modification_result:02");
+			LOGGER.debug("user_modification_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_modification_result:Error:" + e);
+			LOGGER.error("user_modification_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -495,7 +480,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 			String secret, Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("user_modification_acc_result:01");
+		LOGGER.debug("user_modification_acc_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -523,16 +508,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_modification_acc_result:02");
+			LOGGER.debug("user_modification_acc_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_modification_acc_result:Error:" + e);
+			LOGGER.error("user_modification_acc_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -542,7 +525,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 			String secret, Long idUserAuth, String IPAddress)
 			throws GeneralFailure {
 
-		logger.info("user_modification_cert_result:01");
+		LOGGER.debug("user_modification_cert_result:01");
 
 		AppResult result = new AppResult();
 		List<AppAttribute> atList = new ArrayList<AppAttribute>();
@@ -570,16 +553,14 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 				result.setAttributes(atList);
 			}
 
-			logger.info("user_modification_cert_result:02");
+			LOGGER.debug("user_modification_cert_result:02");
 
-			// sys_audit(70L, "" ,
-			// "true; loginsLine:"+(loginsLine.length()>450?loginsLine.substring(0,
-			// 450):loginsLine), IPAddress, idUser );
+			// sys_audit
 
 		} catch (Exception e) {
-			// sys_audit(70L, "" , "error", IPAddress, idUser );
+			// sys_audit
 
-			logger.error("user_modification_cert_result:Error:" + e);
+			LOGGER.error("user_modification_cert_result:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 		return result;
@@ -588,7 +569,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 	public void number_secret_valid(String number, String secret, String type)
 			throws GeneralFailure {
 
-		logger.info("number_secret_valid:number:" + number);
+		LOGGER.debug("number_secret_valid:number:" + number);
 
 		Long numberLong = null;
 		String table_name = null;
@@ -638,13 +619,13 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 			// то в запросах допускаем любые значени€ секретов секретами с
 
 		} catch (NoResultException ex) {
-			logger.error("number_secret_valid:NoResultException");
+			LOGGER.error("number_secret_valid:NoResultException");
 			throw new GeneralFailure("Ќе верный номер за€вки[" + number + "]! ");
 		} catch (GeneralFailure e) {
-			logger.error("number_secret_valid:Error:" + e);
+			LOGGER.error("number_secret_valid:Error:", e);
 			throw e;
 		} catch (Exception e2) {
-			logger.error("number_secret_valid:Error:" + e2);
+			LOGGER.error("number_secret_valid:Error:" + e2);
 			throw new GeneralFailure(e2.getMessage());
 		}
 	}
@@ -656,7 +637,7 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 		try {
 			principal = principal.replaceAll(" ", "").toUpperCase();
 
-			logger.info("principal_exist:principal:" + principal);
+			LOGGER.debug("principal_exist:principal:" + principal);
 
 			idUser = ((java.math.BigDecimal) em
 					.createNativeQuery(
@@ -671,46 +652,18 @@ public class ApplicationResultManager implements ApplicationResultManagerLocal,
 									"and AU.STATUS = 1 ")
 					.setParameter(1, principal).getSingleResult()).longValue();
 
-			logger.info("principal_exist:idUser:" + idUser);
+			LOGGER.debug("principal_exist:idUser:" + idUser);
 
 			return idUser;
 
 		} catch (NoResultException ex) {
-			logger.error("principal_exist:NoResultException");
+			LOGGER.error("principal_exist:NoResultException");
 			throw new GeneralFailure("ѕользователь не идентифицирован! ");
 		} catch (Exception e) {
-			logger.error("principal_exist:Error:" + e);
+			LOGGER.error("principal_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
 
-	private void sys_audit(Long idServ, String inp_param, String result,
-			String ip_adr, Long idUser) {
-		logger.info("sys_audit");
-		try {
 
-			if (idUser != null && !idUser.equals(-1L)) {
-				em.createNativeQuery(
-						"insert into SERVICES_LOG_KNL_T( "
-								+ "ID_SRV,  UP_SERVICES, DATE_ACTION, CREATED, "
-								+ "input_param, result_value, ip_address, UP_USERS ) "
-								+ "values(SERVICES_LOG_KNL_SEQ.nextval , ?, sysdate, sysdate, "
-								+ "?, ?, ?, ? ) ").setParameter(1, idServ)
-						.setParameter(2, inp_param).setParameter(3, result)
-						.setParameter(4, ip_adr).setParameter(5, idUser)
-						.executeUpdate();
-			} else {
-				em.createNativeQuery(
-						"insert into SERVICES_LOG_KNL_T( "
-								+ "ID_SRV,  UP_SERVICES, DATE_ACTION, CREATED, "
-								+ "input_param, result_value, ip_address ) "
-								+ "values(SERVICES_LOG_KNL_SEQ.nextval , ?, sysdate, sysdate, "
-								+ "?, ?, ? ) ").setParameter(1, idServ)
-						.setParameter(2, inp_param).setParameter(3, result)
-						.setParameter(4, ip_adr).executeUpdate();
-			}
-		} catch (Exception e) {
-			logger.error("is_exist:Error:" + e);
-		}
-	}
 }

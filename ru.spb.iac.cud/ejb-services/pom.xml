@@ -47,6 +47,12 @@
   		<version>1.0.1.Final</version>
   	</dependency>
   	<dependency>
+    		<groupId>org.apache.santuario</groupId>
+    		<artifactId>xmlsec</artifactId>
+    		<version>1.5.1</version>
+   	</dependency>
+   	
+  	<dependency>
   		<groupId>org.slf4j</groupId>
   		<artifactId>slf4j-api</artifactId>
   		<version>1.6.1</version>

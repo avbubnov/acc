@@ -1,4 +1,4 @@
-package iac.grn.infosweb.session.audit.export;
+package iac.grn.infosweb.session.audit.actions;
 
 public enum ResourcesMap {
 
@@ -19,7 +19,18 @@ public enum ResourcesMap {
 	PROC_BIND_NOACT("proc_bind_noact"),
 	NAVIG("navig_tree"),
 	CONF_PARAM("conf_param"),
-	BINDING_IOGV("binding_iogv");
+	BINDING_IOGV("binding_iogv"),
+	CLASSIF_IOGV("classif_iogv"),
+	//
+	IS_GROUP("is_group"),
+	APP_USER("app_user"),
+	APP_USER_ACC("app_user_acc"),
+	APP_USER_UPDATE("app_user_update"),
+	APP_USER_CERT("app_user_cert"),
+	
+	APP_SYS("app_sys"),
+	APP_USER_BLOCK("app_user_block"),
+	APP_ORG_MAN("app_org_man");
 	
     private String code;
 	

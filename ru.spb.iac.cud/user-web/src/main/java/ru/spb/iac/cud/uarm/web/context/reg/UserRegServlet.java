@@ -34,7 +34,7 @@ public class UserRegServlet extends HttpServlet {
  
    private static final long serialVersionUID = 1L;
  
-   final static Logger logger = LoggerFactory.getLogger(UserRegServlet.class);
+   final static Logger LOGGER = LoggerFactory.getLogger(UserRegServlet.class);
    
    public UserRegServlet() {
         super();
@@ -45,7 +45,7 @@ public class UserRegServlet extends HttpServlet {
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
-		logger.info("UserRegServlet:service:01");
+		LOGGER.debug("UserRegServlet:service:01");
 		boolean success = false;
 		String email = null;
 				
@@ -63,7 +63,7 @@ public class UserRegServlet extends HttpServlet {
 				
 				String validationKeyTrue = (new BigInteger(email.getBytes("utf-8"))).toString(16);
 			
-				logger.info("UserRegServlet:service:02:"+validationKeyTrue);
+				LOGGER.debug("UserRegServlet:service:02:"+validationKeyTrue);
 				
 				if(validationKey.equals(validationKeyTrue)){
 					success = true;
@@ -71,13 +71,13 @@ public class UserRegServlet extends HttpServlet {
 			}
 			
 	    }catch(Exception e){
-	    	logger.error("UserRegServlet:service:error:"+e);
+	    	LOGGER.error("UserRegServlet:service:error:"+e);
 	    }
 		
 		if(success){
 			//!!!
 			HttpSession hs = (HttpSession) request.getSession(true); 
-			logger.info("UserRegServlet:service:03:"+hs.getId());
+			LOGGER.debug("UserRegServlet:service:03:"+hs.getId());
 			hs.setAttribute(CUDUserConsoleConstants.userEmailReg, email);
 		
 			response.sendRedirect(request.getContextPath()+"/context/registr/reg_user_step2.xhtml");

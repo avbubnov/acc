@@ -30,33 +30,32 @@ public class Crypto15Init {
 	public static void init() {
 		try {
 
-			// log.debug("Crypto15Init:init:01");
+			 
 
 			System.setProperty("org.apache.xml.security.resource.config",
 					"resource/jcp.xml");
 
 			org.apache.xml.security.Init.init();
 
-			// log.debug("Crypto15Init:init:02");
+			 
 
 		} catch (Exception e) {
-			log.error("Crypto15Init:init:error:" + e);
-			e.printStackTrace(System.out);
+			log.error("Crypto15Init:init:error:", e);
 		}
 	}
 
 	public static void fileInit() {
 
-		// log.debug("Crypto15Init:fileInit:01");
+		 
 		try {
-			InputStream is = Crypto15Init.class.getResourceAsStream("jcp.xml");
+			InputStream is = Crypto15Init.class.getResourceAsStream("/jcp.xml");
 
 			if (is == null) {
-				// log.debug("Crypto15Init:fileInit:02");
+				 
 				return;
 			}
 
-			// log.debug("Crypto15Init:fileInit:03");
+			 
 
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setFeature(
@@ -123,7 +122,7 @@ public class Crypto15Init {
 							// зарегистрирован
 							// это нормально, поэтому чтобы не увеличивать лог
 							// закомментируем
-							// log.error("Crypto15Init:fileInit:error_1:"+e1);
+							 
 						}
 					}
 				}
@@ -155,21 +154,21 @@ public class Crypto15Init {
 							// зарегистрирован
 							// это нормально, поэтому чтобы не увеличивать лог
 							// закомментируем
-							// log.error("Crypto15Init:fileInit:error_2:"+e1);
+							 
 						}
 					}
 				}
 
-				// log.debug("Crypto15Init:fileInit:04");
+				 
 				if ("JCEAlgorithmMappings".equals(tag)) {
 
-					// log.debug("Crypto15Init:fileInit:05");
+					 
 
 					Node algorithmsNode = ((Element) el).getElementsByTagName(
 							"Algorithms").item(0);
 					if (algorithmsNode != null) {
 
-						// log.debug("Crypto15Init:fileInit:06");
+						 
 
 						Element[] algorithms = XMLUtils.selectNodes(
 								algorithmsNode.getFirstChild(),
@@ -181,13 +180,13 @@ public class Crypto15Init {
 							Element element = algorithms[i];
 							String id = element.getAttribute("URI");
 
-							// log.debug("Crypto15Init:fileInit:07_1:"+id);
-							// log.debug("Crypto15Init:fileInit:07_2:"+element.getAttribute("JCEName"));
+							 
+							 
 
 							JCEMapper.register(id, new JCEMapper.Algorithm(
 									element));
 
-							// log.debug("Crypto15Init:fileInit:08");
+							 
 
 						}
 					}
@@ -218,7 +217,7 @@ public class Crypto15Init {
 							// зарегистрирован
 							// это нормально, поэтому чтобы не увеличивать лог
 							// закомментируем
-							// log.error("Crypto15Init:fileInit:error_3:"+e1);
+							 
 						}
 					}
 				}
@@ -249,7 +248,7 @@ public class Crypto15Init {
 
 						try {
 							ResourceResolver.register(JAVACLASS);
-						} catch (Throwable e) {
+						} catch (Exception e) {
 							log.warn(
 									"Cannot register:"
 											+ JAVACLASS
@@ -314,7 +313,6 @@ public class Crypto15Init {
 			}
 		} catch (Exception e) {
 			log.error("Crypto15Init:fileInit:error: ", e);
-			e.printStackTrace();
 		}
 	}
 

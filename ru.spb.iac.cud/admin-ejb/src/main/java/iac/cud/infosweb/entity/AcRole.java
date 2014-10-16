@@ -62,14 +62,9 @@ public class AcRole extends BaseItem implements Serializable {
 	@Column(name="SIGN_OBJECT")
 	private String sign;
 	
-	/*@OneToMany(mappedBy="acRole", fetch=FetchType.EAGER, cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
-	private Set<AcLinkRoleAppPagePrmssn> acLinkRoleAppPagePrmssns;*/
-
 	@OneToMany(mappedBy="acRole", cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
 	private Set<AcLinkRoleAppPagePrmssn> acLinkRoleAppPagePrmssns;
 
-	//16.12.13
-	//@OneToMany(mappedBy="acRole", cascade=CascadeType.REMOVE)
 	@OneToMany(mappedBy="acRole", cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
 	private List<AcLinkUserToRoleToRaion> acLinkUserToRoleToRaions;
 
@@ -82,9 +77,6 @@ public class AcRole extends BaseItem implements Serializable {
 
 	@Column(name="UP_IS")
 	private Long acApplication;
-	
-	//@Transient
-	//private Long arm;
 	
 	@Transient
 	private Boolean usrChecked=false;
@@ -110,19 +102,6 @@ public class AcRole extends BaseItem implements Serializable {
 	public Long getBaseId() {
 	   return this.idRol;
 	} 
-	/*public Long getArm() {
-		if(this.acLinkRoleAppPagePrmssns!=null&&this.arm==null){
-			Iterator it= this.acLinkRoleAppPagePrmssns.iterator();
-			AcLinkRoleAppPagePrmssn me = (AcLinkRoleAppPagePrmssn) it.next();
-           	this.arm = me.getAcAppPage().getAcApplication();
-       
-           	System.out.println("AcRole:getArm:idArm:"+this.arm);
-		}
-		return this.arm;
-	}
-	public void setArm(Long arm) {
-		this.arm=arm;
-	}*/
 	public Long getIdRol() {
 		return this.idRol;
 	}
@@ -215,13 +194,7 @@ public class AcRole extends BaseItem implements Serializable {
 		return this.usrChecked;
 	}
 	public void setUsrChecked(Boolean usrChecked){
-	//	System.out.println("AcRole:setUsrChecked:roleTitle:"+roleTitle);
-	// 	System.out.println("AcRole:setUsrChecked:usrChecked:"+usrChecked);
-	 /*	 try{
-			   throw new NullPointerException();
-		   }catch(Exception e){
-			  e.printStackTrace(System.out);
-		   }*/
+		 
 		this.usrChecked=usrChecked;
 	}
 	public Long getAcApplication() {

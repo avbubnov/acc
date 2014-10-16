@@ -42,8 +42,7 @@ public class SettingsKnlT extends BaseItem  implements Serializable {
 	@Column(name="description")
 	private String description;
 	
-	//bi-directional many-to-one association to ServicesBssT
-    @ManyToOne
+	 @ManyToOne
 	@JoinColumn(name="UP_SERVICES")
 	private ServicesBssT servicesBssT;
 

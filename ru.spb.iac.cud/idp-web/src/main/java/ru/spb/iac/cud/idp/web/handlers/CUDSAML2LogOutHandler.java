@@ -87,7 +87,7 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
 
     private final SPLogOutHandler sp = new SPLogOutHandler();
 
-    final static Logger loggerslf4j = LoggerFactory.getLogger(CUDSAML2LogOutHandler.class);
+    final static Logger LOGGERSLF4J = LoggerFactory.getLogger(CUDSAML2LogOutHandler.class);
     
      public void generateSAMLRequest(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
         if (request.getTypeOfRequestToBeGenerated() == null) {
@@ -136,7 +136,7 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
         public void handleStatusResponseType(SAML2HandlerRequest request, SAML2HandlerResponse response)
                 throws ProcessingException {
         	
-        	loggerslf4j.info("handleStatusResponseType:01");
+        	LOGGERSLF4J.debug("handleStatusResponseType:01");
         	
             // we got a logout response from a SP
             SAML2Object samlObject = request.getSAML2Object();
@@ -216,7 +216,7 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
 
         public void handleRequestType(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
            
-        	loggerslf4j.info("handleRequestType:01");
+        	LOGGERSLF4J.debug("handleRequestType:01");
         	
         	HTTPContext httpContext = (HTTPContext) request.getContext();
             HttpServletRequest httpServletRequest = httpContext.getRequest();
@@ -236,12 +236,12 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                 if (server == null)
                     throw logger.samlHandlerIdentityServerNotFoundError();
 
-                loggerslf4j.info("handleRequestType:02:"+issuer);
-                loggerslf4j.info("handleRequestType:03:"+relayState);
+                LOGGERSLF4J.debug("handleRequestType:02:"+issuer);
+                LOGGERSLF4J.debug("handleRequestType:03:"+relayState);
                 
                 String originalIssuer = (relayState == null) ? issuer : relayState;
 
-                loggerslf4j.info("handleRequestType:04:"+originalIssuer);
+                LOGGERSLF4J.debug("handleRequestType:04:"+originalIssuer);
                 
                 //String participant = this.getParticipant(server, sessionID, originalIssuer);
 
@@ -249,7 +249,7 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                 String participant = participant_arr[0];
                 String logoutUrl = participant_arr[1];
                 
-                loggerslf4j.info("handleRequestType:05:"+participant);
+                LOGGERSLF4J.debug("handleRequestType:05:"+participant);
                 
                 String logoutBackUrl = null;
                 
@@ -263,15 +263,15 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                 	try{
                 	 logoutBackUrl=URLDecoder.decode(logoutBackUrl , "UTF-8");
                 	}catch(Exception e){
-                		 loggerslf4j.error("handleRequestType:decode:error:"+e);
+                		 LOGGERSLF4J.error("handleRequestType:decode:error:"+e);
                 	}
                 }
                 
-                loggerslf4j.info("handleRequestType:05_2:"+logoutBackUrl);
+                LOGGERSLF4J.debug("handleRequestType:05_2:"+logoutBackUrl);
                 
                 if (participant == null || participant.equals(originalIssuer)) {
                 		 
-                	loggerslf4j.info("handleRequestType:06");
+                	LOGGERSLF4J.debug("handleRequestType:06");
                 	
                     // All log out is done
                     session.invalidate();
@@ -280,20 +280,20 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                     //!!!
                     server.stack().removeSession(sessionID);
                     
-                  //  generateSuccessStatusResponseType(logOutRequest.getID(), request, response, originalIssuer);
-                   /* generateSuccessStatusResponseType(logOutRequest.getID(), request, response, 
+                  //  generateSuccessStatusResponseType/(logOutRequest.getID(), /request, response, originalIssuer);
+                   /* generateSuccessStatusResponseType/(logOutRequest.getID(), request, response, 
                     		 logoutUrl);*/
                     generateSuccessStatusResponseType(logOutRequest.getID(), request, response, 
                     		logoutBackUrl!=null?logoutBackUrl:logoutUrl);
                     
-                    //boolean isPost = isPostBindingForResponse(server, participant, request);
+                    //boolean /isPost = /isPostBindingForResponse/(server, participant, request);
                     boolean isPost = isPostBindingForResponse(server, "["+participant+"]"+logoutUrl, request);
                     response.setPostBindingForResponse(isPost);
 
                     response.setSendRequest(false);
                 } else {
                 	
-                	loggerslf4j.info("handleRequestType:07");
+                	LOGGERSLF4J.debug("handleRequestType:07");
                 	 
                     // Put the participant in transit mode
                     server.stack().registerTransitParticipant(sessionID, participant);
@@ -368,9 +368,7 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                 throw logger.processingError(je);
             }
 
-           // loggerslf4j.info("generateSuccessStatusResponseType:01:"+
-           //  DocumentUtil.asString(response.getResultingDocument()));
-            
+             
             response.setDestination(originalIssuer);
         }
 
@@ -383,7 +381,7 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                 do {
                     participant = server.stack().pop(sessionID);
                     --participants;
-                    loggerslf4j.info("getParticipant:01:"+participant);
+                    LOGGERSLF4J.debug("getParticipant:01:"+participant);
                 } while (participants > 0 && participant.equals(originalRequestor));
             }
 
@@ -402,15 +400,15 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
                 do {
                     participant = server.stack().pop(sessionID);
                     --participants;
-                    loggerslf4j.info("getParticipant:01:"+participant);
-                //} while (participants > 0 && participant.equals(originalRequestor));
+                    LOGGERSLF4J.debug("getParticipant:01:"+participant);
+                //} while /(participants > 0 && participant/.equals(originalRequestor));
                     //participant=[sys]url
                     //originalRequestor=sys
                     result[0]=participant.split("]")[0].substring(1);
                     result[1]=participant.split("]")[1];
                     
-                    loggerslf4j.info("getParticipant:02:"+result[0]);
-					loggerslf4j.info("getParticipant:03:"+result[1]);
+                    LOGGERSLF4J.debug("getParticipant:02:"+result[0]);
+					LOGGERSLF4J.debug("getParticipant:03:"+result[1]);
                     
                 } while (participants > 0 && !result[0].equals(originalRequestor));
             }
@@ -514,11 +512,11 @@ public class CUDSAML2LogOutHandler extends BaseSAML2Handler {
             StatusType statusType = statusResponseType.getStatus();
             StatusCodeType statusCode = statusType.getStatusCode();
             URI statusCodeValueURI = statusCode.getValue();
-            boolean success = false;
+           
             if(statusCodeValueURI != null){
                 String statusCodeValue = statusCodeValueURI.toString();
                 if(JBossSAMLURIConstants.STATUS_SUCCESS.get().equals(statusCodeValue)){
-                    success = true;
+                   
                     session.invalidate();
                 }
             }

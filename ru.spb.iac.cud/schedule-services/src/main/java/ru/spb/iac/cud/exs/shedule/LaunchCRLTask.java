@@ -41,10 +41,10 @@ public class LaunchCRLTask {
 	private static final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
 
-	final static Logger logger = LoggerFactory.getLogger(LaunchCRLTask.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(LaunchCRLTask.class);
 
 	public static void initTask(int delaySeconds) {
-		logger.info("initTask:01");
+		LOGGER.debug("initTask:01");
 
 		scheduler.schedule(new Runnable() {
 
@@ -52,17 +52,17 @@ public class LaunchCRLTask {
 
 				try {
 
-					logger.info("initTask:run");
+					LOGGER.debug("initTask:run");
 
 					LaunchCRLRepeatTask.initTask(calendar());
 
 				} catch (Exception e) {
-					logger.error("initTask:error:" + e);
+					LOGGER.error("initTask:error:", e);
 				} finally {
 					try {
 						scheduler.shutdown();
 					} catch (Exception e) {
-						logger.error("initTask:finally:is:error:" + e);
+						LOGGER.error("initTask:finally:is:error:", e);
 					}
 				}
 			}
@@ -87,7 +87,7 @@ public class LaunchCRLTask {
 			start = start + 24 * 60 * 60 * 1000;
 		}
 
-		logger.info("calendar:03:start:" + start);
+		LOGGER.debug("calendar:03:start:" + start);
 
 		return start /* 10L */;
 	}

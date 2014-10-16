@@ -91,9 +91,9 @@ import java.util.List;
  */
 
 public class GOSTXMLSignatureUtil {
-private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
+private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory.getLogger();
   
-final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.class);
+final static Logger LOGGERSLF4J = LoggerFactory.getLogger(GOSTXMLSignatureUtil.class);
 
     // Set some system properties and Santuario providers. Run this block before any other class initialization.
     static {
@@ -126,11 +126,11 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
             
              
         } catch (/*NoSuchProvider*/Exception ex) {
-        	loggerslf4j.error("getXMLSignatureFactory:error:"+ex);
+        	LOGGERSLF4J.error("getXMLSignatureFactory:error:"+ex);
             try {
                 xsf = XMLSignatureFactory.getInstance("DOM");
             } catch (Exception err) {
-                throw new RuntimeException(logger.couldNotCreateInstance("DOM", err));
+                throw new RuntimeException(LOGGER.couldNotCreateInstance("DOM", err));
             }
         }
         
@@ -215,10 +215,10 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
             String signatureMethod, String referenceURI) throws ParserConfigurationException, GeneralSecurityException,
             MarshalException, XMLSignatureException {
         if (nodeToBeSigned == null)
-            throw logger.nullArgumentError("Node to be signed");
+            throw LOGGER.nullArgumentError("Node to be signed");
         
-        if (logger.isTraceEnabled()) {
-            logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         }
 
         Node parentNode = nodeToBeSigned.getParentNode();
@@ -279,10 +279,10 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
                                 String signatureMethod, String referenceURI, X509Certificate x509Certificate) throws ParserConfigurationException, GeneralSecurityException,
             MarshalException, XMLSignatureException {
         if (nodeToBeSigned == null)
-            throw logger.nullArgumentError("Node to be signed");
+            throw LOGGER.nullArgumentError("Node to be signed");
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         }
 
         Node parentNode = nodeToBeSigned.getParentNode();
@@ -423,7 +423,7 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
     public static Document sign(Document doc, KeyPair keyPair, String digestMethod, String signatureMethod, String referenceURI,
                                 X509Certificate x509Certificate)
             throws GeneralSecurityException, MarshalException, XMLSignatureException {
-        logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         PrivateKey signingKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
 
@@ -457,9 +457,9 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
         String referenceURI = dto.getReferenceURI();
         String signatureMethod = dto.getSignatureMethod();
 
-        logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         
-       // loggerslf4j.info("GOSTXMLSignatureUtil:sign:01:" + DocumentUtil.asString(doc));
+        
         
         PrivateKey signingKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
@@ -483,18 +483,18 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
     @SuppressWarnings("unchecked")
     public static boolean validate(Document signedDoc, Key publicKey) throws MarshalException, XMLSignatureException {
         if (signedDoc == null)
-            throw logger.nullArgumentError("Signed Document");
+            throw LOGGER.nullArgumentError("Signed Document");
 
-       // loggerslf4j.info("GOSTXMLSignatureUtil:validate:01");
+        
         
         propagateIDAttributeSetup(signedDoc.getDocumentElement(), signedDoc.getDocumentElement());
 
         NodeList nl = signedDoc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
         if (nl == null || nl.getLength() == 0) {
-            throw logger.nullValueError("Cannot find Signature element");
+            throw LOGGER.nullValueError("Cannot find Signature element");
         }
         if (publicKey == null)
-            throw logger.nullValueError("Public Key");
+            throw LOGGER.nullValueError("Public Key");
 
         //написан GostKeyHandler, где GOSTKeyValue из запроса помещается в "SENDER_PUBLIC_KEY"
         //а здесь это будет родной параметр publicKey.
@@ -504,15 +504,15 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
 
         boolean coreValidity = signature.validate(valContext);
 
-      //  loggerslf4j.info("GOSTXMLSignatureUtil:validate:02:"+coreValidity);
+       
         
-        if (logger.isTraceEnabled() && !coreValidity) {
+        if (LOGGER.isTraceEnabled() && !coreValidity) {
             boolean sv = signature.getSignatureValue().validate(valContext);
-            logger.trace("Signature validation status: " + sv);
+            LOGGER.trace("Signature validation status: " + sv);
 
             List<Reference> references = signature.getSignedInfo().getReferences();
             for (Reference ref : references) {
-                logger.trace("[Ref id=" + ref.getId() + ":uri=" + ref.getURI() + "]validity status:" + ref.validate(valContext));
+                LOGGER.trace("[Ref id=" + ref.getId() + ":uri=" + ref.getURI() + "]validity status:" + ref.validate(valContext));
             }
         }
         return coreValidity;
@@ -527,7 +527,7 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
      * @throws JAXBException
      */
     public static void marshall(SignatureType signature, OutputStream os) throws JAXBException, SAXException {
-        throw logger.notImplementedYet("NYI");
+        throw LOGGER.notImplementedYet("NYI");
         /*
          * JAXBElement<SignatureType> jsig = objectFactory.createSignature(signature); Marshaller marshaller =
          * JAXBUtil.getValidatingMarshaller(pkgName, schemaLocation); marshaller.marshal(jsig, os);
@@ -569,7 +569,7 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
                 cert = (X509Certificate) cf.generateCertificate(bais);
             }
         } catch (java.security.cert.CertificateException e) {
-            throw logger.processingError(e);
+            throw LOGGER.processingError(e);
         }
         return cert;
     }
@@ -674,14 +674,14 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
             dsaKeyValue.setY(Base64.encodeBytes(Y).getBytes());
             return dsaKeyValue;
         }
-        throw logger.unsupportedType(key.toString());
+        throw LOGGER.unsupportedType(key.toString());
     }
 
     private static void signImpl(DOMSignContext dsc, String digestMethod, String signatureMethod, String referenceURI, PublicKey publicKey,
                                  X509Certificate x509Certificate)
             throws GeneralSecurityException, MarshalException, XMLSignatureException {
     	
-  	loggerslf4j.info("GOSTXMLSignatureUtil:signImpl:01+");
+  	LOGGERSLF4J.debug("GOSTXMLSignatureUtil:signImpl:01+");
     	
    	
         dsc.setDefaultNamespacePrefix("dsig");
@@ -703,7 +703,7 @@ final static Logger loggerslf4j = LoggerFactory.getLogger(GOSTXMLSignatureUtil.c
         SignatureMethod signatureMethodObj = fac.newSignatureMethod(signatureMethod, null);
         SignedInfo si = fac.newSignedInfo(canonicalizationMethod, signatureMethodObj, referenceList);
 
-    	//loggerslf4j.info("GOSTXMLSignatureUtil:signImpl:02:"+si.getSignatureMethod());
+    	 
         
         
         KeyInfo ki = null;

@@ -23,7 +23,7 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserAdminSysEJB {
 
-	final static Logger logger = LoggerFactory.getLogger(UserAdminSysEJB.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserAdminSysEJB.class);
 	
 	@PersistenceContext(unitName = "CUDUserConsolePU")
     private EntityManager entityManager;
@@ -34,22 +34,17 @@ public class UserAdminSysEJB {
 
     public void save(JournAppAdminUserSysBssT user) {
 
-       logger.info("userAdminSysEJB:save:01");
-       logger.info("userAdminSysEJB:save:02:"+user.getAcIsBssTLong());
+       LOGGER.debug("userAdminSysEJB:save:01");
+       LOGGER.debug("userAdminSysEJB:save:02:"+user.getAcIsBssTLong());
        try{
-    	  /*List<JournAppUserBssT>  app_user_list = entityManager
-    			  .createQuery("select t1 from JournAppUserBssT t1 ")
-    			  .getResultList();
-    	  
-    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
-    	  */
+    	 
     	   
     	   user.setCreated(new Date());
     	   entityManager.persist(user);
     	   
     	   
        }catch(Exception e){
-    	   logger.error("userAdminSysEJB:save:error:"+e);
+    	   LOGGER.error("userAdminSysEJB:save:error:"+e);
        }
        
        

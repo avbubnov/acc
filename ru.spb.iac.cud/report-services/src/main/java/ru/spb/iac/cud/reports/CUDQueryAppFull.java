@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -48,23 +48,23 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
  */
 public class CUDQueryAppFull {
 
-	//private static String REPORT_JRXML = "/home/jboss/jboss/data/reports/templates/";
+	//"/home/jboss/jboss/data/reports/templates/";
 	private static String REPORT_JRXML = Configuration.getReportJRXML();
 	
-	//private static String REPORT_JASPER = "/home/jboss/jboss/data/reports/build/";
+	//"/home/jboss/jboss/data/reports/build/";
 	private static String REPORT_JASPER = Configuration.getReportJASPER();
 
-	//private static String REPORT_JRNPRINT = "/home/jboss/jboss/data/reports/build/";
+	//"/home/jboss/jboss/data/reports/build/";
 	private static String REPORT_JRNPRINT = Configuration.getReportJRNPRINT();
 
-	//private static String REPORT_DOWNLOAD = "/home/jboss/jboss/data/reports/build/";
+	//"/home/jboss/jboss/data/reports/build/";
     private static String REPORT_DOWNLOAD = Configuration.getReportDOWNLOAD();
 
 	private String reportCode;
 
 	private Map<String, Object> parameters;
 
-	final static Logger logger = LoggerFactory.getLogger(CUDQueryAppFull.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(CUDQueryAppFull.class);
 
 	CUDQueryAppFull() {
 
@@ -82,27 +82,25 @@ public class CUDQueryAppFull {
 	public static void main(String[] args) {
 		try {
 
-			logger.info("main:01");
+			LOGGER.debug("main:01");
 
 			CUDQueryAppFull caf = new CUDQueryAppFull();
 
 			caf.create_report();
 
-			logger.info("main:0100");
+			LOGGER.debug("main:0100");
 
 		} catch (Exception e) {
-			logger.error("main:error:" + e);
+			LOGGER.error("main:error:", e);
 		}
 	}
 
 	public void create_report() throws Exception {
 		try {
 
-			logger.info("create_report:01");
+			LOGGER.debug("create_report:01");
 
-			// Thread.sleep(20000);
-
-			logger.info("create_report:02");
+			LOGGER.debug("create_report:02");
 
 			if (!new File(REPORT_JASPER + this.reportCode + ".jasper").exists()) {
 				compile();
@@ -112,10 +110,10 @@ public class CUDQueryAppFull {
 
 			xls();
 
-			logger.info("create_report:03");
+			LOGGER.debug("create_report:03");
 
 		} catch (Exception e) {
-			logger.error("create_report:error:" + e);
+			LOGGER.error("create_report:error:", e);
 			throw e;
 		}
 	}
@@ -131,15 +129,14 @@ public class CUDQueryAppFull {
 
 		try {
 
-			logger.info("download_report:01:" + REPORT_DOWNLOAD
+			LOGGER.debug("download_report:01:" + REPORT_DOWNLOAD
 					+ this.reportCode + "." + reportType);
 
-			// Thread.sleep(20000);
-
+		
 			if ((file = new File(REPORT_DOWNLOAD + this.reportCode + "."
 					+ reportType)).exists()) {
 
-				logger.info("download_report:02");
+				LOGGER.debug("download_report:02");
 
 				is = new FileInputStream(file);
 
@@ -162,10 +159,10 @@ public class CUDQueryAppFull {
 				result.setFlagExec(0);
 			}
 
-			logger.info("download_report:03");
+			LOGGER.debug("download_report:03");
 
 		} catch (Exception e) {
-			logger.error("download_report:error:" + e);
+			LOGGER.error("download_report:error:", e);
 			throw e;
 		} finally {
 			try {
@@ -189,7 +186,7 @@ public class CUDQueryAppFull {
 
 		try {
 
-			//String url = "jdbc:oracle:thin:CUD/CUD@192.168.2.28:1521:cudvm";
+			//"jdbc:oracle:thin:CUD/CUD@192.168.2.28:1521:cudvm";
 			String url = Configuration.getReportDBConnect();
 			
 			String driver = "oracle.jdbc.driver.OracleDriver";
@@ -255,21 +252,7 @@ public class CUDQueryAppFull {
 	 */
 	private void fill(boolean ignorePagination) throws JRException {
 		long start = System.currentTimeMillis();
-		// Preparing parameters
-		/*
-		 * Map<String, Object> parameters = new HashMap<String, Object>();
-		 * parameters.put("ReportTitle", "Address Report");
-		 * 
-		 * List<String> excludedCities = new ArrayList<String>();
-		 * excludedCities.add("Boston"); excludedCities.add("Chicago");
-		 * excludedCities.add("Oslo"); parameters.put("ExcludedCities",
-		 * excludedCities);
-		 * 
-		 * parameters.put("OrderClause", "City");
-		 * 
-		 * if (ignorePagination) {
-		 * parameters.put(JRParameter.IS_IGNORE_PAGINATION, Boolean.TRUE); }
-		 */
+		
 
 		JasperFillManager.fillReportToFile(REPORT_JASPER + this.reportCode
 				+ ".jasper", REPORT_JRNPRINT + this.reportCode + ".jrprint",
@@ -367,9 +350,7 @@ public class CUDQueryAppFull {
 
 		JasperPrint jasperPrint = (JasperPrint) JRLoader.loadObject(sourceFile);
 
-		// File destFile = new File(sourceFile.getParent(),
-		// jasperPrint.getName() + ".xls");
-		File destFile = new File(sourceFile.getParent(), this.reportCode
+			File destFile = new File(sourceFile.getParent(), this.reportCode
 				+ ".xls");
 
 		JRXlsExporter exporter = new JRXlsExporter();

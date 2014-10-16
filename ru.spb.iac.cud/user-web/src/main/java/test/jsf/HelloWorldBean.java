@@ -29,16 +29,7 @@ public class HelloWorldBean implements Serializable {
  
     public void setFirstName(String firstName) {
         this.firstName = firstName;
-        
-       // System.out.println("HelloWorldBean:setFirstName:01");
-       // 
-        String version = FacesContext.class.getPackage().getImplementationVersion();
-        
-       // System.out.println("HelloWorldBean:setFirstName:02:"+version);
-        
-       // System.out.println("HelloWorldBean:setFirstName:03:"+homeBean.test());
-        
-    }
+     }
  
     public String getLastName() {
         return lastName;

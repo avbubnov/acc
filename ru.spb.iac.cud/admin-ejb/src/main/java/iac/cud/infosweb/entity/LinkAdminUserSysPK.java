@@ -9,7 +9,7 @@ import javax.persistence.*;
  */
 @Embeddable
 public class LinkAdminUserSysPK implements Serializable {
-	//default serial version id, required for serializable classes.
+	
 	private static final long serialVersionUID = 1L;
 
 	@Column(name="UP_USER")

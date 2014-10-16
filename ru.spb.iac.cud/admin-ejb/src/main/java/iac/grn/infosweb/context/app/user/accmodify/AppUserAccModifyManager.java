@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +31,8 @@ import iac.cud.infosweb.entity.IspBssT;
 import iac.grn.infosweb.context.app.access.AppAccessContext;
 import iac.grn.infosweb.context.mc.arm.ArmManager;
 import iac.grn.infosweb.context.mc.usr.UsrManager;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.table.BaseDataModel;
 import iac.grn.infosweb.session.table.BaseManager;
 import iac.grn.serviceitems.BaseTableItem;
@@ -50,15 +52,15 @@ public class AppUserAccModifyManager extends BaseManager{
 		
 		 log.info("hostsManager:invokeLocal");
 		 try{
-			 String orderQuery=null;
+			 String orderQueryAppUserAcc=null;
 			 log.info("hostsManager:invokeLocal");
 			 
 			 AppUserAccModifyStateHolder appUserAccModifyStateHolder = (AppUserAccModifyStateHolder)
 					  Component.getInstance("appUserAccModifyStateHolder",ScopeType.SESSION);
-			 HashMap<String, String> filterMap = appUserAccModifyStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = appUserAccModifyStateHolder.getColumnFilterValues();
 			 String st=null;
 			  
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 Set<Map.Entry<String, String>> set = appUserAccModifyStateHolder.getSortOrders().entrySet();
@@ -66,37 +68,36 @@ public class AppUserAccModifyManager extends BaseManager{
       		       log.info("me.getKey+:"+me.getKey());
       		       log.info("me.getValue:"+me.getValue());
       		       
-      		       if(orderQuery==null){
-      		    	 orderQuery="order by "+me.getKey()+" "+me.getValue();
+      		       if(orderQueryAppUserAcc==null){
+      		    	 orderQueryAppUserAcc="order by "+me.getKey()+" "+me.getValue();
       		       }else{
-      		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
+      		    	 orderQueryAppUserAcc=orderQueryAppUserAcc+", "+me.getKey()+" "+me.getValue();  
       		       }
       		     }
-                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 log.info("invokeLocal:list:orderQueryAppUserAcc:"+orderQueryAppUserAcc);
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
+    	    		 Set<Map.Entry<String, String>> setFilterAppUserAcc = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterAppUserAcc) {
     	            	  log.info("me.getKey+:"+me.getKey());
     	            	  log.info("me.getValue:"+me.getValue());
     	   		      
-    	   		     if(me.getKey().equals("t1_crt_date")){  
-    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	   		     if("t1_crt_date".equals(me.getKey())){  
+    	        	   
     	        	   //делаем фильтр на начало  
     	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
     	    	   
-    	   		     }else if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	   		     }else if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
     	    	    	 
     	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	    	    	 
     	    	     }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
+    	        			//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	        	  }
     	              }
     	    	   }
-                 log.info("invokeLocal:list:filterQuery:"+st);
+                 log.info("AppUserAcc:invokeLocal:list:filterQuery:"+st);
 
              
                List<Object[]> lo=null;
@@ -181,7 +182,7 @@ public class AppUserAccModifyManager extends BaseManager{
                 "and CL_dep_app.ID_SRV(+)=t04_APP.CL_dep_ID "+
               ") t1 "+
               (st!=null ? " where "+st :" ")+
-              (orderQuery!=null ? orderQuery+", t1_id desc " : " order by t1_id desc "))
+              (orderQueryAppUserAcc!=null ? orderQueryAppUserAcc+", t1_id desc " : " order by t1_id desc "))
               .setFirstResult(firstRow)
               .setMaxResults(numberOfRows)
               .getResultList();
@@ -189,32 +190,32 @@ public class AppUserAccModifyManager extends BaseManager{
                
                for(Object[] objectArray :lo){
             	   try{
-            		   log.info("invokeLocal:list:02");
+            		   log.info("AppUserAcc:invokeLocal:list:02");
             		   
 
                 	     ui= new AppUserAccModifyItem(
-            	    		 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-            				 (objectArray[3]!=null?objectArray[3].toString():""),
-            				 (objectArray[4]!=null?objectArray[4].toString():""),
-            				 (objectArray[5]!=null?objectArray[5].toString():""),
-            				 (objectArray[6]!=null?objectArray[6].toString():""),
+            	    		objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+            				objectArray[3]!=null?objectArray[3].toString():"",
+            				objectArray[4]!=null?objectArray[4].toString():"",
+            				objectArray[5]!=null?objectArray[5].toString():"",
+            				objectArray[6]!=null?objectArray[6].toString():"",
             				 
-            				 (objectArray[7]!=null?objectArray[7].toString():""),
-	            			 (objectArray[8]!=null?objectArray[8].toString():""),
-	            			 (objectArray[9]!=null?objectArray[9].toString():""),
+            				objectArray[7]!=null?objectArray[7].toString():"",
+	            			objectArray[8]!=null?objectArray[8].toString():"",
+	            			objectArray[9]!=null?objectArray[9].toString():"",
 	            			 
-	            			 (objectArray[10]!=null?objectArray[10].toString():""),
-	            			 (objectArray[11]!=null?new Long(objectArray[11].toString()):null),
-	            			 (objectArray[12]!=null?objectArray[12].toString():""),
-	            			 (objectArray[13]!=null?objectArray[13].toString():""),
-	            			 (objectArray[14]!=null?objectArray[14].toString():""),
-	            			 (objectArray[15]!=null?objectArray[15].toString():""),
-	            			 (objectArray[16]!=null?objectArray[16].toString():""),
-	            			 (objectArray[17]!=null?objectArray[17].toString():""),
-	            			 (objectArray[18]!=null?objectArray[18].toString():""),
-	            			 (objectArray[19]!=null?objectArray[19].toString():""));
+	            			objectArray[10]!=null?objectArray[10].toString():"",
+	            			objectArray[11]!=null?new Long(objectArray[11].toString()):null,
+	            			objectArray[12]!=null?objectArray[12].toString():"",
+	            			objectArray[13]!=null?objectArray[13].toString():"",
+	            			objectArray[14]!=null?objectArray[14].toString():"",
+	            			objectArray[15]!=null?objectArray[15].toString():"",
+	            			objectArray[16]!=null?objectArray[16].toString():"",
+	            			objectArray[17]!=null?objectArray[17].toString():"",
+	            			objectArray[18]!=null?objectArray[18].toString():"",
+	            			objectArray[19]!=null?objectArray[19].toString():"");
                 	     
             	     auditList.add(ui);
             	   }catch(Exception e1){
@@ -222,29 +223,18 @@ public class AppUserAccModifyManager extends BaseManager{
             	   }
                }  
                
-             log.info("invokeLocal:list:02");
+             log.info("AppUserAcc:invokeLocal:list:02");
              
-			 } else if(type.equals("count")){
-				 log.info("IHReposList:count:01");
+			 } else if("count".equals(type)){
+				 log.info("AppUserAccMod:count:01");
 				 
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	   		    
-    	            	  /*
-    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
-    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	        	//   }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
-    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	        	 //  }
-    	            	 */ 
+    	    		 Set<Map.Entry<String, String>> setFilterAppUserAcc = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterAppUserAcc) {
+    	            	
     	            	  
-    	              if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	              if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
      	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	              }else{
     	            	 st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
@@ -253,13 +243,6 @@ public class AppUserAccModifyManager extends BaseManager{
     	            	  
     	              }
     	    	   }
-				 
-				/* 
-				 auditCount = (Long)entityManager.createQuery(
-						 "select count(au) " +
-				         "from AcUser au "+
-				         (st!=null ? " where "+st :""))
-		                .getSingleResult();*/
 				 
 				
 				 auditCount = ((java.math.BigDecimal)entityManager.createNativeQuery(
@@ -334,12 +317,12 @@ public class AppUserAccModifyManager extends BaseManager{
                .getSingleResult()).longValue();
                  
                  
-               log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+               log.info("AppUserAcc:invokeLocal:count:02:"+auditCount);
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
-			  log.error("invokeLocal:error:"+e);
+			  log.error("AppUserAcc:invokeLocal:error:"+e);
 			  evaluteForList=false;
 			  FacesMessages.instance().add("Ошибка!");
 		}
@@ -445,54 +428,54 @@ public class AppUserAccModifyManager extends BaseManager{
 	        		   log.info("AppUserAccModifyManager:getUserItem:login:"+objectArray[1].toString());
 	        		   
 	        		   ui= new AppUserAccModifyItem(
-	            	    		 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-	            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-	            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-	            				 (objectArray[3]!=null?objectArray[3].toString():""),
-	            				 (objectArray[4]!=null?objectArray[4].toString():""),
-	            				 (objectArray[5]!=null?objectArray[5].toString():""),
-	            				 (objectArray[6]!=null?objectArray[6].toString():""),
+	            	    		objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+	            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+	            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+	            				objectArray[3]!=null?objectArray[3].toString():"",
+	            				objectArray[4]!=null?objectArray[4].toString():"",
+	            				objectArray[5]!=null?objectArray[5].toString():"",
+	            				objectArray[6]!=null?objectArray[6].toString():"",
 	            				 
-	            				 (objectArray[7]!=null?objectArray[7].toString():""),
-		            			 (objectArray[8]!=null?objectArray[8].toString():""),
-		            			 (objectArray[9]!=null?objectArray[9].toString():""),
+	            				objectArray[7]!=null?objectArray[7].toString():"",
+		            			objectArray[8]!=null?objectArray[8].toString():"",
+		            			objectArray[9]!=null?objectArray[9].toString():"",
 		            			 
-		            			 (objectArray[10]!=null?objectArray[10].toString():""),
-		            			 (objectArray[11]!=null?new Long(objectArray[11].toString()):null),
-		            			 (objectArray[12]!=null?objectArray[12].toString():""),
-		            			 (objectArray[13]!=null?objectArray[13].toString():""),
-		            			 (objectArray[14]!=null?objectArray[14].toString():""),
-		            			 (objectArray[15]!=null?objectArray[15].toString():""),
-		            			 (objectArray[16]!=null?objectArray[16].toString():""),
-		            			 (objectArray[17]!=null?objectArray[17].toString():""),
-		            			 (objectArray[18]!=null?objectArray[18].toString():""),
-		            			 (objectArray[19]!=null?objectArray[19].toString():""));
+		            			objectArray[10]!=null?objectArray[10].toString():"",
+		            			objectArray[11]!=null?new Long(objectArray[11].toString()):null,
+		            			objectArray[12]!=null?objectArray[12].toString():"",
+		            			objectArray[13]!=null?objectArray[13].toString():"",
+		            			objectArray[14]!=null?objectArray[14].toString():"",
+		            			objectArray[15]!=null?objectArray[15].toString():"",
+		            			objectArray[16]!=null?objectArray[16].toString():"",
+		            			objectArray[17]!=null?objectArray[17].toString():"",
+		            			objectArray[18]!=null?objectArray[18].toString():"",
+		            			objectArray[19]!=null?objectArray[19].toString():"");
 	        	     return ui;
 	        	   }catch(Exception e1){
-	        		   log.error("getUserItem:for:error:"+e1);
+	        		   log.error("AppUserAccModifyManager:getUserItem:for:error:"+e1);
 	        	   }
 	           }  
 		   }catch(Exception e){
-			   log.error("getUserItem:error:"+e);
+			   log.error("AppUserAccModifyManager:getUserItem:error:"+e);
 		   }
 		   return null;
 	 }
 	 
-	 
 	 public void createArm(){
+		 
 		   log.info("AppUserAccModifyManager:createArm:01");
 		  
-		   String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		   String sessionIdAppUserAccModify = FacesContext.getCurrentInstance().getExternalContext()
 			        .getRequestParameterMap()
 			        .get("sessionId");
-	       log.info("AppUserAccModifyManager:createArm:02:"+sessionId);
+	       log.info("AppUserAccModifyManager:createArm:02:"+sessionIdAppUserAccModify);
 	     
 	       Long idApp=null;
 	       Long idUser=null;
 	       
 		   try{
 			   
-			   idApp =  new Long(sessionId); 
+			   idApp =  new Long(sessionIdAppUserAccModify); 
 			   
 			   Object[] app=(Object[]) entityManager.createNativeQuery(
 			    			  "select JAS.UP_USER_APP, " +
@@ -537,12 +520,14 @@ public class AppUserAccModifyManager extends BaseManager{
 	 	     		   "set t1.STATUS=1, t1.UP_USER_EXEC=? " +
 	 	     		   "where t1.ID_SRV=? ")
 	 	     		 .setParameter(1, getCurrentUser().getBaseId())
-	 	     		 .setParameter(2, new Long(sessionId))
+	 	     		 .setParameter(2, new Long(sessionIdAppUserAccModify))
 	         	 	 .executeUpdate();
 		    
-		     AppUserAccModifyItem ui = getUserItem(new Long(sessionId));
+		     AppUserAccModifyItem ui = getUserItem(new Long(sessionIdAppUserAccModify));
 		     
 		     Contexts.getEventContext().set("contextBeanView", ui);
+		     
+		     audit(ResourcesMap.APP_USER_ACC, ActionsMap.EXECUTE); 
 		     
 		   }catch(Exception e){
 			   log.error("AppUserAccModifyManager:createArm:error:"+e);
@@ -557,7 +542,7 @@ public class AppUserAccModifyManager extends BaseManager{
 			
 			if(login!=null){
 			  try{
-				  AcUser au= (AcUser) entityManager.createQuery(
+				  entityManager.createQuery(
 						     "select au from AcUser au " +
 				 		     "where au.login = :login")
 				 		     .setParameter("login", login)
@@ -714,7 +699,7 @@ public class AppUserAccModifyManager extends BaseManager{
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("idApp"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("created"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
-			  // auditItemsListSelect.add(ac.getAuditItemsMap().get("usrFio"));
+			  
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
 		   }
 	       return this.auditItemsListSelect;
@@ -726,9 +711,9 @@ public class AppUserAccModifyManager extends BaseManager{
 	   log.info("AppUserAccModifyManager:getAuditItemsListContext");
 	   if(auditItemsListContext==null){
 		   AppUserAccModifyContext ac= new AppUserAccModifyContext();
-		  // auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		  
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 		   
 	   }
@@ -741,20 +726,7 @@ public class AppUserAccModifyManager extends BaseManager{
 		   AppUserAccModifyContext ac= new AppUserAccModifyContext();
 		//   headerItemsListContext = new ArrayList<BaseTableItem>();
 		   headerItemsListContext=ac.getHeaderItemsList();
-		   
-		/*   
-		   AppUserItem ui = (AppUserItem)
-					  Component.getInstance("contextBeanView",ScopeType.EVENT); 
-		   
-		   log.info("AppUserManager:getHeaderItemsListContext:01");
-		   
-		   if(ui!=null){
-			   log.info("AppUserManager:getHeaderItemsListContext:ui.getStatus():"+ui.getStatus());
-			   if(ui.getStatus()!=2){
-				   log.info("AppUserManager:getHeaderItemsListContext:03:"+headerItemsListContext.get(2).getItems().g);
-				   headerItemsListContext.get(2).getItems().remove("rejectReason");
-			   }
-		   }*/
+	
 		   
 	   }
 	  
@@ -771,7 +743,7 @@ public class AppUserAccModifyManager extends BaseManager{
 	 	
 	 		headerItemsListContext=new ArrayList<HeaderTableItem>();
 	 				
-	 	    //List<String> idsList = Arrays.asList(ids);
+	 	    
 	 	
 	 	     List<String> idsList =  Arrays.asList(ids.split(","));
 	 	   
@@ -798,7 +770,7 @@ public class AppUserAccModifyManager extends BaseManager{
 	 	
 	 		headerItemsListContextCREATE=new ArrayList<HeaderTableItem>();
 	 				
-	 	    //List<String> idsList = Arrays.asList(ids);
+	 	    
 	 	
 	 	     List<String> idsList =  Arrays.asList(ids.split(","));
 	 	   

@@ -35,6 +35,9 @@
     <servlet-name>StartupServlet</servlet-name>
     <url-pattern>/StartupServlet</url-pattern>
   </servlet-mapping>
+  <listener>
+    <listener-class>ru.spb.iac.cud.uarm.session.SessionListener</listener-class>
+  </listener>
   
   <context-param>
     <param-name>facelets.SKIP_COMMENTS</param-name>

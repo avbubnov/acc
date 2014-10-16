@@ -30,7 +30,7 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserRegEJB {
 
-	final static Logger logger = LoggerFactory.getLogger(UserRegEJB.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserRegEJB.class);
 
 	
 	@Resource(mappedName="java:jboss/mail/Default")
@@ -45,15 +45,10 @@ public class UserRegEJB {
 
     public void save(JournAppUserBssT user) {
 
-       logger.info("UserRegEJB:save:01");
-       logger.info("UserRegEJB:save:02:"+user.getNameUser());
+       LOGGER.debug("UserRegEJB:save:01");
+       LOGGER.debug("UserRegEJB:save:02:"+user.getNameUser());
        try{
-    	  /*List<JournAppUserBssT>  app_user_list = entityManager
-    			  .createQuery("select t1 from JournAppUserBssT t1 ")
-    			  .getResultList();
     	  
-    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
-    	  */
     	   
     	   user.setStatus(0L);
     	   user.setCreated(new Date());
@@ -61,14 +56,14 @@ public class UserRegEJB {
     	   
     	   
        }catch(Exception e){
-    	   logger.error("UserRegEJB:save:error:"+e);
+    	   LOGGER.error("UserRegEJB:save:error:"+e);
        }
      }
     
     public void step1(String email, String context_url) {
 
-        logger.info("UserRegEJB:step1:01:"+email);
-        logger.info("UserRegEJB:step1:01_2:"+context_url);
+        LOGGER.debug("UserRegEJB:step1:01:"+email);
+        LOGGER.debug("UserRegEJB:step1:01_2:"+context_url);
         
         try{
         	MimeMessage m = new MimeMessage(mailSession);
@@ -76,7 +71,6 @@ public class UserRegEJB {
         	Address[] to = new InternetAddress[] {
         			new InternetAddress(email) 
         			};
-        	//Address[] to = new InternetAddress[] {new InternetAddress("bubnov@iac.spb.ru") };
         	
         	
         	m.setFrom(from);
@@ -86,12 +80,11 @@ public class UserRegEJB {
         	
         	String validationKey = (new BigInteger(email.getBytes("utf-8"))).toString(16);
         	
-        	 //String link = "http://localhost:8080/uarm/userRegServlet?email=" +
         	 String link = context_url+"/userRegServlet?email=" +
            	 URLEncoder.encode(email, "UTF-8")+"&validationKey=" +
            	 URLEncoder.encode(validationKey, "UTF-8");
         	
-        	logger.info("UserRegEJB:step1:02:"+link);
+        	LOGGER.debug("UserRegEJB:step1:02:"+link);
         	 
         	String content = "Добрый день!<br/>"+
         	 "Вы интересовались запросом на регистрацию пользователя в ИАЦ ПААА.<br/>" +
@@ -103,14 +96,13 @@ public class UserRegEJB {
         	 "ИАЦ";
         	
         	m.setContent(content, "text/html; charset=utf-8");
-        	//m.setContent(content, "text/plain");
         	
         	Transport.send(m);
         	
-        	logger.info("UserRegEJB:step1:03");
+        	LOGGER.debug("UserRegEJB:step1:03");
         	
         }catch(Exception e){
-     	   logger.error("UserRegEJB:step1:error:"+e);
+     	   LOGGER.error("UserRegEJB:step1:error:"+e);
         }
      }
 }

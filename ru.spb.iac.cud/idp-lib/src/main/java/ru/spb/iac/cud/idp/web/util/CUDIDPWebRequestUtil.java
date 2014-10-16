@@ -58,7 +58,7 @@ public class CUDIDPWebRequestUtil extends IDPWebRequestUtil {
 	// для подписи ГОСТ в сообщении об ошибке
 	// переопределяем getErrorResponse()
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
 	private final TrustKeyManager keyManager;
@@ -83,7 +83,7 @@ public class CUDIDPWebRequestUtil extends IDPWebRequestUtil {
 	public Document getErrorResponse(String responseURL, String status,
 			String identityURL, boolean supportSignature) {
 
-		// вызывается из CUDAbstractIDPValve.handleIsPassiveFailedResponse()
+		// вызывается из CUDAbstractIDPValve/.handleIsPassiveFailedResponse/()
 
 		Document samlResponse = null;
 		ResponseType responseType = null;
@@ -109,19 +109,19 @@ public class CUDIDPWebRequestUtil extends IDPWebRequestUtil {
 				.createStatusType(status));
 
 		// Lets see how the response looks like
-		if (logger.isTraceEnabled()) {
+		if (LOGGER.isTraceEnabled()) {
 			StringWriter sw = new StringWriter();
 			try {
 				saml2Response.marshall(responseType, sw);
 			} catch (ProcessingException e) {
-				logger.trace(e);
+				LOGGER.trace(e);
 			}
-			logger.trace("SAML Response Document: " + sw.toString());
+			LOGGER.trace("SAML Response Document: " + sw.toString());
 		}
 
 		if (supportSignature) {
 			try {
-				// SAML2Signature ss = new SAML2Signature();
+				// SAML2Signature /ss = /new /SAML2Signature(/);
 				SAML2Signature ss = new GOSTSAML2Signature();
 				ss.setSignatureMethod("http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411");
 				ss.setDigestMethod("http://www.w3.org/2001/04/xmldsig-more#gostr3411");
@@ -129,14 +129,14 @@ public class CUDIDPWebRequestUtil extends IDPWebRequestUtil {
 				samlResponse = ss.sign(responseType,
 						keyManager.getSigningKeyPair());
 			} catch (Exception e) {
-				logger.trace(e);
-				throw new RuntimeException(logger.signatureError(e));
+				LOGGER.trace(e);
+				throw new RuntimeException(LOGGER.signatureError(e));
 			}
 		} else
 			try {
 				samlResponse = saml2Response.convert(responseType);
 			} catch (Exception e) {
-				logger.trace(e);
+				LOGGER.trace(e);
 			}
 
 		return samlResponse;

@@ -17,17 +17,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PortFilter implements Filter {
 
-	
+	final static Logger LOGGER = LoggerFactory.getLogger(PortFilter.class);
+
 	private List<String> available_ports;
-    /**
-     * Default constructor. 
-     */
-    public PortFilter() {
-        // TODO Auto-generated constructor stub
-    }
+
+	/**
+	 * Default constructor.
+	 */
+	public PortFilter() {
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see Filter#destroy()
@@ -39,40 +43,34 @@ public class PortFilter implements Filter {
 	/**
 	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
 	 */
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain chain) throws IOException, ServletException {
+
 		boolean success = true;
 
-		HttpServletRequest httpRequest = (HttpServletRequest)request;
-		HttpServletResponse httpResponse = (HttpServletResponse)response;
-		
-		System.out.println("PortFilter:doFilter:01:" + available_ports);
-		System.out.println("PortFilter:doFilter:02:" + httpRequest.getServerPort());
-		System.out.println("PortFilter:doFilter:03:" + httpRequest.getServerName());
-		/*System.out.println("PortFilter:doFilter:04:" + httpRequest.getLocalAddr());
-		System.out.println("PortFilter:doFilter:05:" + httpRequest.getLocalName());
-		System.out.println("PortFilter:doFilter:06:" + httpRequest.getLocalPort());
-		System.out.println("PortFilter:doFilter:07:" + httpRequest.getRemoteAddr());
-		System.out.println("PortFilter:doFilter:08:" + httpRequest.getRemoteHost());
-		System.out.println("PortFilter:doFilter:09:" + httpRequest.getRemotePort());
-		System.out.println("PortFilter:doFilter:010:" + httpRequest.getProtocol());
-		System.out.println("PortFilter:doFilter:011:" + httpRequest.getScheme());*/
-		System.out.println("PortFilter:doFilter:012:" + httpRequest.getContextPath());
-		
-		
-		if(available_ports!=null){
-			
-			if(!available_ports.contains(String.valueOf(httpRequest.getServerPort()))){
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+		LOGGER.debug("doFilter:01_logger");
+
+		LOGGER.debug("PortFilter:doFilter:01:" + available_ports);
+		LOGGER.debug("PortFilter:doFilter:02:" + httpRequest.getServerPort());
+		LOGGER.debug("PortFilter:doFilter:03:" + httpRequest.getServerName());
+		LOGGER.debug("PortFilter:doFilter:012:" + httpRequest.getContextPath());
+
+		if (available_ports != null) {
+
+			if (!available_ports.contains(String.valueOf(httpRequest
+					.getServerPort()))) {
 				success = false;
 			}
 		}
-		
-		System.out.println("PortFilter:doFilter:013:" + success);
-		
-		if(success){
-		    chain.doFilter(request, response);
-		}else{
-			//httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "Ресурс на порту "+httpRequest.getServerPort()+" не доступен");
+
+		LOGGER.debug("PortFilter:doFilter:013:" + success);
+
+		if (success) {
+			chain.doFilter(request, response);
+		} else {
 			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
@@ -81,33 +79,32 @@ public class PortFilter implements Filter {
 	 * @see Filter#init(FilterConfig)
 	 */
 	public void init(FilterConfig fConfig) throws ServletException {
-		
-		String param=fConfig.getInitParameter("available_ports");
-		System.out.println("PortFilter:init:01:" + param);
-		
-		//если параметр не задан, или без значения - то доступно на всех портах
-		
-		if(param!=null&&!param.trim().isEmpty()){
-			available_ports = new ArrayList<String>(Arrays.asList(param.split(",")));
-			//fixed size
-			//available_ports = Arrays.asList(param.split(","));
-		}
+
+		String param = fConfig.getInitParameter("available_ports");
+		LOGGER.debug("PortFilter:init:01:" + param);
+
+		// если параметр не задан, или без значения - то доступно на всех портах
+
+		if (param != null && !param.trim().isEmpty()) {
+			available_ports = new ArrayList<String>(Arrays.asList(param
+					.split(",")));
+			}
 	}
 
 	public static void main(String[] args) {
+
+		LOGGER.debug("main:01");
+
+		try {
+
+			List<String> available_ports = new ArrayList<String>(
+					Arrays.asList("".split(",")));
+
+			LOGGER.debug("main:02:" + available_ports.size());
+		} catch (Exception e) {
 		
-		 System.out.println("main:01");
-		 
-		 try{
-					
-			 List<String> available_ports = new ArrayList<String>(Arrays.asList("".split(",")));
-			 
-			 System.out.println("main:02:"+available_ports.size());
-		 }catch(Exception e){
-			 e.printStackTrace(System.out);
-			 
-			System.out.println("error:"+e);	  
-		 }
+			LOGGER.error("error:", e);
+		}
 
 	}
 }

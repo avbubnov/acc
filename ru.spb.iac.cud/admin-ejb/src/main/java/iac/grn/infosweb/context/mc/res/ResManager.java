@@ -13,6 +13,7 @@ import java.util.*;
 
 import iac.cud.infosweb.entity.*;
 import iac.grn.infosweb.session.navig.LinksMap;
+
 import javax.faces.context.FacesContext;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
@@ -20,9 +21,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
-import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.audit.export.AuditExportData;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.cache.CacheManager;
 
 
@@ -33,12 +34,11 @@ import iac.grn.infosweb.session.cache.CacheManager;
  *
  */
 @Name("resManager")
-public class ResManager {//implements OrgManagerInterface{
+public class ResManager {
 	
 	 @Logger private Log log;
 	
-	//  private static final long serialVersionUID = 991300443278089016L;
-
+	
 	/**
      * Список доступных сущностей Рубрика для отображения
      */
@@ -71,7 +71,7 @@ public class ResManager {//implements OrgManagerInterface{
 	     */
 	   private List<AcApplication> listResArm = null;
 	   
-	 //  private List<AcApplication> listArm = null;
+	 
 	   /**
         * Менеджер сущностей, обеспечивающий взаимодействие с БД
         */
@@ -89,7 +89,6 @@ public class ResManager {//implements OrgManagerInterface{
 		    log.info("getListRes_01");
 		    try {
 		    	if(listRes==null){
-		    	//	log.info("getListArm_02");
 		    		listRes=entityManager.createQuery("select o from AcAppPage o").getResultList();
 		    	}
 		     } catch (Exception e) {
@@ -102,7 +101,6 @@ public class ResManager {//implements OrgManagerInterface{
 		    log.info("getListResArm_01");
 		    try {
 		    	if(listResArm==null){
-		    	//	log.info("getListArm_02");
 		    		listResArm=entityManager.createQuery("select o from AcApplication o WHERE o.acAppPages IS NOT EMPTY").getResultList();
 		    	}
 		     } catch (Exception e) {
@@ -148,22 +146,22 @@ public class ResManager {//implements OrgManagerInterface{
 		      	 entityManager.refresh(acResBeanCrt);
 		    
 		     //  [вариант -2-]
-		     //	 entityManager.persist(acResBeanCrt);
-		     //	 entityManager.flush();
-		     //	 AcAppPage parent = entityManager.find(AcAppPage.class, new Long(pidRootNode));
-		     //	 parent.getIdResCollection().add(acResBeanCrt);
+		     
+		     
+		     
+		     
 		    	  
 		     //  [вариант -3-]
-             //  entityManager.persist(acResBeanCrt);
-		     //  entityManager.flush();
-		     //  entityManager.refresh(acResBeanCrt);
-		     //  entityManager.refresh(acResBeanCrt.getIdParent());
+             
+		     
+		     
+		     
 		    
 		      //  [вариант -4-]
-		      //  entityManager.persist(acResBeanCrt);
-			  //  entityManager.flush();
-			  //  AcAppPage parent = entityManager.find(AcAppPage.class, new Long(pidRootNode));
-			  //  entityManager.refresh(parent);
+		      
+			  
+			  
+			  
 		      	String ac = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode().toString();
 				if(pappCode.equals(ac)){
 				  cache();
@@ -184,7 +182,7 @@ public class ResManager {//implements OrgManagerInterface{
 		  */
 	   public String editRes() throws Exception {
 		      log.info("ResManager:editRes:IdRes:"+acResBean.getIdRes());
-		    //  log.info("ResManager:editRes:AcApplication="+acResBean.getAcApplication());
+		     
 		      
 		      String  pidRootNode = FacesContext.getCurrentInstance().getExternalContext()
 				        .getRequestParameterMap()
@@ -203,29 +201,7 @@ public class ResManager {//implements OrgManagerInterface{
 		
 		      try {
 		    	  if(pidRootNode!=null && pappCode!=null && idRes!=null){
-		    	/*  entityManager.createQuery("UPDATE AcAppPage r SET " +
-	    	      		         "r.pageName= :pageName, " +
-	    	      		         "r.acApplication= :acApplication, " +
-	    	      		         "r.isRaions= :isRaions, " +
-	    	      		         "r.visible= :visible, " +
-	    	      		         //"r.modificator= :modificator, " +
-	    	      		         //"r.modified= :modified " +
-	    	      		         "r.idParent2= :idParent2, " +
-	    	      		         "r.pageCode= :pageCode " +
-	    	      		         "WHERE r.idRes= :idRes")
-	    	      		      //   .setParameter("modificator", editOrg.getModificator())
-	    	      		      //   .setParameter("modified", editOrg.getModified())
-	    	      		         .setParameter("pageName", acResBean.getPageName())
-	    	      		         .setParameter("idParent2", new Long(pidRootNode))
-	    	      		         .setParameter("pageCode", acResBean.getPageCode())
-	    	      		         .setParameter("acApplication", new Long(pappCode))
-	    	      		         .setParameter("isRaions", (acResBean.getIsRaionsBoolean()? new Long(1): new Long(0)))
-	    	      		         .setParameter("visible", (acResBean.getVisibleBoolean()? new Long(1): new Long(0)))
-	    	      		         .setParameter("idRes", acResBean.getIdRes())
-	    	      		         .executeUpdate();
-		    	   entityManager.clear();
-				   acResBean=entityManager.find(AcAppPage.class, acResBean.getIdRes());
-				   */ 
+		    	
 		    		  
 		    	  AcAppPage apm = entityManager.find(AcAppPage.class, new Long(idRes)/*acResBean.getIdRes()*/);
 		    	  
@@ -270,14 +246,14 @@ public class ResManager {//implements OrgManagerInterface{
 		    	  
 		    	  entityManager.remove(ap);
 		    	  
-		    	 // log.info("delRes:IdParent:"+ap.getIdParent2()); 
+		    	   
 		    	
 		    	  entityManager.flush();
 		     	
 		    	 // [Вариант -1-]
 		    	 // Основывается, что refresh - не каскадное :
 		    	 // @OneToMany(mappedBy="idParent", cascade={CascadeType.REMOVE, /*CascadeType.REFRESH*/})
-		    	 // private Set<AcAppPage> idResCollection;
+		    	 
 		    	 // иначе при refresh родителя, будут refresh его потомки из списка idResCollection, 
 		    	 // а этот список ещё содержит удалённого потомка, и при попытке его синхронизации 
 		    	 // будет ошибка, так как после flush() в бд удалённого потомка уже нет
@@ -285,10 +261,8 @@ public class ResManager {//implements OrgManagerInterface{
 		    	  entityManager.refresh(ap.getIdParent());
 		    	  
 		    	 // [Вариант -2-]
-		    	 /* if(parent!=null && parent.getIdResCollection()!=null && parent.getIdResCollection().contains(ap)){
-		    		  log.info("delRes:04");
-		    		  parent.getIdResCollection().remove(ap);
-		    	  }*/
+		    	 /* if/(par/ent!=null && parent.getI/dResCollecti/on()!=null /&& parent.getIdResCollection().contains(ap)){
+		    		   /pare/nt.getIdResColle/ction().rem/ove(ap);/}*/
 		    	  String ac = ((LinksMap)Component.getInstance("linksMap",ScopeType.APPLICATION)).getAppCode().toString();
 				  if(ap.getAcApplication().toString().equals(ac)){
 					cache();
@@ -334,10 +308,10 @@ public class ResManager {//implements OrgManagerInterface{
 	 }
 	 public void cache(){
 		try{
-		/* log.info("armManager:cache:01");
-		 CacheManager cm = (CacheManager) Component.getInstance("cacheManager",ScopeType.EVENT);
-		 cm.removeCache("leftUnitFragment", "treeNavigation");
-		 log.info("armManager:cache:02");*/
+		/* 
+		 Cach/eManager c/m = (Cach/eManager) Comp/onent/.getInstance("cacheMan/ager",ScopeType.EVENT);
+		 c/m.remov/eCache("leftUni/tFragment", "tree/Navigation");
+		 */
 		}catch(Exception e){
 		 log.error("armManager:cache:Error:"+e);
 		}   
@@ -353,20 +327,5 @@ public class ResManager {//implements OrgManagerInterface{
 		   }
 	  }
 	 
-	/*
-	   public AcAppPage getNewRes() {
-	      return newRes;
-	   }
-	   public AcAppPage getEditRes() {
-		 String  pidRes = FacesContext.getCurrentInstance().getExternalContext()
-	        .getRequestParameterMap()
-	        .get("idRes");
-		 log.info("getEditRes_idRes="+pidRes);
-		 if(pidRes!=null){
-		  editRes = em.find(AcAppPage.class, new Long(pidRes));
-		}
-	      return editRes;
-	   }*/
+	
 }
-/*select last_number from user_sequences
-where sequence_name='SQNC_AC_ROLES';*/

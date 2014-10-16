@@ -33,8 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ru.spb.iac.cud.idp.web.util.GOSTXMLSignatureUtil;
-
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.SignatureMethod;
@@ -50,7 +48,7 @@ import java.security.PublicKey;
 
 public class GOSTSAML2Signature extends SAML2Signature {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
 	private static final String ID_ATTRIBUTE_NAME = "ID";
@@ -94,7 +92,7 @@ public class GOSTSAML2Signature extends SAML2Signature {
 	 */
 	public void setSignatureIncludeKeyInfo(boolean val) {
 		if (!val) {
-			// XMLSignatureUtil.setIncludeKeyInfoInSignature(false);
+			// XMLSignatureUtil/.setIncludeKeyInfoInSignature(/false);
 			GOSTXMLSignatureUtil.setIncludeKeyInfoInSignature(false);
 		}
 	}
@@ -294,7 +292,7 @@ public class GOSTSAML2Signature extends SAML2Signature {
 		try {
 			sign(samlDocument, id, keypair);
 		} catch (Exception e) {
-			throw new ProcessingException(logger.signatureError(e));
+			throw new ProcessingException(LOGGER.signatureError(e));
 		}
 	}
 
@@ -310,13 +308,13 @@ public class GOSTSAML2Signature extends SAML2Signature {
 			throws ProcessingException {
 		try {
 			configureIdAttribute(signedDocument);
-			// return XMLSignatureUtil.validate(signedDocument, publicKey);
+			// return /XMLSignatureUtil/.validate(/signedDocument, /publicKey);
 			return GOSTXMLSignatureUtil.validate(signedDocument, publicKey);
 
 		} catch (MarshalException me) {
-			throw new ProcessingException(logger.signatureError(me));
+			throw new ProcessingException(LOGGER.signatureError(me));
 		} catch (XMLSignatureException xse) {
-			throw new ProcessingException(logger.signatureError(xse));
+			throw new ProcessingException(LOGGER.signatureError(xse));
 		}
 	}
 

@@ -8,7 +8,7 @@ import iac.grn.infosweb.context.mc.usr.UsrStateHolder;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +33,7 @@ import org.richfaces.model.ExtendedFilterField;
 import org.richfaces.model.FilterField;
 import org.richfaces.model.Modifiable;
 import org.richfaces.model.SortField2;
-//import org.ajax4jsf.model.DataComponentState;
+ 
 
 @Name("ugroupUsrDataModel")
 public class UgroupUsrDataModel  extends SerializableDataModel implements Modifiable  {
@@ -43,9 +43,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	@In(create=true)
 	private UgroupUsrDataProvider ugroupUsrDataProvider;
 	
-	//@In(create=true)
-	//private UsrStateHolder usrStateHolder;
-	
+		
 	private Long currentPk;
 	private Map<Long,BaseItem> wrappedData = new HashMap<Long, BaseItem>();
 	private List<Long> wrappedKeys = null;
@@ -57,10 +55,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	private HashMap<String, String> filterColumnValues = new HashMap<String, String>();
 	 
 	private int flagAction=0;
-	//private List<FilterField> filterFields;
-	
-//	private HashMap<String,String> filterFieldsHM = new HashMap<String,String>();
-	/**
+		/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1956179896877538628L;
@@ -72,7 +67,6 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	 */
 	@Override
 	public Object getRowKey() {
-	//	log.info("getRowKey:currentPk:"+currentPk);
 		return currentPk;
 	}
 
@@ -81,7 +75,6 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	 */
 	@Override
 	public void setRowKey(Object key) {
-	//	log.info("setRowKey:key:"+key);
 		this.currentPk = (Long) key;
 		
 	}
@@ -92,23 +85,8 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	public void walk(FacesContext context, DataVisitor visitor, Range range, Object argument) throws IOException {
 		
 		log.info("ugroupUsrDataModel:walk:01:start");
-	/*	if(componentState!=null){
-			log.info("walk:01:2");
-			Range range2=componentState.getRange();
-			int firstRow = ((SequenceRange)range2).getFirstRow();
-			int numberOfRows = ((SequenceRange)range2).getRows();
-			
-			log.info("walkt:firstRow:"+firstRow);
-			log.info("walk:numberOfRows:"+numberOfRows);
-		}else{
-			log.info("walk:01:3");
-		}*/
-		
-	/*	try{
-			throw new NullPointerException();
-		}catch(Exception e){
-			e.printStackTrace(System.out);
-		}*/
+	
+	
 		
 		int firstRow = ((SequenceRange)range).getFirstRow();
 		int numberOfRows = ((SequenceRange)range).getRows();
@@ -121,20 +99,16 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 		//!!!важно закомментили 24.12.13
 		//идёт вместе с - в filterAction(): setAuditList(null);
 	
-		//if(this.cachedItems==null){
 			log.info("ugroupUsrDataModel:walk:cachedItems:02");
 			 this.cachedItems=getDataProvider().getItemsByrange(firstRow, numberOfRows, null, true);
-		//}
 		log.info("ugroupUsrDataModel:walk:cachedItems:03");
 		if(this.cachedItems!=null){
 		  for (BaseItem item:cachedItems) {
 			wrappedKeys.add(item.getBaseId());
 			wrappedData.put(item.getBaseId(), item);  
-		//	wrappedKeys.add(item.getSessionId());
-		//	wrappedData.put(item.getSessionId(), item);
-			//log.info("visitor:start:"+item.getId().toString());
+				 
 		    visitor.process(context, item.getBaseId(), argument);
-			//log.info("visitor:end");
+			 
 		 }
 		}
 		log.info("usrDataModel:walk:end");
@@ -152,26 +126,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	public int getRowCount() {
 		
 	log.info("usrDataModel:getRowCount:01");
-		/*if(componentState!=null){
-			log.info("getRowCount:01:2");
-			Range range=componentState.getRange();
-			int firstRow = ((SequenceRange)range).getFirstRow();
-			int numberOfRows = ((SequenceRange)range).getRows();
-			
-			log.info("getRowCount:firstRow:"+firstRow);
-			log.info("getRowCount:numberOfRows:"+numberOfRows);
-		}else{
-			log.info("getRowCount:01:3");
-		}*/
 		
-		/*if (rowCount==null) {
-			rowCount = new Integer(getDataProvider().getRowCount(filterColumnValues));
-			log.info("getRowCount:02:rowCount:"+rowCount);
-			return rowCount.intValue();
-		} else {
-			log.info("getRowCount:03:rowCount:"+rowCount);
-			return rowCount.intValue();
-		}*/
 		String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
 		         .getRequestParameterMap()
 		         .get("remoteAudit");
@@ -201,10 +156,10 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 					return 0;
 				}
 				if(remoteAudit!=null &&
-					(remoteAudit.equals("rowSelectFact")/*||
-				    remoteAudit.equals("selRecAllFact")||
-					remoteAudit.equals("clRecAllFact")||
-					remoteAudit.equals("clSelOneFact")*/)&&
+					("rowSelectFact".equals(remoteAudit)/*||
+				    "selRecAllFact".equals(remoteAudit)||
+					"clRecAllFact".equals(remoteAudit)||
+					"clSelOneFact".equals(remoteAudit)*/)&&
 					auditListCount!=null){
 					rowCount = new Integer(auditListCount);
 				}else{
@@ -222,88 +177,34 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	 */
 	@Override
 	public BaseItem getRowData() {
-	//	log.info("getRowData:currentPk:"+currentPk);
 		if (currentPk==null) {
 			return null;
 		} else {
 			BaseItem ret = wrappedData.get(currentPk);
 			if (ret==null) {
-				//ret = getDataProvider().getAuctionItemByPk(currentPk);
-				//wrappedData.put(currentPk, ret);
-			//	log.info("getRowData:currentPk:ret==null!!");
+				
 				return ret;
 			} else {
 				return ret;
 			}
 		}
 	}
-	//@Override
+	
 	 public void modify(List<FilterField> filterFields, List<SortField2> sortFields) {
 		 log.info("usrDataModel:!!!modify!!!");
-		// this.filterFields = filterFields;
+		
 		if(this.flagAction==1){
-		// appendFilters(filterFields,FacesContext.getCurrentInstance());
-		}// this.cachedItems = null;
+		
+		}
 	 }
-/*
-	 private void appendFilters(List<FilterField> filterFields, FacesContext context) {
-        
-		 if (filterFields != null && !filterFields.isEmpty()) {
-			 
-		//	 filterFieldsHM.clear();
-			 
-        	      for (FilterField filterField : filterFields) {
-        	    	  
-                       //для rich:columns 
-        	    	    String propertyName = getPropertyName(context, filterField.getExpression());
-                       
-        	    	    log.info("appendFilters:1:"+(filterField.getExpression().getExpressionString()));
-        	    	     
-        	    	     //  для rich:column 
-        	    	     //  String propertyName = (filterField.getExpression().getExpressionString()).replaceAll("[#|$]{1}\\{.*?\\.", "").replaceAll("\\}", "");
-        	    	    
-        	    	     String filterValue=null;
-        	    	     try{ 
-        	    	    	 log.info("appendFilters:filterField.getClass:"+filterField.getClass());
-        	    	         filterValue = ((ExtendedFilterField) filterField).getFilterValue();
-                        }catch(Exception e){
-                        	log.info("appendFilters:error:"+e);
-                        }
-        	    	     
-        	    	   //log.info("appendFilters:filterColumnValue:"+filterColumnValues.get(propertyName));
-        	    	     
-                         log.info("appendFilters:propertyName:"+propertyName);
-                         log.info("appendFilters:filterValue:"+filterValue);
-                         
-                      //   if (propertyName!=null && filterColumnValues.get(propertyName)!=null && filterColumnValues.get(propertyName).length() != 0 ) {
-                         if (propertyName!=null && filterValue!=null && filterValue.length() != 0 ) {
-                                 	 
-                        	 filterColumnValues.put(propertyName, filterValue);   
-                        	 //filterColumnValues.put(propertyName, filterColumnValues.get(propertyName));   
-                                  
-                         }
-                 }
-         }
-    }
-	 
-	 
-	 private String getPropertyName(FacesContext facesContext, Expression expression) {
-         try {
-                 return (String) ((ValueExpression) expression).getValue(facesContext.getELContext());
-         } catch (ELException e) {
-                 throw new FacesException(e.getMessage(), e);
-         }
-    }
-	 */
+
 	 public void filterAction() {
 		 log.info("usrDataModel:filterAction");
 		 this.cachedItems = null;
 		 this.rowCount=null;
 		 this.flagAction=1;
 		 
-		// UsrStateHolder usrStateHolder = (UsrStateHolder)Component.getInstance("usrStateHolder", ScopeType.SESSION);
-		// usrStateHolder.clearFilters();
-		 
+			 
 		 UgroupUsrStateHolder ugroupUsrStateHolder = (UgroupUsrStateHolder)Component.getInstance("ugroupUsrStateHolder", ScopeType.SESSION);
 		 ugroupUsrStateHolder.clearFilters();
 		 
@@ -332,17 +233,16 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	 */
 	@Override
 	public boolean isRowAvailable() {
-		//log.info("isRowAvailable1");
+		 
 		if (currentPk==null) {
 			return false;
 		} else {
-			//log.info("isRowAvailable2");
+			 
 			if(wrappedKeys!=null){
-				//log.info("isRowAvailable3:"+(wrappedKeys.contains(currentPk)));
+				 
 			}
 			
 			return true;
-		//	return getDataProvider().hasAuctionItemByPk(currentPk);
 		}
 	}
 
@@ -378,11 +278,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 		}
 	}
 	
-	private <V> V lookupInContext(String expression, Class<? extends V> c) {
-		FacesContext facesContext = FacesContext.getCurrentInstance();
-		Application application = facesContext.getApplication();
-		return c.cast(application.evaluateExpressionGet(facesContext, MessageFormat.format("#'{'{0}'}'", expression), c));
-	}
+	
 	
 	private String auctionDataModelExpressionString;
 
@@ -395,18 +291,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 	 */
 	@Override
 	public void update() {
-	/*	AuditDataModel auctionDataModel = lookupInContext(auctionDataModelExpressionString, AuditDataModel.class);
-		Object savedKey = getRowKey();
-		for (Integer key : wrappedKeys) {
-			auctionDataModel.setRowKey(key);
-			auctionDataModel.getRowData().setBid(wrappedData.get(key).getBid());
-		}
-		setRowKey(savedKey);
-		//getDataProvider().update();
-		
-		this.wrappedData.clear();
-		this.wrappedKeys.clear();
-		resetDataProvider();*/
+	
 	}
 	
 	protected void resetDataProvider() {
@@ -417,7 +302,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 		  log.info("getDataProvider:01");
 		if (ugroupUsrDataProvider == null) {
 			log.info("getDataProvider:02");
-			//dataProvider = lookupInContext(auctionDataProviderExpressionString, AuctionDataProvider.class);
+			//data/Provider/ = lookupIn/Context(/auctionDataProviderExpression/String, AuctionDataP/rovider.class);
 		}
 		return ugroupUsrDataProvider;
 	}
@@ -436,7 +321,7 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 		this.auctionDataProviderExpressionString = auctionDataProviderExpressionString;
 	}
 	    
-	   public HashMap<String, String> getFilterColumnValues() {
+	   public Map<String, String> getFilterColumnValues() {
 		   if(filterColumnValues!=null){
 		       log.info("getFilterColumnValues:01:"+filterColumnValues.size());
 		   }else{
@@ -452,11 +337,5 @@ public class UgroupUsrDataModel  extends SerializableDataModel implements Modifi
 		   };
 		   this.filterColumnValues=filterColumnValues;
 	   }
-	/*   public DataComponentState getComponentState(){
-		   return this.componentState;
-	   }
-	   public void setComponentState(DataComponentState componentState){
-		   log.info("setComponentState!");
-		   this.componentState=componentState;
-	   }*/
+	
 }

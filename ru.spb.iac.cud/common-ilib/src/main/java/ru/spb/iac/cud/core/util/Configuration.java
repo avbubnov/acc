@@ -34,8 +34,6 @@ public class Configuration{
 		    
 		    if(f.exists()) { 
 		    	
-		       System.out.println("LaunchAuditSysArchiveTask:initTask:run:02");
-		    	
 		       properties.load(is=new FileInputStream(f));
 		    	 
 		       setReportJRXML(properties.getProperty("REPORT_JRXML"));

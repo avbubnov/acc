@@ -10,16 +10,18 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.transaction.Transaction;
-//import org.picketlink.common.util.Base64;
+ 
+
+
 
 import iac.cud.infosweb.dataitems.BaseItem;
 import iac.cud.infosweb.dataitems.SystemCertItem;
 import iac.cud.infosweb.entity.AcAppPage;
 import iac.cud.infosweb.entity.AcSubsystemCertBssT;
 import iac.cud.infosweb.entity.AcUser;
-import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.audit.export.AuditExportData;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.infosweb.session.cache.CacheManager;
 import iac.grn.infosweb.session.navig.LinksMap;
 
@@ -37,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jboss.seam.Component;
+
 import javax.faces.context.FacesContext;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -44,8 +47,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
 
-import iac.grn.ramodule.entity.VAuditReport;
 import iac.grn.serviceitems.BaseTableItem;
+
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -66,12 +69,11 @@ public class ArmSubManager {
      * Экспортируемая сущности 
      * для отображения
      */
-	//private BaseItem usrBean;             !!! Проверить !!!
 	
 	private String dellMessage=null;
 	private int delNot=0;
 	
-	private List<BaseItem> auditList;//= new ArrayList<VAuditReport>();
+	private List<BaseItem> auditList; 
 	
 	private Long auditCount;
 	
@@ -102,14 +104,13 @@ public class ArmSubManager {
 			  Component.getInstance("armSubListCached",ScopeType.SESSION);
 	  if(auditList==null){
 		  log.info("getAuditList:01");
-		 	if((remoteAudit.equals("rowSelectFact")||
-			    remoteAudit.equals("selRecAllFact")||
-			    remoteAudit.equals("clRecAllFact")||
-			    remoteAudit.equals("clSelOneFact")||
-			    remoteAudit.equals("onSelColSaveFact"))&&
+		 	if(("rowSelectFact".equals(remoteAudit)||
+			    "selRecAllFact".equals(remoteAudit)||
+			    "clRecAllFact".equals(remoteAudit)||
+			    "clSelOneFact".equals(remoteAudit)||
+			    "onSelColSaveFact".equals(remoteAudit))&&
 			    armSubListCached!=null){
-		 	//	log.info("getAuditList:02:"+orgListCached.size());
-			    	this.auditList=armSubListCached;
+		 	    	this.auditList=armSubListCached;
 			}else{
 				log.info("getAuditList:03");
 		    	invokeLocal("list", firstRow, numberOfRows, null);
@@ -117,12 +118,12 @@ public class ArmSubManager {
 			    log.info("getAuditList:03:"+this.auditList.size());
 			}
 		 	
-		 	ArrayList<String> selRecArmSub = (ArrayList<String>)
+		 	List<String>  selRecArmSub = (ArrayList<String>)
 					  Component.getInstance("selRecArmSub",ScopeType.SESSION);
 		 	if(this.auditList!=null && selRecArmSub!=null) {
 		 		 for(BaseItem it:this.auditList){
 				   if(selRecArmSub.contains(it.getBaseId().toString())){
-					// log.info("invoke:Selected!!!");
+					 
 					 it.setSelected(true);
 				   }else{
 					  it.setSelected(false);
@@ -139,22 +140,20 @@ public class ArmSubManager {
 	           String sessionId) {
 		try{
 			 String orderQuery=null;
-			 log.info("hostsManager:invokeLocal");
+			 log.info("ArmSubManager:invokeLocal");
 			 
 			 ArmSubStateHolder orgStateHolder = (ArmSubStateHolder)
 					  Component.getInstance("armSubStateHolder",ScopeType.SESSION);
 			 
-			 HashMap<String, String> filterMap = orgStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = orgStateHolder.getColumnFilterValues();
 			 String st=null;
 			 
-			 if(type.equals("list")){
-				 log.info("invokeLocal:list:01");
+			 if("list".equals(type)){
+				 log.info("ArmSub:invokeLocal:list:01");
 				 
 				
 				 Set<Map.Entry<String, String>> set = orgStateHolder.getSortOrders().entrySet();
                  for (Map.Entry<String, String> me : set) {
-      		       log.info("me.getKey+:"+me.getKey());
-      		       log.info("me.getValue:"+me.getValue());
       		       
       		       if(orderQuery==null){
       		    	 orderQuery="order by "+me.getKey()+" "+me.getValue();
@@ -162,22 +161,15 @@ public class ArmSubManager {
       		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
       		       }
       		     }
-                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 log.info("ArmSub:invokeLocal:list:orderQuery:"+orderQuery);
                 
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	            
-    	            	/*if(me.getKey().equals("dateAction")){  
-    	    	        	// st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	    	   		     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
-    	    	    	}else{*/
-    	   		       if(me.getKey().equals("acIsBssTLong")){  
+    	    		 Set<Map.Entry<String, String>> setFilterArmSub = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterArmSub) {
+    	             
+    	                if(me.getKey().equals("acIsBssTLong")){  
     	   		    	  st=(st!=null?st+" and " :" ")+me.getKey()+"='"+me.getValue()+"' ";
     	    	       }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
     	        		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	                  }
@@ -185,38 +177,30 @@ public class ArmSubManager {
     	    	   }
                  log.info("invokeLocal:list:filterQuery:"+st);
                  
-				// auditList = new ArrayList<BaseItem>();
 				 auditList = entityManager.createQuery("select o from AcSubsystemCertBssT o "+
 						 (st!=null ? " where "+st :"")+
 						 (orderQuery!=null ? orderQuery+", o.idSrv " : " order by o.idSrv "))
                        .setFirstResult(firstRow)
                        .setMaxResults(numberOfRows)
                        .getResultList();
-             log.info("invokeLocal:list:02");
+             log.info("ArmSub:invokeLocal:list:02");
   
-			 } else if(type.equals("count")){
-				 log.info("IHReposList:count:01");
+			 } else if("count".equals(type)){
+				 log.info("ArmSubList:count:01");
 				 
 				 if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	            
-    	            	/*if(me.getKey().equals("dateAction")){  
-    	    	        	// st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	    	   		     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
-    	    	    	}else{*/
-    	   		       if(me.getKey().equals("acIsBssTLong")){  
+    	    		 Set<Map.Entry<String, String>> setFilterArmSub = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterArmSub) {
+    	             
+    	                 if(me.getKey().equals("acIsBssTLong")){  
     	   		    	  st=(st!=null?st+" and " :" ")+me.getKey()+"='"+me.getValue()+"' ";
     	    	       }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
     	        		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	               }
     	              }
     	    	   }
-                 log.info("invokeLocal:count:filterQuery:"+st);
+                 log.info("ArmSub:invokeLocal:count:filterQuery:"+st);
 				 
 				 
 				 auditCount = (Long)entityManager.createQuery(
@@ -225,58 +209,36 @@ public class ArmSubManager {
 				         (st!=null ? " where "+st :""))
 		                .getSingleResult();
 				 
-               log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
-				 
-			 }
+               log.info("ArmSub:invokeLocal:count:02:"+auditCount);
+           	 } 
 		}catch(Exception e){
-			  log.error("invokeLocal:error:"+e);
+			  log.error("ArmSub:invokeLocal:error:"+e);
 			  evaluteForList=false;
 			  FacesMessages.instance().add("Ошибка!");
 		}
 	}
-	  /**
-	  * Подготовка сущности Аудит УФМС 
-	  * для последующих операций просмотра
-	  */
+
+
+	
    public void forView(String modelType) {
-	   String  sessionId = FacesContext.getCurrentInstance().getExternalContext()
+	   String  armSubId = FacesContext.getCurrentInstance().getExternalContext()
 		        .getRequestParameterMap()
 		        .get("sessionId");
-	  log.info("forView:sessionId:"+sessionId);
+	  log.info("forView:armSubId:"+armSubId);
 	  log.info("forView:modelType:"+modelType);
-	  if(sessionId!=null /*&& usrBean==null*/){
+	  if(armSubId!=null ){
 		  
-		    String service="";
+		   
 			if(modelType==null){
 		    	return ;
 		    }
 			if(modelType.equals("armSubDataModel")){
-				//service=ServiceReestr.Repos;
+				
 			}  
-		//  invoke("bean", 0, 0, sessionId, service);
-		//  Contexts.getEventContext().set("logContrBean", logContrBean);
-	
-		 /* 
-	 	 List<AcUser> usrListCached = (List<AcUser>)
-				  Component.getInstance("usrListCached",ScopeType.SESSION);
-		  if(usrListCached!=null){
-			 for(AcUser it : usrListCached){
-				 
-				 log.info("forView_inside_for");
-				 
-				 if(it.getBaseId().toString().equals(sessionId)){
-					 log.info("forView_Achtung!!!");
-					// this.usrBean=it;
-					// Contexts.getEventContext().set("usrBean", usrBean);
-					 Contexts.getEventContext().set("usrBean", it);
-					 return;
-				 }
-			 }
-		 }*/
-		 AcSubsystemCertBssT ar = searchBean(sessionId);
+		
+		 AcSubsystemCertBssT ar = searchBean(armSubId);
 		 
-		 if(!isAllowedSys(new Long(sessionId))){
+		 if(!isAllowedSys(new Long(armSubId))){
 			 log.info("armSubManager:forView:02");
 			 ar.setIsAllowedSys(false);
 		 }		 
@@ -338,7 +300,7 @@ public class ArmSubManager {
 		if(armSubListCached!=null){
 			for(AcSubsystemCertBssT it : armSubListCached){
 				 
-			// log.info("searchBean_inside_for");
+			 
 			  if(it.getBaseId().toString().equals(sessionId)){
 					 log.info("searchBean_Achtung!!!");
 					 return it;
@@ -354,7 +316,6 @@ public class ArmSubManager {
 	   invokeLocal("count",0,0,null);
 	  
 	   return auditCount;
-	  // FacesMessages.instance().add("Ошибка доступа к серверу xxx.xxx.x.xxx!");
    }
    
    public void addArmSub(){
@@ -375,19 +336,13 @@ public class ArmSubManager {
 		  
 		  armSubBeanCrt.setSubsystemName(armSubBeanCrt.getSubsystemName().trim());
 		  armSubBeanCrt.setSubsystemCode(armSubBeanCrt.getSubsystemCode().trim());
-		  /*
-		  if(armSubBeanCrt.getCertAlias()!=null&&!armSubBeanCrt.getCertAlias().trim().equals("")){
-			  armSubBeanCrt.setCertAlias(armSubBeanCrt.getCertAlias().trim());
-		  }else{
-			  armSubBeanCrt.setCertAlias(null);
-		  }*/
-		  
+			  
 		  armSubBeanCrt.setCreator(au.getIdUser());
 		  armSubBeanCrt.setCreated(new Date());
 	      entityManager.persist(armSubBeanCrt);
 	    	
 	    
-	     // audit(ResourcesMap.IS, ActionsMap.CREATE); 
+	     // aud/it(Resour/cesMap.IS, ActionsM/ap.CREATE); 
 	      
 	    }
 	      
@@ -432,10 +387,9 @@ public class ArmSubManager {
 		  entityManager.flush();
 	      entityManager.refresh(aam);
 	    	  
-	    	//  usrBean = entityManager.find(AcUser.class, new Long(sessionId)/*usrBean.getIdUser()*/);
 	      Contexts.getEventContext().set("armSubBean", aam);
 		
-	    //  audit(ResourcesMap.IS, ActionsMap.UPDATE); 
+	    //  au/dit(ResourcesMap.IS, Acti/onsMap.UPDATE); 
 	      
 		 }
 		 
@@ -453,11 +407,10 @@ public class ArmSubManager {
 		   
 		  
 		   
-		   CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
-           X509Certificate user_cert = (X509Certificate)
-        		   user_cf.generateCertificate(new  ByteArrayInputStream(file_byte));
-          // String x509Cert = org.picketlink.common.util.Base64.encodeBytes(user_cert.getEncoded());
-           String x509Cert = Base64.encode(user_cert.getEncoded());
+		   CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+           X509Certificate userCertX = (X509Certificate)
+        		   userCf.generateCertificate(new  ByteArrayInputStream(file_byte));
+            String x509Cert = Base64.encode(userCertX.getEncoded());
            
            log.info("armSubManager:saveArmSubCertificate:03:"+x509Cert);
            
@@ -554,62 +507,10 @@ public class ArmSubManager {
 		  log.info("forViewDelMessage:sessionId:"+sessionId);
 		  if(sessionId!=null){
 		
-			  DateFormat df = new SimpleDateFormat ("dd.MM.yy");
 			  
 			  AcSubsystemCertBssT aa = entityManager.find(AcSubsystemCertBssT.class, new Long(sessionId));
 			
-			  /*
-		      List<Object[]> lo = (List<Object[]>) entityManager.createNativeQuery(
-		    		                          "select JAS.ID_SRV, JAS.CREATED "+
-                                              "from JOURN_APP_SYSTEM_BSS_T jas, "+
-                                              "AC_IS_BSS_T arm "+
-                                              "where ARM.ID_SRV =JAS.UP_IS "+
-                                              "and ARM.ID_SRV=? ")
-                           .setParameter(1, new Long(sessionId))
-                           .getResultList();
 			  
-		      if(lo.size()==0){
-			  
-			    if(aa.getAcRoles()!=null&&!aa.getAcRoles().isEmpty()){
-				  dellMessage="У ИС есть порождённые записи: Роли";
-			    }
-			    List<AcAppPage> aapl = aa.getAcAppPages();
-			    if(aapl!=null&&!aapl.isEmpty()){
-			      int NOT_ROOT_NODE=0;
-			   // log.info("forViewDelMessage:01");
-				  for(AcAppPage aap :aapl){
-					//log.info("forViewDelMessage:02");
-					 if(aap.getIdParent2()!=null&&!aap.getIdParent2().equals(1L)){
-						 
-					//	 log.info("forViewDelMessage:03");
-						 
-						 NOT_ROOT_NODE=1;
-						 break;
-					 }
-					// log.info("forViewDelMessage:04");
-				  }
-			  //	log.info("forViewDelMessage:05");
-				
-				 if(NOT_ROOT_NODE==1){
-				   if(dellMessage!=null){ 
-				     dellMessage+=", Ресурсы.";
-				  }else{
-				    dellMessage="У ИС есть порождённые записи: Ресурсы.";
-				  }
-				 }
-			   }
-			   if(dellMessage!=null){
-				 dellMessage+="<br/>При удалении они будут удалены!";
-			   }
-		      }else{
-		    	  
-		    	  dellMessage="У ИС есть привязка к заявке на создание системы " +
-		    	  		      "<br/>№ "+lo.get(0)[0].toString()+
-		    	  		      " от "+df.format((Date)lo.get(0)[1])+
-		    			      ".<br/>Удаление невозможно! ";
-		    	  delNot=1;
-		      }
-			 */
 			 
 			 Contexts.getEventContext().set("armSubBean", aa);
 			 
@@ -629,36 +530,33 @@ public class ArmSubManager {
  	    
  	     if(sessionId!=null){
  	    	 
- 	    	String cert_data = (String) entityManager.createNativeQuery(
+ 	    	String certDataX = (String) entityManager.createNativeQuery(
  	    			 "select to_char(T1.CERT_DATE) " + 
  	    	 		 "from AC_SUBSYSTEM_CERT_BSS_T t1 " + 
  	    	 		 "where T1.ID_SRV=? ")
                  .setParameter(1, new Long(sessionId))
                  .getSingleResult();
  	    	
- 	    	 log.info("forViewCert:cert_data:"+cert_data); 
+ 	    	 log.info("forViewCert:cert_data:"+certDataX); 
  	    	
- 	     if(cert_data!=null&&!cert_data.trim().equals("")){
- 	    	 byte[] cert_byte = Base64.decode(cert_data);
- 	    	 // String x509Cert = org.picketlink.common.util.Base64.encodeBytes(user_cert.getEncoded());
- 	         
+ 	     if(certDataX!=null&&!certDataX.trim().equals("")){
+ 	    	 byte[] certByteX = Base64.decode(certDataX);
  	    	 
- 	    	 CertificateFactory user_cf = CertificateFactory.getInstance("X.509");
- 	           X509Certificate user_cert = (X509Certificate)
- 	        		   user_cf.generateCertificate(new  ByteArrayInputStream(cert_byte ));
+ 	    	 CertificateFactory userCf = CertificateFactory.getInstance("X.509");
+ 	           X509Certificate userCertX = (X509Certificate)
+ 	        		   userCf.generateCertificate(new  ByteArrayInputStream(certByteX ));
  	          
  	           
- 	           log.info("armSubManager:saveArmSubCertificate:02:"+user_cert);
+ 	           log.info("armSubManager:saveArmSubCertificate:02:"+userCertX);
  	         
  	          SystemCertItem sci = new SystemCertItem();
  	    	 
- 	          sci.setName(user_cert.getSubjectDN().getName());
- 	          sci.setIssuer(user_cert.getIssuerDN().getName());
- 	          sci.setSerial(dec_to_hex(user_cert.getSerialNumber()));
- 	          sci.setDate1(df.format(user_cert.getNotBefore()));
- 	          sci.setDate2(df.format(user_cert.getNotAfter()));
+ 	          sci.setName(userCertX.getSubjectDN().getName());
+ 	          sci.setIssuer(userCertX.getIssuerDN().getName());
+ 	          sci.setSerial(dec_to_hex(userCertX.getSerialNumber()));
+ 	          sci.setDate1(df.format(userCertX.getNotBefore()));
+ 	          sci.setDate2(df.format(userCertX.getNotAfter()));
  	          
- 	    	// AcApplication ao = entityManager.find(AcApplication.class, new Long(sessionId));
  	    	 Contexts.getEventContext().set("systemCertBean", sci);
  	    	 
  	       }
@@ -693,19 +591,7 @@ public class ArmSubManager {
 			   log.info("getAuditItemsListSelect:02");
 			   auditItemsListSelect = new ArrayList<BaseTableItem>();
 			   
-			 /* String reposType = FacesContext.getCurrentInstance().getExternalContext()
-			      .getRequestParameterMap()
-			      .get("reposType");
-	            log.info("getAuditItemsListSelect:reposType:"+reposType);
-			    if(reposType!=null){
-					 if(reposType.equals("1")){
-					 }else if(reposType.equals("2")){
-					 }else if(reposType.equals("3")){
-					 }else if(reposType.equals("4")){
-				     }else{
-				     }
-			    }else{
-			    }*/
+			
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("subsystemName"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("subsystemCode"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("armName"));
@@ -722,9 +608,7 @@ public class ArmSubManager {
 	   if(auditItemsListContext==null){
 		   ArmSubContext ac= new ArmSubContext();
 		   auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
-		   auditItemsListContext=ac.getAuditItemsCollection();
+			   auditItemsListContext=ac.getAuditItemsCollection();
 	   }
 	   return this.auditItemsListContext;
    }
@@ -736,8 +620,8 @@ public class ArmSubManager {
 		        .get("sessionId");
 	    log.info("selectRecord:sessionId="+sessionId);
 	    
-	   //  forView(); //!!!
-	    ArrayList<String> selRecArmSub = (ArrayList<String>)
+	   //  for/View(/); //!!!
+	    List<String>  selRecArmSub = (ArrayList<String>)
 				  Component.getInstance("selRecArmSub",ScopeType.SESSION);
 	    
 	    if(selRecArmSub==null){
@@ -745,10 +629,8 @@ public class ArmSubManager {
 	       log.info("selectRecord:01");
 	    }
 	    
-	    // AcApplication aa = searchBean(sessionId);
 	    AcSubsystemCertBssT aa = new AcSubsystemCertBssT();
-  	    // в getAuditList : else{it.setSelected(false);}
-	    
+  	    
 	    if(aa!=null){
 	     if(selRecArmSub.contains(sessionId)){
 	    	selRecArmSub.remove(sessionId);
@@ -886,11 +768,11 @@ public class ArmSubManager {
      	
     	if(remoteAudit!=null&&
     	 
-    	   !remoteAudit.equals("OpenCrtFact")&&	
-    	   !remoteAudit.equals("OpenUpdFact")&&
-    	   !remoteAudit.equals("OpenDelFact")&&
-   	       !remoteAudit.equals("onSelColFact")&&
-   	       !remoteAudit.equals("refreshPdFact")){
+    	   !"OpenCrtFact".equals(remoteAudit)&&	
+    	   !"OpenUpdFact".equals(remoteAudit)&&
+    	   !"OpenDelFact".equals(remoteAudit)&&
+   	       !"onSelColFact".equals(remoteAudit)&&
+   	       !"refreshPdFact".equals(remoteAudit)){
     		log.info("reposManager:evaluteForList!!!");
    		    evaluteForList=true;
     	}
@@ -899,8 +781,7 @@ public class ArmSubManager {
    }
    public Boolean getEvaluteForListFooter() {
 		
-	  // 	log.info("reposManager:evaluteForListFooter:01");
-	   	if(evaluteForListFooter==null){
+	    	if(evaluteForListFooter==null){
 	   		evaluteForListFooter=false;
 	    	String remoteAudit = FacesContext.getCurrentInstance().getExternalContext()
 		             .getRequestParameterMap()
@@ -909,12 +790,12 @@ public class ArmSubManager {
 	     
 	    	if(getEvaluteForList()&&
 	    	   //new-1-	
-	    	   !remoteAudit.equals("protBeanWord")&&	
+	    	   !"protBeanWord".equals(remoteAudit)&&	
 	    	   //new-2-	
-	   	       !remoteAudit.equals("selRecAllFact")&&
-	   	       !remoteAudit.equals("clRecAllFact")&&
-	   	      // !remoteAudit.equals("clSelOneFact")&&
-	   	       !remoteAudit.equals("onSelColSaveFact")){
+	   	       !"selRecAllFact".equals(remoteAudit)&&
+	   	       !"clRecAllFact".equals(remoteAudit)&&
+	   	      // !remoteAudit equals "clSelOneFact"
+	   	       !"onSelColSaveFact".equals(remoteAudit)){
 	    		  log.info("armSubManager:evaluteForListFooter!!!");
 	   		      evaluteForListFooter=true;
 	    	}
@@ -936,8 +817,8 @@ public class ArmSubManager {
 			             .get("sessionId");
 			    log.info("armSubManager:evaluteForBean:sessionId:"+sessionId);
 		    	if(sessionId!=null && remoteAudit!=null &&
-		    	   (remoteAudit.equals("rowSelectFact")||	
-		    	    remoteAudit.equals("UpdFact"))){
+		    	   ("rowSelectFact".equals(remoteAudit)||	
+		    	    "UpdFact".equals(remoteAudit))){
 		    	      log.info("armSubManager:evaluteForBean!!!");
 		   		      evaluteForBean=true;
 		    	}
@@ -945,29 +826,21 @@ public class ArmSubManager {
 		     return evaluteForBean;
 		   }
 
-   private static String dec_to_hex(BigInteger bi) {
+   private String dec_to_hex(BigInteger bi) {
 		
 		String result = null;
 		
 		try
 		{
 		 result = bi.toString(16);
-	     System.out.println("num_convert:num:"+result);
+		  
 		}
 		catch (NumberFormatException e)
 		{
-		     System.out.println("Error! tried to parse an invalid number format");
+			log.error("Error! tried to parse an invalid number format");
 		}
 		 return result;
 	}
    
 }
-/*
-Department dept = em.getReference(Department.class, 30);
-Employee emp = new Employee();
-emp.setId(53);
-emp.setName("Peter");
-emp.setDepartment(dept);
-dept.getEmployees().add(emp);
-em.persist(emp);
-*/
+

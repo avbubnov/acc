@@ -63,7 +63,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,10 +71,10 @@ import java.util.Set;
 public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		implements SecurityTokenProvider {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDSAML20TokenProvider.class);
 
 	private SAML20TokenAttributeProvider attributeProvider;
@@ -91,13 +91,13 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 	public void initialize(Map<String, String> properties) {
 		super.initialize(properties);
 
-		// loggerslf4j.info("issueToken:01");
+		 
 
 		// Check if an attribute provider has been set.
 		String attributeProviderClassName = this.properties
 				.get(ATTRIBUTE_PROVIDER);
 		if (attributeProviderClassName == null) {
-			logger.trace("No attribute provider set");
+			LOGGER.trace("No attribute provider set");
 		} else {
 			try {
 				Class<?> clazz = SecurityActions.loadClass(getClass(),
@@ -107,9 +107,9 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 					this.attributeProvider = (SAML20TokenAttributeProvider) object;
 					this.attributeProvider.setProperties(this.properties);
 				} else
-					logger.stsWrongAttributeProviderTypeNotInstalled(attributeProviderClassName);
+					LOGGER.stsWrongAttributeProviderTypeNotInstalled(attributeProviderClassName);
 			} catch (Exception pae) {
-				logger.attributeProviderInstationError(pae);
+				LOGGER.attributeProviderInstationError(pae);
 			}
 		}
 
@@ -138,10 +138,10 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		Element token = context.getRequestSecurityToken()
 				.getCancelTargetElement();
 		if (token == null)
-			throw logger.wsTrustNullCancelTargetError();
+			throw LOGGER.wsTrustNullCancelTargetError();
 		Element assertionElement = (Element) token.getFirstChild();
 		if (!this.isAssertion(assertionElement))
-			throw logger.assertionInvalidError();
+			throw LOGGER.assertionInvalidError();
 
 		// get the assertion ID and add it to the canceled assertions set.
 		String assertionId = assertionElement.getAttribute("ID");
@@ -160,7 +160,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 	public void issueToken(ProtocolContext protoContext)
 			throws ProcessingException {
 
-		// loggerslf4j.info("issueToken:01");
+		 
 
 		if (!(protoContext instanceof WSTrustRequestContext))
 			return;
@@ -255,7 +255,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 
 		if (this.attributeProvider != null) {
 
-			// loggerslf4j.info("issueToken:02");
+			 
 
 			Map<String, String> properties = new HashMap<String, String>();
 
@@ -312,7 +312,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 
 			if (attributeStatement != null) {
 
-				// loggerslf4j.info("issueToken:03");
+				 
 
 				assertion.addStatement(attributeStatement);
 			}
@@ -343,18 +343,18 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 			assertion.addStatement(ant);
 			
 			}catch(Exception e){
-				 loggerslf4j.error("issueToken:currentTime:error:"+e);
+				 LOGGERSLF4J.error("issueToken:currentTime:error:"+e);
 			}*/
 		}
 
-		// loggerslf4j.info("issueToken:04");
+		 
 
 		// convert the constructed assertion to element.
 		Element assertionElement = null;
 		try {
 			assertionElement = SAMLUtil.toElement(assertion);
 		} catch (Exception e) {
-			throw logger.samlAssertionMarshallError(e);
+			throw LOGGER.samlAssertionMarshallError(e);
 		}
 
 		SecurityToken token = new StandardSecurityToken(context
@@ -392,24 +392,24 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 
 		// в renewToken Subject переписывается из старого токена
 
-		loggerslf4j.info("renewToken:01");
+		LOGGERSLF4J.debug("renewToken:01");
 
 		WSTrustRequestContext context = (WSTrustRequestContext) protoContext;
 		// get the specified assertion that must be renewed.
 		Element token = context.getRequestSecurityToken()
 				.getRenewTargetElement();
 		if (token == null)
-			throw logger.wsTrustNullRenewTargetError();
+			throw LOGGER.wsTrustNullRenewTargetError();
 		Element oldAssertionElement = (Element) token.getFirstChild();
 		if (!this.isAssertion(oldAssertionElement))
-			throw logger.assertionInvalidError();
+			throw LOGGER.assertionInvalidError();
 
 		// get the JAXB representation of the old assertion.
 		AssertionType oldAssertion = null;
 		try {
 			oldAssertion = SAMLUtil.fromElement(oldAssertionElement);
 		} catch (Exception je) {
-			throw logger.samlAssertionUnmarshallError(je);
+			throw LOGGER.samlAssertionUnmarshallError(je);
 		}
 
 		// поддержка HOK
@@ -451,7 +451,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		// canceled assertions cannot be renewed.
 		if (this.revocationRegistry.isRevoked(SAMLUtil.SAML2_TOKEN_TYPE,
 				oldAssertion.getID()))
-			throw logger
+			throw LOGGER
 					.samlAssertionRevokedCouldNotRenew(oldAssertion.getID());
 
 		// adjust the lifetime for the renewed assertion.
@@ -478,7 +478,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 				for (org.picketlink.identity.federation.saml.v2.assertion.AttributeStatementType.ASTChoiceType atr : ((AttributeStatementType) oldSt)
 						.getAttributes()) {
 					if ("TOKEN_ID".equals(atr.getAttribute().getName())) {
-						loggerslf4j
+						LOGGERSLF4J
 								.info("renewToken:02:"
 										+ atr.getAttribute()
 												.getAttributeValue().get(0));
@@ -486,7 +486,7 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 						tokenIDAttribute = atr.getAttribute();
 
 					} else if ("USER_UID".equals(atr.getAttribute().getName())) {
-						loggerslf4j
+						LOGGERSLF4J
 								.info("renewToken:03:"
 										+ atr.getAttribute()
 												.getAttributeValue().get(0));
@@ -528,13 +528,13 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 			
 				
 			} catch (Exception e) {
-				 loggerslf4j.error("renewToken:currentTime:error:"+e);
+				 LOGGERSLF4J.error("renewToken:currentTime:error:"+e);
 			}
 
 			}*/
 		}
 
-		loggerslf4j.info("renewToken:04");
+		LOGGERSLF4J.debug("renewToken:04");
 
 		if (tokenIDAttribute != null) {
 			if (tokenIDAttribute.getAttributeValue() != null) {
@@ -565,10 +565,10 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 		try {
 			assertionElement = SAMLUtil.toElement(newAssertion);
 		} catch (Exception e) {
-			throw logger.samlAssertionMarshallError(e);
+			throw LOGGER.samlAssertionMarshallError(e);
 		}
 
-		loggerslf4j.info("renewToken:02++");
+		LOGGERSLF4J.debug("renewToken:02++");
 
 		SecurityToken securityToken = new StandardSecurityToken(context
 				.getRequestSecurityToken().getTokenType().toString(),
@@ -601,13 +601,13 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 
 		WSTrustRequestContext context = (WSTrustRequestContext) protoContext;
 
-		logger.trace("SAML token validation started");
+		LOGGER.trace("SAML token validation started");
 
 		// get the SAML assertion that must be validated.
 		Element token = context.getRequestSecurityToken()
 				.getValidateTargetElement();
 		if (token == null)
-			throw logger.wsTrustNullValidationTargetError();
+			throw LOGGER.wsTrustNullValidationTargetError();
 
 		String code = WSTrustConstants.STATUS_CODE_VALID;
 		String reason = "SAMLV2.0 Assertion successfuly validated";
@@ -619,13 +619,13 @@ public class CUDSAML20TokenProvider extends AbstractSecurityTokenProvider
 			reason = "Validation failure: supplied token is not a SAMLV2.0 Assertion";
 		} else {
 			try {
-				if (logger.isTraceEnabled()) {
-					logger.samlAssertion(DocumentUtil
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.samlAssertion(DocumentUtil
 							.getNodeAsString(assertionElement));
 				}
 				assertion = SAMLUtil.fromElement(assertionElement);
 			} catch (Exception e) {
-				throw logger.samlAssertionUnmarshallError(e);
+				throw LOGGER.samlAssertionUnmarshallError(e);
 			}
 		}
 

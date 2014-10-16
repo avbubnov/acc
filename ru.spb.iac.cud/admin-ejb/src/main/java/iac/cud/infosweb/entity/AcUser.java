@@ -6,8 +6,8 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
-//import org.hibernate.annotations.OnDelete;
-//import org.hibernate.annotations.OnDeleteAction;
+ 
+ 
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Role;
 
@@ -89,21 +89,9 @@ public class AcUser extends BaseItem implements Serializable {
     @Column(name="IS_ACC_ORG_MANAGER")
 	private Long isAccOrgManager;
     
-   //@OneToMany(mappedBy="acUser", cascade=CascadeType.REMOVE)
-	@OneToMany(mappedBy="acUser", cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
+  	@OneToMany(mappedBy="acUser", cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
 	private List<AcLinkUserToRoleToRaion> acLinkUserToRoleToRaions;
 
-	/*@ManyToOne
-	@JoinColumn(name="UP_ORG",insertable=false,updatable=false)
-	private AcOrganization acOrganization2;
-
-    @Column(name="UP_ORG")
-	private Long acOrganization;*/
-    
-	/*
-    @OneToMany(mappedBy="acUsersKnlT")
-	private Set<TokenKnlT> tokenKnlTs;
-    */
 	
    //-1-1-
   	//для проверки наличия записей
@@ -125,7 +113,7 @@ public class AcUser extends BaseItem implements Serializable {
     
     @OneToMany(mappedBy="upUser", 
     		  fetch=FetchType.LAZY,
-    		  cascade={/*CascadeType.PERSIST, CascadeType.REFRESH,*/ CascadeType.REMOVE})
+    		  cascade={ CascadeType.REMOVE})
 	private List<AcUsersCertBssT> acUsersCert;
     
     @OneToMany(mappedBy="acUsersKnlT", cascade={CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
@@ -138,22 +126,6 @@ public class AcUser extends BaseItem implements Serializable {
     @Column(name="UP_MUNIC")
     private Long munic;
     
-  /*  
-    @ManyToOne
-	@JoinColumn(name="UP_ISP",insertable=false,updatable=false)
-	private IspBssT acClOrganization2;
-
-    @Column(name="UP_ISP")
-	private Long acClOrganization;
-    
-    @ManyToOne
-	@JoinColumn(name="UP_ISP_USER",insertable=false,updatable=false)
-	private IspBssT acClUser2;
-
-    @Column(name="UP_ISP_USER")
-	private Long acClUser;
-    
-    */
     
     @Column(name="CERTIFICATE")
 	private String certificate;
@@ -203,12 +175,6 @@ public class AcUser extends BaseItem implements Serializable {
     @Transient
 	private Boolean usrChecked=false;
     
-  /* @Transient
-   	private String crtDate;
-       
-    @Transient
-   	private String updDate;*/
-     
     @Transient
    	private List<Long> allowedSys;
     
@@ -318,14 +284,7 @@ public class AcUser extends BaseItem implements Serializable {
 	public void setAcLinkUserToRoleToRaions(List<AcLinkUserToRoleToRaion> acLinkUserToRoleToRaions) {
 		this.acLinkUserToRoleToRaions = acLinkUserToRoleToRaions;
 	}
-	/*
-	public AcOrganization getAcOrganization2() {
-		return this.acOrganization2;
-	}
 
-	public void setAcOrganization(AcOrganization acOrganization2) {
-		this.acOrganization2 = acOrganization2;
-	}*/
 	public String getFio(){
 	  return this.fio;
 	}
@@ -333,13 +292,6 @@ public class AcUser extends BaseItem implements Serializable {
 		this.fio=fio;
 	}
 	
-/*	public Long getAcOrganization(){
-		return this.acOrganization;
-	}
-	public void setAcOrganization(Long acOrganization){
-		this.acOrganization=acOrganization;
-	}
-	*/
 	public String getEmail() {
 	  return this.email;
 	}
@@ -405,13 +357,6 @@ public class AcUser extends BaseItem implements Serializable {
 	public void setUpdUserName(String updUserName) {
 		this.updUserName = updUserName;
 	}
-	/*
-	public Set<TokenKnlT> getTokenKnlTs() {
-		return this.tokenKnlTs;
-	}
-	public void setTokenKnlTs(Set<TokenKnlT> tokenKnlTs) {
-		this.tokenKnlTs = tokenKnlTs;
-	}*/
 	
 	public List<LinkGroupUsersUsersKnlT> getLinkGroupUsersUsersKnlTs() {
 		return this.linkGroupUsersUsersKnlTs;
@@ -433,35 +378,6 @@ public class AcUser extends BaseItem implements Serializable {
 	public void setIsSysAdmin(Long isSysAdmin) {
 		this.isSysAdmin = isSysAdmin;
 	}
-	/*
-	public IspBssT getAcClOrganization2() {
-		return this.acClOrganization2;
-	}
-	public void setAcClOrganization2(IspBssT acClOrganization2) {
-		this.acClOrganization2 = acClOrganization2;
-	}
-	
-	public Long getAcClOrganization(){
-		return this.acClOrganization;
-	}
-	public void setAcClOrganization(Long acClOrganization){
-		this.acClOrganization=acClOrganization;
-	}
-	
-	public IspBssT getAcClUser2() {
-		return this.acClUser2;
-	}
-	public void setAcClUser2(IspBssT acClUser2) {
-		this.acClUser2 = acClUser2;
-	}
-	
-	public Long getAcClUser(){
-		return this.acClUser;
-	}
-	public void setAcClUser(Long acClUser){
-		this.acClUser=acClUser;
-	}
-	*/
 	public String getCertificate() {
 		return this.certificate;
 	}

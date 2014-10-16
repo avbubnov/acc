@@ -7,31 +7,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class AppOrgManContext {
 
-	//private HashMap<String, HeaderTableItem> headerItemsMap=new HashMap<String, HeaderTableItem>();
-	
+		
 	private List<HeaderTableItem> headerItemsList=new ArrayList<HeaderTableItem>();
 	
-    private HashMap<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
+    private Map<String, BaseTableItem> auditItemsMap=new HashMap<String, BaseTableItem>();
 	
-	public HashMap <String, BaseTableItem> getAuditItemsMap() {
+	public Map <String, BaseTableItem> getAuditItemsMap() {
         return this.auditItemsMap;
     }
 	
 	public List<HeaderTableItem> getHeaderItemsList() {
         return this.headerItemsList;
     }
-	/*private TreeMap<String, BaseTableItem> auditItemsMap=new TreeMap<String, BaseTableItem>();
 	
-	public TreeMap <String, BaseTableItem> getAuditItemsMap() {
-        return this.auditItemsMap;
-    }*/
 	
 	public List <BaseTableItem> getAuditItemsCollection() {
 		
@@ -61,7 +57,6 @@ public class AppOrgManContext {
 		
 		HeaderTableItem h2=null, h3=null, h4=null, h5=null;
 		
-		//headerItemsList.add(h4=new HeaderTableItem("Результат выполнения", "h4")); 
 		headerItemsList.add(h4=new HeaderTableItem("Содержание: пользователь", "h4"));
 		headerItemsList.add(h2=new HeaderTableItem("Отправитель", "h2"));
 		headerItemsList.add(h3=new HeaderTableItem("Учётные данные", "h3")); 
@@ -84,6 +79,5 @@ public class AppOrgManContext {
 		auditItemsMap.put("nameDep",new BaseTableItem("Подразделение", "...", "nameDep", "t1_dep_name_app", 6, h4));
 		auditItemsMap.put("nameOrg",new BaseTableItem("Организация", "...", "nameOrg", "t1_org_name_app", 7, h4));
 	
-		//auditItemsMap.put("modeExec",new BaseTableItem("Режим выполнения", "...", "modeExec", "t1_MODE_EXEC", 1));
 		}
 }

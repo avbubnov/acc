@@ -50,78 +50,68 @@ public class LaunchUCCertTask {
 
 	private static String jndiBinding = "java:global/InfoS-ear/InfoS-ejb/IRemoteFrontage!iac.cud.infosweb.remote.frontage.IRemoteFrontageLocal";
 
-	private static final String proc_uccert_exec_file = System
-			.getProperty("jboss.server.config.dir")
-			+ "/"
-			+ "proc_uccert_exec.properties";
-
-	final static Logger logger = LoggerFactory
+	
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(LaunchUCCertTask.class);
 
 	public static void initTask(int delaySeconds) {
 
-		logger.info("initTask");
+		LOGGER.debug("initTask");
 
 		scheduler.schedule(new Runnable() {
 
 			public void run() {
 
-				String start_date = null, period = null, scan_interval = null, scan_period = null, waitNextFile, status = null;
-				Properties properties = new Properties();
-				String path = proc_uccert_exec_file;
-				InputStream is = null;
+				String  period = null;
 				Long startSpan = null;
 
 				try {
 
-					logger.info("initTask:run:01+");
+					LOGGER.debug("initTask:run:01+");
 
-					DateFormat df = new SimpleDateFormat("dd.MM.yy HH:mm");
-
-					File f = new File(path);
-
+				
 					// запускаем на автомате
 					// даже если админ не запустил процесс из консоли
 					// а соответственно нет файла
 
-					logger.info("initTask:run:02+");
+					LOGGER.debug("initTask:run:02+");
 
 					// временное решение
 					// запуск на автомате без админа
 
-					logger.info("initTask:run:03+!+");
+					LOGGER.debug("initTask:run:03+!+");
 
 				
 					BaseParamItem bpi = new BaseParamItem(
 							ServiceReestrPro.UCCert.name());
 
-					logger.info("initTask:run:05+");
+					LOGGER.debug("initTask:run:05+");
 
 					bpi.put("gactiontype",
 							ServiceReestrAction.PROCESS_START.name());
 
-					logger.info("initTask:run:06+");
+					LOGGER.debug("initTask:run:06+");
 
 					period = "1";
 					startSpan = calendar();
 
-					logger.info("initTask:run:07+");
+					LOGGER.debug("initTask:run:07+");
 
 					bpi.put("startSpan", startSpan);
 					bpi.put("period", new Long(period));
 
 					Context ctx = new InitialContext();
-					logger.info("initTask:run:02");
+					LOGGER.debug("initTask:run:02");
 					((IRemoteFrontageLocal) ctx.lookup(jndiBinding)).run(bpi);
-					logger.info("initTask:run:03");
+					LOGGER.debug("initTask:run:03");
 
 				} catch (Exception e) {
-					logger.error("initTask:run:error:" + e);
+					LOGGER.error("initTask:run:error:", e);
 				} finally {
 					try {
 						scheduler.shutdown();
 					} catch (Exception e) {
-						logger.error("initTask:run:finally:is:error:" + e);
+						LOGGER.error("initTask:run:finally:is:error:", e);
 					}
 				}
 			}
@@ -146,9 +136,9 @@ public class LaunchUCCertTask {
 			start = start + 24 * 60 * 60 * 1000;
 		}
 
-		logger.info("calendar:03:start:" + start);
+		LOGGER.debug("calendar:03:start:" + start);
 
-		return start;
-		// return 5000L;
+		//return start;
+		 return 5000L;
 	}
 }

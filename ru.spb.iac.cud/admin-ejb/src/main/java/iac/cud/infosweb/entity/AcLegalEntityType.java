@@ -26,10 +26,6 @@ public class AcLegalEntityType implements Serializable {
 	@Column(name="SIGN_OBJECT")
 	private String signObject;
 	
-//	@Column(name="SORT_ORDER")
-//	private Long sortOrder;
-
-	//@OneToMany(mappedBy="acLegalEntityType2", fetch=FetchType.EAGER)
 	@OneToMany(mappedBy="acLegalEntityType2")
 	private List<AcOrganization> acOrganizations;
 
@@ -59,14 +55,6 @@ public class AcLegalEntityType implements Serializable {
 	public void setSignObject(String signObject) {
 		this.signObject = signObject;
 	}
-/*
-	public Long getSortOrder() {
-		return this.sortOrder;
-	}
-	public void setSortOrder(Long sortOrder) {
-		this.sortOrder = sortOrder;
-	}*/
-
 	public List<AcOrganization> getAcOrganizations() {
 		return this.acOrganizations;
 	}

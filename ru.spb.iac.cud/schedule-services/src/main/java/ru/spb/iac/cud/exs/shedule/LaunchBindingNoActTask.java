@@ -55,25 +55,24 @@ public class LaunchBindingNoActTask {
 			+ "/"
 			+ "proc_binding_noact_exec.properties";
 
-	final static Logger logger = LoggerFactory
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(LaunchBindingNoActTask.class);
 
 	public static void initTask(int delaySeconds) {
 
-		logger.info("initTask");
+		LOGGER.debug("initTask");
 
 		scheduler.schedule(new Runnable() {
 
 			public void run() {
 
-				String start_date = null, period = null, scan_interval = null, scan_period = null, waitNextFile, status = null;
+				String startDate = null, period = null, status = null;
 				Properties properties = new Properties();
 				String path = proc_binding_noact_exec_file;
-				InputStream is = null;
-
+			
 				try {
 
-					logger.info("initTask:run:01");
+					LOGGER.debug("initTask:run:01");
 
 					DateFormat df = new SimpleDateFormat("dd.MM.yy HH:mm");
 
@@ -81,21 +80,21 @@ public class LaunchBindingNoActTask {
 
 					if (f.exists()) {
 
-						logger.info("initTask:run:02");
+						LOGGER.debug("initTask:run:02");
 
-						properties.load(is = new FileInputStream(f));
+						properties.load(new FileInputStream(f));
 
-						start_date = properties.getProperty("start_date");
+						startDate = properties.getProperty("start_date");
 						period = properties.getProperty("period");
 
 						status = properties.getProperty("status");
 
-						logger.info("initTask:run:status!:" + status);
+						LOGGER.debug("initTask:run:status!:" + status);
 
 						if (status != null && status.equals("active")
-								&& start_date != null && period != null) {
+								&& startDate != null && period != null) {
 
-							logger.info("initTask:run:03");
+							LOGGER.debug("initTask:run:03");
 
 							Context ctx = new InitialContext();
 
@@ -104,7 +103,7 @@ public class LaunchBindingNoActTask {
 							bpi.put("gactiontype",
 									ServiceReestrAction.PROCESS_START.name());
 
-							bpi.put("startDate", df.parse(start_date));
+							bpi.put("startDate", df.parse(startDate));
 							bpi.put("period", new Long(period));
 
 							((IRemoteFrontageLocal) ctx.lookup(jndiBinding))
@@ -113,12 +112,12 @@ public class LaunchBindingNoActTask {
 					}
 
 				} catch (Exception e) {
-					logger.error("initTask:run:error:" + e);
+					LOGGER.error("initTask:run:error:", e);
 				} finally {
 					try {
 						scheduler.shutdown();
 					} catch (Exception e) {
-						logger.error("initTask:run:finally:is:error:" + e);
+						LOGGER.error("initTask:run:finally:is:error:", e);
 					}
 				}
 			}

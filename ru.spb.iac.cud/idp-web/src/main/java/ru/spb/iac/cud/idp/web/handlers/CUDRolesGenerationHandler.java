@@ -33,7 +33,7 @@ import java.util.Map;
 public class CUDRolesGenerationHandler extends BaseSAML2Handler {
 	private transient RoleGenerator roleGenerator = new EmptyRoleGenerator();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDRolesGenerationHandler.class);
 
 	@Override
@@ -84,18 +84,18 @@ public class CUDRolesGenerationHandler extends BaseSAML2Handler {
 				.getAttribute(GeneralConstants.ROLES_ID);
 
 		// закомментировано, так как до вызова handler
-		// в AbstractIDPValve:processSAMLRequestMessage уже идёт установка
-		// List roles = this.roleGenerator.generateRoles(userPrincipal);
-		// session.getSession().setAttribute("picketlink.roles", roles);
+		// в /AbstractIDPValve:processSAMLRequestMessage уже идёт установка
+		// List /roles = /this/.roleGenerator/.generateRoles(userPrincipal);
+		// session.getSession()/.setAttribute("picketlink.roles", roles);
 
-		// if (roles == null) {
+		// if (/roles == null/) {
 
-		// loggerslf4j.infohandleRequestType:02:"+request.getIssuer().getValue());
+		 
 
 		AuthnRequestType so = (AuthnRequestType) request.getSAML2Object();
 
 		String codeSystem = so.getIssuer().getValue();
-		// loggerslf4j.infohandleRequestType:03:"+codeSystem);
+		 
 
 		((RolesManager) this.roleGenerator).setSystemCode(codeSystem);
 
@@ -113,7 +113,7 @@ public class CUDRolesGenerationHandler extends BaseSAML2Handler {
 		// }
 		response.setRoles(roles);
 
-		// loggerslf4j.infohandleRequestType:04:"+roles.size());
+		 
 	}
 
 	private void insantiateRoleValidator(String attribStr)

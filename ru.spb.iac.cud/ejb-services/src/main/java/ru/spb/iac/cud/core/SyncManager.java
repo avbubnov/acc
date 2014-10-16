@@ -1,9 +1,9 @@
 package ru.spb.iac.cud.core;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
-//import javax.annotation.Resource;
+ 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -39,7 +39,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 	@javax.annotation.Resource
 	UserTransaction utx;
 
-	Logger logger = LoggerFactory.getLogger(SyncManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(SyncManager.class);
 
 	public SyncManager() {
 	}
@@ -62,45 +62,48 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// ADD - это ADD или UPDATE
 
-		logger.info("sync_roles:01");
+		LOGGER.debug("sync_roles:01");
 
-		HashMap<String, Long> roles_cl = new HashMap<String, Long>();
+		Map<String, Long> roles_cl = new HashMap<String, Long>();
 
 		try {
 
 			utx.begin();
 
-			if (roles == null || roles.isEmpty()) {
-				logger.info("sync_roles:return");
-				throw new GeneralFailure("Отсутствует список ролей!");
-			}
-
 			if (idIS == null) {
-				logger.info("sync_roles:return");
+				LOGGER.debug("sync_roles:return");
 				throw new GeneralFailure("idIS is null");
 			}
 
-			if (modeExec == null
-					|| modeExec.trim().isEmpty()
-					|| (!modeExec.equals("REPLACE") && !modeExec.equals("ADD") && !modeExec
-							.equals("REMOVE"))) {
-				throw new GeneralFailure("Некорректные данные [modeExec]!");
+			
+			if (roles == null || roles.isEmpty()) {
+				LOGGER.debug("sync_roles:return");
+				throw new GeneralFailure("Отсутствует список ролей!");
 			}
 
-			int mode = 1;
+			
+			if (modeExec == null|| modeExec.trim().isEmpty()
+					|| (!modeExec.equals("REPLACE") && !modeExec.equals("ADD") && !modeExec
+				.equals("REMOVE"))) {
+				throw new GeneralFailure("Некорректные данные [modeExec]");
+			}
+
+			int modeSyncRoles = 1;
 
 			if (modeExec.equals("REPLACE")) {
-				mode = 0;
+				modeSyncRoles = 0;
 			} else if (modeExec.equals("ADD")) {
-				mode = 1;
+				modeSyncRoles = 1;
 			} else if (modeExec.equals("REMOVE")) {
-				mode = 2;
+				modeSyncRoles = 2;
 			}
 
+			
 			// !!!
 			idIS = get_code_is(idIS);
 
-			if (mode == 1) { // //ADD
+			
+			if (modeSyncRoles == 1) { // //ADD
 
 				// имеющиеся роли
 				List<Object[]> lo = em
@@ -111,7 +114,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 										+ "where APP.ID_SRV = rls.UP_IS "
 										+ "and APP.SIGN_OBJECT=?")
 						.setParameter(1, idIS).getResultList();
-				logger.info("sync_roles:02");
+				LOGGER.debug("sync_roles:02");
 
 				for (Object[] objectArray : lo) {
 					roles_cl.put(
@@ -160,13 +163,13 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					}
 				}
 
-			} else if (mode == 2) { // REMOVE
+			} else if (modeSyncRoles == 2) { // REMOVE
 
-				logger.info("sync_roles:03");
+				LOGGER.debug("sync_roles:03");
 
 				for (Role role : roles) {
 
-					logger.info("sync_roles:04:" + role.getCode());
+					LOGGER.debug("sync_roles:04:" + role.getCode());
 
 					if (role.getCode() == null
 							|| role.getCode().trim().equals("")) {
@@ -182,7 +185,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					// роль есть в базе
 
 					try {
-						logger.info("sync_roles:05");
+						LOGGER.debug("sync_roles:05");
 
 						em.createNativeQuery(
 								"DELETE FROM AC_ROLES_BSS_T rls "
@@ -195,7 +198,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 								.setParameter(2, idIS).executeUpdate();
 
 					} catch (Exception e) {
-						logger.error("sync_roles:error:" + e);
+						LOGGER.error("sync_roles:error:", e);
 						// sys_audit тут не будет работать, т.к. транзакция
 						// завершилась неудачно,
 						// и он требует новую транзакцию
@@ -212,15 +215,15 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					}
 					// }
 				}
-			} else if (mode == 0) { // REPLACE
+			} else if (modeSyncRoles == 0) { // REPLACE
 
 				// REPLACE = ALL REMOVE + ADD
-				logger.info("sync_roles:07");
+				LOGGER.debug("sync_roles:07");
 
 				// 1. REMOVE ALL
 
 				try {
-					logger.info("sync_roles:09");
+					LOGGER.debug("sync_roles:09");
 
 					em.createNativeQuery(
 							"DELETE FROM AC_ROLES_BSS_T rls "
@@ -231,7 +234,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 							.setParameter(1, idIS).executeUpdate();
 
 				} catch (Exception e) {
-					logger.error("sync_roles:010");
+					LOGGER.error("sync_roles:010");
 					// sys_audit тут не будет работать, т.к. транзакция
 					// завершилась неудачно,
 					// и он требует новую транзакцию
@@ -246,7 +249,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 				for (Role role : roles) {
 
-					logger.info("sync_roles:011:" + role.getCode());
+					LOGGER.debug("sync_roles:011:" + role.getCode());
 
 					if (role.getCode() == null
 							|| role.getCode().trim().equals("")) {
@@ -286,9 +289,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				try {
 					utx.rollback();
 				} catch (Exception er1) {
-					logger.error("rollback:Error1:" + er1);
+					LOGGER.error("rollback:Error1:", er1);
 				}
-				logger.error("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
 			throw new GeneralFailure(e.getMessage());
 		}
@@ -314,9 +317,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// ADD - это ADD или UPDATE
 
-		logger.info("sync_functions:01");
+		LOGGER.debug("sync_functions:01");
 
-		HashMap<String, Long> act_cl = new HashMap<String, Long>();
+		Map<String, Long> act_cl = new HashMap<String, Long>();
 
 		try {
 
@@ -326,16 +329,18 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				throw new GeneralFailure("Отсутствует код системы!");
 			}
 
+			if (idIS == null) {
+				LOGGER.debug("sync_functions:return");
+				throw new GeneralFailure("idIS is null!");
+			}
+			
 			if (functions == null || functions.isEmpty()) {
-				logger.info("sync_functions:return");
+				LOGGER.debug("sync_functions:return");
 				throw new GeneralFailure("Отсутствует список функций!");
 				// return;
 			}
 
-			if (idIS == null) {
-				logger.info("sync_functions:return");
-				throw new GeneralFailure("idIS is null!");
-			}
+			
 
 			if (modeExec == null
 					|| modeExec.trim().isEmpty()
@@ -344,14 +349,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				throw new GeneralFailure("Некорректные данные [modeExec]!");
 			}
 
-			int mode = 1;
+			int modeSyncFunc = 1;
 
 			if (modeExec.equals("REPLACE")) {
-				mode = 0;
+				modeSyncFunc = 0;
 			} else if (modeExec.equals("ADD")) {
-				mode = 1;
+				modeSyncFunc = 1;
 			} else if (modeExec.equals("REMOVE")) {
-				mode = 2;
+				modeSyncFunc = 2;
 			}
 
 			// !!!
@@ -363,7 +368,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 			 * .executeUpdate();
 			 */
 
-			if (mode == 1) { // //ADD
+			if (modeSyncFunc == 1) { // //ADD
 
 				// имеющиеся роли
 				List<Object[]> lo = em
@@ -374,7 +379,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 										+ "where APP.ID_SRV = ACT.UP_IS "
 										+ "and APP.SIGN_OBJECT=?")
 						.setParameter(1, idIS).getResultList();
-				logger.info("sync_functions:03");
+				LOGGER.debug("sync_functions:03");
 
 				for (Object[] objectArray : lo) {
 					act_cl.put(
@@ -424,9 +429,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					}
 				}
 
-			} else if (mode == 2) { // REMOVE
+			} else if (modeSyncFunc == 2) { // REMOVE
 
-				logger.info("sync_functions:04");
+				LOGGER.debug("sync_functions:04");
 
 				for (Function func : functions) {
 
@@ -445,7 +450,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					// функция есть в базе
 
 					try {
-						logger.info("sync_functions:05");
+						LOGGER.debug("sync_functions:05");
 
 						em.createNativeQuery(
 								"DELETE FROM ACTIONS_BSS_T act "
@@ -458,7 +463,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 								.setParameter(2, idIS).executeUpdate();
 
 					} catch (Exception e) {
-						logger.error("sync_functions:06");
+						LOGGER.error("sync_functions:06");
 						// sys_audit тут не будет работать, т.к. транзакция
 						// завершилась неудачно,
 						// и он требует новую транзакцию
@@ -475,16 +480,16 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					// }
 				}
 
-			} else if (mode == 0) { // REPLACE
+			} else if (modeSyncFunc == 0) { // REPLACE
 
 				// REPLACE = ALL REMOVE + ADD
 
-				logger.info("sync_functions:07");
+				LOGGER.debug("sync_functions:07");
 
 				// 1. REMOVE ALL
 
 				try {
-					logger.info("sync_functions:09");
+					LOGGER.debug("sync_functions:09");
 
 					em.createNativeQuery(
 							"DELETE FROM ACTIONS_BSS_T act "
@@ -495,7 +500,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 							.setParameter(1, idIS).executeUpdate();
 
 				} catch (Exception e) {
-					logger.error("sync_functions:010");
+					LOGGER.error("sync_functions:010");
 					// sys_audit тут не будет работать, т.к. транзакция
 					// завершилась неудачно,
 					// и он требует новую транзакцию
@@ -550,9 +555,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				try {
 					utx.rollback();
 				} catch (Exception er1) {
-					logger.error("rollback:Error1:" + er1);
+					LOGGER.error("rollback:Error1:", er1);
 				}
-				logger.error("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
 
 			throw new GeneralFailure(e.getMessage());
@@ -567,9 +572,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// для групп систем, систем и подсистем
 
-		logger.info("is_roles:01");
-
-		HashMap<String, Long> roles_cl = new HashMap<String, Long>();
+		LOGGER.debug("is_roles:01");
 
 		List<Role> result = new ArrayList<Role>();
 		List<String> keyList = new ArrayList<String>();
@@ -577,14 +580,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 		try {
 
 			if (idIS == null || idIS.trim().isEmpty()) {
-				logger.info("is_roles:01");
+				LOGGER.debug("is_roles:01");
 				throw new GeneralFailure("idIS is null!");
 			}
 
 			if (idIS.startsWith(CUDConstants.groupArmPrefix)) {
 				// группа ИС
 
-				logger.info("is_roles:02");
+				LOGGER.debug("is_roles:02");
 
 				List<Object[]> lo = em
 						.createNativeQuery(
@@ -607,14 +610,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						.setParameter(1, idIS).getResultList();
 
 				for (Object[] objectArray : lo) {
-					logger.info("IdRole:" + objectArray[0].toString());
+					LOGGER.debug("IdRole:" + objectArray[0].toString());
 
 					Role role = new Role();
 
 					role.setCode(objectArray[0].toString());
 					role.setName(objectArray[1].toString());
-					role.setDescription((objectArray[2] != null ? objectArray[2]
-							.toString() : null));
+					role.setDescription (objectArray[2] != null ? objectArray[2]
+							.toString() : null);
 
 					result.add(role);
 
@@ -622,7 +625,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 				}
 
-				logger.info("is_roles:03");
+				LOGGER.debug("is_roles:03");
 
 			} else if (idIS.startsWith(CUDConstants.armPrefix)
 					|| idIS.startsWith(CUDConstants.subArmPrefix)) {
@@ -644,8 +647,8 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 					role.setCode(objectArray[0].toString());
 					role.setName(objectArray[1].toString());
-					role.setDescription((objectArray[2] != null ? objectArray[2]
-							.toString() : null));
+					role.setDescription (objectArray[2] != null ? objectArray[2]
+							.toString() : null);
 
 					result.add(role);
 
@@ -653,7 +656,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 				}
 
-				logger.info("is_roles:04");
+				LOGGER.debug("is_roles:04");
 
 			}
 
@@ -675,24 +678,22 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// для групп систем, систем и подсистем
 
-		logger.info("is_functions:01");
+		LOGGER.debug("is_functions:01");
 
-		HashMap<String, Long> roles_cl = new HashMap<String, Long>();
-
-		List<Function> result = new ArrayList<Function>();
+			List<Function> result = new ArrayList<Function>();
 		List<String> keyList = new ArrayList<String>();
 
 		try {
 
 			if (idIS == null || idIS.trim().isEmpty()) {
-				logger.info("is_functions:01");
+				LOGGER.debug("is_functions:01");
 				throw new GeneralFailure("idIS is null!");
 			}
 
 			if (idIS.startsWith(CUDConstants.groupArmPrefix)) {
 				// группа ИС
 
-				logger.info("is_functions:02");
+				LOGGER.debug("is_functions:02");
 
 				List<Object[]> lo = em
 						.createNativeQuery(
@@ -715,14 +716,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						.setParameter(1, idIS).getResultList();
 
 				for (Object[] objectArray : lo) {
-					logger.info("IdRole:" + objectArray[0].toString());
+					LOGGER.debug("IdRole:" + objectArray[0].toString());
 
 					Function func = new Function();
 
 					func.setCode(objectArray[0].toString());
 					func.setName(objectArray[1].toString());
-					func.setDescription((objectArray[2] != null ? objectArray[2]
-							.toString() : null));
+					func.setDescription (objectArray[2] != null ? objectArray[2]
+							.toString() : null);
 
 					result.add(func);
 
@@ -730,7 +731,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 				}
 
-				logger.info("is_functions:03");
+				LOGGER.debug("is_functions:03");
 
 			} else if (idIS.startsWith(CUDConstants.armPrefix)
 					|| idIS.startsWith(CUDConstants.subArmPrefix)) {
@@ -752,8 +753,8 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 					func.setCode(objectArray[0].toString());
 					func.setName(objectArray[1].toString());
-					func.setDescription((objectArray[2] != null ? objectArray[2]
-							.toString() : null));
+					func.setDescription (objectArray[2] != null ? objectArray[2]
+							.toString() : null);
 
 					result.add(func);
 
@@ -761,7 +762,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 				}
 
-				logger.info("is_functions:04");
+				LOGGER.debug("is_functions:04");
 
 			}
 
@@ -799,9 +800,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// ADD - это ADD или UPDATE
 
-		logger.info("sync_groups:01");
+		LOGGER.debug("sync_groups:01");
 
-		HashMap<String, Long> group_cl = new HashMap<String, Long>();
+		Map<String, Long> group_cl = new HashMap<String, Long>();
 
 		List<String> role_cl = new ArrayList<String>();
 
@@ -811,44 +812,49 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 			/*
 			 * проверка на уровне выше - is_exist()
-			 * if(idIS==null||idIS.trim().equals("")){ throw new
-			 * GeneralFailure("Отсутствует код системы!"); }
-			 */
+		    */
 
-			if (groups == null || groups.isEmpty()) {
-				logger.info("sync_groups:return");
+			if (modeExec == null 
+					|| modeExec.trim().isEmpty()
+					|| (!modeExec.equals("ADD") 
+				&& !modeExec.equals("REMOVE"))) {
+				throw new GeneralFailure("Некорректные данные [modeExec]!");
+			}
+			
+			if (idIS == null) {
+				LOGGER.debug("sync_groups:return");
+				throw new GeneralFailure("idIS is null!");
+			}
+			
+			if (groups == null 
+					|| groups.isEmpty()) {
+				LOGGER.debug("sync_groups:return");
 				throw new GeneralFailure("Отсутствует список групп!");
 			}
 
-			if (idIS == null) {
-				logger.info("sync_groups:return");
-				throw new GeneralFailure("idIS is null!");
-			}
+			
 
-			if (modeExec == null || modeExec.trim().isEmpty()
-					|| (!modeExec.equals("ADD") && !modeExec.equals("REMOVE"))) {
-				throw new GeneralFailure("Некорректные данные [modeExec]!");
-			}
+			
 
-			int mode = 1;
+			int modeSyncGroup = 1;
 
 			if (modeExec.equals("ADD")) {
-				mode = 1;
+				modeSyncGroup = 1;
 			} else if (modeExec.equals("REMOVE")) {
-				mode = 2;
+				modeSyncGroup = 2;
 			}
 
 			// !!!
 			idIS = get_code_is(idIS);
 
-			if (mode == 1) { // //ADD
+			if (modeSyncGroup == 1) { // //ADD
 
 				// имеющиеся группы
 				List<Object[]> lo = em.createNativeQuery(
 						"select gr.SIGN_OBJECT, GR.ID_SRV "
 								+ "from GROUP_USERS_KNL_T gr ").getResultList();
 
-				logger.info("sync_groups:02");
+				LOGGER.debug("sync_groups:02");
 
 				for (Object[] objectArray : lo) {
 					group_cl.put(
@@ -883,7 +889,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						// привязка ролей к группе
 						if (group.getCodesRoles() != null) {
 
-							logger.info("sync_groups:03");
+							LOGGER.debug("sync_groups:03");
 
 							// имеющиеся роли в группе по данной системе
 
@@ -908,17 +914,17 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 								role_cl.add(objectArray[0] != null ? objectArray[0]
 										.toString() : "");
 
-								logger.info("sync_groups:04:" + objectArray[0]);
+								LOGGER.debug("sync_groups:04:" + objectArray[0]);
 
 							}
 
 							for (String role_code : group.getCodesRoles()) {
 
-								logger.info("sync_groups:05:" + role_code);
+								LOGGER.debug("sync_groups:05:" + role_code);
 
 								if (!role_cl.contains(role_code)) {
 
-									logger.info("sync_groups:06");
+									LOGGER.debug("sync_groups:06");
 
 									em.createNativeQuery(
 											"insert into LINK_GROUP_USERS_ROLES_KNL_T(UP_ROLES, UP_GROUP_USERS, CREATOR,  created) "
@@ -1007,13 +1013,13 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					}
 				}
 
-			} else if (mode == 2) { // REMOVE
+			} else if (modeSyncGroup == 2) { // REMOVE
 
-				logger.info("sync_groups:03");
+				LOGGER.debug("sync_groups:03");
 
 				for (Group group : groups) {
 
-					logger.info("sync_groups:04:" + group.getCode());
+					LOGGER.debug("sync_groups:04:" + group.getCode());
 
 					if (group.getCode() == null
 							|| group.getCode().trim().equals("")) {
@@ -1026,7 +1032,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					// роль есть в базе
 
 					try {
-						logger.info("sync_group:05");
+						LOGGER.debug("sync_group:05");
 
 						em.createNativeQuery(
 								"DELETE FROM GROUP_USERS_KNL_T rls "
@@ -1035,7 +1041,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 								.executeUpdate();
 
 					} catch (Exception e) {
-						logger.error("sync_group:06");
+						LOGGER.error("sync_group:06");
 						// sys_audit тут не будет работать, т.к. транзакция
 						// завершилась неудачно,
 						// и он требует новую транзакцию
@@ -1071,9 +1077,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				try {
 					utx.rollback();
 				} catch (Exception er1) {
-					logger.error("rollback:Error1:" + er1);
+					LOGGER.error("rollback:Error1:", er1);
 				}
-				logger.error("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
 			throw new GeneralFailure(e.getMessage());
 		}
@@ -1102,7 +1108,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// ADD - это ADD или UPDATE
 
-		logger.info("sync_groups_roles:01");
+		LOGGER.debug("sync_groups_roles:01");
 
 		List<String> role_cl = new ArrayList<String>();
 
@@ -1116,41 +1122,40 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 			 * GeneralFailure("Отсутствует код системы!"); }
 			 */
 
-			if (codesGroups == null || codesGroups.isEmpty()) {
-				logger.info("sync_groups_roles:return");
-				throw new GeneralFailure("Отсутствует список групп!");
-			}
-			if (codesRoles == null || codesRoles.isEmpty()) {
-				logger.info("sync_groups_roles:return2");
-				throw new GeneralFailure("Отсутствует список ролей!");
-			}
-
 			if (idIS == null) {
-				logger.info("sync_groups_roles:return3");
 				throw new GeneralFailure("idIS is null!");
 			}
+			
+			if (codesGroups == null || codesGroups.isEmpty()) {
+				throw new GeneralFailure("Отсутствует список групп!");
+			}
+			
+			if (codesRoles == null || codesRoles.isEmpty()) {
+					throw new GeneralFailure("Отсутствует список ролей!");
+			}
 
-			if (modeExec == null
-					|| modeExec.trim().isEmpty()
-					|| (!modeExec.equals("REPLACE") && !modeExec.equals("ADD") && !modeExec
+			
+
+			if (modeExec == null|| modeExec.trim().isEmpty()|| (!modeExec.equals("REPLACE") && !modeExec.equals("ADD") && !modeExec
 							.equals("REMOVE"))) {
 				throw new GeneralFailure("Некорректные данные [modeExec]!");
 			}
 
-			int mode = 1;
+			int modeSyncGroupRoles = 1;
 
 			if (modeExec.equals("REPLACE")) {
-				mode = 0;
+				modeSyncGroupRoles = 0;
 			} else if (modeExec.equals("ADD")) {
-				mode = 1;
+				modeSyncGroupRoles = 1;
 			} else if (modeExec.equals("REMOVE")) {
-				mode = 2;
+				modeSyncGroupRoles = 2;
 			}
 
 			// !!!
 			idIS = get_code_is(idIS);
 
-			if (mode == 1) { // //ADD
+			
+			if (modeSyncGroupRoles == 1) { // //ADD
 
 				for (String group : codesGroups) {
 
@@ -1161,7 +1166,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					role_cl = new ArrayList<String>();
 
 					// привязка ролей к группе
-					logger.info("sync_groups_roles:03");
+					LOGGER.debug("sync_groups_roles:03");
 
 					// имеющиеся роли в группе по данной системе
 
@@ -1185,17 +1190,17 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						role_cl.add(objectArray[0] != null ? objectArray[0]
 								.toString() : "");
 
-						logger.info("sync_groups_roles:04:" + objectArray[0]);
+						LOGGER.debug("sync_groups_roles:04:" + objectArray[0]);
 
 					}
 
 					for (String role_code : codesRoles) {
 
-						logger.info("sync_groups_roles:05:" + role_code);
+						LOGGER.debug("sync_groups_roles:05:" + role_code);
 
 						if (!role_cl.contains(role_code)) {
 
-							logger.info("sync_groups_roles:06");
+							LOGGER.debug("sync_groups_roles:06");
 
 							em.createNativeQuery(
 									"insert into LINK_GROUP_USERS_ROLES_KNL_T(UP_ROLES, UP_GROUP_USERS, CREATOR,  created) "
@@ -1213,20 +1218,20 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					}
 				}
 
-			} else if (mode == 2) { // REMOVE
+			} else if (modeSyncGroupRoles == 2) { // REMOVE
 
-				logger.info("sync_groups_roles:03");
+				LOGGER.debug("sync_groups_roles:03");
 
 				for (String group : codesGroups) {
 
-					logger.info("sync_groups_roles:04:" + group);
+					LOGGER.debug("sync_groups_roles:04:" + group);
 
 					if (group == null || group.trim().equals("")) {
 						throw new GeneralFailure("Отсутствует код группы!");
 					}
 
 					try {
-						logger.info("sync_group_roles:05");
+						LOGGER.debug("sync_group_roles:05");
 
 						for (String role_code : codesRoles) {
 
@@ -1245,15 +1250,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						}
 
 					} catch (Exception e) {
-						logger.info("sync_group_roles:06");
+						LOGGER.debug("sync_group_roles:06");
 					}
-					// }
 				}
 
-			} else if (mode == 0) { // REPLACE
+			} else if (modeSyncGroupRoles == 0) { // REPLACE
 
 				// REPLACE = ALL REMOVE + ADD
-				logger.info("sync_groups_roles:07");
+				LOGGER.debug("sync_groups_roles:07");
 
 				for (String group : codesGroups) {
 
@@ -1264,7 +1268,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					// 1. REMOVE ALL
 
 					try {
-						logger.info("sync_groups_roles:09");
+						LOGGER.debug("sync_groups_roles:09");
 
 						em.createNativeQuery(
 								"DELETE FROM LINK_GROUP_USERS_ROLES_KNL_T rls "
@@ -1274,14 +1278,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 								.setParameter(1, group).executeUpdate();
 
 					} catch (Exception e) {
-						logger.info("sync_groups_roles:010");
+						LOGGER.debug("sync_groups_roles:010");
 					}
 
 					// 2.ADD
 
 					for (String role_code : codesRoles) {
 
-						logger.info("sync_groups_roles:05:" + role_code);
+						LOGGER.debug("sync_groups_roles:05:" + role_code);
 
 						if (role_code == null || role_code.trim().equals("")) {
 							throw new GeneralFailure("Отсутствует код роли!");
@@ -1321,9 +1325,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				try {
 					utx.rollback();
 				} catch (Exception er1) {
-					logger.error("rollback:Error1:" + er1);
+					LOGGER.error("rollback:Error1:", er1);
 				}
-				logger.error("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
 			throw new GeneralFailure(e.getMessage());
 		}
@@ -1342,7 +1346,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 			 Long idUserAuth,
 			 String IPAddress) throws GeneralFailure{
 		 
-		 logger.info("sync_resources:01");
+		 LOGGER.debug("sync_resources:01");
 		 
 		 //ADD - это ADD или UPDATE
 		 
@@ -1350,7 +1354,6 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 		 //для систем данные для обновления берутся из resources.get(0)
 		 //для систем код систем берётся idIS, а не resources.get(0).resource.getCode()
 		 
-		 List<String> role_cl=new ArrayList<String>();
 		
 		 String linksLine=null;
 		 
@@ -1366,7 +1369,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 	    		 throw new GeneralFailure("Некорректные данные [modeExec]!");
 	    	 }
 			 
-			 HashMap<String, Long> res_cl=new HashMap<String, Long>();
+			 Map<String, Long> res_cl=new HashMap<String, Long>();
 			 
 			 int mode=1;
 				
@@ -1378,7 +1381,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				//!!!
 				idIS =  get_code_is(idIS);
 					
-				logger.info("sync_resources:idIS2:"+idIS);
+				LOGGER.debug("sync_resources:idIS2:"+idIS);
 					
 				if(mode==1){ //ADD [UPDATE]
 					
@@ -1389,14 +1392,13 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 							 
 						
 						      // закомментировано, т.к. для систем код систем берётся idIS
-							  /* if(resource.getCode()==null||resource.getCode().trim().equals("")){
-								   throw new GeneralFailure("Отсутствует код ресурса!");
-							   }else */if(resource.getName()==null||resource.getName().trim().equals("")){
+							  /* if(re/source.getCode()==nul/l||reso/urce.getCode().trim().equals("")){
+								   throw/ new GeneralFa/ilure("Отсутствует код ресурса!");
+							   }els/e */if(resource.getName()==null||resource.getName().trim().equals("")){
 								   throw new GeneralFailure("Отсутствует название ресурса!");
 							   }
 								 
-							   role_cl=new ArrayList<String>();
-								 
+							 	 
 							   linksLine=null;
 							   
 							   if(resource.getLinks()!=null&&!resource.getLinks().isEmpty()){
@@ -1419,7 +1421,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						             .setParameter(2, resource.getDescription())
 						             .setParameter(3, linksLine)
 						             .setParameter(4, idIS)
-						            //!!! .setParameter(4, resource.getCode())
+						            //!!! .setPara/meter(/4, resourc/e.getCode())
 						            
 						            .executeUpdate();	
 					}
@@ -1444,7 +1446,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				    							" and GSYS.GROUP_CODE=:idIS ")
 				                .setParameter("idIS", idIS)
 				       	      	.getResultList();
-					   logger.info("sync_resources:02");
+					   LOGGER.debug("sync_resources:02");
 				       
 				       for(Object[] objectArray :lo){
 				    	   res_cl.put(objectArray[0]!=null?objectArray[0].toString():"", 
@@ -1460,7 +1462,6 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 							   throw new GeneralFailure("Отсутствует название ресурса!");
 						   }
 							 
-						   role_cl=new ArrayList<String>();
 							 
 						   linksLine=null;
 						   
@@ -1532,8 +1533,8 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 			 utx.commit();
 			 
 		    }catch (Exception er) {
-				try{utx.rollback();}catch (Exception er1) {logger.error("rollback:Error1:"+er1);} 
-				logger.error("rollback:Error:"+er);
+				try{utx.rollback();}catch (Exception er1) {LOGGER.error("rollback:Error1:"+er1);} 
+				LOGGER.error("rollback:Error:"+er);
 			} 
 		 
 			 throw new GeneralFailure(e.getMessage());
@@ -1543,308 +1544,6 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 	 }
 	
 	
-	/*
-	public void sync_resources(String idIS, List<ResourceNU> resources,
-			String modeExec, Long idUserAuth, String IPAddress)
-			throws GeneralFailure {
-
-		logger.info("sync_resources:01");
-
-		List<String> role_cl = new ArrayList<String>();
-
-		try {
-
-			if (idIS == null || idIS.trim().isEmpty()) {
-				throw new GeneralFailure("idIS is null!");
-			}
-
-			if (modeExec == null
-					|| modeExec.trim().isEmpty()
-					|| (!modeExec.equals("REPLACE") && !modeExec.equals("ADD") && !modeExec
-							.equals("REMOVE"))) {
-				throw new GeneralFailure("Некорректные данные [modeExec]!");
-			}
-
-			HashMap<String, Long> res_cl = new HashMap<String, Long>();
-
-			int mode = 1;
-
-			if (modeExec.equals("REPLACE")) {
-				mode = 0;
-			} else if (modeExec.equals("ADD")) {
-				mode = 1;
-			} else if (modeExec.equals("REMOVE")) {
-				mode = 2;
-			}
-
-			if (idIS.startsWith(CUDConstants.groupArmPrefix)) {
-				// группа ИС
-
-			} else if (idIS.startsWith(CUDConstants.armPrefix)
-					|| idIS.startsWith(CUDConstants.subArmPrefix)) {
-				// система или подсистема
-
-				// !!!
-				idIS = get_code_is(idIS);
-
-				if (mode == 1) { // //ADD
-
-					// имеющиеся ресурсы
-					List<Object[]> lo = em
-							.createNativeQuery(
-									"select RES.SIGN_OBJECT, RES.ID_SRV "
-											+ "from AC_RESOURCES_BSS_T res, "
-											+ "AC_IS_BSS_T app "
-											+ "where res.UP_IS=APP.ID_SRV "
-											+ "and APP.SIGN_OBJECT = ? ")
-							.setParameter(1, idIS).getResultList();
-					logger.info("sync_resources:02");
-
-					for (Object[] objectArray : lo) {
-						res_cl.put(
-								objectArray[0] != null ? objectArray[0]
-										.toString() : "",
-								objectArray[1] != null ? new Long(
-										objectArray[1].toString()) : -1L);
-					}
-
-					for (ResourceNU resource : resources) {
-
-						if (resource.getCode() == null
-								|| resource.getCode().trim().equals("")) {
-							throw new GeneralFailure("Отсутствует код ресурса!");
-						} else if (resource.getName() == null
-								|| resource.getName().trim().equals("")) {
-							throw new GeneralFailure(
-									"Отсутствует название ресурса!");
-						}
-
-						role_cl = new ArrayList<String>();
-
-						if (res_cl.containsKey(resource.getCode())) {
-
-							em.createNativeQuery(
-									"UPDATE AC_RESOURCES_BSS_T rls "
-											+ "set rls.FULL_=?, rls.DESCRIPTION=?  "
-											+ "where rls.SIGN_OBJECT = ?  "
-											+ "and RLS.UP_IS = "
-											+ "(select app.ID_SRV from AC_IS_BSS_T app "
-											+ "where app.SIGN_OBJECT = ? ) ")
-									.setParameter(1, resource.getName())
-									.setParameter(2, resource.getDescription())
-									.setParameter(3, resource.getCode())
-									.setParameter(4, idIS)
-
-									.executeUpdate();
-
-							// привязка ролей к ресурсу
-							if (resource.getCodesRoles() != null) {
-
-								logger.info("sync_resource:03");
-
-								// имеющиеся роли в ресурсе по данной системе
-
-								List<Object[]> lo_roles = em
-										.createNativeQuery(
-												"  SELECT ROL.SIGN_OBJECT, ROL.ID_SRV "
-														+ "FROM AC_RESOURCES_BSS_T res, "
-														+ "AC_LINK_ROLE_RESOURCE_KNL_T lgr, "
-														+ "AC_ROLES_BSS_T rol, "
-														+ "AC_IS_BSS_T sys "
-														+ "WHERE  res.ID_SRV = LGR.UP_RESOURCE "
-														+ "AND LGR.UP_ROLE = ROL.ID_SRV "
-														+ "AND SYS.SIGN_OBJECT = ? "
-														+ "AND SYS.ID_SRV = ROL.UP_IS "
-														+ "AND res.SIGN_OBJECT = ? "
-														+ "GROUP BY ROL.SIGN_OBJECT, ROL.ID_SRV")
-										.setParameter(1, idIS)
-										.setParameter(2, resource.getCode())
-										.getResultList();
-
-								for (Object[] objectArray : lo_roles) {
-									role_cl.add(objectArray[0] != null ? objectArray[0]
-											.toString() : "");
-
-									logger.info("sync_resources:04:"
-											+ objectArray[0]);
-
-								}
-
-								for (String role_code : resource
-										.getCodesRoles()) {
-
-									logger.info("sync_resources:05:"
-											+ role_code);
-
-									if (!role_cl.contains(role_code)) {
-
-										logger.info("sync_resources:06");
-
-										em.createNativeQuery(
-												"insert into AC_LINK_ROLE_RESOURCE_KNL_T(UP_ROLE, UP_RESOURCE, CREATOR,  created) "
-														+ "values ("
-														+ "(select role.ID_SRV from AC_ROLES_BSS_T role, AC_IS_BSS_T sys  "
-														+ "where SYS.ID_SRV= ROLE.UP_IS and  SYS.SIGN_OBJECT = ? "
-														+ "and role.SIGN_OBJECT = ? ), ?, ?, sysdate) ")
-												.setParameter(1, idIS)
-												.setParameter(2, role_code)
-												.setParameter(
-														3,
-														res_cl.get(resource
-																.getCode()))
-												.setParameter(4, 1L)
-												.executeUpdate();
-									}
-								}
-							}
-
-						} else {
-
-							List results = em
-									.createNativeQuery(
-											"select AC_RESOURCES_SEQ.nextval from dual ")
-									.getResultList();
-
-							Long newIdRes = ((BigDecimal) results.get(0))
-									.longValue();
-
-							em.createNativeQuery(
-									"insert into AC_RESOURCES_BSS_T(ID_SRV, SIGN_OBJECT, FULL_ , DESCRIPTION, CREATOR,  created, UP_IS ) "
-											+ "values(?, "
-											+ "?, ?, ?, 1, sysdate, (select app.ID_SRV from AC_IS_BSS_T app where app.SIGN_OBJECT = ? )) ")
-									.setParameter(1, newIdRes)
-									.setParameter(2, resource.getCode())
-									.setParameter(3, resource.getName())
-									.setParameter(4, resource.getDescription())
-									.setParameter(5, idIS).executeUpdate();
-
-							// привязка ролей к группе
-							if (resource.getCodesRoles() != null) {
-
-								// имеющиеся роли в ресурсе по данной системе
-
-								List<Object[]> lo_roles = em
-										.createNativeQuery(
-												"  SELECT ROL.SIGN_OBJECT, ROL.ID_SRV "
-														+ "FROM AC_RESOURCES_BSS_T res, "
-														+ "AC_LINK_ROLE_RESOURCE_KNL_T lgr, "
-														+ "AC_ROLES_BSS_T rol, "
-														+ "AC_IS_BSS_T sys "
-														+ "WHERE  res.ID_SRV = LGR.UP_RESOURCE "
-														+ "AND LGR.UP_ROLE = ROL.ID_SRV "
-														+ "AND SYS.SIGN_OBJECT = ? "
-														+ "AND SYS.ID_SRV = ROL.UP_IS "
-														+ "AND res.SIGN_OBJECT = ? "
-														+ "GROUP BY ROL.SIGN_OBJECT, ROL.ID_SRV")
-										.setParameter(1, idIS)
-										.setParameter(2, resource.getCode())
-										.getResultList();
-
-								for (Object[] objectArray : lo_roles) {
-									role_cl.add(objectArray[0] != null ? objectArray[0]
-											.toString() : "");
-								}
-
-								for (String role_code : resource
-										.getCodesRoles()) {
-
-									if (!role_cl.contains(role_code)) {
-
-										em.createNativeQuery(
-												"insert into AC_LINK_ROLE_RESOURCE_KNL_T(UP_ROLE, UP_RESOURCE, CREATOR,  created) "
-														+ "values ("
-														+ "(select role.ID_SRV from AC_ROLES_BSS_T role, AC_IS_BSS_T sys "
-														+ "where SYS.ID_SRV= ROLE.UP_IS and  SYS.SIGN_OBJECT = ? "
-														+ "and role.SIGN_OBJECT = ? ), ?, ?, sysdate) ")
-												.setParameter(1, idIS)
-												.setParameter(2, role_code)
-												.setParameter(3, newIdRes)
-												.setParameter(4, 1L)
-												.executeUpdate();
-									}
-								}
-							}
-
-						}
-					}
-
-				} else if (mode == 2) { // REMOVE
-
-					logger.info("sync_resources:03");
-
-					for (ResourceNU resource : resources) {
-
-						logger.info("sync_resources:04:" + resource.getCode());
-
-						if (resource.getCode() == null
-								|| resource.getCode().trim().equals("")) {
-							throw new GeneralFailure("Отсутствует код ресурса!");
-						} else if (resource.getName() == null
-								|| resource.getName().trim().equals("")) {
-							throw new GeneralFailure(
-									"Отсутствует название ресурса!");
-						}
-
-						// roles_cl устанавливается только в ADD
-						// if(roles_cl.containsKey(role.getIdRole())){
-
-						// ресурс есть в базе
-
-						try {
-							logger.info("sync_resources:05");
-
-							// удаляем сначала ссылки на ресурс
-							em.createNativeQuery(
-									"DELETE FROM AC_LINK_ROLE_RESOURCE_KNL_T lrr "
-											+ "where LRR.UP_RESOURCE = ( "
-											+ "select RES.ID_SRV "
-											+ "from AC_RESOURCES_BSS_T res, "
-											+ "AC_IS_BSS_T app "
-											+ "where res.UP_IS=APP.ID_SRV "
-											+ "and APP.SIGN_OBJECT = ? "
-											+ "and  RES.SIGN_OBJECT = ? )")
-									.setParameter(1, resource.getCode())
-									.setParameter(2, idIS).executeUpdate();
-
-							// затем сами ресурс
-							em.createNativeQuery(
-										"DELETE FROM AC_RESOURCES_BSS_T rls "
-											+ "where rls.SIGN_OBJECT = ?  "
-											+ "and RLS.UP_IS = "
-											+ "(select app.ID_SRV from AC_IS_BSS_T app where app.SIGN_OBJECT = ? ) ")
-									.setParameter(1, resource.getCode())
-									.setParameter(2, idIS).executeUpdate();
-
-						} catch (Exception e) {
-							logger.error("sync_resources:06");
-							// sys_audit тут не будет работать, т.к. транзакция
-							// завершилась неудачно,
-							// и он требует новую транзакцию
-							// надо подумать - может ввести ручное управление
-							// транзакцией,
-							// чтобы заносить в аудит эти случаи
-
-							// sys_audit(12L, "idIS:"+idIS,
-							// "error:dependent records found", IPAddress, null
-							// );
-							throw new GeneralFailure(
-									"Removal resource ['"
-											+ resource.getCode()
-											+ "'] is not possible: dependent records found ! ");
-						}
-						// }
-					}
-				}
-
-			}
-
-			sys_audit(101L, "idIS:" + idIS, "true", IPAddress, null);
-
-		} catch (Exception e) {
-			sys_audit(101L, "idIS:" + idIS, "error", IPAddress, null);
-			throw new GeneralFailure(e.getMessage());
-		}
-	}*/
 
 	/**
 	 * синхронизация ролей ресурсов
@@ -1868,7 +1567,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 		// ADD - это ADD или UPDATE
 
-		logger.info("sync_groups_roles:01");
+		LOGGER.debug("sync_groups_roles:01");
 
 		List<String> role_cl = new ArrayList<String>();
 
@@ -1878,23 +1577,22 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 
 			/*
 			 * проверка на уровне выше - is_exist()
-			 * if(idIS==null||idIS.trim().equals("")){ throw new
-			 * GeneralFailure("Отсутствует код системы!"); }
 			 */
 
-			if (codesResources == null || codesResources.isEmpty()) {
-				logger.info("sync_resources_roles:return");
+			if (idIS == null) {
+				throw new GeneralFailure("idIS is null!");
+			}
+			
+			if (codesResources == null 
+					|| codesResources.isEmpty()) {
 				throw new GeneralFailure("Отсутствует список ресурсов!");
 			}
-			if (codesRoles == null || codesRoles.isEmpty()) {
-				logger.info("sync_resources_roles:return2");
+			if (codesRoles == null 
+					|| codesRoles.isEmpty()) {
 				throw new GeneralFailure("Отсутствует список ролей!");
 			}
 
-			if (idIS == null) {
-				logger.info("sync_resources_roles:return3");
-				throw new GeneralFailure("idIS is null!");
-			}
+			
 
 			if (modeExec == null
 					|| modeExec.trim().isEmpty()
@@ -1903,20 +1601,20 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				throw new GeneralFailure("Некорректные данные [modeExec]!");
 			}
 
-			int mode = 1;
+			int modeSyncResRoles = 1;
 
 			if (modeExec.equals("REPLACE")) {
-				mode = 0;
+				modeSyncResRoles = 0;
 			} else if (modeExec.equals("ADD")) {
-				mode = 1;
+				modeSyncResRoles = 1;
 			} else if (modeExec.equals("REMOVE")) {
-				mode = 2;
+				modeSyncResRoles = 2;
 			}
 
 			// !!!
 			idIS = get_code_is(idIS);
 
-			if (mode == 1) { // //ADD
+			if (modeSyncResRoles == 1) { // //ADD
 
 				for (String resource : codesResources) {
 
@@ -1927,7 +1625,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					role_cl = new ArrayList<String>();
 
 					// привязка ролей к ресурсу
-					logger.info("sync_resources_roles:03");
+					LOGGER.debug("sync_resources_roles:03");
 
 					// имеющиеся роли в ресурсе по данной системе
 
@@ -1951,17 +1649,17 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						role_cl.add(objectArray[0] != null ? objectArray[0]
 								.toString() : "");
 
-						logger.info("sync_resources_roles:04:" + objectArray[0]);
+						LOGGER.debug("sync_resources_roles:04:" + objectArray[0]);
 
 					}
 
 					for (String role_code : codesRoles) {
 
-						logger.info("sync_resources_roles:05:" + role_code);
+						LOGGER.debug("sync_resources_roles:05:" + role_code);
 
 						if (!role_cl.contains(role_code)) {
 
-							logger.info("sync_resources_roles:06");
+							LOGGER.debug("sync_resources_roles:06");
 
 							em.createNativeQuery(
 									"insert into AC_LINK_ROLE_RESOURCE_KNL_T(UP_ROLE, UP_RESOURCE, CREATOR,  created) "
@@ -1979,20 +1677,20 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					}
 				}
 
-			} else if (mode == 2) { // REMOVE
+			} else if (modeSyncResRoles == 2) { // REMOVE
 
-				logger.info("sync_resources_roles:03");
+				LOGGER.debug("sync_resources_roles:03");
 
 				for (String resource : codesResources) {
 
-					logger.info("sync_resources_roles:04:" + resource);
+					LOGGER.debug("sync_resources_roles:04:" + resource);
 
 					if (resource == null || resource.trim().equals("")) {
 						throw new GeneralFailure("Отсутствует код группы!");
 					}
 
 					try {
-						logger.info("sync_resources_roles:05");
+						LOGGER.debug("sync_resources_roles:05");
 
 						for (String role_code : codesRoles) {
 
@@ -2018,15 +1716,15 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						}
 
 					} catch (Exception e) {
-						logger.error("sync_resources_roles:06");
+						LOGGER.error("sync_resources_roles:06");
 					}
 					// }
 				}
 
-			} else if (mode == 0) { // REPLACE
+			} else if (modeSyncResRoles == 0) { // REPLACE
 
 				// REPLACE = ALL REMOVE + ADD
-				logger.info("sync_resources_roles:07");
+				LOGGER.debug("sync_resources_roles:07");
 
 				for (String resource : codesResources) {
 
@@ -2037,7 +1735,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					// 1. REMOVE ALL
 
 					try {
-						logger.info("sync_resources_roles:09");
+						LOGGER.debug("sync_resources_roles:09");
 
 						em.createNativeQuery(
 								"DELETE FROM AC_LINK_ROLE_RESOURCE_KNL_T lrr "
@@ -2052,14 +1750,14 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 								.setParameter(2, idIS).executeUpdate();
 
 					} catch (Exception e) {
-						logger.error("sync_resources_roles:010");
+						LOGGER.error("sync_resources_roles:010");
 					}
 
 					// 2.ADD
 
 					for (String role_code : codesRoles) {
 
-						logger.info("sync_resources_roles:05:" + role_code);
+						LOGGER.debug("sync_resources_roles:05:" + role_code);
 
 						if (role_code == null || role_code.trim().equals("")) {
 							throw new GeneralFailure("Отсутствует код роли!");
@@ -2100,9 +1798,9 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 				try {
 					utx.rollback();
 				} catch (Exception er1) {
-					logger.error("rollback:Error1:" + er1);
+					LOGGER.error("rollback:Error1:", er1);
 				}
-				logger.error("rollback:Error:" + er);
+				LOGGER.error("rollback:Error:", er);
 			}
 			throw new GeneralFailure(e.getMessage());
 		}
@@ -2113,7 +1811,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 	 */
 	public void is_exist(String idIS) throws GeneralFailure {
 
-		logger.info(":is_exist:01");
+		LOGGER.debug(":is_exist:01");
 
 		try {
 
@@ -2123,10 +1821,10 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					.getSingleResult();
 
 		} catch (NoResultException ex) {
-			logger.error("is_exist:NoResultException");
+			LOGGER.error("is_exist:NoResultException");
 			throw new GeneralFailure("Информационная система не определёна!");
 		} catch (Exception e) {
-			logger.error("is_exist:Error:" + e);
+			LOGGER.error("is_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -2153,7 +1851,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 					.setParameter("codeSys", codeSys).getSingleResult();
 
 		} catch (NoResultException ex) {
-			logger.error("get_id_is:NoResultException");
+			LOGGER.error("get_id_is:NoResultException");
 			throw new GeneralFailure("System is not defined");
 		} catch (Exception e) {
 			throw new GeneralFailure(e.getMessage());
@@ -2167,7 +1865,7 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 	 */
 	private void sys_audit(Long idServ, String inp_param, String result,
 			String ip_adr, Long idUser) {
-		logger.info("sys_audit:01");
+		LOGGER.debug("sys_audit:01");
 		try {
 
 			if (idUser != null && !idUser.equals(-1L)) {
@@ -2191,9 +1889,11 @@ public class SyncManager implements SyncManagerLocal, SyncManagerRemote {
 						.setParameter(4, ip_adr).executeUpdate();
 			}
 		} catch (Exception e) {
-			logger.error("is_exist:Error:" + e);
+			LOGGER.error("is_exist:Error:", e);
 		}
 
 	}
+	
+
 
 }

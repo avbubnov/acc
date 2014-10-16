@@ -3,7 +3,7 @@ import iac.cud.infosweb.dataitems.AuditReportsItem;
 import iac.cud.infosweb.dataitems.AuditTransferItem;
 import iac.grn.ramodule.entity.zags.VAuditReport;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 
 public interface InvokeFrontageRemote {

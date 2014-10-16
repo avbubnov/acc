@@ -34,9 +34,8 @@ public class ContextApplicationResultManager {
 	static Context ctx;
 	ApplicationResultManagerLocal aml = null;
 
-	private static final Long user_default = 1L;
-
-	Logger logger = LoggerFactory
+	
+	final static Logger LOGGER = LoggerFactory
 			.getLogger(ContextApplicationResultManager.class);
 
 	static {
@@ -44,25 +43,9 @@ public class ContextApplicationResultManager {
 			ctx = new InitialContext();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("error",e);
 		}
 	}
-
-	/*
-	 * public static void initContext(String jboss_jndi_port){ try{
-	 * logger.info("initContext:jboss_jndi_port:"+jboss_jndi_port);
-	 * 
-	 * jboss_jndi_port=(jboss_jndi_port!=null?jboss_jndi_port:"1099");
-	 * 
-	 * Properties env = new Properties();
-	 * env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-	 * "org.jnp.interfaces.NamingContextFactory");
-	 * env.setProperty(Context.URL_PKG_PREFIXES, "org.jboss.naming");
-	 * env.setProperty(Context.PROVIDER_URL, "localhost:"+jboss_jndi_port); ctx
-	 * = new InitialContext(env);
-	 * 
-	 * }catch(Exception e){ logger.error("initContext:error:"+e); } }
-	 */
 
 	public ContextApplicationResultManager() {
 		try {
@@ -70,7 +53,7 @@ public class ContextApplicationResultManager {
 					.lookup("java:global/AuthServices/ApplicationResultManager!ru.spb.iac.cud.core.app.ApplicationResultManagerLocal");
 
 		} catch (Exception e) {
-			logger.error("ContextApplicationResultManager:error:" + e);
+			LOGGER.error("ContextApplicationResultManager:error:", e);
 		}
 	}
 
@@ -84,10 +67,6 @@ public class ContextApplicationResultManager {
 		return aml.result(request_list, idUserAuth, IPAddress);
 	}
 
-	private void number_secret_valid(String number, String secret, String type)
-			throws GeneralFailure {
-		logger.info("number_exist:01");
-		aml.number_secret_valid(number, secret, type);
-	}
+	
 
 }

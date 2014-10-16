@@ -15,8 +15,8 @@ import iac.cud.infosweb.entity.ReportsBssT;
 import iac.grn.infosweb.context.mc.usr.UsrContext;
 import iac.grn.infosweb.context.mc.usr.UsrDataModel;
 import iac.grn.infosweb.context.mc.usr.UsrStateHolder;
-import iac.grn.infosweb.session.audit.export.ActionsMap;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.serviceitems.BaseTableItem;
 
 import java.io.FileInputStream;
@@ -27,8 +27,9 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
+
+import mypackage.Configuration;
 
 import org.ajax4jsf.model.DataVisitor;
 import org.ajax4jsf.model.Range;
@@ -61,7 +64,11 @@ import org.richfaces.model.ExtendedFilterField;
 import org.richfaces.model.FilterField;
 import org.richfaces.model.Modifiable;
 import org.richfaces.model.SortField2;
-//import org.ajax4jsf.model.DataComponentState;
+ 
+
+
+
+
 
 
 
@@ -87,6 +94,15 @@ public class ReportsManager {
 	private Date reportDate1; 
 	
 	private Date reportDate2; 
+	
+	//http://192.168.68.7:8080/jasperserver/rest_v2/reports/
+	private String jasperServer = Configuration.getJasperServer();
+	
+	private String jasperLogin = Configuration.getJasperLogin();
+	
+	private String jasperPassword = Configuration.getJasperPassword();
+	
+	private String reportUrl;
 	
 	public void create_report(){
 		  
@@ -169,19 +185,19 @@ public class ReportsManager {
 				 response.setContentType("text/html; charset=utf-8");
 				 
 				 os.write("Запрашиваемый ресурс не найден!".getBytes("utf-8"));
-				 os.write("<br/><br/><a href=\"javascript:window.close();\" style=\"color:black;font-size:18px!important;\"> Закрыть </a>".getBytes("utf-8"));;
+				 os.write("<br/><br/><a href=\"javascript:window.close();\" style=\"color:black;font-size:18px!important;\"> Закрыть </a>".getBytes("utf-8"));
 				         
 		   	}else if(flagExec==-1){
 				 response.setContentType("text/html; charset=utf-8");
 				 
 				 os.write("Формирование отчёта ещё не завершено!".getBytes("utf-8"));
-				 os.write("<br/><br/><a href=\"javascript:window.close();\" style=\"color:black;font-size:18px!important;\"> Закрыть </a>".getBytes("utf-8"));;
+				 os.write("<br/><br/><a href=\"javascript:window.close();\" style=\"color:black;font-size:18px!important;\"> Закрыть </a>".getBytes("utf-8"));
 				         
-		   	}else if(flagExec==-1){
+		   	}else if(flagExec==-2){
 				 response.setContentType("text/html; charset=utf-8");
 				 
 				 os.write("При скачивании произошла ошибка !".getBytes("utf-8"));
-				 os.write("<br/><br/><a href=\"javascript:window.close();\" style=\"color:black;font-size:18px!important;\"> Закрыть </a>".getBytes("utf-8"));;
+				 os.write("<br/><br/><a href=\"javascript:window.close();\" style=\"color:black;font-size:18px!important;\"> Закрыть </a>".getBytes("utf-8"));
 				         
 		   	}
 			
@@ -196,35 +212,65 @@ public class ReportsManager {
 		}
 			 	
 	}
-	/*
-	public void downDictionary(){
-	    try {
-	    	System.out.println("===downDictionary-01==");
-	        FacesContext context = FacesContext.getCurrentInstance();
-		    HttpServletResponse response = (HttpServletResponse) context.getExternalContext().getResponse();
-			  
-		  //  response.setHeader("Content-disposition", "attachment; filename=" +"dictionary_of_terms_of_intellectual_property.pdf");
-		    response.setContentType("application/pdf"); 
-		    byte[] buffer = new byte[2048];
-		   	OutputStream os = response.getOutputStream();
-            
-		   	FileInputStream fis=null;
-		    fis=new FileInputStream("/devel/1.pdf");
-		   	int readBytes;
-    		    while ((readBytes = fis.read(buffer)) != -1) {
-    		     os.write(buffer);
-	        } 
-       	
-    		os.flush();
-			os.close();
-			fis.close();
-			context.responseComplete();
-			System.out.println("===downDictionary-02==");
+	
+public void server_report(String reportType){
+		  //сделали даты обязятельными!!!
+		
+		try{
 			
-		} catch (Exception e) {
-			System.out.println("===downDictionary-ERROR="+e);
+			log.info("reportsManager:server_report:01");
+			
+			
+			String reportId = FacesContext.getCurrentInstance().getExternalContext()
+		             .getRequestParameterMap()
+		             .get("reportId");
+			
+			
+			ReportsBssT rep = entityManager.find(ReportsBssT.class, new Long(reportId));
+			
+			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+		
+			if (reportDate1 != null && reportDate2 != null) {
+				
+				log.info("reportsManager:server_report:02");
+				
+			} else if (reportDate1 != null) {
+				reportDate2 = new Date();
+
+			} else if (reportDate2 != null) {
+
+		
+				Calendar cln = Calendar.getInstance();
+				cln.set(Calendar.YEAR, 2000);
+				reportDate1 = cln.getTime();
+
+			} else {
+
+			
+				Calendar cln = Calendar.getInstance();
+				cln.set(Calendar.YEAR, 2000);
+				reportDate1 = cln.getTime();
+				reportDate2 = new Date();
+			}
+
+			reportUrl = jasperServer+rep.getReportPath()+"?"
+					+ "ReportDate1="+df.format(reportDate1)
+					+ "&ReportDate2="+df.format(reportDate2)
+					+ "&j_username="+jasperLogin
+					+ "&j_password="+jasperPassword;
+			
+			    
+			log.info("reportsManager:server_report:02");
+		}catch(Exception e){
+			log.error("reportsManager:server_report:error:"+e);
+			
 		}
-	}*/
+			 	
+	}
+
+	
 	
 	public List<ReportsBssT> getReportsList() {
 		if(this.reportsList==null){
@@ -263,6 +309,14 @@ public class ReportsManager {
 
 	public void setReportDate2(Date reportDate2) {
 		this.reportDate2 = reportDate2;
+	}
+
+	public String getReportUrl() {
+		return reportUrl;
+	}
+
+	public void setReportUrl(String reportUrl) {
+		this.reportUrl = reportUrl;
 	}
 
 	

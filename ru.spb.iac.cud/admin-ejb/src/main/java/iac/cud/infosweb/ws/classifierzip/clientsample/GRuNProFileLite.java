@@ -1,6 +1,5 @@
 package iac.cud.infosweb.ws.classifierzip.clientsample;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -41,58 +40,55 @@ import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static javax.ejb.TransactionAttributeType.NOT_SUPPORTED;
 
 @Name("gRuNProFileLite")
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)  
-public class GRuNProFileLite implements GRuNProFileLiteLocal{
+@TransactionManagement(TransactionManagementType.BEAN)
+public class GRuNProFileLite implements GRuNProFileLiteLocal {
 
-	@PersistenceContext(unitName="InfoSCUD-web")
-    EntityManager entityManager;
-	
-	//@In 
-	//EntityManager entityManager;
+	@PersistenceContext(unitName = "InfoSCUD-web")
+	EntityManager entityManager;
 
-    
-    public int process(/*final String tableName, final List <String> fileList, final String dirName*/){
-		   
-		   Session session = (Session) entityManager.getDelegate();
-	    	 final int[] result=new int[]{-1};
-	  
-			 session.doWork(new Work(){
-			     public void execute(Connection conn)throws SQLException{
-				    System.out.println("IHLogContrList:logContrList:execute:conn:"+conn.isClosed());
-				    try{
-				    	conn.setAutoCommit(false);
-				    	//PojoGRuNProFileLite pojo = new PojoGRuNProFileLite();
-				    	//result[0]=pojo.process2(tableName, fileList, dirName, conn);
-				    	
-				    	 PojoRunProcess pp = new PojoRunProcess(conn);
-				    	 pp.startProcess();
-				    	  
-				    	 System.out.println("IHLogContrList:logContrList:execute:01");
-				    	// Thread.sleep(600000);
-				    	 System.out.println("IHLogContrList:logContrList:execute:02");
-				    	 
-				    }catch(Exception e){
-				     System.out.println("IHLogContrList:logContrList:execute:error:1:"+e);
-					// throw e;
-				    }finally{
-				    	try{
-				    	//!!!
-				    	//обязательно здесь НЕ закрывать коннект!!!
-				    		
-				  		/*  if(conn!=null&&!conn.isClosed()){
-				  			 conn.close();
-				  		  }*/
-				  		}catch(Exception e){}
-				    }
-			   }
-			  });
-		 return result[0];
-    }
-    
 	
+	final static Logger LOGGER = LoggerFactory.getLogger(GRuNProFileLite.class);
+
+	public int process() {
+
+		Session session = (Session) entityManager.getDelegate();
+		final int[] result = new int[] { -1 };
+
+		session.doWork(new Work() {
+			public void execute(Connection conn) throws SQLException {
+				LOGGER.debug("IHLogContrList:logContrList:execute:conn:"
+						+ conn.isClosed());
+				try {
+					conn.setAutoCommit(false);
+				
+					PojoRunProcess pp = new PojoRunProcess();
+					pp.startProcess();
+
+					LOGGER.debug("IHLogContrList:logContrList:execute:01");
+				
+				} catch (Exception e) {
+					LOGGER.error("IHLogContrList:logContrList:execute:error:1:"
+							+ e);
+				} finally {
+
+					// !!!
+					// обязательно здесь НЕ закрывать коннект!!!
+
+					/*
+					 * if/(conn/!=null/&&!conn./isClosed/()){ /conn.close/() }
+					 */
+
+				}
+			}
+		});
+		return result[0];
+	}
+
 }

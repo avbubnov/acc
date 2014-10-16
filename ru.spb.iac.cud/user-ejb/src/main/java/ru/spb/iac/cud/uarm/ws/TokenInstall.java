@@ -24,9 +24,9 @@ import ru.spb.iac.cud.items.AuditFunction;
 
 public class TokenInstall {
 
-	final static Logger logger = LoggerFactory.getLogger(TokenInstall.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(TokenInstall.class);
 	
-	//private static final String assertion_file_path = "/home/jboss/jboss/data/saml/saml_asserion.xml";
+	//"/home/jboss/jboss/data/saml/saml_asserion.xml";
 	private static final String assertion_file_path = Configuration.getSamlAssertion();
 	
 	
@@ -36,19 +36,19 @@ public class TokenInstall {
 		 String result = null;
 		 try{ 	 
 		   
-		   logger.info("TokenInstall:install:01");
+		   LOGGER.debug("TokenInstall:install:01");
 			 
 		   if(!valid()){
-			   logger.info("TokenInstall:install:02");
+			   LOGGER.debug("TokenInstall:install:02");
 			   setup();
 		   }
 		   
 		   result = load();
 		   
-		   logger.info("TokenInstall:install:0100");
+		   LOGGER.debug("TokenInstall:install:0100");
 		   
 		  }catch(Exception e){
-			 logger.error("TokenInstall:install:error:"+e);
+			 LOGGER.error("TokenInstall:install:error:"+e);
 			 
 	     }
 		 
@@ -61,13 +61,13 @@ public class TokenInstall {
 		 InputStream samlAssertionInputStream = null;
 				 
 		 try{
-			 logger.info("TokenInstall:valid:01");
+			 LOGGER.debug("TokenInstall:valid:01");
 			 
 			 File file = new File(assertion_file_path);
 			 
 			 if(file.exists()){
 				
-				logger.info("TokenInstall:valid:02");
+				LOGGER.debug("TokenInstall:valid:02");
 				 
 				samlAssertionInputStream = new FileInputStream(file);
 			    SAMLParser samlParser = new SAMLParser();
@@ -75,16 +75,16 @@ public class TokenInstall {
                 AssertionType assertionType = (AssertionType) parsedObject;
 
                 if (!AssertionUtil.hasExpired(assertionType)){
-                	logger.info("TokenInstall:valid:03");
+                	LOGGER.debug("TokenInstall:valid:03");
                 	 result = true;
                 }
                 
 			 }
 			 
-			 logger.info("TokenInstall:valid:0100");
+			 LOGGER.debug("TokenInstall:valid:0100");
 			 
 		 }catch(Exception e){
-			 logger.error("TokenInstall:valid:error:"+e);
+			 LOGGER.error("TokenInstall:valid:error:"+e);
 		 }finally{
 			 try{
 				 if(samlAssertionInputStream!=null){
@@ -92,7 +92,7 @@ public class TokenInstall {
 				 }
 				 
 			 }catch(Exception e1){
-				 logger.error("TokenInstall:valid:finally:error:"+e1);
+				 LOGGER.error("TokenInstall:valid:finally:error:"+e1);
 			 }
 		 }
 		 
@@ -107,7 +107,7 @@ public class TokenInstall {
          int n = - 1;
          
 		 try{
-			 logger.info("TokenInstall:setup:01");
+			 LOGGER.debug("TokenInstall:setup:01");
 			 
 			 File file = new File(assertion_file_path);
 			
@@ -115,7 +115,7 @@ public class TokenInstall {
 			   
 			 String samlAssertion = scl.sign_verify_soap_transform_2sign();
 			   
-			// logger.info("TokenInstall:setup:02:"+samlAssertion);
+			 
 			  
 			 in = new ByteArrayInputStream(samlAssertion.getBytes("UTF-8"));
 			 
@@ -128,24 +128,24 @@ public class TokenInstall {
 		      }
 		      output.close();
 		      
-			 logger.info("TokenInstall:setup:0100");
+			 LOGGER.debug("TokenInstall:setup:0100");
 			 
 		 }catch(Exception e){
-			 logger.error("TokenInstall:setup:error:"+e);
+			 LOGGER.error("TokenInstall:setup:error:"+e);
 		 }finally{
 			 try{
 				 if(in!=null){
 					 in.close();
 				 }
 			 }catch(Exception e1){
-				 logger.error("TokenInstall:valid:finally:error:1"+e1);
+				 LOGGER.error("TokenInstall:valid:finally:error:1"+e1);
 			 }
 			 try{
 				 if(output!=null){
 					 output.close();
 				 }
 			 }catch(Exception e2){
-				 logger.error("TokenInstall:valid:finally:error2:"+e2);
+				 LOGGER.error("TokenInstall:valid:finally:error2:"+e2);
 			 }
 		 }
 		 
@@ -157,13 +157,13 @@ public class TokenInstall {
 		 InputStream samlAssertionInputStream = null;
 				 
 		 try{
-			 logger.info("TokenInstall:load:01");
+			 LOGGER.debug("TokenInstall:load:01");
 			 
 			 File file = new File(assertion_file_path);
 			 
 			 if(file.exists()){
 				
-				logger.info("TokenInstall:load:02");
+				LOGGER.debug("TokenInstall:load:02");
 				 
 				samlAssertionInputStream = new FileInputStream(file);
 			    SAMLParser samlParser = new SAMLParser();
@@ -186,10 +186,10 @@ public class TokenInstall {
               
 			 }
 			 
-			 logger.info("TokenInstall:load:0100");
+			 LOGGER.debug("TokenInstall:load:0100");
 			 
 		 }catch(Exception e){
-			 logger.error("TokenInstall:load:error:"+e);
+			 LOGGER.error("TokenInstall:load:error:"+e);
 		 }finally{
 			 try{
 				 if(samlAssertionInputStream!=null){
@@ -197,7 +197,7 @@ public class TokenInstall {
 				 }
 				 
 			 }catch(Exception e1){
-				 logger.error("TokenInstall:load:finally:error:"+e1);
+				 LOGGER.error("TokenInstall:load:finally:error:"+e1);
 			 }
 		 }
 		 

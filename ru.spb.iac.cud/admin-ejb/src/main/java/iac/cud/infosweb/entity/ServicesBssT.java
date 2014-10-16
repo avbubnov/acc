@@ -33,7 +33,6 @@ public class ServicesBssT implements Serializable {
 	@Column(name="SIGN_OBJECT")
 	private Long signObject;
 
-	//bi-directional many-to-one association to ServicesLogKnlT
 	@OneToMany(mappedBy="servicesBssT")
 	private List<ServicesLogKnlT> servicesLogKnlTs;
 

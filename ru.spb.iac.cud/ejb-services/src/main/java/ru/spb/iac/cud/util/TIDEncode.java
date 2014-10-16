@@ -1,6 +1,9 @@
 package ru.spb.iac.cud.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
 import org.apache.xml.security.utils.Base64;
 
 /**
@@ -28,5 +31,6 @@ public class TIDEncode {
 	
 		return result;
 	}
+
 
 }

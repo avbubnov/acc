@@ -23,13 +23,11 @@ public class LinkGroupUsersRolesKnlT implements Serializable {
 
 	private Long creator;
 
-	//bi-directional many-to-one association to AcRolesBssT
-    @ManyToOne
+	 @ManyToOne
 	@JoinColumn(name="UP_ROLES", insertable=false,updatable=false)
 	private AcRole acRolesBssT;
 
-	//bi-directional many-to-one association to GroupUsersKnlT
-    @ManyToOne
+	 @ManyToOne
 	@JoinColumn(name="UP_GROUP_USERS", insertable=false,updatable=false)
 	private GroupUsersKnlT groupUsersKnlT;
 

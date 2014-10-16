@@ -1,6 +1,6 @@
 package iac.cud.authmodule.session;
 
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
@@ -14,8 +14,8 @@ import iac.cud.authmodule.dataitem.*;
 
 import java.util.ArrayList;
 
-//import org.jboss.ejb3.annotation.LocalBinding;
-//import org.jboss.ejb3.annotation.RemoteBinding;
+ 
+ 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
@@ -34,7 +34,7 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 	@PersistenceContext(unitName = "CUDAuthModule")
 	EntityManager em;
 
-	final static Logger logger = LoggerFactory.getLogger(AutzManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(AutzManager.class);
 
 	public AutzManager() {
 	}
@@ -54,16 +54,16 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 	public AuthItem getAccessComplete(Long appCode, List<String> roles)
 			throws Exception {
 		try {
-			logger.info("getPermFromRoles:01");
+			LOGGER.debug("getPermFromRoles:01");
 
 			if (appCode == null || roles == null || roles.isEmpty()) {
 				return null;
 			}
-			logger.info("getPermFromRoles:02");
+			LOGGER.debug("getPermFromRoles:02");
 
 			return createResourceTreeItem(appCode, roles, null);
 		} catch (Exception e) {
-			logger.error("authCompleteItem:Error:" + e);
+			LOGGER.error("authCompleteItem:Error:", e);
 			throw e;
 		}
 	}
@@ -71,7 +71,7 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 	private AuthItem createResourceTreeItem(Long appCode, List<String> roles,
 			String pageCode) throws Exception {
 
-		logger.info("createResourceTreeItem:01");
+		LOGGER.debug("createResourceTreeItem:01");
 
 		AuthItem result = new AuthItem();
 		result.setIdUser(null);
@@ -90,7 +90,7 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 					roleLine = roleLine + ", '" + role + "'";
 				}
 			}
-			logger.info("createResourceTreeItem:roleLine:" + roleLine);
+			LOGGER.debug("createResourceTreeItem:roleLine:" + roleLine);
 
 			List<Object[]> lo = em
 					.createNativeQuery(
@@ -115,7 +115,7 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 					.setParameter(2, (pageCode != null ? pageCode : 1))
 					.getResultList();
 
-			logger.info("createResourceTreeItem:02:" + lo.size());
+			LOGGER.debug("createResourceTreeItem:02:" + lo.size());
 
 			for (Object[] objectArray : lo) {
 				pageCode_curr = objectArray[0].toString();
@@ -137,20 +137,20 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 				pageCode_prev = pageCode_curr;
 			}
 
-			logger.info("createResourceTreeItem:03");
+			LOGGER.debug("createResourceTreeItem:03");
 
 			if (!pageCode_curr.equals("")) {
 
-				logger.info("createResourceTreeItem:04");
+				LOGGER.debug("createResourceTreeItem:04");
 
 				result.getPageList().put(pageCode_prev, new PageItem(permList));
 
 			}
 
-			logger.info("createResourceTreeItem:05");
+			LOGGER.debug("createResourceTreeItem:05");
 
 		} catch (Exception e) {
-			logger.error("createResourceTreeItem:Error:" + e);
+			LOGGER.error("createResourceTreeItem:Error:", e);
 			throw e;
 		}
 		return result;
@@ -170,7 +170,7 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 	 */
 	public PageItem getAccessPage(Long appCode, List<String> roles,
 			String pageCode) throws Exception {
-		logger.info("accessItem");
+		LOGGER.debug("accessItem");
 		if (appCode == null || pageCode == null || roles == null
 				|| roles.isEmpty()) {
 			return null;
@@ -181,7 +181,7 @@ public class AutzManager implements AutzManagerLocal, AutzManagerRemote {
 
 	public boolean getAccessPage(Long appCode, List<String> roles,
 			String pageCode, String permCode) throws Exception {
-		logger.info("accessItem");
+		LOGGER.debug("accessItem");
 		if (appCode == null || pageCode == null || roles == null
 				|| roles.isEmpty()) {
 			throw new NullPointerException();

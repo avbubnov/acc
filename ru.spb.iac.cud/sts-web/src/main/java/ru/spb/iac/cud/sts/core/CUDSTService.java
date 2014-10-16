@@ -62,10 +62,10 @@ import java.security.PrivilegedAction;
 @ServiceMode(value = Service.Mode.MESSAGE)
 @HandlerChain(file = "/handlers.xml")
 public class CUDSTService implements Provider<SOAPMessage> {
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
-	final static Logger loggerslf4j = LoggerFactory
+	final static Logger LOGGERSLF4J = LoggerFactory
 			.getLogger(CUDSTService.class);
 
 	private static final String SEPARATOR = AccessController
@@ -115,8 +115,8 @@ public class CUDSTService implements Provider<SOAPMessage> {
     	String auth_type = (String)  http_session
 				.getAttribute("cud_auth_type");
 			
-		loggerslf4j.info("invoke:01:" + user_principal_name);
-		loggerslf4j.info("invoke:02:" + system_principal_name);
+		LOGGERSLF4J.debug("invoke:01:" + user_principal_name);
+		LOGGERSLF4J.debug("invoke:02:" + system_principal_name);
 
 		cud_principal = new CudPrincipal();
 		cud_principal.setSystemName(system_principal_name);
@@ -147,8 +147,8 @@ public class CUDSTService implements Provider<SOAPMessage> {
 				}
 			}
 		} catch (SOAPException e) {
-			loggerslf4j.error("invoke:04_error:" + e);
-			throw logger.stsWSError(e);
+			LOGGERSLF4J.error("invoke:04_error:", e);
+			throw LOGGER.stsWSError(e);
 		}
 
 		Node payLoad;
@@ -161,8 +161,8 @@ public class CUDSTService implements Provider<SOAPMessage> {
 			baseRequest = (BaseRequestSecurityToken) parser.parse(DocumentUtil
 					.getNodeAsStream(payLoad));
 		} catch (Exception e) {
-			loggerslf4j.error("invoke:05_error:" + e);
-			throw logger.stsWSError(e);
+			LOGGERSLF4J.error("invoke:05_error:", e);
+			throw LOGGER.stsWSError(e);
 		}
 
 		if (baseRequest instanceof RequestSecurityToken) {
@@ -190,7 +190,7 @@ public class CUDSTService implements Provider<SOAPMessage> {
 					this.handleTokenRequestCollection((RequestSecurityTokenCollection) baseRequest),
 					soap12);
 		} else {
-			throw logger.stsWSInvalidTokenRequestError();
+			throw LOGGER.stsWSInvalidTokenRequestError();
 		}
 	}
 
@@ -207,12 +207,10 @@ public class CUDSTService implements Provider<SOAPMessage> {
 					.getNodeFromSource(theResponse);
 			response.getSOAPBody().addDocument(theResponseDoc);
 
-			Document soapDoc = response.getSOAPPart().getEnvelope()
-					.getOwnerDocument();
-
+		
 			return response;
 		} catch (Exception e) {
-			throw logger.stsWSError(e);
+			throw LOGGER.stsWSError(e);
 		}
 	}
 
@@ -248,19 +246,19 @@ public class CUDSTService implements Provider<SOAPMessage> {
 					+ "WebServiceContext");
 		if (this.config == null)
 			try {
-				logger.info("Loading STS configuration");
+				LOGGER.debug("Loading STS configuration");
 				this.config = this.getConfiguration();
 			} catch (ConfigurationException e) {
-				throw logger.stsWSConfigurationError(e);
+				throw LOGGER.stsWSConfigurationError(e);
 			}
 
 		WSTrustRequestHandler handler = this.config.getRequestHandler();
 		if (handler == null)
-			throw logger.nullValueError("WSTrustRequestHandler");
+			throw LOGGER.nullValueError("WSTrustRequestHandler");
 
 		String requestType = request.getRequestType().toString();
 
-		logger.trace("STS received request of type " + requestType);
+		LOGGER.trace("STS received request of type " + requestType);
 
 		try {
 			if (requestType.equals(WSTrustConstants.ISSUE_REQUEST)) {
@@ -273,7 +271,7 @@ public class CUDSTService implements Provider<SOAPMessage> {
 				Document doc = handler.postProcess(
 						(Document) ((DOMSource) source).getNode(), request);
 
-				// loggerslf4j.info("handleTokenRequest:01:"+DocumentUtil.asString(doc));
+				 
 
 				return new DOMSource(doc);
 			} else if (requestType.equals(WSTrustConstants.RENEW_REQUEST)) {
@@ -293,9 +291,9 @@ public class CUDSTService implements Provider<SOAPMessage> {
 				return this.marshallResponse(handler.validate(request,
 						this.context.getUserPrincipal()));
 			else
-				throw logger.stsWSInvalidRequestTypeError(requestType);
+				throw LOGGER.stsWSInvalidRequestTypeError(requestType);
 		} catch (WSTrustException we) {
-			throw logger.stsWSHandlingTokenRequestError(we);
+			throw LOGGER.stsWSHandlingTokenRequestError(we);
 		}
 	}
 
@@ -336,7 +334,7 @@ public class CUDSTService implements Provider<SOAPMessage> {
 			writer.write(responseCollection);
 			return new DOMSource(result.getNode());
 		} catch (Exception e) {
-			throw logger.stsWSResponseWritingError(e);
+			throw LOGGER.stsWSResponseWritingError(e);
 		}
 	}
 
@@ -373,7 +371,7 @@ public class CUDSTService implements Provider<SOAPMessage> {
 			// if no configuration file was found, log a warn message and use
 			// default configuration values.
 			if (configurationFileURL == null) {
-				logger.stsUsingDefaultConfiguration("");
+				LOGGER.stsUsingDefaultConfiguration("");
 				return new PicketLinkSTSConfiguration();
 			}
 
@@ -381,11 +379,11 @@ public class CUDSTService implements Provider<SOAPMessage> {
 			STSType stsConfig = (STSType) new STSConfigParser().parse(stream);
 			STSConfiguration configuration = new PicketLinkSTSConfiguration(
 					stsConfig);
-			if (logger.isInfoEnabled())
-				logger.stsConfigurationFileLoaded(STS_CONFIG_FILE);
+			if (LOGGER.isInfoEnabled())
+				LOGGER.stsConfigurationFileLoaded(STS_CONFIG_FILE);
 			return configuration;
 		} catch (Exception e) {
-			throw logger.stsConfigurationFileParsingError(e);
+			throw LOGGER.stsConfigurationFileParsingError(e);
 		}
 	}
 }

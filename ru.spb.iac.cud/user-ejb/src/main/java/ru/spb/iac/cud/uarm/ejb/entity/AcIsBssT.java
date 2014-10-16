@@ -43,7 +43,6 @@ public class AcIsBssT implements Serializable {
 	@Column(name="SIGN_OBJECT")
 	private String signObject;
 
-	//bi-directional many-to-one association to AcRolesBssT
 	@OneToMany(mappedBy="acIsBssT")
 	private List<AcRolesBssT> acRolesBssTs;
 
@@ -58,7 +57,6 @@ public class AcIsBssT implements Serializable {
 
 	@OneToMany(mappedBy="acIsBssT")
 	private List<JournAppAdminUserSysBssT> journAppAdminUserSysBssTs;
-	//private List<SysAppAdminUserSysBssT> sysAppAdminUserSysBssTs;
 	
 	@Transient
 	private List<GroupUsersKnlT> groups;

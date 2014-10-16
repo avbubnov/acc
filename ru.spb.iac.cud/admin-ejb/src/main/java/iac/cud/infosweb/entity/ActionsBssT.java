@@ -24,17 +24,10 @@ public class ActionsBssT implements Serializable {
 
 	private String abridgment;
 
-	/*@Column(name="ATTEMPT_SRV")
-	private Long attemptSrv;*/
-
     @Temporal( TemporalType.DATE)
 	private Date created;
 
 	private Long creator;
-
-    /*@Temporal( TemporalType.DATE)
-	@Column(name="DATE_EVENT_SRV")
-	private Date dateEventSrv;*/
 
 	private String descriptions;
 
@@ -47,7 +40,6 @@ public class ActionsBssT implements Serializable {
 	@Column(name="SIGN_OBJECT")
 	private String sign;
 
-	//bi-directional many-to-one association to AcIsBssT
     @ManyToOne
 	@JoinColumn(name="UP_IS")
 	private AcApplication acIsBssT;
@@ -56,7 +48,6 @@ public class ActionsBssT implements Serializable {
 	@JoinColumn(name="UP_IS", insertable=false, updatable=false)
 	private AcApplication acIsBssT2;
     
-	//bi-directional many-to-one association to ActionsLogKnlT
 	@OneToMany(mappedBy="actionsBssT")
 	private Set<ActionsLogKnlT> actionsLogKnlTs;
 
@@ -79,13 +70,6 @@ public class ActionsBssT implements Serializable {
 		this.abridgment = abridgment;
 	}
 
-	/*public Long getAttemptSrv() {
-		return this.attemptSrv;
-	}
-
-	public void setAttemptSrv(Long attemptSrv) {
-		this.attemptSrv = attemptSrv;
-	}*/
 
 	public Date getCreated() {
 		return this.created;
@@ -102,14 +86,6 @@ public class ActionsBssT implements Serializable {
 	public void setCreator(Long creator) {
 		this.creator = creator;
 	}
-
-	/*public Date getDateEventSrv() {
-		return this.dateEventSrv;
-	}
-
-	public void setDateEventSrv(Date dateEventSrv) {
-		this.dateEventSrv = dateEventSrv;
-	}*/
 
 	public String getDescriptions() {
 		return this.descriptions;

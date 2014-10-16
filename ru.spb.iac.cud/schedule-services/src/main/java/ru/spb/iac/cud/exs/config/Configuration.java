@@ -1,4 +1,4 @@
-package ru.spb.iac.cud.exs.init;
+package ru.spb.iac.cud.exs.config;
 
 
 public class Configuration{

@@ -100,6 +100,26 @@
     <param-name>CLASSIF_SERVICE</param-name>
     <param-value>http://192.168.2.173:80/WSclassif/ClassifierZip?wsdl</param-value>
   </context-param>
+  <context-param>
+    <param-name>CLASSIF_LOAD_PATH</param-name>
+    <param-value>/home/jboss/jboss/data/classif/LoadScript/sources/</param-value>
+  </context-param>
+  <context-param>
+    <param-name>CLASSIF_LOAD_TMP</param-name>
+    <param-value>/home/jboss/jboss/data/classif/LoadScript/tmp/</param-value>
+  </context-param>
+  <context-param>
+    <param-name>JASPER_SERVER</param-name>
+    <param-value>http://192.168.68.7:8080/jasperserver/rest_v2/reports/</param-value>
+  </context-param>
+   <context-param>
+    <param-name>JASPER_LOGIN</param-name>
+    <param-value>jasperadmin</param-value>
+  </context-param>
+   <context-param>
+    <param-name>JASPER_PASSWORD</param-name>
+    <param-value>jasperadmin</param-value>
+  </context-param>
   
   <context-param>
     <param-name>org.jboss.jbossfaces.JSF_CONFIG_NAME</param-name>

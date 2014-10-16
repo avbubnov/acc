@@ -35,7 +35,7 @@ import static org.picketlink.common.util.StringUtil.isNotNull;
 
 public class GOSTRedirectBindingSignatureUtil {
 
-	private static final PicketLinkLogger logger = PicketLinkLoggerFactory
+	private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory
 			.getLogger();
 
 	/**
@@ -189,7 +189,7 @@ public class GOSTRedirectBindingSignatureUtil {
 
 		if (sigValueTokenValue == null)
 			throw new IllegalStateException(
-					logger.samlHandlerSignatureNotPresentError());
+					LOGGER.samlHandlerSignatureNotPresentError());
 		return RedirectBindingUtil.urlBase64Decode(sigValueTokenValue);
 	}
 
@@ -258,7 +258,6 @@ public class GOSTRedirectBindingSignatureUtil {
 		}
 
 		// SigAlg
-		String algo = signingKey.getAlgorithm();
 		// String sigAlg = SignatureUtil.getXMLSignatureAlgorithmURI(algo);
 		String sigAlg = "GOST3411withGOST3410EL";
 
@@ -329,7 +328,7 @@ public class GOSTRedirectBindingSignatureUtil {
 
 	private static String getToken(String queryString, String token) {
 		if (queryString == null)
-			throw logger.nullArgumentError("queryString");
+			throw LOGGER.nullArgumentError("queryString");
 
 		token += "=";
 

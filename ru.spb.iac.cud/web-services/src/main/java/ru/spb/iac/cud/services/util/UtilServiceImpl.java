@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 
-//import javax.annotation.Resource;
+ 
+
+
 import javax.jws.HandlerChain;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -25,6 +27,8 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 import javax.xml.ws.soap.SOAPBinding;
 
 import org.jboss.security.annotation.SecurityDomain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import ru.spb.iac.cud.context.ContextSyncManager;
@@ -48,6 +52,8 @@ public class UtilServiceImpl implements UtilService {
 
 	public static final String NS = "http://util.services.cud.iac.spb.ru/";
 
+	final static Logger LOGGER = LoggerFactory.getLogger(UtilServiceImpl.class);
+	
 	@javax.annotation.Resource(name = "wsContext")
 	private WebServiceContext wsContext;
 
@@ -63,6 +69,8 @@ public class UtilServiceImpl implements UtilService {
 			@WebParam(name = "settings", targetNamespace = NS) List<String> settings)
 			throws GeneralFailure {
 
+		LOGGER.debug("users_data");
+		
 		return (new ContextUtilManager()).users_data(getIDSystem(), uidsUsers,
 				category, rolesCodes, groupsCodes, startRow, countRow, null,
 				getIDUser(), getIPAddress());
@@ -72,13 +80,18 @@ public class UtilServiceImpl implements UtilService {
 	@WebMethod
 	@WebResult(targetNamespace = NS)
 	public List<Role> sys_roles() throws GeneralFailure {
+		
+		LOGGER.debug("sys_roles");
+		
 		return (new ContextSyncManager()).is_roles(getIDSystem(), getIDUser(),
 				getIPAddress());
 	}
 
 	@WebResult(targetNamespace = NS)
 	public List<Function> sys_functions() throws GeneralFailure {
-		System.out.println("AuditServiceImpl:is_functions");
+		
+		LOGGER.debug("sys_functions");
+		
 		return (new ContextSyncManager()).is_functions(getIDSystem(),
 				getIDUser(), getIPAddress());
 
@@ -95,6 +108,8 @@ public class UtilServiceImpl implements UtilService {
 			@WebParam(name = "settings", targetNamespace = NS) List<String> settings)
 			throws GeneralFailure {
 
+		LOGGER.debug("groups_data");
+		
 		return (new ContextUtilManager()).groups_data(getIDSystem(),
 				groupsCodes, category, rolesCodes, startRow, countRow, null,
 				getIDUser(), getIPAddress());
@@ -134,6 +149,8 @@ public class UtilServiceImpl implements UtilService {
 	@WebParam(name = "category", targetNamespace = NS) String category)
 			throws GeneralFailure {
 
+		LOGGER.debug("resources_data");
+		
 		return (new ContextUtilManager()).resources_data_subsys(getIDSystem(), 
 				/*resourcesCodes*/
 				category, getIDUser(), getIPAddress());
@@ -143,6 +160,9 @@ public class UtilServiceImpl implements UtilService {
 	@WebResult(targetNamespace = NS)
 	public List<Role> roles_data(
 			@WebParam(name = "category", targetNamespace = NS) String category) throws GeneralFailure{
+		
+		LOGGER.debug("roles_data");
+		
 		return (new ContextUtilManager()).roles_data(getIDSystem(), 
 				category, getIDUser(), getIPAddress());
 	}
@@ -165,8 +185,6 @@ public class UtilServiceImpl implements UtilService {
 		String idSystem = (String) request.getSession().getAttribute(
 				"cud_sts_principal");
 
-		System.out.println("UtilServicesImpl:getIDSystem:" + idSystem);
-
 		return idSystem;
 	}
 
@@ -188,8 +206,8 @@ public class UtilServiceImpl implements UtilService {
 			// Long
 			// сейчас же мы кладём в сессиию ид пользователя из текстового поля
 			// запроса
-			// Long idUser =
-			// (Long)request.getSession().getAttribute("user_id_principal");
+			// Long /idUser /=
+			// (Long)/request/.getSession()/.getAttribute(/"user_id_principal"/)
 
 			if (request.getSession().getAttribute("user_id_principal") != null
 					&& !request.getSession().getAttribute("user_id_principal")
@@ -199,8 +217,7 @@ public class UtilServiceImpl implements UtilService {
 				idUser = new Long((String) request.getSession().getAttribute(
 						"user_id_principal"));
 
-				// System.out.println("ApplicationServicesImpl:getIDUser:"+idUser);
-
+			
 			} else {
 				// аноним
 				idUser = -1L;

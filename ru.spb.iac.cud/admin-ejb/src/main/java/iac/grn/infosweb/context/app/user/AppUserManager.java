@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +18,9 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesMessages;
 
 
+
+
+
 import iac.cud.infosweb.dataitems.AppUserItem;
 import iac.cud.infosweb.dataitems.BaseItem;
 import iac.cud.infosweb.dataitems.UserItem;
@@ -29,6 +32,8 @@ import iac.grn.infosweb.context.mc.arm.ArmManager;
 import iac.grn.infosweb.context.mc.clorg.ClOrgManager;
 import iac.grn.infosweb.context.mc.clusr.ClUsrManager;
 import iac.grn.infosweb.context.mc.usr.UsrManager;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.table.BaseDataModel;
 import iac.grn.infosweb.session.table.BaseManager;
 import iac.grn.serviceitems.BaseTableItem;
@@ -51,10 +56,10 @@ public class AppUserManager extends BaseManager{
 			 
 			 AppUserStateHolder appUserStateHolder = (AppUserStateHolder)
 					  Component.getInstance("appUserStateHolder",ScopeType.SESSION);
-			 HashMap<String, String> filterMap = appUserStateHolder.getColumnFilterValues();
+			 Map<String, String> filterMap = appUserStateHolder.getColumnFilterValues();
 			 String st=null;
 			  
-			 if(type.equals("list")){
+			 if("list".equals(type)){
 				 log.info("invokeLocal:list:01");
 				 
 				 Set<Map.Entry<String, String>> set = appUserStateHolder.getSortOrders().entrySet();
@@ -68,31 +73,28 @@ public class AppUserManager extends BaseManager{
       		    	 orderQuery=orderQuery+", "+me.getKey()+" "+me.getValue();  
       		       }
       		     }
-                 log.info("invokeLocal:list:orderQuery:"+orderQuery);
+                 log.info("AppUser:invokeLocal:list:orderQuery:"+orderQuery);
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	   		      
-    	   		     if(me.getKey().equals("t1_crt_date")){  
-    	        	   //  st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
+    	    		 Set<Map.Entry<String, String>> setFilterAppUser = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterAppUser) {
+    	              
+    	   		     if("t1_crt_date".equals(me.getKey())){  
+    	        	   
     	        	   //делаем фильтр на начало  
     	        	     st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('"+me.getValue()+"%') ";
     	    	   
-    	   		     }else if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	   		     }else if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
     	    	    	 
     	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	    	    	 
     	    	     }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
     	        		//делаем фильтр на начало
     	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
     	        	  }
     	              }
     	    	   }
-                 log.info("invokeLocal:list:filterQuery:"+st);
+                 log.info("AppUser:invokeLocal:list:filterQuery:"+st);
 
              
                List<Object[]> lo=null;
@@ -150,9 +152,6 @@ public class AppUserManager extends BaseManager{
                "where JAS.UP_USER=AU_FULL.ID_SRV(+) "+
                 "and AU_FULL.UP_SIGN=t03.CL_ORG_CODE(+) "+
                 "and CL_ORG_FULL.ID_SRV(+)=t03.CL_ORG_ID "+
-              /* "where JAS.UP_USER=AU_FULL.ID_SRV "+
-                "and AU_FULL.UP_SIGN=t03.CL_ORG_CODE "+
-                "and CL_ORG_FULL.ID_SRV=t03.CL_ORG_ID "+*/
                 "and AU_FULL.UP_SIGN_USER=t02.CL_USR_CODE(+) "+
                 "and CL_USR_FULL.ID_SRV(+)=t02.CL_USR_ID "+
                "and au_APP.ID_SRV(+) =JAS.UP_USER_APP "+
@@ -167,58 +166,47 @@ public class AppUserManager extends BaseManager{
                for(Object[] objectArray :lo){
             	   try{
             		 ui= new AppUserItem(
-            				 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-            				 (objectArray[3]!=null?objectArray[3].toString():""),
-            				 (objectArray[4]!=null?objectArray[4].toString():""),
-            				 (objectArray[5]!=null?objectArray[5].toString():""),
-            				 (objectArray[6]!=null?objectArray[6].toString():""),
+            				objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+            				objectArray[3]!=null?objectArray[3].toString():"",
+            				objectArray[4]!=null?objectArray[4].toString():"",
+            				objectArray[5]!=null?objectArray[5].toString():"",
+            				objectArray[6]!=null?objectArray[6].toString():"",
             				 
-            				 (objectArray[7]!=null?objectArray[7].toString():""),
-            				 (objectArray[8]!=null?objectArray[8].toString():""),
-            				 (objectArray[9]!=null?objectArray[9].toString():""),
-            				 (objectArray[10]!=null?objectArray[10].toString():""),
-            				 (objectArray[11]!=null?objectArray[11].toString():""),
-            				 (objectArray[12]!=null?objectArray[12].toString():""),
-            				 (objectArray[13]!=null?objectArray[13].toString():""),
-            				 (objectArray[14]!=null?objectArray[14].toString():""),
-            				 (objectArray[15]!=null?objectArray[15].toString():""),
-            				 (objectArray[16]!=null?objectArray[16].toString():""),
-            				 (objectArray[17]!=null?objectArray[17].toString():""),
-            				 (objectArray[18]!=null?new Long(objectArray[18].toString()):null),
-              			     (objectArray[19]!=null?objectArray[19].toString():""),
-              			     (objectArray[20]!=null?objectArray[20].toString():"")
+            				objectArray[7]!=null?objectArray[7].toString():"",
+            				objectArray[8]!=null?objectArray[8].toString():"",
+            				objectArray[9]!=null?objectArray[9].toString():"",
+            				objectArray[10]!=null?objectArray[10].toString():"",
+            				objectArray[11]!=null?objectArray[11].toString():"",
+            				objectArray[12]!=null?objectArray[12].toString():"",
+            				objectArray[13]!=null?objectArray[13].toString():"",
+            				objectArray[14]!=null?objectArray[14].toString():"",
+            				objectArray[15]!=null?objectArray[15].toString():"",
+            				objectArray[16]!=null?objectArray[16].toString():"",
+            				objectArray[17]!=null?objectArray[17].toString():"",
+            				objectArray[18]!=null?new Long(objectArray[18].toString()):null,
+              			    objectArray[19]!=null?objectArray[19].toString():"",
+              			    objectArray[20]!=null?objectArray[20].toString():""
             				);  
             	   	     auditList.add(ui);
             	   }catch(Exception e1){
-            		   log.error("invokeLocal:for:error:"+e1);
+            		   log.error("AppUserinvokeLocal:for:error:"+e1);
             	   }
                }  
                
-             log.info("invokeLocal:list:02");
+             log.info("AppUser:invokeLocal:list:02");
              
-			 } else if(type.equals("count")){
-				 log.info("IHReposList:count:01");
+			 } else if("count".equals(type)){
+				 log.info("AppUser:AppUserList:count:01");
 				 
                  
                  if(filterMap!=null){
-    	    		 Set<Map.Entry<String, String>> set_filter = filterMap.entrySet();
-    	              for (Map.Entry<String, String> me : set_filter) {
-    	            	  log.info("me.getKey+:"+me.getKey());
-    	            	  log.info("me.getValue:"+me.getValue());
-    	   		    
-    	            	  /*
-    	   		     //  if(me.getKey().equals("LCR.CREATED")){  
-    	        	//	 st=(st!=null?st+" and " :"")+" lower(to_char("+me.getKey()+",'DD.MM.YY HH24:MI:SS')) like lower('%"+me.getValue()+"%') ";
-    	        	//   }else{
-    	        		// st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('%"+me.getValue()+"%') ";
-    	        		//делаем фильтр на начало
-    	            	  st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
-    	        	 //  }
-    	            	 */ 
+    	    		 Set<Map.Entry<String, String>> setFilterAppUser = filterMap.entrySet();
+    	              for (Map.Entry<String, String> me : setFilterAppUser) {
+    	            	
     	            	  
-    	              if(me.getKey().equals("t1_iogv_bind_type")&&(me.getValue()!=null && me.getValue().equals("-2"))){
+    	              if("t1_iogv_bind_type".equals(me.getKey())&&(me.getValue()!=null && "-2".equals(me.getValue()))){
      	    	    	 st=(st!=null?st+" and " :"")+" t1_usr_code is null ";
     	              }else{
     	            	 st=(st!=null?st+" and " :"")+" lower("+me.getKey()+") like lower('"+me.getValue()+"%') ";
@@ -227,14 +215,8 @@ public class AppUserManager extends BaseManager{
     	            	  
     	              }
     	    	   }
-				 
-				/* 
-				 auditCount = (Long)entityManager.createQuery(
-						 "select count(au) " +
-				         "from AcUser au "+
-				         (st!=null ? " where "+st :""))
-		                .getSingleResult();*/
-				 
+			 
+			
 				
 				 auditCount = ((java.math.BigDecimal)entityManager.createNativeQuery(
 						 "select count(*) " +
@@ -280,12 +262,12 @@ public class AppUserManager extends BaseManager{
                .getSingleResult()).longValue();
                  
                  
-               log.info("invokeLocal:count:02:"+auditCount);
-           	 } else if(type.equals("bean")){
+               log.info("AppUser:invokeLocal:count:02:"+auditCount);
+           	 } else if("bean".equals(type)){
 				 
 			 }
 		}catch(Exception e){
-			  log.error("invokeLocal:error:"+e);
+			  log.error("AppUser:invokeLocal:error:"+e);
 			  evaluteForList=false;
 			  FacesMessages.instance().add("Ошибка!");
 		}
@@ -368,53 +350,54 @@ public class AppUserManager extends BaseManager{
 	        		   log.info("AppUserManager:getUserItem:login:"+objectArray[1].toString());
 	        		   
 	        		   ui= new AppUserItem(
-	            				 (objectArray[0]!=null?new Long(objectArray[0].toString()):null),
-	            				 (objectArray[1]!=null?df.format((Date)objectArray[1]) :""),
-	            				 (objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0),	
-	            				 (objectArray[3]!=null?objectArray[3].toString():""),
-	            				 (objectArray[4]!=null?objectArray[4].toString():""),
-	            				 (objectArray[5]!=null?objectArray[5].toString():""),
-	            				 (objectArray[6]!=null?objectArray[6].toString():""),
+	            				objectArray[0]!=null?new Long(objectArray[0].toString()):null,
+	            				objectArray[1]!=null?df.format((Date)objectArray[1]) :"",
+	            				objectArray[2]!=null?Integer.parseInt(objectArray[2].toString()):0,	
+	            				objectArray[3]!=null?objectArray[3].toString():"",
+	            				objectArray[4]!=null?objectArray[4].toString():"",
+	            				objectArray[5]!=null?objectArray[5].toString():"",
+	            				objectArray[6]!=null?objectArray[6].toString():"",
 	            				 
-	            				 (objectArray[7]!=null?objectArray[7].toString():""),
-	            				 (objectArray[8]!=null?objectArray[8].toString():""),
-	            				 (objectArray[9]!=null?objectArray[9].toString():""),
-	            				 (objectArray[10]!=null?objectArray[10].toString():""),
-	            				 (objectArray[11]!=null?objectArray[11].toString():""),
-	            				 (objectArray[12]!=null?objectArray[12].toString():""),
-	            				 (objectArray[13]!=null?objectArray[13].toString():""),
-	            				 (objectArray[14]!=null?objectArray[14].toString():""),
-	            				 (objectArray[15]!=null?objectArray[15].toString():""),
-	            				 (objectArray[16]!=null?objectArray[16].toString():""),
-	            				 (objectArray[17]!=null?objectArray[17].toString():""),
-	            				 (objectArray[18]!=null?new Long(objectArray[18].toString()):null),
-	              			     (objectArray[19]!=null?objectArray[19].toString():""),
-	              			     (objectArray[20]!=null?objectArray[20].toString():"")
+	            				objectArray[7]!=null?objectArray[7].toString():"",
+	            				objectArray[8]!=null?objectArray[8].toString():"",
+	            				objectArray[9]!=null?objectArray[9].toString():"",
+	            				objectArray[10]!=null?objectArray[10].toString():"",
+	            				objectArray[11]!=null?objectArray[11].toString():"",
+	            				objectArray[12]!=null?objectArray[12].toString():"",
+	            				objectArray[13]!=null?objectArray[13].toString():"",
+	            				objectArray[14]!=null?objectArray[14].toString():"",
+	            				objectArray[15]!=null?objectArray[15].toString():"",
+	            				objectArray[16]!=null?objectArray[16].toString():"",
+	            				objectArray[17]!=null?objectArray[17].toString():"",
+	            				objectArray[18]!=null?new Long(objectArray[18].toString()):null,
+	              			    objectArray[19]!=null?objectArray[19].toString():"",
+	              			    objectArray[20]!=null?objectArray[20].toString():""
 	            				);  
 	        	     return ui;
 	        	   }catch(Exception e1){
-	        		   log.error("getUserItem:for:error:"+e1);
+	        		   log.error("AppUserManager:getUserItem:for:error:"+e1);
 	        	   }
 	           }  
 		   }catch(Exception e){
-			   log.error("getUserItem:error:"+e);
+			   log.error("AppUserManager:getUserItem:error:"+e);
 		   }
 		   return null;
 	 }
 	 
 	 
 	 public void createArm(){
+		 
 		   log.info("AppUserManager:createArm:01");
 		  
-		   String sessionId = FacesContext.getCurrentInstance().getExternalContext()
+		   String sessionIdAppUser = FacesContext.getCurrentInstance().getExternalContext()
 			        .getRequestParameterMap()
 			        .get("sessionId");
-	       log.info("AppUserManager:createArm:sessionId:"+sessionId);
+	       log.info("AppUserManager:createArm:sessionId:"+sessionIdAppUser);
 	     
 		   try{
 			   
 			   
-			 //armBeanCrt.setIdAppSys(new Long(sessionId));
+			 
 			 
 			 UsrManager usrManager = (UsrManager)
 			          Component.getInstance("usrManager", ScopeType.EVENT);
@@ -430,12 +413,14 @@ public class AppUserManager extends BaseManager{
 	 	     		   "where t1.ID_SRV=? ")
 	 	     		 .setParameter(1, usrBeanCrt.getBaseId())
 	 	     		 .setParameter(2, getCurrentUser().getBaseId())
-	 	     		 .setParameter(3, new Long(sessionId))
+	 	     		 .setParameter(3, new Long(sessionIdAppUser))
 	         	 	 .executeUpdate();
 		    
-		     AppUserItem ui = getUserItem(new Long(sessionId));
+		     AppUserItem ui = getUserItem(new Long(sessionIdAppUser));
 		     
 		     Contexts.getEventContext().set("contextBeanView", ui);
+		     
+		     audit(ResourcesMap.APP_USER, ActionsMap.EXECUTE); 
 		     
 		   }catch(Exception e){
 			   log.error("AppUserManager:createArm:error:"+e);
@@ -464,6 +449,8 @@ public class AppUserManager extends BaseManager{
              AppUserItem ui = getUserItem(new Long(sessionId)); 
 		     
 		     Contexts.getEventContext().set("contextBeanView", ui);
+		     
+		     audit(ResourcesMap.APP_USER, ActionsMap.REJECT); 
 		     
 		   }catch(Exception e){
 			   log.error("AppUserManager:reject:error:"+e);
@@ -518,7 +505,7 @@ public class AppUserManager extends BaseManager{
 		    
 		     log.info("AppUserManager:forViewCrt:01:"+(ui==null));
 		     
-		   // log.info("AppUserManager:forViewCrt:IogvCodeUser:"+ui.getIogvCodeUser());
+		    
 		     
 		    if(ui.getIogvCodeUser()!=null&&ui.getIogvCodeUser().length()==8){ //в заявке корректный код иогв пользователя
 		    	
@@ -542,7 +529,7 @@ public class AppUserManager extends BaseManager{
 				    clUsrBean = (IspBssT)
 			                    Component.getInstance("clUsrBean", ScopeType.EVENT);
 					    
-					  //  log.info("AppUserManager:forViewCrt:clOrgBean.BaseId:"+clOrgBean.getBaseId());
+					   
 					    
 				    if(clUsrBean.getBaseId()!=null){ //нашли действующего пользователя
 						  
@@ -579,7 +566,7 @@ public class AppUserManager extends BaseManager{
 		      clOrgBean = (IspBssT)
                     Component.getInstance("clOrgBean", ScopeType.EVENT);
 		    
-		  //  log.info("AppUserManager:forViewCrt:clOrgBean.BaseId:"+clOrgBean.getBaseId());
+		   
 		    
 		      if(clOrgBean.getBaseId()!=null){
 		    	  
@@ -596,24 +583,10 @@ public class AppUserManager extends BaseManager{
 		    Contexts.getEventContext().set("contextBeanView", ui);
 		    
 		   
-		    
-		    
-		   /* IspBssT ao = new IspBssT();
-	    		
-	    	 ao.setFull(ui.getNameOrg());
-	    	 ao.setFio(ui.getSurnameUser()+" "+ui.getNameUser()+" "+ui.getPatronymicUser());
-	    	 
-		    Contexts.getEventContext().set("clOrgBean", ao);
-		    
-		    AcUser au = new AcUser();
-		    
-		    au.setCertificate(ui.getCertificateUser());
-		    
-		    Contexts.getEventContext().set("usrBeanCrt", au);*/
+		
 		    
 		   }catch(Exception e){
 			 log.error("AppUserManager:forViewCrt:Error:"+e);
-			 e.printStackTrace(System.out);
 		   }
 	   } 
 	 
@@ -681,7 +654,7 @@ public class AppUserManager extends BaseManager{
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("idApp"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("created"));
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("orgName"));
-			  // auditItemsListSelect.add(ac.getAuditItemsMap().get("usrFio"));
+			  
 			   auditItemsListSelect.add(ac.getAuditItemsMap().get("statusValue"));
 		   }
 	       return this.auditItemsListSelect;
@@ -693,9 +666,9 @@ public class AppUserManager extends BaseManager{
 	   log.info("AppUserManager:getAuditItemsListContext");
 	   if(auditItemsListContext==null){
 		   AppUserContext ac= new AppUserContext();
-		  // auditItemsListContext = new ArrayList<BaseTableItem>();
-		   //auditItemsListContext.addAll(ac.getAuditItemsMap().values());
-		   //auditItemsListContext.addAll(ac.getAuditItemsCollection());
+		  
+		   
+		   
 		   auditItemsListContext=ac.getAuditItemsCollection();
 		   
 	   }
@@ -706,22 +679,9 @@ public class AppUserManager extends BaseManager{
 	  
 	  if(headerItemsListContext==null){
 		   AppUserContext ac= new AppUserContext();
-		//   headerItemsListContext = new ArrayList<BaseTableItem>();
 		   headerItemsListContext=ac.getHeaderItemsList();
 		   
-		/*   
-		   AppSystemItem ui = (AppSystemItem)
-					  Component.getInstance("contextBeanView",ScopeType.EVENT); 
-		   
-		   log.info("AppSystemManager:getHeaderItemsListContext:01");
-		   
-		   if(ui!=null){
-			   log.info("AppSystemManager:getHeaderItemsListContext:ui.getStatus():"+ui.getStatus());
-			   if(ui.getStatus()!=2){
-				   log.info("AppSystemManager:getHeaderItemsListContext:03:"+headerItemsListContext.get(2).getItems().g);
-				   headerItemsListContext.get(2).getItems().remove("rejectReason");
-			   }
-		   }*/
+	
 		   
 	   }
 	  

@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashMap; import java.util.Map;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,8 +40,8 @@ import org.jboss.seam.contexts.Contexts;
 import iac.cud.infosweb.local.service.ServiceReestr;
 import iac.grn.infosweb.context.proc.TaskProcessor;
 
-//import org.jboss.seam.annotations.Logger;
-//import org.jboss.seam.log.Log;
+ 
+ 
 import org.apache.log4j.Logger;
 
 @Stateless
@@ -56,14 +56,11 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 
 	private Logger log = Logger.getLogger(IHArchiveAuditSys.class);
 
-	// private static String file_path="/distr/jboss/data/audit/sys/";
-	// private static String file_path="/home/jboss/jboss/data/audit/sys/";
+	// "/home/jboss/jboss/data/audit/sys/";
 	private static String file_path = Configuration.getArchiveAuditSys();
 
 	private static String param_code = "to_archive_audit_sys";
 
-	// private static final String
-	// proc_aasys_info_file=System.getProperty("jboss.server.config.url")+"proc_aasys_info.properties";
 	private static final String proc_aasys_info_file = System
 			.getProperty("jboss.server.config.dir")
 			+ "/"
@@ -81,15 +78,12 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 		ScheduledFuture shf = scheduler.scheduleAtFixedRate(new Runnable() {
 			public void run() {
 
-				// String path =
-				// System.getProperty("jboss.server.config.url")+"conf_loaddata_exec.properties";
-
+			
 				try {
 
 					log.info("IHArchiveAuditSys:process_start:run");
 
-					// synchronized(this){
-
+				
 					Calendar cln = Calendar.getInstance();
 
 					int day = cln.get(Calendar.DAY_OF_MONTH);
@@ -97,15 +91,11 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 					log.info("IHArchiveAuditSys:process_start:run:day:" + day);
 
 					if (day == 1) {
-						// _LaunchAuditSysArchiveRepeatTask lct = new
-						// _LaunchAuditSysArchiveRepeatTask();
-						// lct.content();
 						process_start_content(null);
 					}
 
-					// }
 				} catch (Exception e) {
-					log.error("IHArchiveAuditSys:process_start:run:error:" + e);
+					log.error("IHArchiveAuditSys:process_start:run:error:", e);
 				} finally {
 					try {
 
@@ -117,15 +107,13 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 			}
 		}, calendar(), 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS);
 
-		// Contexts.getApplicationContext().set("archiveAuditSysScheduled",
-		// shf);
-
+	
 		if (TaskProcessor.getControls().containsKey("archiveAuditSysScheduled")) {
 			try {
 				TaskProcessor.getControls().get("archiveAuditSysScheduled")
 						.cancel(false);
 			} catch (Exception e) {
-				log.info("IHArchiveAuditSys:process_start:error:" + e);
+				log.info("IHArchiveAuditSys:process_start:error:", e);
 			}
 		}
 		TaskProcessor.getControls().put("archiveAuditSysScheduled", shf);
@@ -140,9 +128,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 		log.info("IHArchiveAuditSysa:process_stop:01");
 
 		try {
-			// ScheduledFuture shf = (ScheduledFuture)
-			// Contexts.getApplicationContext().get("archiveAuditSysScheduled");
-
+		
 			ScheduledFuture shf = TaskProcessor.getControls().get(
 					"archiveAuditSysScheduled");
 
@@ -152,7 +138,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 				shf.cancel(false);
 			}
 		} catch (Exception e) {
-			log.error("IHArchiveAuditSys:process_stop:error:" + e);
+			log.error("IHArchiveAuditSys:process_stop:error:", e);
 			throw e;
 		}
 
@@ -171,7 +157,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 			process_start_content(archiveParamValue);
 
 		} catch (Exception e) {
-			log.error("IHArchiveAuditSys:task_run:error:" + e);
+			log.error("IHArchiveAuditSys:task_run:error:", e);
 			throw e;
 		}
 		return jpi;
@@ -180,7 +166,6 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 	private synchronized void process_start_content(Long archiveParamValue)
 			throws Exception {
 
-		BaseParamItem bpi = new BaseParamItem();
 		String prev_date = null;
 		BufferedWriter bw = null;
 		File file = null;
@@ -233,7 +218,6 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 									+ monthInterval
 									+ "' month, 'MM.YYYY'),'DD.MM.YYYY') "
 									+ "order by SL.CREATED ")
-					// .setParameter(1, monthInterval.toString())
 					.getResultList();
 			log.info("IHArchiveAuditSys:process_start_content:02");
 
@@ -259,7 +243,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 							+ "IP_ADDRESS" + "\n");
 				}
 
-				bw.append((objectArray[1] != null ? objectArray[1].toString()
+				bw.append ((objectArray[1] != null ? objectArray[1].toString()
 						: "null")
 						+ "\t"
 						+ (objectArray[2] != null ? objectArray[2].toString()
@@ -300,16 +284,14 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 					.executeUpdate();
 
 			utx.commit();
-			// jpi.put("list", JiList) ;
 		} catch (Exception e) {
-			log.error("IHArchiveAuditSys:process_start_content:error" + e);
+			log.error("IHArchiveAuditSys:process_start_content:error", e);
 
 			utx.rollback();
 
 			/*
 			 * можно в принципе файл и оставить. если в базе сведения не
 			 * удалились, то при следующем запуске файл будет перезаписан
-			 * if(bw!=null){ bw.close(); } file.delete();
 			 */
 
 			hit = false;
@@ -322,9 +304,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 						+ hit);
 
 				DateFormat df = new SimpleDateFormat("dd.MM.yy HH:mm:ss");
-				// URL url = new URL(proc_aasys_info_file);
-				// File f=new File(url.toURI());
-
+			
 				File f = new File(proc_aasys_info_file);
 
 				Properties properties = new Properties();
@@ -336,7 +316,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 				properties.store(os = new FileOutputStream(f), null);
 
 			} catch (Exception e) {
-				log.error("ConfLoadDataTask:run:error:2:" + e);
+				log.error("ConfLoadDataTask:run:error:2:", e);
 			} finally {
 				try {
 					if (os != null) {
@@ -355,8 +335,7 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 	}
 
 	private static Long calendar() {
-		// System.out.println("calendar:01");
-
+	
 		Long currentTime = System.currentTimeMillis();
 
 		// 4.40 в jboss - это в реальном времени 5.40
@@ -375,10 +354,8 @@ public class IHArchiveAuditSys extends IHArchiveBase implements IHLocal {
 			start = start + 24 * 60 * 60 * 1000;
 		}
 
-		System.out.println("IHArchiveAuditSys:calendar:start:" + start);
-
 		return start;
-		// return 5000L;
+		//  5000L;
 	}
 
 }

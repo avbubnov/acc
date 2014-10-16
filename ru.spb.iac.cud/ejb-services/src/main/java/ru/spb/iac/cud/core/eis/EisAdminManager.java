@@ -30,7 +30,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 	private static int max_size_roles = 500;
 
-	Logger logger = LoggerFactory.getLogger(EisAdminManager.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(EisAdminManager.class);
 
 	public EisAdminManager() {
 	}
@@ -48,13 +48,13 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 		// 0 - REPLACE
 		// 1 - ADD
 		// 2 - REMOVE
-		logger.info("access:01");
+		LOGGER.debug("access:01");
 
 		// List<String> result = new ArrayList<String>();
 
 		try {
-			logger.info("access:codeSystem:" + codeSystem);
-			logger.info("access:modeExec:" + modeExec);
+			LOGGER.debug("access:codeSystem:" + codeSystem);
+			LOGGER.debug("access:modeExec:" + modeExec);
 
 			if (modeExec == null
 					|| modeExec.trim().isEmpty()
@@ -67,11 +67,11 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 				throw new GeneralFailure("Некорректные данные!");
 			}
 
-			logger.info("access:02");
+			LOGGER.debug("access:02");
 
 			for (String uidUser : uidsUsers) {
 
-				logger.info("access:uidUser:" + uidUser);
+				LOGGER.debug("access:uidUser:" + uidUser);
 
 				if (uidUser == null || uidUser.trim().isEmpty()) {
 					throw new GeneralFailure("Некорректные данные!");
@@ -103,8 +103,8 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 					roles_app.add(idRoleApp.toString());
 
-					logger.info("createAccess:role:" + role);
-					logger.info("createAccess:idRoleApp:" + idRoleApp);
+					LOGGER.debug("createAccess:role:" + role);
+					LOGGER.debug("createAccess:idRoleApp:" + idRoleApp);
 				}
 
 				// список ролей, которые уже есть у пользователя в системе
@@ -119,7 +119,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 						.setParameter(1, idArm).setParameter(2, idUser)
 						.getResultList();
 
-				logger.info("createAccess:rolesLine:" + rolesLineExist);
+				LOGGER.debug("createAccess:rolesLine:" + rolesLineExist);
 
 				if (mode == 0) { // REPLACE
 
@@ -133,7 +133,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 					}
 
-					logger.info("createAccess:rolesLine:" + rolesLineExist);
+					LOGGER.debug("createAccess:rolesLine:" + rolesLineExist);
 
 					em.createNativeQuery(
 							"DELETE FROM AC_USERS_LINK_KNL_T url "
@@ -157,7 +157,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 					for (String role : roles_app) {
 
-						logger.info("createAccess:role2:" + role);
+						LOGGER.debug("createAccess:role2:" + role);
 
 						if (!roles_user.contains(role)) {
 
@@ -203,15 +203,15 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 			 * "and RL.UP_IS=? "+ "and URL.UP_USERS=? ") .setParameter(1, idArm)
 			 * .setParameter(2, idUser) .getResultList();
 			 */
-			// logger.info("access:result.size:"+result.size());
+			 
 
 		} catch (GeneralFailure ge) {
 			// sys_audit(70L, "" , "error", IPAddress, idUser );
-			logger.error("access:Error:" + ge);
+			LOGGER.error("access:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
 			// sys_audit(70L, "" , "error", IPAddress, idUser );
-			logger.error("access:Error:" + e);
+			LOGGER.error("access:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 
@@ -231,11 +231,11 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 		// 0 - REPLACE
 		// 1 - ADD
 		// 2 - REMOVE
-		logger.info("access_groups:01");
+		LOGGER.debug("access_groups:01");
 
 		try {
-			logger.info("access_groups:codeSystem:" + codeSystem);
-			logger.info("access_groups:modeExec:" + modeExec);
+			LOGGER.debug("access_groups:codeSystem:" + codeSystem);
+			LOGGER.debug("access_groups:modeExec:" + modeExec);
 
 			if (modeExec == null
 					|| modeExec.trim().isEmpty()
@@ -248,11 +248,11 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 				throw new GeneralFailure("Некорректные данные!");
 			}
 
-			logger.info("access_groups:02");
+			LOGGER.debug("access_groups:02");
 
 			for (String uidUser : uidsUsers) {
 
-				logger.info("access_groups:uidUser:" + uidUser);
+				LOGGER.debug("access_groups:uidUser:" + uidUser);
 
 				if (uidUser == null || uidUser.trim().isEmpty()) {
 					throw new GeneralFailure("Некорректные данные!");
@@ -267,7 +267,6 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 				// логинам
 				// Long idUser = user_exist(loginUser);
 				Long idUser = new Long(uidUser);
-				Long idArm = get_id_is(codeSystem);
 				int mode = 1;
 
 				if (modeExec.equals("REPLACE")) {
@@ -284,8 +283,8 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 					groups_app.add(idGroupApp.toString());
 
-					logger.info("createAccess_groups:group:" + group);
-					logger.info("createAccess_groups:idRoleApp:" + idGroupApp);
+					LOGGER.debug("createAccess_groups:group:" + group);
+					LOGGER.debug("createAccess_groups:idRoleApp:" + idGroupApp);
 				}
 
 				// список групп, которые уже есть у пользователя
@@ -308,7 +307,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 					}
 
-					logger.info("createAccess_groups:rolesLine:"
+					LOGGER.debug("createAccess_groups:rolesLine:"
 							+ groupsLineExist);
 
 					em.createNativeQuery(
@@ -333,11 +332,11 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 					for (String group : groups_app) {
 
-						logger.info("createAccess_groups:role2:" + group);
+						LOGGER.debug("createAccess_groups:role2:" + group);
 
 						if (!groups_user.contains(group)) {
 
-							logger.info("createAccess_groups:role2_2");
+							LOGGER.debug("createAccess_groups:role2_2");
 
 							em.createNativeQuery(
 									"insert into LINK_GROUP_USERS_USERS_KNL_T (UP_GROUP_USERS, UP_USERS, CREATOR, CREATED) "
@@ -373,11 +372,11 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 		} catch (GeneralFailure ge) {
 			// sys_audit(70L, "" , "error", IPAddress, idUser );
-			logger.error("access_groups:Error:" + ge);
+			LOGGER.error("access_groups:Error:" + ge);
 			throw ge;
 		} catch (Exception e) {
 			// sys_audit(70L, "" , "error", IPAddress, idUser );
-			logger.error("access_groups:Error:" + e);
+			LOGGER.error("access_groups:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 	}
@@ -392,7 +391,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 		X509Certificate cert_obj = null;
 		try {
-			logger.info("cert_change:01");
+			LOGGER.debug("cert_change:01");
 
 			if (newCert == null || newCert.isEmpty()) {
 				throw new GeneralFailure("New Certificate is null or empty!");
@@ -417,10 +416,10 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 				// в базе храним текст base64 сертификата
 
 			} catch (Exception e) {
-				logger.error("cert_change:ErrorCertValid:" + e);
+				LOGGER.error("cert_change:ErrorCertValid:", e);
 				throw new GeneralFailure("New Certificate is not valid!");
 			}
-			logger.info("cert_change:02:" + cert_obj);
+			LOGGER.debug("cert_change:02:" + cert_obj);
 
 			// сначала предполагаем, что имеем дело с системой
 			int result_flag = em
@@ -430,7 +429,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 					.setParameter(1, newCert).setParameter(2, codeSystem)
 					.executeUpdate();
 
-			logger.info("cert_change:03:" + result_flag);
+			LOGGER.debug("cert_change:03:" + result_flag);
 
 			if (result_flag == 0) {
 				// не было изменённых записей, значит не нашли в системах такой
@@ -462,43 +461,16 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 			}
 
 		} catch (GeneralFailure ge) {
-			logger.error("cert_change:Error1:" + ge);
+			LOGGER.error("cert_change:Error1:" + ge);
 			throw ge;
 		} catch (Exception e) {
-			logger.error("cert_change:Error2:" + e);
+			LOGGER.error("cert_change:Error2:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 
 	}
 
-	/**
-	 * проверка наличия системы
-	 */
-	private Long system_exist(String codeSystem) throws GeneralFailure {
-
-		logger.info("system_exist:codeSystem:" + codeSystem);
-
-		Long result = null;
-
-		try {
-
-			result = ((java.math.BigDecimal) em
-					.createNativeQuery(
-							"select APP.ID_SRV " + "from AC_IS_BSS_T app "
-									+ "where APP.SIGN_OBJECT=?")
-					.setParameter(1, codeSystem).getSingleResult()).longValue();
-
-			return result;
-
-		} catch (NoResultException ex) {
-			logger.error("system_exist:NoResultException");
-			throw new GeneralFailure("Информационная система не определена!");
-		} catch (Exception e) {
-			logger.error("system_exist:Error:" + e);
-			throw new GeneralFailure(e.getMessage());
-		}
-	}
-
+	
 	/**
 	 * получение ИД системы по коду системы
 	 */
@@ -519,7 +491,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 					.longValue();
 
 		} catch (NoResultException ex) {
-			logger.error("get_id_is:NoResultException");
+			LOGGER.error("get_id_is:NoResultException");
 			throw new GeneralFailure("System is not defined");
 		} catch (Exception e) {
 			throw new GeneralFailure(e.getMessage());
@@ -528,33 +500,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 
 	}
 
-	/**
-	 * проверка наличия пользователя по его ИД
-	 */
-	private Long user_exist(String loginUser) throws GeneralFailure {
-
-		logger.info("user_exist:loginUser:" + loginUser);
-
-		Long result = null;
-
-		try {
-
-			result = ((java.math.BigDecimal) em
-					.createNativeQuery(
-							"select usr.ID_SRV " + "from  AC_USERS_KNL_T usr "
-									+ "where usr.login=?")
-					.setParameter(1, loginUser).getSingleResult()).longValue();
-
-			return result;
-
-		} catch (NoResultException ex) {
-			logger.error("user_exist:NoResultException");
-			throw new GeneralFailure("Пользователь не определён!");
-		} catch (Exception e) {
-			logger.error("system_exist:Error:" + e);
-			throw new GeneralFailure(e.getMessage());
-		}
-	}
+	
 
 	/**
 	 * проверка наличия роли по её коду
@@ -562,8 +508,8 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 	private Long role_exist(Long idSystem, String codeRole)
 			throws GeneralFailure {
 
-		logger.info("role_exist:idSystem:" + idSystem);
-		logger.info("role_exist:codeRole:" + codeRole);
+		LOGGER.debug("role_exist:idSystem:" + idSystem);
+		LOGGER.debug("role_exist:codeRole:" + codeRole);
 
 		Long result = null;
 
@@ -578,10 +524,10 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 					.getSingleResult()).longValue();
 
 		} catch (NoResultException ex) {
-			logger.error("role_exist:NoResultException");
+			LOGGER.error("role_exist:NoResultException");
 			throw new GeneralFailure("Роль " + codeRole + " не определёна!");
 		} catch (Exception e) {
-			logger.info("role_error:Error:" + e);
+			LOGGER.debug("role_error:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 
@@ -593,7 +539,7 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 	 */
 	private Long group_exist(String codeGroup) throws GeneralFailure {
 
-		logger.info("role_exist:codeGroup:" + codeGroup);
+		LOGGER.debug("role_exist:codeGroup:" + codeGroup);
 
 		Long result = null;
 
@@ -606,10 +552,10 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 					.setParameter(1, codeGroup).getSingleResult()).longValue();
 
 		} catch (NoResultException ex) {
-			logger.error("group_exist:NoResultException");
+			LOGGER.error("group_exist:NoResultException");
 			throw new GeneralFailure("Группа " + codeGroup + " не определёна!");
 		} catch (Exception e) {
-			logger.error("group_exist:Error:" + e);
+			LOGGER.error("group_exist:Error:", e);
 			throw new GeneralFailure(e.getMessage());
 		}
 
@@ -619,35 +565,5 @@ public class EisAdminManager implements AdminManagerLocal, AdminManagerRemote {
 	/**
 	 * протоколирование действий
 	 */
-	private void sys_audit(Long idServ, String inp_param, String result,
-			String ip_adr, Long idUser) {
-		logger.info("sys_audit:01");
-		try {
-
-			if (idUser != null && !idUser.equals(-1L)) {
-				em.createNativeQuery(
-						"insert into SERVICES_LOG_KNL_T( "
-								+ "ID_SRV,  UP_SERVICES, DATE_ACTION, CREATED, "
-								+ "input_param, result_value, ip_address, UP_USERS ) "
-								+ "values(SERVICES_LOG_KNL_SEQ.nextval , ?, sysdate, sysdate, "
-								+ "?, ?, ?, ? ) ").setParameter(1, idServ)
-						.setParameter(2, inp_param).setParameter(3, result)
-						.setParameter(4, ip_adr).setParameter(5, idUser)
-						.executeUpdate();
-			} else {
-				em.createNativeQuery(
-						"insert into SERVICES_LOG_KNL_T( "
-								+ "ID_SRV,  UP_SERVICES, DATE_ACTION, CREATED, "
-								+ "input_param, result_value, ip_address ) "
-								+ "values(SERVICES_LOG_KNL_SEQ.nextval , ?, sysdate, sysdate, "
-								+ "?, ?, ? ) ").setParameter(1, idServ)
-						.setParameter(2, inp_param).setParameter(3, result)
-						.setParameter(4, ip_adr).executeUpdate();
-			}
-		} catch (Exception e) {
-			logger.error("sys_audit:Error:" + e);
-		}
-
-	}
-
+	
 }

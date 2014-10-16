@@ -5,8 +5,6 @@ public class Configuration{
  
   private static boolean signRequired;
 
- // private static boolean encryptRequired;
-  
   private static String samlRequestLoginUarm ; 
 	
   private static String samlRequestLogout; 
@@ -28,14 +26,7 @@ public class Configuration{
   public static void setSignRequired(boolean signRequired) {
 	Configuration.signRequired = signRequired;
   }
-/*
-  public static boolean isEncryptRequired() {
-	return encryptRequired;
-  }
 
-  public static void setEncryptRequired(boolean encryptRequired) {
-	Configuration.encryptRequired = encryptRequired;
-  }*/
 
 public static String getSamlRequestLoginUarm() {
 	return samlRequestLoginUarm;

@@ -23,7 +23,7 @@ import ru.spb.iac.cud.uarm.ejb.entity.JournAppUserBssT;
 @LocalBean
 public class UserAccessEJB {
 
-	final static Logger logger = LoggerFactory.getLogger(UserAccessEJB.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(UserAccessEJB.class);
 	
    
 	@PersistenceContext(unitName = "CUDUserConsolePU")
@@ -35,43 +35,33 @@ public class UserAccessEJB {
 
     public void save(JournAppAccessBssT user) {
 
-       logger.info("userAccessEJB:save:01");
-       logger.info("userAccessEJB:save:02:"+user.getCodeSystem());
+       LOGGER.debug("userAccessEJB:save:01");
+       LOGGER.debug("userAccessEJB:save:02:"+user.getCodeSystem());
        try{
-    	  /*List<JournAppUserBssT>  app_user_list = entityManager
-    			  .createQuery("select t1 from JournAppUserBssT t1 ")
-    			  .getResultList();
-    	  
-    	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
-    	  */
+    	 
     	   
     	   user.setCreated(new Date());
     	   entityManager.persist(user);
     	   
     	   
        }catch(Exception e){
-    	   logger.error("userAccessEJB:save:error:"+e);
+    	   LOGGER.error("userAccessEJB:save:error:"+e);
        }
      }
     
     public void saveGroup(JournAppAccessGroupsBssT user) {
 
-        logger.info("userAccessEJB:saveGroup:01");
+        LOGGER.debug("userAccessEJB:saveGroup:01");
       
         try{
-     	  /*List<JournAppUserBssT>  app_user_list = entityManager
-     			  .createQuery("select t1 from JournAppUserBssT t1 ")
-     			  .getResultList();
-     	  
-     	  logger.info("UserRegEJB:save:03:"+app_user_list.size());
-     	  */
+     	 
      	   
      	   user.setCreated(new Date());
      	   entityManager.persist(user);
      	   
      	   
         }catch(Exception e){
-     	   logger.error("userAccessEJB:saveGroup:error:"+e);
+     	   LOGGER.error("userAccessEJB:saveGroup:error:"+e);
         }
       }
 }

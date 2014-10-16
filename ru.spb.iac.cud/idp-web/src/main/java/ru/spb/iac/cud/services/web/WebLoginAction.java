@@ -38,7 +38,7 @@ public class WebLoginAction extends HttpServlet {
 	
    private static final long serialVersionUID = 1L;
 
-   final static Logger logger = LoggerFactory.getLogger(WebLoginAction.class);
+   final static Logger LOGGER = LoggerFactory.getLogger(WebLoginAction.class);
    
    public WebLoginAction() {
         super();
@@ -57,7 +57,7 @@ public class WebLoginAction extends HttpServlet {
 		String repeatLoginUrl=null;
 		String pswitch = null;
 		 
-		String login_user = null;
+		String loginUser = null;
 		
 		try{
 			backUrl = request.getParameter("backUrl");
@@ -71,24 +71,24 @@ public class WebLoginAction extends HttpServlet {
 				
 			if(login!=null && password!=null){
 				
-		       login_user = (new ContextAccessWebManager())
+		       loginUser = (new ContextAccessWebManager())
 					  .authenticate_login(login, password, AuthMode.HTTP_REDIRECT, getIPAddress(request),
 							  getCodeSystem(request));
 			
 			  success="true"; 
 			
-			  HttpSession hs = request.getSession();
+			
 			  
 			}
 		}catch(InvalidCredentials e1){
-	 	    logger.error("error1:"+e1.getMessage());
+	 	    LOGGER.error("error1:"+e1.getMessage());
 	 	}catch(GeneralFailure e2){
-	     	logger.error("error2:"+e2.getMessage());
+	     	LOGGER.error("error2:"+e2.getMessage());
 	    }catch(Exception e3){
-		    logger.error("error3:"+e3.getMessage());
+		    LOGGER.error("error3:"+e3.getMessage());
 		}
 		
-		logger.info("service:03");
+		LOGGER.debug("service:03");
 		
 		 if(success.equals("true")){
 			 
@@ -100,15 +100,15 @@ public class WebLoginAction extends HttpServlet {
 			response.sendRedirect(request.getContextPath()+"/");
 			 
 				    
-			request.getSession().setAttribute("login_user", login_user);
+			request.getSession().setAttribute("login_user", loginUser);
 			    
 		 }else{
 			
-			// logger.info("service:05");
+			 
 			 
 			 if(forceBack==null){//здесь в режиме использования своей формы логин/пароль
 			 
-				 logger.info("service:06");
+				 LOGGER.debug("service:06");
 				 
 				 if(backUrl!=null){
 					if(pswitch==null||!pswitch.equals("false")){ 
@@ -160,12 +160,12 @@ public class WebLoginAction extends HttpServlet {
 	 private String getCodeSystem(HttpServletRequest request){
 		  
 		//!!!
-		//для метода важно, что в ExtFilter при if(...||requestURI.endsWith(login_to_auth)...)
-		//идёт установка request2.getSessionInternal().setNote(GeneralConstants.SAML_REQUEST_KEY, request.getParameter(SAMLMessageKey))
-		//и request.getSession().setAttribute("incoming_http_method", request.getParameter(HTTPMethodKey))
+		//для метода важно, что в ExtFilter при /if(...||/requestURI./endsWith(login_to_auth)...)
+		//идёт установка /request2./getSessionInternal().setNote(/GeneralConstants/.SAML_REQUEST_KEY, request/.getParameter(SAMLMessageKey))
+		//и request./getSession()/.setAttribute(/"incoming_http_method", /request./getParameter(HTTPMethodKey))
 
 		 
-		 logger.info("getCodeSystem:031");
+		 LOGGER.debug("getCodeSystem:031");
 		 String result=null;
 		 
 		 try{
@@ -178,9 +178,7 @@ public class WebLoginAction extends HttpServlet {
 				 
 				 if(samlRequestMessage!=null){
 				 
-				// IDPWebRequestUtil webRequestUtil = new IDPWebRequestUtil(request, null, null);
-	            // SAMLDocumentHolder samlDocumentHolder = webRequestUtil.getSAMLDocumentHolder(samlRequestMessage);
-				 
+					 
 				 boolean begin_req_method = "GET".equals((String)request.getSession().getAttribute("incoming_http_method"));	
 					
 				 SAMLDocumentHolder samlDocumentHolder = getSAMLDocumentHolder(samlRequestMessage, begin_req_method);
@@ -188,11 +186,11 @@ public class WebLoginAction extends HttpServlet {
 				 if(samlDocumentHolder!=null){
 				 
 				 if(samlDocumentHolder.getSamlObject()!=null){
-					// RequestAbstractType requestAbstractType = (RequestAbstractType)samlDocumentHolder.getSamlObject();
-					  AuthnRequestType requestAbstractType = (AuthnRequestType)samlDocumentHolder.getSamlObject();
+					
+					 AuthnRequestType requestAbstractType = (AuthnRequestType)samlDocumentHolder.getSamlObject();
 					  result = requestAbstractType.getIssuer().getValue();
 
-				      logger.info("getCodeSystem:032:"+result);
+				      LOGGER.debug("getCodeSystem:032:"+result);
 				      
 				     }
 				 }
@@ -200,7 +198,7 @@ public class WebLoginAction extends HttpServlet {
 			   }
 					 
 		 }catch(Exception e){
-			 logger.error("getCodeSystem:error:"+e);
+			 LOGGER.error("getCodeSystem:error:"+e);
 		 }
 		 
 		 return result;
@@ -208,7 +206,7 @@ public class WebLoginAction extends HttpServlet {
 	 
 	 public SAMLDocumentHolder getSAMLDocumentHolder(String samlMessage, boolean redirectProfile) throws Exception
 	  {
-		logger.info("getSAMLDocumentHolder:01:"+redirectProfile);
+		LOGGER.debug("getSAMLDocumentHolder:01:"+redirectProfile);
 		 
 	    InputStream is = null;
 	    SAML2Request saml2Request = new SAML2Request();
@@ -221,7 +219,7 @@ public class WebLoginAction extends HttpServlet {
 	         is = new ByteArrayInputStream(samlBytes);
 	      }
 	    } catch (Exception rte) {
-	      logger.error("getSAMLDocumentHolder:error:"+rte);
+	      LOGGER.error("getSAMLDocumentHolder:error:"+rte);
 	      throw rte;
 	    }
 

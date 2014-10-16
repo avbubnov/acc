@@ -49,7 +49,7 @@ import java.security.PublicKey;
 
 public class GOSTSAML2Signature extends SAML2Signature{
 	
-    private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
+    private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory.getLogger();
     
     private static final String ID_ATTRIBUTE_NAME = "ID";
 
@@ -272,7 +272,7 @@ public class GOSTSAML2Signature extends SAML2Signature{
         try {
             sign(samlDocument, id, keypair);
         } catch (Exception e) {
-            throw new ProcessingException(logger.signatureError(e));
+            throw new ProcessingException(LOGGER.signatureError(e));
         }
     }
 
@@ -292,9 +292,9 @@ public class GOSTSAML2Signature extends SAML2Signature{
            return GOSTXMLSignatureUtil.validate(signedDocument, publicKey);
             
         } catch (MarshalException me) {
-            throw new ProcessingException(logger.signatureError(me));
+            throw new ProcessingException(LOGGER.signatureError(me));
         } catch (XMLSignatureException xse) {
-            throw new ProcessingException(logger.signatureError(xse));
+            throw new ProcessingException(LOGGER.signatureError(xse));
         }
     }
 

@@ -907,7 +907,7 @@
                  <a4j:commandButton value="Отмена"
                      onclick="#{rich:component('CBmpUpd')}.hide();return false;"
                      styleClass="but_class"/>
-                     
+                            
              <c:if test="#{(empty currentUser.allowedSys and !currentUser.isAccOrgManagerValue) or currentUser.isAllowedReestr('002', '3') 
                            or(param['onUpdate']!=null and usrBean.upSignUser==null)}">        
                  <a4j:commandButton value="Сохранить"
@@ -2418,6 +2418,12 @@ function check_crt(tform){
     	 if (jQuery.trim(document.getElementById(tform+":name3").value)==""){
     		  msg+="Нет Отчества !\n";
     	 }
+
+    	 if(jQuery.trim(document.getElementById(tform+":email").value)!=""){
+    	     if(!IsEmail(jQuery.trim(document.getElementById(tform+":email").value))){
+    	    	 msg+="Не корректный e-mail !\n";
+    	       }
+    	 }
      }
 	/* if (document.getElementById(tform+":cert").value==""){
 		  msg+="Нет Номера сертификата !\n";
@@ -2462,6 +2468,12 @@ function check_upd(tform){
    	 if ( jQuery.trim(document.getElementById(tform+":name3").value)==""){
    		  msg+="Нет Отчества !\n";
    	 }
+   	 if(jQuery.trim(document.getElementById(tform+":email").value)!=""){
+	     if(!IsEmail(jQuery.trim(document.getElementById(tform+":email").value))){
+	    	 msg+="Не корректный e-mail !\n";
+	       }
+	 }
+	 
     }  
 
    if(#{(empty currentUser.allowedSys and !currentUser.isAccOrgManagerValue) or currentUser.isAllowedReestr('002', '3')}){ 
@@ -2776,6 +2788,12 @@ function load_iframe(sessionId){
 		
 	}
 }
+
+function IsEmail(email) {
+	  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+	  return regex.test(email);
+}
+	
 
 //CBformUpd:CBdtUpd:0:CBsdtUpd:0:CBsdtchbUpd
 /*

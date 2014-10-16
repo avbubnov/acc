@@ -87,7 +87,7 @@ import java.util.List;
  */
 
 public class GOSTXMLSignatureUtil {
-private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
+private static final PicketLinkLogger LOGGER = PicketLinkLoggerFactory.getLogger();
     
     // Set some system properties and Santuario providers. Run this block before any other class initialization.
     static {
@@ -113,18 +113,17 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         XMLSignatureFactory xsf = null;
 
         try {
-         //  xsf = XMLSignatureFactory.getInstance("DOM", "ApacheXMLDSig");
+         //  xsf /= /XMLSignatureFactory/.getInstance(/"DOM", "ApacheXMLDSig/")
             
            Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
            xsf = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
             
              
-        } catch (/*NoSuchProvider*/Exception ex) {
-        	System.out.println("getXMLSignatureFactory:error:"+ex);
-            try {
+        } catch (Exception ex) {
+        	 try {
                 xsf = XMLSignatureFactory.getInstance("DOM");
             } catch (Exception err) {
-                throw new RuntimeException(logger.couldNotCreateInstance("DOM", err));
+                throw new RuntimeException(LOGGER.couldNotCreateInstance("DOM", err));
             }
         }
         
@@ -209,10 +208,10 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
             String signatureMethod, String referenceURI) throws ParserConfigurationException, GeneralSecurityException,
             MarshalException, XMLSignatureException {
         if (nodeToBeSigned == null)
-            throw logger.nullArgumentError("Node to be signed");
+            throw LOGGER.nullArgumentError("Node to be signed");
         
-        if (logger.isTraceEnabled()) {
-            logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         }
 
         Node parentNode = nodeToBeSigned.getParentNode();
@@ -248,7 +247,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         }
 
         parentNode.replaceChild(signedNode, nodeToBeSigned);
-        // doc.getDocumentElement().replaceChild(signedNode, nodeToBeSigned);
+        
 
         return doc;
     }
@@ -273,10 +272,10 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
                                 String signatureMethod, String referenceURI, X509Certificate x509Certificate) throws ParserConfigurationException, GeneralSecurityException,
             MarshalException, XMLSignatureException {
         if (nodeToBeSigned == null)
-            throw logger.nullArgumentError("Node to be signed");
+            throw LOGGER.nullArgumentError("Node to be signed");
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         }
 
         Node parentNode = nodeToBeSigned.getParentNode();
@@ -312,7 +311,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         }
 
         parentNode.replaceChild(signedNode, nodeToBeSigned);
-        // doc.getDocumentElement().replaceChild(signedNode, nodeToBeSigned);
+        
 
         return doc;
     }
@@ -417,7 +416,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
     public static Document sign(Document doc, KeyPair keyPair, String digestMethod, String signatureMethod, String referenceURI,
                                 X509Certificate x509Certificate)
             throws GeneralSecurityException, MarshalException, XMLSignatureException {
-        logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         PrivateKey signingKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
 
@@ -451,9 +450,8 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         String referenceURI = dto.getReferenceURI();
         String signatureMethod = dto.getSignatureMethod();
 
-        logger.trace("Document to be signed=" + DocumentUtil.asString(doc));
+        LOGGER.trace("Document to be signed=" + DocumentUtil.asString(doc));
         
-       // System.out.println("GOSTXMLSignatureUtil:sign:01:" + DocumentUtil.asString(doc));
         
         PrivateKey signingKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
@@ -477,18 +475,17 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
     @SuppressWarnings("unchecked")
     public static boolean validate(Document signedDoc, Key publicKey) throws MarshalException, XMLSignatureException {
         if (signedDoc == null)
-            throw logger.nullArgumentError("Signed Document");
+            throw LOGGER.nullArgumentError("Signed Document");
 
-       // System.out.println("GOSTXMLSignatureUtil:validate:01");
-        
+         
         propagateIDAttributeSetup(signedDoc.getDocumentElement(), signedDoc.getDocumentElement());
 
         NodeList nl = signedDoc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
         if (nl == null || nl.getLength() == 0) {
-            throw logger.nullValueError("Cannot find Signature element");
+            throw LOGGER.nullValueError("Cannot find Signature element");
         }
         if (publicKey == null)
-            throw logger.nullValueError("Public Key");
+            throw LOGGER.nullValueError("Public Key");
 
         //написан GostKeyHandler, где GOSTKeyValue из запроса помещается в "SENDER_PUBLIC_KEY"
         //а здесь это будет родной параметр publicKey.
@@ -498,15 +495,14 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
 
         boolean coreValidity = signature.validate(valContext);
 
-      //  System.out.println("GOSTXMLSignatureUtil:validate:02:"+coreValidity);
-        
-        if (logger.isTraceEnabled() && !coreValidity) {
+         
+        if (LOGGER.isTraceEnabled() && !coreValidity) {
             boolean sv = signature.getSignatureValue().validate(valContext);
-            logger.trace("Signature validation status: " + sv);
+            LOGGER.trace("Signature validation status: " + sv);
 
             List<Reference> references = signature.getSignedInfo().getReferences();
             for (Reference ref : references) {
-                logger.trace("[Ref id=" + ref.getId() + ":uri=" + ref.getURI() + "]validity status:" + ref.validate(valContext));
+                LOGGER.trace("[Ref id=" + ref.getId() + ":uri=" + ref.getURI() + "]validity status:" + ref.validate(valContext));
             }
         }
         return coreValidity;
@@ -521,7 +517,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
      * @throws JAXBException
      */
     public static void marshall(SignatureType signature, OutputStream os) throws JAXBException, SAXException {
-        throw logger.notImplementedYet("NYI");
+        throw LOGGER.notImplementedYet("NYI");
         /*
          * JAXBElement<SignatureType> jsig = objectFactory.createSignature(signature); Marshaller marshaller =
          * JAXBUtil.getValidatingMarshaller(pkgName, schemaLocation); marshaller.marshal(jsig, os);
@@ -563,7 +559,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
                 cert = (X509Certificate) cf.generateCertificate(bais);
             }
         } catch (java.security.cert.CertificateException e) {
-            throw logger.processingError(e);
+            throw LOGGER.processingError(e);
         }
         return cert;
     }
@@ -668,14 +664,13 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
             dsaKeyValue.setY(Base64.encodeBytes(Y).getBytes());
             return dsaKeyValue;
         }
-        throw logger.unsupportedType(key.toString());
+        throw LOGGER.unsupportedType(key.toString());
     }
 
     private static void signImpl(DOMSignContext dsc, String digestMethod, String signatureMethod, String referenceURI, PublicKey publicKey,
                                  X509Certificate x509Certificate)
             throws GeneralSecurityException, MarshalException, XMLSignatureException {
     	
-  	System.out.println("GOSTXMLSignatureUtil:signImpl:01+");
     	
    	
         dsc.setDefaultNamespacePrefix("dsig");
@@ -697,9 +692,7 @@ private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger
         SignatureMethod signatureMethodObj = fac.newSignatureMethod(signatureMethod, null);
         SignedInfo si = fac.newSignedInfo(canonicalizationMethod, signatureMethodObj, referenceList);
 
-    	//System.out.println("GOSTXMLSignatureUtil:signImpl:02:"+si.getSignatureMethod());
-        
-        
+    	   
         KeyInfo ki = null;
         if(includeKeyInfoInSignature){
             ki = createKeyInfo(publicKey,x509Certificate);

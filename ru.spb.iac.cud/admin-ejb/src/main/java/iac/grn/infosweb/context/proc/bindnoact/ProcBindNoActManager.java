@@ -5,9 +5,9 @@ import iac.cud.infosweb.local.service.IHLocal;
 import iac.cud.infosweb.local.service.ServiceReestr;
 import iac.cud.infosweb.local.service.ServiceReestrAction;
 import iac.cud.infosweb.remote.frontage.IRemoteFrontageLocal;
-import iac.grn.infosweb.session.audit.export.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ActionsMap;
+import iac.grn.infosweb.session.audit.actions.ResourcesMap;
 import iac.grn.infosweb.session.audit.export.AuditExportData;
-import iac.grn.infosweb.session.audit.export.ResourcesMap;
 import iac.grn.serviceitems.ProcBNAInfoItem;
 import iac.grn.serviceitems.ProcBNAItem;
 import iac.grn.serviceitems.ProcInfoItem;
@@ -41,17 +41,14 @@ public class ProcBindNoActManager {
 
 	@Logger private Log log;
 	
-	//private static final String proc_binding_noact_exec_file=System.getProperty("jboss.server.config.url")+"proc_binding_noact_exec.properties";
 	private static final String proc_binding_noact_exec_file=System.getProperty("jboss.server.config.dir")+"/"+"proc_binding_noact_exec.properties";
 	
-	//private static final String proc_binding_noact_info_file=System.getProperty("jboss.server.config.url")+"proc_binding_noact_info.properties";
 	private static final String proc_binding_noact_info_file=System.getProperty("jboss.server.config.dir")+"/"+"proc_binding_noact_info.properties";
 		
 	private Date startDate;
 	
 	private Long period=1L;
 	
-	//private Long periodUpd=1L;
 	
 	private ProcBNAItem procBNABean;
 	
@@ -71,12 +68,7 @@ public class ProcBindNoActManager {
 		this.period=period;
 	}
 	
-	/*public Long getPeriodUpd(){
-		return this.periodUpd;
-	}
-	public void setPeriodUpd(Long periodUpd){
-		this.periodUpd=periodUpd;
-	}*/
+	
 	
 	@Factory
 	public ProcBNAItem getProcBNABean(){
@@ -104,7 +96,7 @@ public class ProcBindNoActManager {
 	public void initProcBNABean(){
 		 log.info("procBindNoActManager:initProcBNABean:01");
 		 
-		 String start_date=null, period=null, status=null;
+		 String startDate=null, period=null, status=null;
 		 Properties properties = new Properties();
 		 String path = proc_binding_noact_exec_file;
 		 InputStream is = null;
@@ -116,36 +108,35 @@ public class ProcBindNoActManager {
 		
 		 procBNABean= new ProcBNAItem();
 		 
-		 if(remoteAudit!=null && remoteAudit.equals("procInfo")){
+		 if(remoteAudit!=null && "procInfo".equals(remoteAudit)){
 			 // кнопка "обновить" задействована для обновления и Center, и Bottom панелей 
 		     // чтобы отобразить изменения, если кто другой запустил/остановил процесс
 			 //	return;
 		
 		 }
 		 
-		 if(remoteAudit!=null && remoteAudit.equals("procCrt")){
+		 if(remoteAudit!=null && "procCrt".equals(remoteAudit)){
 			// this.confLCBean.setActive(false);
 			 procBNABean.setStatus("passive");
 			 return;
 		 }
-		 if(remoteAudit!=null && remoteAudit.equals("procDel")){
-			// this.confLCBean.setActive(true);
+		 if(remoteAudit!=null && "procDel".equals(remoteAudit)){
 			 procBNABean.setStatus("active");
 			 return;
 		 }
-		 if(remoteAudit!=null && remoteAudit.equals("procPause")){
+		 if(remoteAudit!=null && "procPause".equals(remoteAudit)){
 			 procBNABean.setStatus("active");
 			 return;
 		 }
-		 if(remoteAudit!=null && remoteAudit.equals("procRun")){
+		 if(remoteAudit!=null && "procRun".equals(remoteAudit)){
 			 procBNABean.setStatus("pause");
 			 return;
 		 }
 		 
 		 try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		    // URL url = new URL(path);
-		   //  File f=new File(url.toURI());
+		    
+		   
 		     
 		     File f=new File(path); 
 		     
@@ -153,17 +144,17 @@ public class ProcBindNoActManager {
 		    	 
 		    	 properties.load(is=new FileInputStream(f));
 		    	 
-		    	 start_date=properties.getProperty("start_date");
+		    	 startDate=properties.getProperty("start_date");
 		    	 period=properties.getProperty("period");
 		    	 status=properties.getProperty("status");
 		    	 
-		    	log.info("procBindNoActManager:initProcBNABean:start_date:"+start_date);
+		    	log.info("procBindNoActManager:initProcBNABean:start_date:"+startDate);
 		    	 log.info("procBindNoActManager:initProcBNABean:period:"+period);
 		    	 log.info("procBindNoActManager:initProcBNABean:status:"+status);
 		    	 
-		    	 if(start_date!=null&&period!=null&&status!=null){
+		    	 if(startDate!=null&&period!=null&&status!=null){
 		    		 if(status.equals("active")||status.equals("pause")){
-		    			 procBNABean.setStartDate(df.parse(start_date));
+		    			 procBNABean.setStartDate(df.parse(startDate));
 		    			 procBNABean.setPeriod(new Long(period));
 		    		   }
 		    		 procBNABean.setStatus(status);
@@ -187,15 +178,15 @@ public class ProcBindNoActManager {
 	public void initProcBNAInfoBean(){
 		 log.info("procBindNoActManager:initProcBNAInfoBean:01");
 		 
-		 String exec_date=null, exec_hit=null, conf_date=null, conf_period=null;
+		 String execDate=null, execHit=null;
 		 Properties properties = new Properties();
 		 String path = proc_binding_noact_info_file;
 		 InputStream is = null;
 		 
 		 try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm:ss");
-		    // URL url = new URL(path);
-		   //  File f=new File(url.toURI());
+		    
+		   
 		     
 		     File f=new File(path); 
 		     
@@ -205,21 +196,15 @@ public class ProcBindNoActManager {
 		    	 
 		    	 properties.load(is=new FileInputStream(f));
 		    	 
-		    	 exec_date=properties.getProperty("exec_date");
-		    	 exec_hit=properties.getProperty("exec_hit");
-		    	/* conf_date=properties.getProperty("conf_date");
-		    	 conf_period=properties.getProperty("conf_period");*/
-		    	 
-		    	 log.info("procBindNoActManager:initProcBNAInfoBean:exec_date:"+exec_date);
-		    	 log.info("procBindNoActManager:initProcBNAInfoBean:exec_hit:"+exec_hit);
-		    	 /*log.info("procBindNoActManager:initProcBNAInfoBean:conf_date:"+conf_date);
-		    	 log.info("procBindNoActManager:initProcBNAInfoBean:conf_period:"+conf_period);*/
-		    	 
-		    	 procBNAInfoBean.setExecDate(exec_date != null ? df.parse(exec_date) : null);
-		    	 procBNAInfoBean.setExecHit(exec_hit != null ? (exec_hit.equals("true") ? "Запущен" : "Сбой") : null);
-		    	/* procBNAInfoBean.setConfDate(conf_date != null ? df.parse(conf_date) : null);
-		    	 procBNAInfoBean.setConfPeriod(conf_period != null ? new Long(conf_period) : null);*/
-		    	 
+		    	 execDate=properties.getProperty("exec_date");
+		    	 execHit=properties.getProperty("exec_hit");
+		    		 
+		    	 log.info("procBindNoActManager:initProcBNAInfoBean:exec_date:"+execDate);
+		    	 log.info("procBindNoActManager:initProcBNAInfoBean:exec_hit:"+execHit);
+		    		 
+		    	 procBNAInfoBean.setExecDate(execDate != null ? df.parse(execDate) : null);
+		    	 procBNAInfoBean.setExecHit(execHit != null ? ("true".equals(execHit) ? "Запущен" : "Сбой") : null);
+		       	 
 		     }
 		  }catch (Exception e) {
 				log.error("procBindNoActManager:initProcBNAInfoBean:error:"+e);
@@ -249,8 +234,8 @@ public class ProcBindNoActManager {
 		   
 		  try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		   //  URL url = new URL(path);
-		   //  File f=new File(url.toURI());
+		   
+		   
 		 	
 		     File f=new File(path); 
 		     
@@ -260,8 +245,8 @@ public class ProcBindNoActManager {
 		       
 		       properties.store(os=new FileOutputStream(f), null);
 		       
-		     //  IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-    		  // obj.startTask(this.startDate,this.period);
+		     
+    		  
     		 
 		       Context ctx = new InitialContext(); 
 	 	    	 
@@ -299,9 +284,7 @@ public class ProcBindNoActManager {
  		
 		try {
 		   Context ctx = new InitialContext();
-		   /*IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-   		   obj.stopTask();*/
-   		   
+		   
    		   BaseParamItem bpi = new BaseParamItem();
    		   
    		   bpi.put("gactiontype", ServiceReestrAction.PROCESS_STOP.name());
@@ -311,13 +294,13 @@ public class ProcBindNoActManager {
    		   Properties properties = new Properties();
    		   String path = proc_binding_noact_exec_file;
    		  
-   		  // URL url = new URL(path);
-	     //  File f=new File(url.toURI());
+   		  
+	     
 	       
 	       File f=new File(path); 
 	       
-	      // boolean bfd = f.delete();
-	      // log.info("procBindNoActManager:procDel:bfd:"+bfd);
+	      
+	       
 	       
 	       properties.load(is=new FileInputStream(f));
 	       properties.setProperty("status", "passive");
@@ -352,12 +335,10 @@ public class ProcBindNoActManager {
 		InputStream is = null;
  		OutputStream os = null;
  		DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
- 		String start_date=null, period=null;
+ 		String startDate=null, period=null;
 		try {
 		   Context ctx = new InitialContext();
-		 /*  IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-   		   obj.stopTask();*/
-   		   
+		   
    		   BaseParamItem bpi = new BaseParamItem();
 	       bpi.put("gactiontype", ServiceReestrAction.PROCESS_STOP.name());
 	       ((IHLocal)ctx.lookup(ServiceReestr.BindingNoAct)).run(bpi);
@@ -367,26 +348,26 @@ public class ProcBindNoActManager {
    		   Properties properties = new Properties();
    		   String path = proc_binding_noact_exec_file;
    		  
-   		   //URL url = new URL(path);
-	      // File f=new File(url.toURI());
+   		   
+	      
 	       
 	       File f=new File(path); 
 	       
 	       if(f.exists()) {
-	      // boolean bfd = f.delete();
-	      // log.info("procBindNoActManager:procDel:bfd:"+bfd);
+	      
+	       
 	       
 	          properties.load(is=new FileInputStream(f));
 	       
 	          period=properties.getProperty("period");
-	          start_date=properties.getProperty("start_date");
+	          startDate=properties.getProperty("start_date");
 	      
-	          if(period==null || start_date==null){
+	          if(period==null || startDate==null){
 			    log.info("procBindNoActManager:procRun:02");
 			    return;
 		      }
 	 	
-	          this.startDate=df.parse(start_date);
+	          this.startDate=df.parse(startDate);
 	          this.period=new Long(period);
 	      
 	          properties.setProperty("status", "pause");
@@ -422,33 +403,28 @@ public class ProcBindNoActManager {
 		  Properties properties = new Properties();
 		  String path = proc_binding_noact_exec_file;
 		  OutputStream os = null;
-		  InputStream is = null;
-		  String start_date=null, period=null;
-		/*  if(this.period==null || this.startDate==null){
-			  log.info("procBindNoActManager:procCrt:02");
-			  return;
-		  }*/
-		   
+		  String startDate=null, period=null;
+			   
 		  try {
 			 DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		    // URL url = new URL(path);
-		    // File f=new File(url.toURI());
+		    
+		    
 		     
 		     File f=new File(path); 
 		     
 		     if(f.exists()) {
 		    	 
-		       properties.load(is=new FileInputStream(f));
+		       properties.load(new FileInputStream(f));
 		       
 		       period=properties.getProperty("period");
-		       start_date=properties.getProperty("start_date");
+		       startDate=properties.getProperty("start_date");
 		     
-		       if(period==null || start_date==null){
+		       if(period==null || startDate==null){
 				  log.info("procBindNoActManager:procRun:02");
 				  return;
 			   }
 		 	 
-		       this.startDate=df.parse(start_date);
+		       this.startDate=df.parse(startDate);
 		       this.period=new Long(period);
 		      
 		       
@@ -456,10 +432,7 @@ public class ProcBindNoActManager {
 		       properties.store(os=new FileOutputStream(f), null);
 		       
 		       Context ctx = new InitialContext();
-		      /* IHProcArchASysLocal obj = (IHProcArchASysLocal)ctx.lookup("procarchasys.IHProcArchASys.local");
-    		   obj.startTask(df.parse(start_date), new Long(period));
-    		   */
-		       
+		         
     		   BaseParamItem bpi = new BaseParamItem();
      	       bpi.put("gactiontype", ServiceReestrAction.PROCESS_START.name());
      	       
@@ -487,56 +460,7 @@ public class ProcBindNoActManager {
 			 }
 		 }
 	}
-	/*
-	public synchronized void procUpd(){
-		  log.info("procBindNoActManager:procUpd:01");
-		  log.info("procBindNoActManager:procUpd:period:"+period);
-		  
-		  Properties properties = new Properties();
-		  String path = System.getProperty("jboss.server.config.url")+"conf_logcontr_exec.properties";
-		  OutputStream os = null;
-		  InputStream is = null;
-		  DateFormat df = new SimpleDateFormat ("dd.MM.yy HH:mm");
-		  
-		  if(this.periodUpd==null){
-			  log.info("procBindNoActManager:procUpd:02");
-			  return;
-		  }
-		   
-		  try {
-			 URL url = new URL(path);
-		     File f=new File(url.toURI());
-		 	// if(f.exists()) { 
-		     properties.load(is=new FileInputStream(f));
-		     
-		     this.startDate=df.parse(properties.getProperty("start_date"));
-		     
-		     properties.setProperty("period", this.periodUpd.toString());
-		     properties.store(os=new FileOutputStream(f), null);
-		       
-		     log.info("procBindNoActManager:procUpd:03");
-  	  
-  	  	     forView("procUpd");
-  		   //  }
-		  }catch (Exception e) {
-				log.error("procBindNoActManager:procUpd:error:"+e);
-		  }finally{
-			 try {
-				if(os!=null){
-					 os.close();
-				}
-			 } catch (Exception e) {
-				log.error("procBindNoActManager:procUpd:os:error:"+e);
-			 }
-			 try {
-				  if(is!=null){
-				    is.close();
-				   }
-			} catch (Exception e) {
-				log.error("procBindNoActManager:procUpd:finally:is:error:"+e);
-			}
-		 }
-	}*/
+	
 	
 	private void forView(String type){
 	   try {
@@ -546,10 +470,9 @@ public class ProcBindNoActManager {
 		  if(type.equals("procCrt")){
 		    this.procBNABean.setPeriod(this.period);
 		    this.procBNABean.setStartDate(this.startDate);
-		 //   this.confLCBean.setActive(true);
+		 
 		    procBNABean.setStatus("active");
 		  }else if (type.equals("procDel")){ 
-		//	this.confLCBean.setActive(false);
 			  procBNABean.setStatus("passive");
 		  }else if (type.equals("procPause")){
 			this.procBNABean.setPeriod(this.period);
@@ -560,11 +483,6 @@ public class ProcBindNoActManager {
 			this.procBNABean.setStartDate(this.startDate);
 			procBNABean.setStatus("active");
 		  }
-		  /*else if (type.equals("procUpd")){ 
-			this.confLCBean.setPeriod(this.periodUpd);
-			this.confLCBean.setStartDate(this.startDate);
-			this.confLCBean.setActive(true);
-		  }*/
 		  
 		  Contexts.getEventContext().set("procBNABean", this.procBNABean);
 		  
